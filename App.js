@@ -15,9 +15,9 @@ export default function App() {
       {/* <DatesDoctor/> */}
       {/* <SearchPatinet/> */}
       {/* <PatinetProfile/> */}
-      {/* <Weightinput/> */}
+      <Weightinput/>
 
-      <PatinetPages/>
+      {/* <PatinetPages/> */}
       <StatusBar style="auto" />
     </View>
   );
