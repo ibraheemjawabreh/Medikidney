@@ -6,6 +6,7 @@ import SearchPatinet from './screens/patinet/searchPatinet';
 import PatinetProfile from './screens/patinet/PatinetProfile';
 import Weightinput from './screens/patinet/Weightinput';
 import PatinetPages from './screens/patinet/PatinetControolPanal';
+import NurceTasks from './screens/Nurse/NurseTasks';
 
 export default function App() {
   
@@ -15,8 +16,8 @@ export default function App() {
       {/* <DatesDoctor/> */}
       {/* <SearchPatinet/> */}
       {/* <PatinetProfile/> */}
-      <Weightinput/>
-
+      {/* <Weightinput/> */}
+      <NurceTasks/>
       {/* <PatinetPages/> */}
       <StatusBar style="auto" />
     </View>
