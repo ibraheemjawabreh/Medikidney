@@ -16,7 +16,6 @@ const LoginScreen = () => {
         { abortEarly: false }
       );
       seterrors({});
-      // هنا لاحقاً تضيف تسجيل الدخول الحقيقي
     } catch (err) {
       const newErrors = {};
       err.inner.forEach((e) => {
@@ -28,10 +27,9 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* الشعار */}
       <View style={styles.logoContainer}>
         <Image
-          source={require("../assets/logo.jpeg")} // غير المسار حسب مشروعك
+          source={require("../assets/logo.jpeg")} 
           style={styles.logo}
           resizeMode="contain"
         />
@@ -41,7 +39,6 @@ const LoginScreen = () => {
         </Text>
       </View>
 
-      {/* كرت تسجيل الدخول */}
       <View style={styles.card}>
         <Input
           placeholder="اسم المستخدم"
@@ -74,7 +71,7 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#dfe2e5", // خلفية طبية فاتحة
+    backgroundColor: "#dfe2e5",
     justifyContent: "center",
     paddingHorizontal: 20,
     width:'100%'
@@ -108,7 +105,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 20,
     paddingHorizontal: 10,
-    elevation: 4, // ظل خفيف (Android)
+    elevation: 4, 
   },
 
   button: {

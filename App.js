@@ -3,6 +3,9 @@ import { StyleSheet, Text, View } from 'react-native';
 import LoginScreen from './login/loginScreen';
 import DatesDoctor from './screens/patinet/DatesDoctor';
 import SearchPatinet from './screens/patinet/searchPatinet';
+import PatinetProfile from './screens/patinet/PatinetProfile';
+import Weightinput from './screens/patinet/Weightinput';
+import PatinetPages from './screens/patinet/PatinetControolPanal';
 
 export default function App() {
   
@@ -10,7 +13,11 @@ export default function App() {
     <View style={styles.container}>
       {/* <LoginScreen/> */}
       {/* <DatesDoctor/> */}
-      <SearchPatinet/>
+      {/* <SearchPatinet/> */}
+      {/* <PatinetProfile/> */}
+      {/* <Weightinput/> */}
+
+      <PatinetPages/>
       <StatusBar style="auto" />
     </View>
   );
