@@ -7,9 +7,10 @@ import PatinetProfile from './screens/patinet/PatinetProfile';
 import Weightinput from './screens/patinet/Weightinput';
 import PatinetPages from './screens/patinet/PatinetControolPanal';
 import NurceTasks from './screens/Nurse/NurseTasks';
+import SettingsScreen from './screens/settings/settingsScreen';
 
 export default function App() {
-  
+
   return (
     <View style={styles.container}>
       {/* <LoginScreen/> */}
@@ -17,8 +18,9 @@ export default function App() {
       {/* <SearchPatinet/> */}
       {/* <PatinetProfile/> */}
       {/* <Weightinput/> */}
-      <NurceTasks/>
+      {/* <NurceTasks/> */}
       {/* <PatinetPages/> */}
+      <SettingsScreen />
       <StatusBar style="auto" />
     </View>
   );
