@@ -8,6 +8,7 @@ import Weightinput from './screens/patinet/Weightinput';
 import PatinetPages from './screens/patinet/PatinetControolPanal';
 import NurceTasks from './screens/Nurse/NurseTasks';
 import SettingsScreen from './screens/settings/settingsScreen';
+import ChangePassword from './screens/changePassword/changePassword';
 
 export default function App() {
 
@@ -20,7 +21,8 @@ export default function App() {
       {/* <Weightinput/> */}
       {/* <NurceTasks/> */}
       {/* <PatinetPages/> */}
-      <SettingsScreen />
+      {/* <SettingsScreen /> */}
+      <ChangePassword />
       <StatusBar style="auto" />
     </View>
   );
