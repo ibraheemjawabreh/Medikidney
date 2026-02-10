@@ -10,6 +10,7 @@ import NurceTasks from './screens/Nurse/NurseTasks';
 import SettingsScreen from './screens/settings/settingsScreen';
 import ChangePassword from './screens/changePassword/changePassword';
 import NutritionistTable from './screens/Nutritionist/NutritionistTable';
+import UserProfile from './screens/Profile/UserProfile';
 
 export default function App() {
 
@@ -24,7 +25,9 @@ export default function App() {
       {/* <PatinetPages/> */}
       {/* <SettingsScreen /> */}
       {/* <NutritionistTable/> */}
-      <ChangePassword />
+      {/* <ChangePassword /> */}
+      <UserProfile/>
+     
       <StatusBar style="auto" />
     </View>
   );
