@@ -9,6 +9,7 @@ import PatinetPages from './screens/patinet/PatinetControolPanal';
 import NurceTasks from './screens/Nurse/NurseTasks';
 import SettingsScreen from './screens/settings/settingsScreen';
 import ChangePassword from './screens/changePassword/changePassword';
+import NutritionistTable from './screens/Nutritionist/NutritionistTable';
 
 export default function App() {
 
@@ -22,6 +23,7 @@ export default function App() {
       {/* <NurceTasks/> */}
       {/* <PatinetPages/> */}
       {/* <SettingsScreen /> */}
+      {/* <NutritionistTable/> */}
       <ChangePassword />
       <StatusBar style="auto" />
     </View>
