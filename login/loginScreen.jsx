@@ -1,10 +1,10 @@
 import { Input, Button } from "@rneui/themed";
 import { useState } from "react";
 import { Text, View, StyleSheet, Image } from "react-native";
-
 import LoginValidation from "./loginValidation";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const LoginScreen = () => {
+const LoginScreen = ({navigation}) => {
   const [username, setusername] = useState("");
   const [password, setpassword] = useState("");
   const [errors, seterrors] = useState({});
@@ -16,13 +16,43 @@ const LoginScreen = () => {
         { abortEarly: false }
       );
       seterrors({});
+      const response = await fetch("https://medikidneysys.onrender.com/auth/login",
+        {
+          method: "POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({username,password}),
+
+        }
+      );
+      const data = await response.json();
+      
+      if(response.ok){
+        await AsyncStorage.setItem("token",data.access_token);
+        const role=data.user.role;
+        if(role === "PATIENT"){
+          navigation.replace("Patinet");
+        } else if(role === "NURSE"){
+          navigation.replace("SearchPatient");
+        } else if( role ==="NUTRITIONIST"){
+          navigation.replace("SearchPatient");
+        }else{
+          alert("Role not found")
+        }
+      }else{
+        alert(data.message||"فشل تسجيل الدخول");
+      }
     } catch (err) {
-      const newErrors = {};
-      err.inner.forEach((e) => {
-        newErrors[e.path] = e.message;
-      });
-      seterrors(newErrors);
-    }
+  if (err.inner) {
+    const newErrors = {};
+    err.inner.forEach((e) => {
+      newErrors[e.path] = e.message;
+    });
+    seterrors(newErrors);
+  } else {
+    console.log(err);
+    alert("خطأ في الاتصال بالسيرفر");
+  }
+}
   };
 
   return (

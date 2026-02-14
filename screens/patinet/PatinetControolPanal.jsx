@@ -12,7 +12,6 @@ const Tab = createBottomTabNavigator();
 const PatinetPages = () => {
   return (
     <View style={styles.container}>
-      <NavigationContainer>
         <Tab.Navigator
           screenOptions={({ route }) => ({
             headerShown: false,
@@ -44,7 +43,7 @@ const PatinetPages = () => {
             options={{ title: "الوزن" }}
           />
         </Tab.Navigator>
-      </NavigationContainer>
+      
     </View>
   );
 };
