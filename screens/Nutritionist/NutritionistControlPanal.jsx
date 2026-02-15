@@ -3,13 +3,12 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
 
-import PatientProfile from "./PatinetProfile";
-import WeightInput from "./Weightinput";
-import ProfileSettingsScreen from "../SettingsWithProfile/SettingWithProfile"; 
+import SearchPatient from "../patinet/searchPatinet"; 
+import ProfileSettingsScreen from "../SettingsWithProfile/SettingWithProfile";
 
 const Tab = createBottomTabNavigator();
 
-const PatinetPages = () => {
+const NutritionistPages = () => {
   return (
     <View style={styles.container}>
       <Tab.Navigator
@@ -25,7 +24,9 @@ const PatinetPages = () => {
             if (route.name === "Profile") {
               iconName = focused ? "person" : "person-outline";
             } else if (route.name === "Weight") {
-              iconName = focused ? "barbell" : "barbell-outline";
+              iconName = focused ? "stats-chart" : "stats-chart-outline";
+            } else if (route.name === "Search") {
+              iconName = focused ? "search" : "search-outline";
             } else if (route.name === "Settings") {
               iconName = focused ? "settings" : "settings-outline";
             }
@@ -35,17 +36,10 @@ const PatinetPages = () => {
         })}
       >
         <Tab.Screen
-          name="Profile"
-          component={PatientProfile}
-          options={{ title: "ملفي" }}
+          name="Search"
+          component={SearchPatient}
+          options={{ title: "بحث" }}
         />
-
-        <Tab.Screen
-          name="Weight"
-          component={WeightInput}
-          options={{ title: "الوزن" }}
-        />
-
         <Tab.Screen
           name="Settings"
           component={ProfileSettingsScreen}
@@ -56,7 +50,7 @@ const PatinetPages = () => {
   );
 };
 
-export default PatinetPages;
+export default NutritionistPages;
 
 const styles = StyleSheet.create({
   container: {
@@ -65,21 +59,22 @@ const styles = StyleSheet.create({
     width: '100%'
   },
   tabBar: {
-    height: 75, 
-    paddingBottom: 12,
-    paddingTop: 8,
+    height: 70,
+    paddingBottom: 10,
+    paddingTop: 10,
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 20,
-    borderTopWidth: 0,
+    shadowRadius: 6,
+    elevation: 15,
+    borderTopWidth: 0, 
   },
   tabLabel: {
     fontSize: 12,
     fontWeight: "600",
+    marginTop: 2,
   },
 });

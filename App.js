@@ -13,7 +13,9 @@ import NutritionistTable from './screens/Nutritionist/NutritionistTable';
 import UserProfile from './screens/Profile/UserProfile';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
+import ProfileSettingsScreen from './screens/SettingsWithProfile/SettingWithProfile';
+import NursePages from './screens/Nurse/nurserControolPanal';
+import NutritionistPages from './screens/Nutritionist/NutritionistControlPanal';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -24,11 +26,11 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SearchPatient" component={SearchPatinet} />
         <Stack.Screen name="Patinet" component={PatinetPages} />
-        <Stack.Screen name="NurseHome" component={NurceTasks} />
-        <Stack.Screen name="NutritionistHome" component={NutritionistTable} />
+        <Stack.Screen name="NurseHome" component={NursePages} />
+        <Stack.Screen name="NutritionistHome" component={NutritionistPages} />
+        <Stack.Screen name='ChangePassword' component={ChangePassword} />
       </Stack.Navigator>
       </NavigationContainer>
-      
   );
 }
 
