@@ -1,21 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import LoginScreen from './login/loginScreen';
-import DatesDoctor from './screens/patinet/DatesDoctor';
 import SearchPatinet from './screens/patinet/searchPatinet';
-import PatinetProfile from './screens/patinet/PatinetProfile';
-import Weightinput from './screens/patinet/Weightinput';
 import PatinetPages from './screens/patinet/PatinetControolPanal';
-import NurceTasks from './screens/Nurse/NurseTasks';
-import SettingsScreen from './screens/settings/settingsScreen';
 import ChangePassword from './screens/changePassword/changePassword';
-import NutritionistTable from './screens/Nutritionist/NutritionistTable';
-import UserProfile from './screens/Profile/UserProfile';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import ProfileSettingsScreen from './screens/SettingsWithProfile/SettingWithProfile';
 import NursePages from './screens/Nurse/nurserControolPanal';
 import NutritionistPages from './screens/Nutritionist/NutritionistControlPanal';
+import AboutApp from './screens/aboutApplication/ApoutApplication'
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -29,6 +22,7 @@ export default function App() {
         <Stack.Screen name="NurseHome" component={NursePages} />
         <Stack.Screen name="NutritionistHome" component={NutritionistPages} />
         <Stack.Screen name='ChangePassword' component={ChangePassword} />
+        <Stack.Screen name="AboutApp" component={AboutApp}/>
       </Stack.Navigator>
       </NavigationContainer>
   );

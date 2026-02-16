@@ -69,7 +69,8 @@ const ProfileSettingsScreen = ({ navigation }) => {
             navigation.navigate('ChangePassword')} />
         <SettingItem id="2" icon="person" title="تعديل الحساب" onPress={() => {}} />
         <SettingItem id="3" icon="language" title="لغة التطبيق" onPress={() => {}} />
-        <SettingItem id="4" icon="info" title="عن التطبيق" onPress={() => {}} />
+        <SettingItem id="4" icon="info" title="عن التطبيق" onPress={() => 
+            navigation.navigate('AboutApp')}  />
 
         <TouchableOpacity style={styles.logoutBtn} onPress={confirmLogout}>
           <Text style={styles.logoutText}>تسجيل الخروج</Text>

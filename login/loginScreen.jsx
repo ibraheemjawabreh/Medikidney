@@ -33,8 +33,8 @@ const LoginScreen = ({navigation}) => {
           navigation.replace("Patinet");
         } else if(role === "NURSE"){
           navigation.replace("NurseHome");
-        } else if( role ==="NutritionistHome"){
-          navigation.replace("SearchPatient");
+        } else if( role ==="NUTRITIONIST"){
+          navigation.replace("NutritionistHome");
         }else{
           alert("Role not found")
         }
