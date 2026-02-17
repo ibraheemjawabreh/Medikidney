@@ -9,6 +9,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import NursePages from './screens/Nurse/nurserControolPanal';
 import NutritionistPages from './screens/Nutritionist/NutritionistControlPanal';
 import AboutApp from './screens/aboutApplication/ApoutApplication'
+import NurseTasks from './screens/Nurse/NurseTasks'
+import WeightInput from './screens/patinet/Weightinput'
+import DatesDoctor from './screens/patinet/DatesDoctor'
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -23,6 +26,9 @@ export default function App() {
         <Stack.Screen name="NutritionistHome" component={NutritionistPages} />
         <Stack.Screen name='ChangePassword' component={ChangePassword} />
         <Stack.Screen name="AboutApp" component={AboutApp}/>
+        <Stack.Screen name="NurseTasks" component={NurseTasks} />
+        <Stack.Screen name="WeightInput" component={WeightInput}/>
+        <Stack.Screen name="DatesDoctor" component={DatesDoctor}/>
       </Stack.Navigator>
       </NavigationContainer>
   );

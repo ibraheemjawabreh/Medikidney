@@ -26,8 +26,6 @@ const DatesDoctor = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>حجز موعد طبي</Text>
-
-      {/* اختيار الطبيب */}
       <View style={styles.card}>
         <Text style={styles.label}>الطبيب</Text>
         <Picker
@@ -44,7 +42,6 @@ const DatesDoctor = () => {
         </Picker>
       </View>
 
-      {/* اختيار اليوم */}
       {selectDoctor !== "" && (
         <View style={styles.card}>
           <Text style={styles.label}>اليوم</Text>
@@ -63,7 +60,6 @@ const DatesDoctor = () => {
         </View>
       )}
 
-      {/* اختيار الوقت */}
       {date && (
         <View style={styles.card}>
           <Text style={styles.label}>وقت الحجز</Text>
@@ -95,7 +91,6 @@ const DatesDoctor = () => {
         </View>
       )}
 
-      {/* Date Picker */}
       {showDatePicker && (
         <DateTimePicker
           value={date || new Date()}
@@ -105,7 +100,6 @@ const DatesDoctor = () => {
         />
       )}
 
-        {/* زر تأكيد الحجز */}
 {selectedSlot && (
   <View style={styles.card}>
     <TouchableOpacity

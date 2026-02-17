@@ -24,8 +24,6 @@ const PatinetPages = () => {
 
             if (route.name === "Profile") {
               iconName = focused ? "person" : "person-outline";
-            } else if (route.name === "Weight") {
-              iconName = focused ? "barbell" : "barbell-outline";
             } else if (route.name === "Settings") {
               iconName = focused ? "settings" : "settings-outline";
             }
@@ -35,21 +33,14 @@ const PatinetPages = () => {
         })}
       >
         <Tab.Screen
-          name="Profile"
-          component={PatientProfile}
-          options={{ title: "ملفي" }}
-        />
-
-        <Tab.Screen
-          name="Weight"
-          component={WeightInput}
-          options={{ title: "الوزن" }}
-        />
-
-        <Tab.Screen
           name="Settings"
           component={ProfileSettingsScreen}
           options={{ title: "الإعدادات" }}
+        />
+        <Tab.Screen
+          name="Profile"
+          component={PatientProfile}
+          options={{ title: "ملفي" }}
         />
       </Tab.Navigator>
     </View>
