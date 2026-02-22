@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 
 const ValidationChange = yup.object().shape({
-    originalPassword: yup
+    oldPassword: yup
         .string()
         .required("يجب عليك ادخال كلمة السر الاصلية"),
 

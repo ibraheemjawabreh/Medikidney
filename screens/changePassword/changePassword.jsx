@@ -1,40 +1,71 @@
 import { Button } from "@rneui/base";
 import { Input } from "@rneui/themed";
 import { Text, View, StyleSheet } from "react-native";
-
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Alert } from "react-native"; 
 import ValidationChange from "./ValidationChangePassword";
 import { useState } from "react";
 
 const ChangePassword = () => {
-  const [originalPassword, setoriginalPassword] = useState("");
+  const [oldPassword, setoldPassword] = useState("");
   const [newPassword, setnewPassword] = useState("");
   const [confirmPassword, setconfirmPassword] = useState("");
   const [errors, seterrors] = useState({});
+  const [loading, setLoading] = useState(false); // حالة التحميل للزر
 
-  const handleChangePassword = async () => {
-  
-   
-    try {
-      seterrors({});
+const handleChangePassword = async () => {
+  try {
+    setLoading(true);
+    seterrors({});
 
-      await ValidationChange.validate(
-        {
-          originalPassword,
-          newPassword,
-          confirmPassword,
+    await ValidationChange.validate(
+      { oldPassword, newPassword, confirmPassword },
+      { abortEarly: false }
+    );
+
+    const token = await AsyncStorage.getItem("token");
+
+    if (!token) {
+      Alert.alert("خطأ", "انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى");
+      setLoading(false);
+      return;
+    }
+
+    const response = await axios.patch(
+      "https://medikidneysys.onrender.com/auth/change-password",
+      { oldPassword, newPassword, confirmPassword },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          accept: "*/*",
         },
-        { abortEarly: false }
-      );
+      }
+    );
 
-      console.log("done");
-    } catch (err) {
+    if (response.status === 200 || response.status === 201) {
+      Alert.alert("نجاح", "تم تغيير كلمة المرور بنجاح");
+      setoldPassword("");
+      setnewPassword("");
+      setconfirmPassword("");
+    }
+  } catch (err) {
+    if (err.inner) {
       const validationErrors = {};
       err.inner.forEach((error) => {
         validationErrors[error.path] = error.message;
       });
       seterrors(validationErrors);
+    } else {
+      const apiError = err.response?.data?.message || "فشل الاتصال بالسيرفر";
+      Alert.alert("تنبيه", apiError);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <View style={styles.container}>
@@ -42,9 +73,9 @@ const ChangePassword = () => {
       <View style={styles.card}>
         <Input
           placeholder="كلمة المرور القديمة"
-          value={originalPassword}
-          onChangeText={(text) => setoriginalPassword(text)}
-          errorMessage={errors.originalPassword}
+          value={oldPassword}
+          onChangeText={(text) => setoldPassword(text)}
+          errorMessage={errors.oldPassword}
           secureTextEntry
           leftIcon={{
             type: "feather",
@@ -80,11 +111,12 @@ const ChangePassword = () => {
           inputContainerStyle={styles.inputContainer}
         />
         <Button
-          title="حفظ التغيير"
-          onPress={handleChangePassword}
-          buttonStyle={styles.button}
-          titleStyle={styles.buttonText}
-        />
+  title="حفظ التغيير"
+  onPress={handleChangePassword}
+  loading={loading} // حالة الـ state الجديدة
+  buttonStyle={styles.button}
+  titleStyle={styles.buttonText}
+/>
       </View>
     </View>
   );
