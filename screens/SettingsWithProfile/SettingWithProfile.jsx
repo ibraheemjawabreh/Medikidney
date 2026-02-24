@@ -1,11 +1,40 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
 import { Icon } from '@rneui/themed';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const ProfileSettingsScreen = ({ navigation }) => {
   const [image, setImage] = useState(null);
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+  getProfile();
+}, []);
+
+
+const getProfile = async () => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+
+    const response = await axios.get(
+      "https://medikidneysys.onrender.com/users/profile",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log("PROFILE DATA:", response.data);
+
+    setUserData(response.data);
+
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   const handleLogout = async () => {
     try {
@@ -52,25 +81,76 @@ const ProfileSettingsScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
-  return (
+
+  if (!userData) {
+  return <Text>Loading...</Text>;
+}
+
+const role = userData.role;
+
+let data = null;
+
+if (role === "PATIENT") {
+  data = userData.patient;
+} else if (role === "NURSE") {
+  data = userData.nurse;
+} else if (role === "NUTRITIONIST") {
+  data = userData.nutritionist;
+}
+return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
-          {image ? <Image source={{ uri: image }} style={styles.avatar} /> : 
-                   <Icon name="person" size={50} color="#fff" />}
-          <View style={styles.editIcon}><Icon name="edit" size={12} color="#fff" /></View>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.avatar} />
+          ) : (
+            <Icon name="person" size={50} color="#fff" />
+          )}
+          <View style={styles.editIcon}>
+            <Icon name="edit" size={12} color="#fff" />
+          </View>
         </TouchableOpacity>
-        <Text style={styles.name}>احمد محمد</Text>
-        <Text style={styles.subText}>ahmed@.com</Text>
+
+        <Text style={styles.name}>{data?.full_name || "مستخدم"}</Text>
+
+        <Text style={styles.subText}>{data?.phone || "059xxxxxxx"}</Text>
+
+        <View style={styles.roleBadge}>
+          <Text style={styles.roleText}>{role}</Text>
+        </View>
+
+        {role !== "PATIENT" && data?.email && (
+          <Text style={[styles.subText, { marginTop: 8, color: '#a27d7b', fontWeight: 'bold' }]}>
+            {data.email}
+          </Text>
+        )}
       </View>
 
       <View style={styles.list}>
-        <SettingItem id="1" icon="lock" title="تغيير كلمة المرور " onPress={() => 
-            navigation.navigate('ChangePassword')} />
-        <SettingItem id="2" icon="person" title="تعديل الحساب" onPress={() => {}} />
-        <SettingItem id="3" icon="language" title="لغة التطبيق" onPress={() => {}} />
-        <SettingItem id="4" icon="info" title="عن التطبيق" onPress={() => 
-            navigation.navigate('AboutApp')}  />
+        <SettingItem
+          id="1"
+          icon="lock"
+          title="تغيير كلمة المرور"
+          onPress={() => navigation.navigate("ChangePassword")}
+        />
+        <SettingItem
+          id="2"
+          icon="person"
+          title="تعديل الحساب"
+          onPress={() => {}}
+        />
+        <SettingItem
+          id="3"
+          icon="language"
+          title="لغة التطبيق"
+          onPress={() => {}}
+        />
+        <SettingItem
+          id="4"
+          icon="info"
+          title="عن التطبيق"
+          onPress={() => navigation.navigate("AboutApp")}
+        />
 
         <TouchableOpacity style={styles.logoutBtn} onPress={confirmLogout}>
           <Text style={styles.logoutText}>تسجيل الخروج</Text>
@@ -160,5 +240,20 @@ const styles = StyleSheet.create({
   logoutText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  roleBadge: {
+    backgroundColor: '#5e3c3a',
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#a27d7b',
+  },
+  roleText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
   },
 });

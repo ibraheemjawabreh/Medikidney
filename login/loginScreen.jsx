@@ -26,19 +26,22 @@ const LoginScreen = ({navigation}) => {
         }
       );
       const data = await response.json();
-      
+      console.log("LOGIN RESPONSE:", data);
       if(response.ok){
-        await AsyncStorage.setItem("token",data.access_token);
-        const role=data.user.role;
-        if(role === "PATIENT"){
+        await AsyncStorage.setItem("token", data.access_token);
+        const userRole = data.user.role; 
+        await AsyncStorage.setItem("role", userRole);
+
+        if(userRole === "PATIENT"){
           navigation.replace("Patinet");
-        } else if(role === "NURSE"){
+        } else if(userRole === "NURSE"){
           navigation.replace("NurseHome");
-        } else if( role ==="NUTRITIONIST"){
+        } else if(userRole === "NUTRITIONIST"){
           navigation.replace("NutritionistHome");
-        }else{
-          alert("Role not found")
+        } else {
+          alert("Role not found: " + userRole);
         }
+
       }else{
         alert(data.message||"فشل تسجيل الدخول");
       }
