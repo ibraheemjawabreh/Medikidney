@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Text, View, StyleSheet, Image } from "react-native";
 import LoginValidation from "./loginValidation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { TouchableOpacity } from "react-native";
 
 const LoginScreen = ({navigation}) => {
   const [username, setusername] = useState("");
@@ -86,6 +87,14 @@ const LoginScreen = ({navigation}) => {
           errorMessage={errors.password}
           leftIcon={{ type: "feather", name: "lock", color: "#2A7FFF" }}
         />
+        <TouchableOpacity
+          onPress={() => navigation.navigate("EmailInput")}
+          style={{ marginBottom: 16 }}
+        >
+          <Text style={{ color: "#2A7FFF", textAlign: "right", marginRight: 10, fontWeight: "bold" }}>
+            نسيت كلمة المرور؟
+          </Text>
+        </TouchableOpacity>
 
         <Button
           title="تسجيل الدخول"

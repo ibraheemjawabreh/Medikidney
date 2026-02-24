@@ -6,8 +6,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native"; 
 import ValidationChange from "./ValidationChangePassword";
 import { useState } from "react";
+import { TouchableOpacity } from "react-native";
 
-const ChangePassword = () => {
+
+const ChangePassword = ({navigation}) => {
   const [oldPassword, setoldPassword] = useState("");
   const [newPassword, setnewPassword] = useState("");
   const [confirmPassword, setconfirmPassword] = useState("");
@@ -117,6 +119,15 @@ const handleChangePassword = async () => {
   buttonStyle={styles.button}
   titleStyle={styles.buttonText}
 />
+<TouchableOpacity
+          onPress={() => navigation.navigate("EmailInput")}
+          style={{ marginTop: 16 }}
+        >
+          <Text style={{ color: "#2563EB", textAlign: "center", fontWeight: "bold" }}>
+            هل نسيت كلمة المرور؟
+          </Text>
+        </TouchableOpacity>
+
       </View>
     </View>
   );

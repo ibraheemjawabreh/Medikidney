@@ -65,7 +65,7 @@ const ProfileSettingsScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.list}>
-        <SettingItem id="1" icon="lock" title="تغيير كلمة المرور" onPress={() => 
+        <SettingItem id="1" icon="lock" title="تغيير كلمة المرور " onPress={() => 
             navigation.navigate('ChangePassword')} />
         <SettingItem id="2" icon="person" title="تعديل الحساب" onPress={() => {}} />
         <SettingItem id="3" icon="language" title="لغة التطبيق" onPress={() => {}} />
@@ -140,11 +140,15 @@ const styles = StyleSheet.create({
   itemContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex:1,
+    justifyContent:"flex-end",
   },
   itemText: {
     marginRight: 15,
     fontSize: 16,
     color: '#333',
+    flexShrink:1,
+    textAlign:"right",
   },
   logoutBtn: {
     marginTop: 30,

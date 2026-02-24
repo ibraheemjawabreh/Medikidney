@@ -12,6 +12,9 @@ import AboutApp from './screens/aboutApplication/ApoutApplication'
 import NurseTasks from './screens/Nurse/NurseTasks'
 import WeightInput from './screens/patinet/Weightinput'
 import DatesDoctor from './screens/patinet/DatesDoctor'
+import EmailInput from './screens/resetPassword/EmailInput';
+import OtpCode from './screens/resetPassword/OtpCode';
+import ResetPassword from './screens/resetPassword/ResetPassword';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -29,8 +32,13 @@ export default function App() {
         <Stack.Screen name="NurseTasks" component={NurseTasks} />
         <Stack.Screen name="WeightInput" component={WeightInput}/>
         <Stack.Screen name="DatesDoctor" component={DatesDoctor}/>
+        <Stack.Screen name="EmailInput" component={EmailInput}/>
+        <Stack.Screen name="OtpCode" component={OtpCode}/>
+        <Stack.Screen name="ResetPassword" component={ResetPassword}/>
       </Stack.Navigator>
       </NavigationContainer>
+      
+      
   );
 }
 
