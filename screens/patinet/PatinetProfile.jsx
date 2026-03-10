@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native"; 
 import { Tab, TabView, Button } from "@rneui/base";
@@ -22,33 +23,48 @@ const PatientProfile = ({ navigation }) => {
         scrollable
         indicatorStyle={styles.indicator}
       >
-        <Tab.Item title="الملاحظات"
-         icon={{ name: "description",
+        <Tab.Item 
+          title="البرنامج الغذائي"
+          icon={{ name: "restaurant",
           color: "#2A7FFF" }}
           titleStyle={styles.tabText}
           />
-          {/* ----------- */}
-        <Tab.Item title="الفحوصات"
-         icon={{ name: "science",
+
+        <Tab.Item 
+          title="الفحوصات"
+          icon={{ name: "science",
           color: "#2A7FFF" }}
            titleStyle={styles.tabText} 
            />
-           {/* ------------- */}
-        <Tab.Item title="المواعيد" 
-        icon={{ name: "event", color: "#2A7FFF" }} 
-        titleStyle={styles.tabText} 
+
+        <Tab.Item 
+          title="مواعيد الطبيب" 
+          icon={{ name: "event", color: "#2A7FFF" }} 
+          titleStyle={styles.tabText} 
         />
-        {/* --------------- */}
-        <Tab.Item title="الجلسات"
+
+        <Tab.Item 
+         title="الجلسات"
          icon={{ name: "opacity", color: "#2A7FFF" }}
-          titleStyle={styles.tabText}
+         titleStyle={styles.tabText}
            />
 
       </Tab>
 
       <TabView value={tabIndex} onChange={setTabIndex}>
         <TabView.Item style={styles.tabItem}>
-          <Text>ملاحظات الطبيب</Text>
+          <ScrollView>
+            <Text style={styles.sectionTitle}>ادارة البرنامج الغذائي </Text>
+            <Button
+            title={'البرنامج الغذائي'}
+            icon={{name:'plus',type:"font-awesome",color:"white",size:15}}
+            buttonStyle={styles.addButton}
+            onPress={()=>{navigation.navigate("NutritionistTable")}}
+          
+          />
+
+          </ScrollView>
+       
           </TabView.Item>
 
 
@@ -59,7 +75,7 @@ const PatientProfile = ({ navigation }) => {
 
         <TabView.Item style={styles.tabItem}>
           <ScrollView contentContainerStyle={styles.tabContent}>
-            <Text style={styles.sectionTitle}>إدارة الجلسات</Text>
+            <Text style={styles.sectionTitle}> المواعيد مع الطبيب و ملاحظاته</Text>
             <Button
               title="المواعيد مع الطبيب"
               icon={{ name: "plus", type: "font-awesome", color: "white", size: 15 }}
@@ -71,7 +87,7 @@ const PatientProfile = ({ navigation }) => {
         
         <TabView.Item style={styles.tabItem}>
           <ScrollView contentContainerStyle={styles.tabContent}>
-            <Text style={styles.sectionTitle}>إدارة الجلسات</Text>
+            <Text style={styles.sectionTitle} >إدارة الجلسات و بيانتها</Text>
             <Button
               title="إدخال الوزن"
               icon={{ name: "plus", type: "font-awesome", color: "white", size: 15 }}
@@ -154,3 +170,59 @@ const styles = StyleSheet.create({
 });
 
 export default PatientProfile;
+
+
+
+
+// import React from "react";
+// import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native"; 
+// import { Icon } from "@rneui/themed";
+// import { color } from "@rneui/base";
+
+// const PatientProfile = ({ navigation }) => {
+
+//   const RenderPagies=[
+//       {id:1,
+//        title:'ملاحظات الطبيب',
+//        icon:'description',
+//        color:'blue',
+//        screen:'DateDoctor'
+//       },
+//        {id:2,
+//        title:'جلسات الغسيل',
+//        icon:'description',
+//        color:'red',
+//        screen:'WeightInput'
+//       },
+//         {id:2,
+//        title:'جلسات الغسيل',
+//        icon:'description',
+//        color:'red',
+//        screen:'WeightInput'
+//       },
+//         {id:2,
+//        title:'جلسات الغسيل',
+//        icon:'description',
+//        color:'red',
+//        screen:'WeightInput'
+//       },
+      
+  
+//   ]
+ 
+//   return (
+//     <View> 
+//       <Text>صفحة المريض</Text>
+
+
+//     </View>
+//   )
+   
+// };
+
+
+
+// export default PatientProfile;
+
+
+

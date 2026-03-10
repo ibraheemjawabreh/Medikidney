@@ -15,6 +15,7 @@ import DatesDoctor from './screens/patinet/DatesDoctor'
 import EmailInput from './screens/resetPassword/EmailInput';
 import OtpCode from './screens/resetPassword/OtpCode';
 import ResetPassword from './screens/resetPassword/ResetPassword';
+import NutritionistTable from './screens/Nutritionist/NutritionistTable'
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -35,6 +36,7 @@ export default function App() {
         <Stack.Screen name="EmailInput" component={EmailInput}/>
         <Stack.Screen name="OtpCode" component={OtpCode}/>
         <Stack.Screen name="ResetPassword" component={ResetPassword}/>
+        <Stack.Screen name="NutritionistTable" component={NutritionistTable}/>
       </Stack.Navigator>
       </NavigationContainer>
       
