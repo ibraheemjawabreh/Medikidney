@@ -1,10 +1,11 @@
 import { Button, Input } from "@rneui/base";
-import { useState } from "react";
+import { use, useState } from "react";
 import { View, StyleSheet, Text, FlatList, TouchableOpacity } from "react-native";import ValidationSearch from "./validationsearch/validationSearch";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
+import axios, { Axios } from "axios";
 
-const SearchPatient = () => {
+
+const SearchPatient = ({navigation}) => {
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [patient, setPatient] = useState(null);
@@ -64,9 +65,9 @@ const handleSearch = async (queryText,navigation) => {
           onPress={() => {
             setSearch(item.name); 
             setPatient([]);
-            // navigation.navigate("PatientProfile", { patientId: item.id });
+            navigation.navigate("StaffPatientView", { patientId: item.id });
           }}
-        >
+        > 
           <Text>{item.name}</Text>
         </TouchableOpacity>
       )}
@@ -134,7 +135,7 @@ resultItem: {
     marginTop: 4
   },
   dropdownContainer: {
-    maxHeight: 200, // عشان ما تغطي كل الشاشة
+    maxHeight: 200,
     marginTop: 10,
     borderTopWidth: 1,
     borderTopColor: '#eee'
