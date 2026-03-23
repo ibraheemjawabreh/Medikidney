@@ -49,18 +49,42 @@ const StaffPatientView = ({ route, navigation }) => {
       <View style={styles.headerCard}>
         <Text style={styles.headerTitle}>بيانات المريض </Text>
         <View style={styles.infoRow}>
-                 <Text style={styles.infoValue}>{patient?.full_name || "اسم غير معروف"}</Text>
-                  <Text style={styles.infoValue}>رقم الهوية: {patient?.national_id}</Text>
-                  <Text style={styles.infoValue}>الجنس: {patient?.gender}</Text>
-                  <Text style={styles.infoValue}>فصيلة الدم: {patient?.blood_type}</Text>
-                  <Text style={styles.infoValue}>رقم المريض: {patient?.patient_id}</Text>
+            <Text style={styles.infoValue}>{patient?.full_name || "اسم غير معروف"}</Text>
+            <Text style={styles.infoValue}>رقم الهوية: {patient?.national_id}</Text>
+            <Text style={styles.infoValue}>الجنس: {patient?.gender}</Text>
+            <Text style={styles.infoValue}>فصيلة الدم: {patient?.blood_type}</Text>
+            <Text style={styles.infoValue}>رقم المريض: {patient?.patient_id}</Text>
         </View>
       </View>
 
       <Tab value={tabIndex} onChange={setTabIndex} scrollable indicatorStyle={styles.indicator}>
-        <Tab.Item title="الغذاء" icon={{ name: "restaurant", color: "#2A7FFF" }} titleStyle={styles.tabText} />
-        <Tab.Item title="الجلسات" icon={{ name: "opacity", color: "#2A7FFF" }} titleStyle={styles.tabText} />
-        <Tab.Item title="ملاحظات الطبيب" icon={{ name: "description", color: "#2A7FFF" }} titleStyle={styles.tabText} />
+        <Tab.Item 
+            title="الغذاء" 
+            icon={{ name: "restaurant",
+            color: "#2A7FFF" }} 
+            titleStyle={styles.tabText} 
+         />
+
+        <Tab.Item 
+            title="الجلسات"
+            icon={{ name: "opacity",
+            color: "#2A7FFF" }}
+            titleStyle={styles.tabText} 
+        />
+
+        <Tab.Item 
+            title="ملاحظات الطبيب"
+            icon={{ name: "description",
+            color: "#2A7FFF" }}
+            titleStyle={styles.tabText} 
+        />
+
+         <Tab.Item 
+            title="الفحوصات"
+            icon={{ name: "science",
+            color: "#2A7FFF" }}
+            titleStyle={styles.tabText}
+        />
       </Tab>
 
       <TabView value={tabIndex} onChange={setTabIndex}>
@@ -90,6 +114,16 @@ const StaffPatientView = ({ route, navigation }) => {
             <Text>هنا تظهر تقارير الطبيب الموجهة للطاقم</Text>
           </View>
         </TabView.Item>
+
+        <TabView.Item style={styles.tabItem}>
+            <ScrollView contentContainerStyle={styles.tabContent}>
+                <Text style={styles.sectionTitle}>الفحوصات</Text>
+                <Text>هنا تظهر فحوصات المريض  </Text>
+
+                
+            </ScrollView>
+        </TabView.Item>
+
       </TabView>
     </View>
   );
