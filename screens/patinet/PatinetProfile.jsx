@@ -8,6 +8,7 @@ const PatientProfile = ({ route, navigation }) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [nutritionPlan, setNutritionPlan] = useState([]);
 
   const { patientId } = route.params || {};
 
@@ -21,7 +22,12 @@ const PatientProfile = ({ route, navigation }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      setPatient(response.data.patient);
+      const patientInfo = response.data.patient; 
+      setPatient(patientInfo);
+
+     if (patientInfo && patientInfo.patient_id) {
+        fetchNutritionPlan(patientInfo.patient_id);
+      }
 
     } catch (error) {
       console.log("Error:", error.response?.data || error.message);
@@ -32,6 +38,27 @@ const PatientProfile = ({ route, navigation }) => {
   useEffect(() => {
     fetchPatientData();
   }, [patientId]);
+
+
+const fetchNutritionPlan = async () => {
+  try {
+    setLoading(true); 
+    const token = await AsyncStorage.getItem("token");
+
+    const url = `https://medikidneysys.onrender.com/nutrition-programs`;
+
+    const response = await axios.get(url, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    setNutritionPlan(response.data); 
+
+  } catch (error) {
+    console.log("Error fetching nutrition plan:", error.response?.data || error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (loading) {
     return (
@@ -85,11 +112,38 @@ const PatientProfile = ({ route, navigation }) => {
       </Tab>
 
       <TabView value={tabIndex} onChange={setTabIndex}>
-        <TabView.Item style={styles.tabItem}>
-          <ScrollView contentContainerStyle={styles.tabContent}>
-            <Text style={styles.sectionTitle}>  البرنامج الغذائي للمريض</Text>
-          </ScrollView>
-        </TabView.Item>
+     <TabView.Item style={styles.tabItem}>
+  <ScrollView contentContainerStyle={styles.tabContent}>
+    <Text style={styles.sectionTitle}>البرنامج الغذائي للمريض 🥗</Text>
+
+    {nutritionPlan.length > 0 ? (
+      nutritionPlan.map((item, index) => (
+        <View key={index} style={styles.nutritionCard}>
+          <View style={styles.cardHeader}>
+            {/* تأكد من مسميات الحقول حسب الـ API تبعك (مثلاً day_name أو meal_type) */}
+            <Text style={styles.mealType}>{item.day_name || "وجبة يومية"}</Text> 
+            <Text style={styles.mealTime}>{item.meal_time}</Text>
+          </View>
+          
+          <Text style={styles.mealContent}>
+            <Text style={{fontWeight: 'bold'}}>الوصف: </Text>
+            {item.description || "لا يوجد وصف"}
+          </Text>
+
+          {item.notes && (
+            <View style={styles.notesBox}>
+              <Text style={styles.mealNotes}>📝 {item.notes}</Text>
+            </View>
+          )}
+        </View>
+      ))
+    ) : (
+      <View style={{ marginTop: 40, alignItems: 'center' }}>
+        <Text style={styles.infoText}>لا يوجد برنامج غذائي مضاف حالياً</Text>
+      </View>
+    )}
+  </ScrollView>
+</TabView.Item>
 
         <TabView.Item style={styles.tabItem}>
           <View style={styles.tabContent}>
@@ -208,6 +262,79 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     marginTop: 15,
     textAlign: 'center'
+  },
+  // كرت الوجبة نفسه
+  nutritionCard: {
+    backgroundColor: "#fff",
+    width: '95%',
+    borderRadius: 18,
+    padding: 15,
+    marginBottom: 15,
+    elevation: 3, // ظل للأندرويد
+    shadowColor: "#000", // ظل للآيفون
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    borderRightWidth: 6, // خط جانبي يعطي شكل جمالي
+    borderRightColor: "#2A7FFF", 
+  },
+  // هيدر الكرت (اليوم والوقت)
+  cardHeader: {
+    flexDirection: "row-reverse",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F2F5",
+    paddingBottom: 8,
+  },
+  // نص اليوم (فطور، غداء، أو السبت، الأحد...)
+  mealType: {
+    fontSize: 17,
+    fontWeight: "800",
+    color: "#2A7FFF",
+  },
+  // نص الوقت (مثلاً: 09:00 AM)
+  mealTime: {
+    fontSize: 13,
+    color: "#64748B",
+    fontWeight: "700",
+    backgroundColor: "#F1F5F9",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    overflow: 'hidden'
+  },
+  // محتوى الوجبة (شو يوكل المريض)
+  mealContent: {
+    fontSize: 15,
+    color: "#334155",
+    textAlign: "right",
+    lineHeight: 24, // تباعد الأسطر لراحة العين
+  },
+  // صندوق الملاحظات (بيطلع بلون مختلف)
+  notesBox: {
+    backgroundColor: "#FFF9E6", // أصفر خفيف جداً
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: "#FEF3C7",
+  },
+  // نص الملاحظة
+  mealNotes: {
+    fontSize: 13,
+    color: "#D97706", // برتقالي غامق
+    textAlign: "right",
+    fontWeight: "600",
+  },
+  // الستايل في حال ما في بيانات
+  infoText: {
+    fontSize: 15,
+    color: "#94A3B8",
+    textAlign: 'center',
+    marginTop: 20,
+    fontWeight: "500"
   }
 });
 
