@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator,TouchableOpacity } from "react-native";
 import { Tab, TabView, Button } from "@rneui/base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -9,6 +9,7 @@ const PatientProfile = ({ route, navigation }) => {
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [nutritionPlan, setNutritionPlan] = useState([]);
+  const [sessions, setSessions] = useState([]); 
 
   const { patientId } = route.params || {};
 
@@ -37,8 +38,12 @@ const PatientProfile = ({ route, navigation }) => {
   };
   useEffect(() => {
     fetchPatientData();
+    fetchNutritionPlan();
+    fetchSessions();
   }, [patientId]);
 
+// --------------------------------------------------------
+// --------------------------------------------------------
 
 const fetchNutritionPlan = async () => {
   try {
@@ -58,6 +63,35 @@ const fetchNutritionPlan = async () => {
   } finally {
     setLoading(false);
   }
+};
+
+// --------------------------------------------------------
+// --------------------------------------------------------
+
+
+const fetchSessions = async () => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+    
+    const response = await axios.get(
+      `https://medikidneysys.onrender.com/dialysis-sessions`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+   
+    console.log("البيانات القادمة من السيرفر:", response.data);
+    setSessions(response.data); 
+
+
+  } catch (error) {
+    console.log("Error fetching real sessions:", error.response?.data || error.message);
+    setSessions([]); 
+  }
+};
+
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString('ar-EG', options);
 };
 
   if (loading) {
@@ -114,7 +148,7 @@ const fetchNutritionPlan = async () => {
       <TabView value={tabIndex} onChange={setTabIndex}>
      <TabView.Item style={styles.tabItem}>
   <ScrollView contentContainerStyle={styles.tabContent}>
-    <Text style={styles.sectionTitle}>البرنامج الغذائي للمريض 🥗</Text>
+    <Text style={styles.sectionTitle}>البرنامج الغذائي للمريض </Text>
 
     {nutritionPlan.length > 0 ? (
       nutritionPlan.map((item, index) => (
@@ -145,6 +179,9 @@ const fetchNutritionPlan = async () => {
   </ScrollView>
 </TabView.Item>
 
+
+
+
         <TabView.Item style={styles.tabItem}>
           <View style={styles.tabContent}>
             <Text style={styles.sectionTitle}>الفحوصات المخبرية</Text>
@@ -172,6 +209,26 @@ const fetchNutritionPlan = async () => {
               buttonStyle={styles.addButton}
               onPress={() => navigation.navigate("WeightInput")}
             />
+            <Text style={styles.sectionTitle}>سجل جلسات غسيل الكلى 🏥</Text>
+
+    {sessions.map((session, index) => (
+  <TouchableOpacity 
+    key={index} 
+    style={styles.sessionCard}
+    // تأكد أن الـ ID في الـ API اسمه id وليس sessionId حسب الـ Response
+    onPress={() => navigation.navigate("ShowSessions", { sessionId: session.id })}
+  >
+    <View style={styles.sessionHeader}>
+      <Text style={styles.sessionDate}>{formatDate(session.date)}</Text>
+      <Text style={styles.sessionIdText}>جلسة #{session.id || index + 1}</Text>
+    </View>
+    
+    <View style={styles.sessionSummary}>
+      <Text style={styles.summaryItem}>الوزن قبل: {session.weightBefore} كغم</Text>
+      <Text style={styles.summaryLink}>عرض التفاصيل ←</Text>
+    </View>
+  </TouchableOpacity>
+))}
           </ScrollView>
         </TabView.Item>
       </TabView>
@@ -335,6 +392,45 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
     fontWeight: "500"
+  },
+  sessionCard: {
+    backgroundColor: "#fff",
+    width: '95%',
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 12,
+    borderLeftWidth: 5,
+    borderLeftColor: "#2A7FFF", // خط أزرق جهة اليسار
+    elevation: 3,
+  },
+  sessionHeader: {
+    flexDirection: "row-reverse",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  sessionDate: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1A1A1A",
+  },
+  sessionIdText: {
+    fontSize: 14,
+    color: "#64748B",
+  },
+  sessionSummary: {
+    flexDirection: "row-reverse",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 5,
+  },
+  summaryItem: {
+    fontSize: 14,
+    color: "#475569",
+  },
+  summaryLink: {
+    fontSize: 13,
+    color: "#2A7FFF",
+    fontWeight: "600",
   }
 });
 

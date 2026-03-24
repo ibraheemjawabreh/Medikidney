@@ -17,6 +17,7 @@ import ResetPassword from '../screens/resetPassword/ResetPassword';
 import NutritionistTable from '../screens/Nutritionist/NutritionistTable';
 import PatientProfile from '../screens/patinet/PatinetProfile';
 import StaffPatientView from '../screens/patinet/NurseNutritionsitTOpatint';
+import ShowSessions from '../screens/Sessions/ShowSessions'
 
 const Stack = createNativeStackNavigator();
 
@@ -39,6 +40,7 @@ const AppNavigator = () => {
       <Stack.Screen name="NutritionistTable" component={NutritionistTable} />
       <Stack.Screen name="PatientProfile" component={PatientProfile} />
       <Stack.Screen name="StaffPatientView" component={StaffPatientView} />
+      <Stack.Screen name='ShowSessions' component={ShowSessions} /> 
     </Stack.Navigator>
   );
 };
