@@ -11,34 +11,24 @@ const PatientProfile = ({ route, navigation }) => {
 
   const { patientId } = route.params || {};
 
-  const fetchPatientData = async () => {
+ const fetchPatientData = async () => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem("token");
-      
-   
-      const savedId = await AsyncStorage.getItem("patientId");
-      const idToFetch = patientId || savedId;
-
-      if (!idToFetch) {
-        console.log("No ID found");
-        setLoading(false);
-        return;
-      }
 
       const response = await axios.get(
-        `https://medikidneysys.onrender.com/users/profile/patients/${idToFetch}`,
+        `https://medikidneysys.onrender.com/users/profile`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      setPatient(response.data);
+      setPatient(response.data.patient);
+
     } catch (error) {
-      console.log("Error fetching patient data:", error.response?.data || error.message);
+      console.log("Error:", error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchPatientData();
   }, [patientId]);
@@ -53,7 +43,6 @@ const PatientProfile = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* هيدر بيانات المريض */}
       <View style={styles.headerCard}>
         <Text style={styles.headerTitle}>ملف المريض</Text>
         <View style={styles.infoRow}>
@@ -163,7 +152,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   infoRow: { 
-    flexDirection: "row-reverse", // عشان العربي يبدأ من اليمين
+    flexDirection: "row-reverse",
     justifyContent: "space-between",
     flexWrap: "wrap", 
     alignItems: "center"
@@ -172,7 +161,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     color: "#2A7FFF", 
-    backgroundColor: "#E0EBFF", // خلفية خفيفة لكل معلومة بتعطي شكل Badge
+    backgroundColor: "#E0EBFF", 
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 8,
