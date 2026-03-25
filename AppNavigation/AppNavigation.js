@@ -19,6 +19,7 @@ import PatientProfile from '../screens/patinet/PatinetProfile';
 import StaffPatientView from '../screens/patinet/NurseNutritionsitTOpatint';
 import ShowSessions from '../screens/Sessions/ShowSessions'
 
+
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {

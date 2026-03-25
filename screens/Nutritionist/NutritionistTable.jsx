@@ -53,33 +53,55 @@ const NutritionistTable = ({ route }) => {
     fetchCurrentPlan();
   }, [patientId]);
 
-  const savePlan = async () => {
-    try {
-      if (!patientId) return Alert.alert("خطأ", "لم يتم اختيار المريض");
+ const savePlan = async () => {
+  try {
+    if (!patientId) return Alert.alert("خطأ", "لم يتم اختيار المريض");
 
-      const token = await AsyncStorage.getItem("token");
-      if (!token) return Alert.alert("خطأ", "لم يتم تسجيل الدخول");
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return Alert.alert("خطأ", "لم يتم تسجيل الدخول");
 
-      const response = await fetch(
-        "https://medikidneysys.onrender.com/nutrition-programs",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ patientId, title, description, forbiddenItems, allowedItems, breakfast, lunch, dinner, mealNotes, startDate: new Date().toISOString(), endDate: new Date().toISOString() })
-        }
-      );
+    // تجهيز البيانات بناءً على مسميات الباك آيند الحقيقية
+    const bodyData = {
+      patientId: Number(patientId), // التأكد أنه رقم واسمه patientId
+      title: title,
+      description: description,
+      forbiddenItems: forbiddenItems, // CamelCase كما في الباك آيند
+      allowedItems: allowedItems,     // CamelCase
+      breakfast: breakfast,
+      lunch: lunch,
+      dinner: dinner,
+      mealNotes: mealNotes,           // CamelCase
+      startDate: new Date().toISOString(), 
+      endDate: new Date().toISOString()
+    };
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "تعذر حفظ الخطة");
+    console.log("البيانات المرسلة للباك آيند:", bodyData);
+
+    const response = await fetch(
+      "https://medikidneysys.onrender.com/nutrition-programs",
+      {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json", 
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify(bodyData)
       }
+    );
 
-      Alert.alert("نجاح ", "تم حفظ الخطة بنجاح!");
-    } catch (error) {
-      console.log("Save Plan Error:", error);
-      Alert.alert("خطأ ", error.message);
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.log("رد السيرفر بالخطأ:", data);
+      throw new Error(data.message || "تعذر حفظ الخطة");
     }
-  };
+
+    Alert.alert("نجاح ", "تم حفظ الخطة بنجاح!");
+  } catch (error) {
+    console.log("Save Plan Error:", error);
+    Alert.alert("خطأ ", error.message);
+  }
+};
 
   if (loading) return <Text style={{ textAlign: "center", marginTop: 50 }}>جاري تحميل البيانات...</Text>;
 

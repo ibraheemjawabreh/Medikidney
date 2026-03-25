@@ -76,7 +76,19 @@ const StaffPatientView = ({ route, navigation }) => {
           <ScrollView contentContainerStyle={styles.tabContent}>
             <Text style={styles.sectionTitle}>البرنامج الغذائي</Text>
             {userRole === "NUTRITIONIST" ? (
-              <Button title="تعديل البرنامج" buttonStyle={styles.addButton} onPress={() => navigation.navigate("NutritionistTable", { patientId })} />
+// في صفحة PatientProfile
+<Button 
+  title="تعديل البرنامج" 
+  onPress={() => {
+    // اطبع كائن المريض كامل عشان نشوف شو جواته
+    console.log("بيانات المريض كاملة:", patient); 
+    
+    // جرب ابحث عن حقل اسمه patient_id أو id داخل كائن المريض
+    const actualId = patient?.patient_id || patient?.id; 
+    
+    navigation.navigate("NutritionistTable", { patientId: actualId });
+  }} 
+/>
             ) : (
               <Text>عرض البرنامج الغذائي للمريض فقط</Text>
             )}
