@@ -29,6 +29,7 @@ const LoginScreen = ({navigation}) => {
       console.log("LOGIN RESPONSE:", data);
       if(response.ok){
         await AsyncStorage.setItem("token", data.access_token);
+        await AsyncStorage.setItem("role", data.user.role);
         const userRole = data.user.role; 
         await AsyncStorage.setItem("role", userRole);
 
