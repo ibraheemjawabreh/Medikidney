@@ -2,11 +2,8 @@ import React, { useState, useEffect } from "react";
 import { View, TextInput, TouchableOpacity, Text, Alert, ScrollView } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const NutritionistTable = ({ route }) => {
+const NutritionistTable = ({ route, navigation }) => {
   const patientId = route.params?.patientId;
-  if (!patientId) {
-  Alert.alert("خطأ", "لم يتم تمرير رقم المريض");
-  }
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -17,12 +14,12 @@ const NutritionistTable = ({ route }) => {
   const [dinner, setDinner] = useState("");
   const [mealNotes, setMealNotes] = useState("");
   const [loading, setLoading] = useState(true);
+  const [existingPlanId, setExistingPlanId] = useState(null);
 
   useEffect(() => {
     const fetchCurrentPlan = async () => {
       try {
         if (!patientId) return;
-
         const token = await AsyncStorage.getItem("token");
         if (!token) throw new Error("لم يتم تسجيل الدخول");
 
@@ -32,16 +29,21 @@ const NutritionistTable = ({ route }) => {
         );
 
         const data = await response.json();
+
         if (data.length > 0) {
-          const plan = data[0];
+          const plan = data[0]; 
+          setExistingPlanId(plan.id);
+
           setTitle(plan.title || "");
           setDescription(plan.description || "");
-          setForbiddenItems(plan.forbiddenItems || "");
-          setAllowedItems(plan.allowedItems || "");
+
+        
+          setForbiddenItems(plan.forbiddenItems || plan.forbidden_items || "");
+          setAllowedItems(plan.allowedItems || plan.allowed_items || "");
           setBreakfast(plan.breakfast || "");
           setLunch(plan.lunch || "");
           setDinner(plan.dinner || "");
-          setMealNotes(plan.mealNotes || "");
+          setMealNotes(plan.mealNotes || plan.meal_notes || "");
         }
       } catch (error) {
         console.log("Fetch Plan Error:", error);
@@ -49,59 +51,64 @@ const NutritionistTable = ({ route }) => {
         setLoading(false);
       }
     };
-
     fetchCurrentPlan();
   }, [patientId]);
 
- const savePlan = async () => {
-  try {
-    if (!patientId) return Alert.alert("خطأ", "لم يتم اختيار المريض");
+  const savePlan = async () => {
+    try {
+      if (!patientId) return Alert.alert("خطأ", "لم يتم اختيار المريض");
 
-    const token = await AsyncStorage.getItem("token");
-    if (!token) return Alert.alert("خطأ", "لم يتم تسجيل الدخول");
+      const token = await AsyncStorage.getItem("token");
+      const nutritionistId = await AsyncStorage.getItem("userId");
+      if (!token) return Alert.alert("خطأ", "لم يتم تسجيل الدخول");
 
-    // تجهيز البيانات بناءً على مسميات الباك آيند الحقيقية
-    const bodyData = {
-      patientId: Number(patientId), // التأكد أنه رقم واسمه patientId
-      title: title,
-      description: description,
-      forbiddenItems: forbiddenItems, // CamelCase كما في الباك آيند
-      allowedItems: allowedItems,     // CamelCase
-      breakfast: breakfast,
-      lunch: lunch,
-      dinner: dinner,
-      mealNotes: mealNotes,           // CamelCase
-      startDate: new Date().toISOString(), 
-      endDate: new Date().toISOString()
-    };
+      const bodyData = {
+        patientId: Number(patientId),
+        nutritionistId: Number(nutritionistId),
+        title,
+        description,
+        forbiddenItems,
+        allowedItems,
+        breakfast,
+        lunch,
+        dinner,
+        mealNotes,
+        startDate: new Date().toISOString(),
+        endDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
+      };
 
-    console.log("البيانات المرسلة للباك آيند:", bodyData);
-
-    const response = await fetch(
-      "https://medikidneysys.onrender.com/nutrition-programs",
-      {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json", 
-          Authorization: `Bearer ${token}` 
-        },
-        body: JSON.stringify(bodyData)
+      let response;
+      if (existingPlanId) {
+        response = await fetch(
+          `https://medikidneysys.onrender.com/nutrition-programs/${existingPlanId}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify(bodyData)
+          }
+        );
+      } else {
+        response = await fetch(
+          `https://medikidneysys.onrender.com/nutrition-programs`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify(bodyData)
+          }
+        );
       }
-    );
 
-    const data = await response.json();
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "تعذر حفظ الخطة");
 
-    if (!response.ok) {
-      console.log("رد السيرفر بالخطأ:", data);
-      throw new Error(data.message || "تعذر حفظ الخطة");
+      Alert.alert("نجاح", existingPlanId ? "تم تعديل الخطة بنجاح!" : "تم إنشاء الخطة بنجاح!");
+      setExistingPlanId(data.id || existingPlanId);
+
+    } catch (error) {
+      console.log("Save Plan Error:", error);
+      Alert.alert("خطأ", error.message);
     }
-
-    Alert.alert("نجاح ", "تم حفظ الخطة بنجاح!");
-  } catch (error) {
-    console.log("Save Plan Error:", error);
-    Alert.alert("خطأ ", error.message);
-  }
-};
+  };
 
   if (loading) return <Text style={{ textAlign: "center", marginTop: 50 }}>جاري تحميل البيانات...</Text>;
 
@@ -117,7 +124,9 @@ const NutritionistTable = ({ route }) => {
       <TextInput placeholder="ملاحظات" value={mealNotes} onChangeText={setMealNotes} style={styles.input} />
 
       <TouchableOpacity onPress={savePlan} style={styles.button}>
-        <Text style={{ color: "#fff", fontWeight: "bold" }}>حفظ الخطة</Text>
+        <Text style={{ color: "#fff", fontWeight: "bold" }}>
+          {existingPlanId ? "تعديل الخطة" : "حفظ الخطة"}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -125,7 +134,7 @@ const NutritionistTable = ({ route }) => {
 
 const styles = {
   input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 8, marginBottom: 12, padding: 10, textAlign: "right" },
-  button: { backgroundColor: "#2ecc71", padding: 15, borderRadius: 8, alignItems: "center", marginTop: 10 },
+  button: { backgroundColor: "#2A7FFF", padding: 15, borderRadius: 8, alignItems: "center", marginTop: 10 },
 };
 
 export default NutritionistTable;

@@ -1,20 +1,29 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator
+} from "react-native";
 import { Tab, TabView, Button } from "@rneui/base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { useFocusEffect } from "@react-navigation/native";
 
 const StaffPatientView = ({ route, navigation }) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState("");
+  const [nutritionPlan, setNutritionPlan] = useState(null);
 
   const { patientId } = route.params || {};
 
   const fetchPatientData = async () => {
     try {
       setLoading(true);
+
       const token = await AsyncStorage.getItem("token");
       const role = await AsyncStorage.getItem("role");
       setUserRole(role);
@@ -31,6 +40,10 @@ const StaffPatientView = ({ route, navigation }) => {
       );
 
       setPatient(response.data);
+
+     
+      fetchNutritionPlan(response.data.patient_id);
+
     } catch (error) {
       console.log("Error:", error.response?.data || error.message);
       alert("المريض غير موجود أو حدث خطأ أثناء جلب البيانات");
@@ -40,17 +53,51 @@ const StaffPatientView = ({ route, navigation }) => {
     }
   };
 
-  useEffect(() => {
-    fetchPatientData();
-  }, [patientId]);
+  const fetchNutritionPlan = async (patientId) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
 
-  if (loading)
-    return <ActivityIndicator size="large" color="#2A7FFF" style={{ flex: 1 }} />;
+      const response = await axios.get(
+        `https://medikidneysys.onrender.com/nutrition-programs?patientId=${patientId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const fixedData = response.data.map(item => ({
+        ...item,
+        allowedItems: item.allowedItems || item.allowed_items || "",
+        forbiddenItems: item.forbiddenItems || item.forbidden_items || "",
+        mealNotes: item.mealNotes || item.meal_notes || ""
+      }));
+
+      setNutritionPlan(fixedData.length > 0 ? fixedData[0] : null);
+
+    } catch (error) {
+      console.log("Error fetching nutrition plan:", error.response?.data || error.message);
+      setNutritionPlan(null);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchPatientData();
+    }, [patientId])
+  );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2A7FFF" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
+
+      {/* Header */}
       <View style={styles.headerCard}>
         <Text style={styles.headerTitle}>بيانات المريض</Text>
+
         {patient ? (
           <View style={styles.infoRow}>
             <Text style={styles.infoValue}>{patient.full_name || "اسم غير معروف"}</Text>
@@ -64,7 +111,13 @@ const StaffPatientView = ({ route, navigation }) => {
         )}
       </View>
 
-      <Tab value={tabIndex} onChange={setTabIndex} scrollable indicatorStyle={styles.indicator}>
+      {/* Tabs */}
+      <Tab
+        value={tabIndex}
+        onChange={setTabIndex}
+        scrollable
+        indicatorStyle={styles.indicator}
+      >
         <Tab.Item title="الغذاء" icon={{ name: "restaurant", color: "#2A7FFF" }} titleStyle={styles.tabText} />
         <Tab.Item title="الجلسات" icon={{ name: "opacity", color: "#2A7FFF" }} titleStyle={styles.tabText} />
         <Tab.Item title="ملاحظات الطبيب" icon={{ name: "description", color: "#2A7FFF" }} titleStyle={styles.tabText} />
@@ -72,53 +125,92 @@ const StaffPatientView = ({ route, navigation }) => {
       </Tab>
 
       <TabView value={tabIndex} onChange={setTabIndex}>
+
+        {/* Nutrition */}
         <TabView.Item style={styles.tabItem}>
           <ScrollView contentContainerStyle={styles.tabContent}>
             <Text style={styles.sectionTitle}>البرنامج الغذائي</Text>
-            {userRole === "NUTRITIONIST" ? (
-// في صفحة PatientProfile
-<Button 
-  title="تعديل البرنامج" 
-  onPress={() => {
-    // اطبع كائن المريض كامل عشان نشوف شو جواته
-    console.log("بيانات المريض كاملة:", patient); 
-    
-    // جرب ابحث عن حقل اسمه patient_id أو id داخل كائن المريض
-    const actualId = patient?.patient_id || patient?.id; 
-    
-    navigation.navigate("NutritionistTable", { patientId: actualId });
-  }} 
-/>
-            ) : (
-              <Text>عرض البرنامج الغذائي للمريض فقط</Text>
+
+            {userRole === "NUTRITIONIST" && patient && (
+              <Button
+                title="تعديل البرنامج"
+                buttonStyle={styles.addButton}
+                onPress={() =>
+                  navigation.navigate("NutritionistTable", {
+                    patientId: patient.patient_id
+                  })
+                }
+              />
             )}
+
+            {nutritionPlan ? (
+              <View style={styles.nutritionCard}>
+                <Text style={styles.mealType}>{nutritionPlan.title || "برنامج غذائي"}</Text>
+
+                <Text style={styles.mealContent}>
+                  <Text style={styles.bold}>الوصف: </Text>
+                  {nutritionPlan.description || "لا يوجد وصف"}
+                </Text>
+
+                <Text style={styles.mealContent}>
+                  <Text style={styles.bold}>المسموحات: </Text>
+                  {nutritionPlan.allowedItems || "لا يوجد"}
+                </Text>
+
+                <Text style={styles.mealContent}>
+                  <Text style={styles.bold}>الممنوعات: </Text>
+                  {nutritionPlan.forbiddenItems || "لا يوجد"}
+                </Text>
+
+                <Text style={styles.mealContent}>
+                  <Text style={styles.bold}>الفطور: </Text>
+                  {nutritionPlan.breakfast || "غير محدد"}
+                </Text>
+
+                <Text style={styles.mealContent}>
+                  <Text style={styles.bold}>الغداء: </Text>
+                  {nutritionPlan.lunch || "غير محدد"}
+                </Text>
+
+                <Text style={styles.mealContent}>
+                  <Text style={styles.bold}>العشاء: </Text>
+                  {nutritionPlan.dinner || "غير محدد"}
+                </Text>
+
+                {nutritionPlan.mealNotes && (
+                  <View style={styles.notesBox}>
+                    <Text style={styles.mealNotes}>📝 {nutritionPlan.mealNotes}</Text>
+                  </View>
+                )}
+              </View>
+            ) : (
+              <Text style={styles.infoText}>لا يوجد برنامج غذائي</Text>
+            )}
+
           </ScrollView>
         </TabView.Item>
 
+        {/* Sessions */}
         <TabView.Item style={styles.tabItem}>
           <ScrollView contentContainerStyle={styles.tabContent}>
             <Text style={styles.sectionTitle}>بيانات الجلسات</Text>
-            {userRole === "NURSE" ? (
-              <Button title="إضافة بيانات جلسة" buttonStyle={styles.addButton} onPress={() => navigation.navigate("NurseSessionInput", { patientId })} />
-            ) : (
-              <Text>مراقبة أوزان المريض قبل وبعد الجلسة</Text>
-            )}
           </ScrollView>
         </TabView.Item>
 
+        {/* Notes */}
         <TabView.Item style={styles.tabItem}>
           <View style={styles.tabContent}>
             <Text style={styles.sectionTitle}>ملاحظات الطبيب</Text>
-            <Text>هنا تظهر تقارير الطبيب الموجهة للطاقم</Text>
           </View>
         </TabView.Item>
 
+        {/* Labs */}
         <TabView.Item style={styles.tabItem}>
           <ScrollView contentContainerStyle={styles.tabContent}>
             <Text style={styles.sectionTitle}>الفحوصات</Text>
-            <Text>هنا تظهر فحوصات المريض</Text>
           </ScrollView>
         </TabView.Item>
+
       </TabView>
     </View>
   );
@@ -128,8 +220,9 @@ export default StaffPatientView;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F0F2F5" },
-  headerCard: { backgroundColor: "#fff", padding: 20, marginHorizontal: 15, marginTop: 15, borderRadius: 20, elevation: 4, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 10 },
-  headerTitle: { fontSize: 22, fontWeight: "800", textAlign: "right", marginBottom: 15, color: "#1A1A1A" },
+  loadingContainer: { flex: 1, justifyContent: "center" },
+  headerCard: { backgroundColor: "#fff", padding: 20, marginHorizontal: 15, marginTop: 15, borderRadius: 20, elevation: 4 },
+  headerTitle: { fontSize: 22, fontWeight: "800", textAlign: "right", marginBottom: 15 },
   infoRow: { flexDirection: "row-reverse", justifyContent: "space-between", flexWrap: "wrap", alignItems: "center" },
   infoValue: { fontSize: 15, fontWeight: "700", color: "#2A7FFF", backgroundColor: "#E0EBFF", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, marginVertical: 4 },
   infoText: { fontSize: 16, color: "#FF4D4D", textAlign: "center", marginVertical: 10 },
@@ -137,6 +230,12 @@ const styles = StyleSheet.create({
   tabText: { fontSize: 12, color: "#2A7FFF", fontWeight: "700", textAlign: "center" },
   tabItem: { width: "100%", backgroundColor: "#F0F2F5" },
   tabContent: { padding: 20, alignItems: "center", paddingTop: 40 },
-  sectionTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 25, color: "#333", textAlign: "center" },
-  addButton: { backgroundColor: "#2A7FFF", borderRadius: 12, paddingHorizontal: 35, paddingVertical: 15, elevation: 2 }
+  sectionTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 25, textAlign: "center" },
+  addButton: { backgroundColor: "#2A7FFF", borderRadius: 12, paddingHorizontal: 35, paddingVertical: 15 },
+  nutritionCard: { width: "100%", backgroundColor: "#fff", borderRadius: 15, padding: 15, marginVertical: 10 },
+  mealType: { fontSize: 18, fontWeight: "bold", marginBottom: 10, textAlign: "right" },
+  mealContent: { fontSize: 15, marginBottom: 6, textAlign: "right" },
+  bold: { fontWeight: "bold" },
+  notesBox: { marginTop: 10, backgroundColor: "#E8F0FE", padding: 10, borderRadius: 8 },
+  mealNotes: { fontSize: 14, fontStyle: "italic", textAlign: "right" }
 });
