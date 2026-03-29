@@ -180,29 +180,42 @@ const PatientProfile = ({ route, navigation }) => {
         </TabView.Item>
 
         {/* Sessions */}
-        <TabView.Item style={styles.tabItem}>
-          <ScrollView contentContainerStyle={styles.tabContent}>
-            <Text style={styles.sectionTitle}>بيانات الجلسات</Text>
-            {sessions.length > 0 ? (
-              sessions.map((session, index) => (
-                <View key={index} style={styles.sessionCard}>
-                  <Text style={styles.sessionTitle}>جلسة #{session.id}</Text>
-                  <Text style={styles.sessionText}><Text style={styles.bold}>التاريخ: </Text>{formatDate(session.date)}</Text>
-                  <Text style={styles.sessionText}><Text style={styles.bold}>وقت البدء: </Text>{session.startTime ? new Date(session.startTime).toLocaleTimeString() : "-"}</Text>
-                  <Text style={styles.sessionText}><Text style={styles.bold}>وقت الانتهاء: </Text>{session.endTime ? new Date(session.endTime).toLocaleTimeString() : "-"}</Text>
-                  <Text style={styles.sessionText}><Text style={styles.bold}>الوزن قبل: </Text>{session.weightBefore ?? "-"}</Text>
-                  <Text style={styles.sessionText}><Text style={styles.bold}>الوزن بعد: </Text>{session.weightAfter ?? "-"}</Text>
-                  <Text style={styles.sessionText}><Text style={styles.bold}>السوائل المسحوبة: </Text>{session.fluidRemoved ?? "-"} لتر</Text>
-                  <Text style={styles.sessionText}><Text style={styles.bold}>الضغط قبل: </Text>{session.bloodPressureBefore || "-"}</Text>
-                  <Text style={styles.sessionText}><Text style={styles.bold}>الضغط بعد: </Text>{session.bloodPressureAfter || "-"}</Text>
-                  {session.notes && <Text style={styles.sessionText}>📝 {session.notes}</Text>}
-                </View>
-              ))
-            ) : (
-              <Text style={styles.infoText}>لا توجد جلسات حتى الآن</Text>
-            )}
-          </ScrollView>
-        </TabView.Item>
+      {/* Sessions */}
+<TabView.Item style={styles.tabItem}>
+  <ScrollView contentContainerStyle={styles.tabContent}>
+    <Text style={styles.sectionTitle}>بيانات الجلسات</Text>
+    {sessions.length > 0 ? (
+      sessions.map((session, index) => (
+        <View key={index} style={styles.sessionCard}>
+          {/* التعديل هون: استخدمنا session_id بدل id */}
+          <Text style={styles.sessionTitle}>جلسة #{session.session_id}</Text>
+          
+          <Text style={styles.sessionText}><Text style={styles.bold}>التاريخ: </Text>{formatDate(session.date)}</Text>
+          
+          {/* التعديل هون: استخدمنا start_time و end_time */}
+          <Text style={styles.sessionText}><Text style={styles.bold}>وقت البدء: </Text>{session.start_time ? new Date(session.start_time).toLocaleTimeString() : "-"}</Text>
+          <Text style={styles.sessionText}><Text style={styles.bold}>وقت الانتهاء: </Text>{session.end_time ? new Date(session.end_time).toLocaleTimeString() : "-"}</Text>
+          
+          {/* التعديل هون: الأسماء بالـ underscore حسب الـ JSON تبعك */}
+          <Text style={styles.sessionText}><Text style={styles.bold}>الوزن قبل: </Text>{session.weight_before ?? "-"}</Text>
+          <Text style={styles.sessionText}><Text style={styles.bold}>الوزن بعد: </Text>{session.weight_after ?? "-"}</Text>
+          
+          <Text style={styles.sessionText}><Text style={styles.bold}>السوائل المسحوبة: </Text>{session.fluid_removed ?? "-"} لتر</Text>
+          
+          <Text style={styles.sessionText}><Text style={styles.bold}>الضغط قبل: </Text>{session.blood_pressure_before || "-"}</Text>
+          <Text style={styles.sessionText}><Text style={styles.bold}>الضغط بعد: </Text>{session.blood_pressure_after || "-"}</Text>
+          
+          {/* اسم الممرض اللي عمل الجلسة (إضافة حلوة) */}
+          <Text style={styles.sessionText}><Text style={styles.bold}>الممرض: </Text>{session.nurse?.full_name || "-"}</Text>
+          
+          {session.notes && <Text style={styles.sessionText}>📝 {session.notes}</Text>}
+        </View>
+      ))
+    ) : (
+      <Text style={styles.infoText}>لا توجد جلسات حتى الآن</Text>
+    )}
+  </ScrollView>
+</TabView.Item>
 
       </TabView>
     </View>

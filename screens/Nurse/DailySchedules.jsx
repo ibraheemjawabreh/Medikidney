@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react"; // ضفنا useCallback
+import React, { useState, useCallback } from "react"; 
 import { 
   View, Text, StyleSheet, FlatList, TouchableOpacity, 
   ActivityIndicator, LayoutAnimation, Platform, UIManager, ScrollView 
@@ -6,7 +6,7 @@ import {
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useFocusEffect } from '@react-navigation/native'; // ضروري للتحديث التلقائي
+import { useFocusEffect } from '@react-navigation/native'; 
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -18,7 +18,6 @@ const DailySchedules = ({ navigation }) => {
   const [expandedPatientId, setExpandedPatientId] = useState(null); 
   const [activeShift, setActiveShift] = useState(null);
 
-  // دالة جلب الشفتات من الـ API
   const fetchTodaySchedules = async () => {
     try {
       setLoading(true);
@@ -31,11 +30,10 @@ const DailySchedules = ({ navigation }) => {
 
       setShifts(response.data.shifts);
       
-      // إذا لم يتم اختيار شفت بعد، اختر أول شفت فيه مرضى
       if (!activeShift) {
         const firstActiveShift = response.data.shifts.find(s => s.patientCount > 0);
         if (firstActiveShift) setActiveShift(firstActiveShift.shiftNumber);
-        else setActiveShift(1); // افتراضي شفت 1
+        else setActiveShift(1);
       }
 
     } catch (error) {
@@ -45,7 +43,6 @@ const DailySchedules = ({ navigation }) => {
     }
   };
 
-  // استخدام useFocusEffect لتحديث البيانات كل ما ترجع للشاشة
   useFocusEffect(
     useCallback(() => {
       fetchTodaySchedules();
@@ -89,20 +86,22 @@ const DailySchedules = ({ navigation }) => {
 
         {isExpanded && (
           <View style={styles.actionRow}>
-            {/* زر الانتقال لملف المريض (Staff Profile) */}
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.profileButton]}
+            {/* تم تعطيل زر "عرض الملف" مؤقتاً لحين التأكد من الـ API والـ ID الصحيح من الباك-إند
               onPress={() => {
                 navigation.navigate("StaffPatientView", { 
-                  patientId: item.patientId 
+                  patientId: item.userId || item.patientId 
                 });
               }}
+            */}
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.disabledProfileButton]}
+              onPress={() => alert("قريباً: سيتم تفعيل عرض الملف بعد ربط الـ API الجديد")}
             >
-              <MaterialCommunityIcons name="account-details" size={20} color="#2563eb" />
-              <Text style={styles.profileButtonText}>عرض الملف</Text>
+              <MaterialCommunityIcons name="account-details" size={20} color="#94a3b8" />
+              <Text style={styles.disabledProfileButtonText}>عرض الملف</Text>
             </TouchableOpacity>
 
-            {/* زر البدء بالجلسة */}
+            {/* زر البدء بالجلسة - شغال تمام */}
             <TouchableOpacity 
               style={[
                 styles.actionButton, 
@@ -129,6 +128,7 @@ const DailySchedules = ({ navigation }) => {
     );
   };
 
+  // ... باقي كود الـ UI (نفسه بدون تغيير)
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -203,8 +203,9 @@ const styles = StyleSheet.create({
   doneText: { fontSize: 12, color: "#16a34a", fontWeight: '600' },
   actionRow: { flexDirection: "row-reverse", padding: 15, backgroundColor: "#f8fafc", borderTopWidth: 1, borderTopColor: "#e2e8f0", justifyContent: 'space-between' },
   actionButton: { flexDirection: 'row-reverse', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15, borderRadius: 10, width: '48%', justifyContent: 'center' },
-  profileButton: { backgroundColor: "#fff", borderWidth: 1, borderColor: "#dbeafe" },
-  profileButtonText: { color: "#2563eb", fontWeight: "bold", marginRight: 8 },
+  // ستايل الزر المعطل
+  disabledProfileButton: { backgroundColor: "#f1f5f9", borderWidth: 1, borderColor: "#e2e8f0" },
+  disabledProfileButtonText: { color: "#94a3b8", fontWeight: "bold", marginRight: 8 },
   sessionButton: { backgroundColor: "#2563eb" },
   disabledButton: { backgroundColor: "#cbd5e1" },
   sessionButtonText: { color: "#fff", fontWeight: "bold", marginRight: 8 },

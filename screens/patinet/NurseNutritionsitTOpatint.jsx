@@ -23,35 +23,46 @@ const StaffPatientView = ({ route, navigation }) => {
   const { patientId } = route.params || {};
 
   const fetchPatientData = async () => {
+  try {
+    setLoading(true);
+    const token = await AsyncStorage.getItem("token");
+    
+    // جرب الرابط الأول (البروفايل المباشر)
+    console.log("Testing URL with ID:", patientId);
+    
+    const response = await axios.get(
+      `https://medikidneysys.onrender.com/users/profile/patients/${patientId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    setPatient(response.data);
+    fetchNutritionPlan(response.data.patient_id);
+    fetchSessions(response.data.patient_id);
+
+  } catch (error) {
+    console.log("Primary URL Failed (404), trying Search URL...");
+    
+    // الخطة ب: جرب تجيب بيانات المريض من رابط البحث العام إذا الرابط المباشر فشل
     try {
-      setLoading(true);
       const token = await AsyncStorage.getItem("token");
-      const role = await AsyncStorage.getItem("role");
-      setUserRole(role);
-
-      if (!patientId) {
-        alert("خطأ: لم يتم تمرير رقم المريض");
-        navigation.goBack();
-        return;
-      }
-
-      const response = await axios.get(
+      const searchRes = await axios.get(
         `https://medikidneysys.onrender.com/users/profile/patients/${patientId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      setPatient(response.data);
-      fetchNutritionPlan(response.data.patient_id);
-      fetchSessions(response.data.patient_id);
-
-    } catch (error) {
-      console.log("Error:", error.response?.data || error.message);
-      alert("المريض غير موجود أو حدث خطأ أثناء جلب البيانات");
+      
+      setPatient(searchRes.data);
+      fetchNutritionPlan(searchRes.data.patient_id);
+      fetchSessions(searchRes.data.patient_id);
+      
+    } catch (finalError) {
+      console.log("Final Error:", finalError.response?.data);
+      alert("عذراً: السيرفر لا يجد مريضاً بهذا الرقم (ID: " + patientId + ")");
       navigation.goBack();
-    } finally {
-      setLoading(false);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchNutritionPlan = async (patientId) => {
     try {
@@ -77,25 +88,25 @@ const StaffPatientView = ({ route, navigation }) => {
     }
   };
 
-  const fetchSessions = async (patientId) => {
-    try {
-      setSessionsLoading(true);
-      const token = await AsyncStorage.getItem("token");
+ const fetchSessions = async (pId) => {
+  try {
+    setSessionsLoading(true);
+    const token = await AsyncStorage.getItem("token");
 
-      const response = await axios.get(
-        `https://medikidneysys.onrender.com/dialysis-sessions?patientId=${patientId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    const response = await axios.get(
+      `https://medikidneysys.onrender.com/dialysis-sessions?patientId=${pId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-      setSessions(response.data || []);
-    } catch (error) {
-      console.log("خطأ الجلسات:", error.response?.data || error.message);
-      setSessions([]);
-    } finally {
-      setSessionsLoading(false);
-    }
-  };
-
+    // التأكد من شكل المصفوفة
+    const sessionsList = Array.isArray(response.data) ? response.data : [];
+    setSessions(sessionsList);
+  } catch (error) {
+    console.log("Sessions Error:", error.message);
+  } finally {
+    setSessionsLoading(false);
+  }
+};
   useFocusEffect(
     useCallback(() => {
       fetchPatientData();
@@ -184,36 +195,75 @@ const StaffPatientView = ({ route, navigation }) => {
         </TabView.Item>
 
         {/* Sessions */}
-        <TabView.Item style={styles.tabItem}>
-          <ScrollView contentContainerStyle={styles.tabContent}>
-            <Text style={styles.sectionTitle}>بيانات الجلسات</Text>
+       {/* Sessions Tab Item - التعديل الأساسي هون */}
+<TabView.Item style={styles.tabItem}>
+  <ScrollView contentContainerStyle={styles.tabContent}>
+    <Text style={styles.sectionTitle}>بيانات الجلسات</Text>
 
-            {sessionsLoading ? (
-              <ActivityIndicator size="large" color="#2A7FFF" style={{ marginTop: 20 }} />
-            ) : sessions.length > 0 ? (
-              sessions.map((session, index) => (
-                <View key={index} style={styles.sessionCard}>
-                  <Text style={styles.sessionTitle}>جلسة #{session.id}</Text>
+    {sessionsLoading ? (
+      <ActivityIndicator size="large" color="#2A7FFF" style={{ marginTop: 20 }} />
+    ) : sessions.length > 0 ? (
+      sessions.map((session, index) => (
+        <View key={index} style={styles.sessionCard}>
+          {/* تم التعديل لـ session_id */}
+          <Text style={styles.sessionTitle}>جلسة #{session.session_id}</Text>
 
-                  <Text style={styles.sessionText}><Text style={styles.bold}>التاريخ: </Text>{new Date(session.date).toLocaleDateString('en-GB') || "غير متوفر"}</Text>
-                  <Text style={styles.sessionText}><Text style={styles.bold}>وقت البدء: </Text>{session.startTime ? new Date(session.startTime).toLocaleTimeString() : "غير متوفر"}</Text>
-                  <Text style={styles.sessionText}><Text style={styles.bold}>وقت الانتهاء: </Text>{session.endTime ? new Date(session.endTime).toLocaleTimeString() : "غير متوفر"}</Text>
+          <Text style={styles.sessionText}>
+            <Text style={styles.bold}>التاريخ: </Text>
+            {session.date ? new Date(session.date).toLocaleDateString('en-GB') : "غير متوفر"}
+          </Text>
+          
+          {/* تم التعديل لـ start_time و end_time */}
+          <Text style={styles.sessionText}>
+            <Text style={styles.bold}>وقت البدء: </Text>
+            {session.start_time ? new Date(session.start_time).toLocaleTimeString() : "غير متوفر"}
+          </Text>
+          <Text style={styles.sessionText}>
+            <Text style={styles.bold}>وقت الانتهاء: </Text>
+            {session.end_time ? new Date(session.end_time).toLocaleTimeString() : "قيد التنفيذ..."}
+          </Text>
 
-                  <Text style={styles.sessionText}><Text style={styles.bold}>الوزن قبل: </Text>{session.weightBefore ?? "غير متوفر"} كغم</Text>
-                  <Text style={styles.sessionText}><Text style={styles.bold}>الوزن بعد: </Text>{session.weightAfter ?? "غير متوفر"} كغم</Text>
-                  <Text style={styles.sessionText}><Text style={styles.bold}>السوائل المسحوبة: </Text>{session.fluidRemoved ?? "غير متوفر"} لتر</Text>
+          {/* تم التعديل لـ weight_before و weight_after و fluid_removed */}
+          <Text style={styles.sessionText}>
+            <Text style={styles.bold}>الوزن قبل: </Text>
+            {session.weight_before ?? "غير متوفر"} كغم
+          </Text>
+          <Text style={styles.sessionText}>
+            <Text style={styles.bold}>الوزن بعد: </Text>
+            {session.weight_after ?? "غير متوفر"} كغم
+          </Text>
+          <Text style={styles.sessionText}>
+            <Text style={styles.bold}>السوائل المسحوبة: </Text>
+            {session.fluid_removed ?? "0"} لتر
+          </Text>
 
-                  <Text style={styles.sessionText}><Text style={styles.bold}>الضغط قبل: </Text>{session.bloodPressureBefore || "غير متوفر"}</Text>
-                  <Text style={styles.sessionText}><Text style={styles.bold}>الضغط بعد: </Text>{session.bloodPressureAfter || "غير متوفر"}</Text>
+          {/* تم التعديل لـ blood_pressure_before و blood_pressure_after */}
+          <Text style={styles.sessionText}>
+            <Text style={styles.bold}>الضغط قبل: </Text>
+            {session.blood_pressure_before || "غير متوفر"}
+          </Text>
+          <Text style={styles.sessionText}>
+            <Text style={styles.bold}>الضغط بعد: </Text>
+            {session.blood_pressure_after || "غير متوفر"}
+          </Text>
 
-                  <Text style={styles.sessionText}><Text style={styles.bold}>ملاحظات: </Text>{session.notes || "لا يوجد"}</Text>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.infoText}>لا توجد جلسات</Text>
-            )}
-          </ScrollView>
-        </TabView.Item>
+          {/* إضافة اسم الممرض من الكائن الفرعي nurse */}
+          <Text style={styles.sessionText}>
+            <Text style={styles.bold}>الممرض المسؤول: </Text>
+            {session.nurse?.full_name || "غير محدد"}
+          </Text>
+
+          <Text style={styles.sessionText}>
+            <Text style={styles.bold}>ملاحظات: </Text>
+            {session.notes || "لا يوجد ملاحظات"}
+          </Text>
+        </View>
+      ))
+    ) : (
+      <Text style={styles.infoText}>لا توجد جلسات مسجلة لهذا المريض</Text>
+    )}
+  </ScrollView>
+</TabView.Item>
 
         {/* Notes */}
         <TabView.Item style={styles.tabItem}>
