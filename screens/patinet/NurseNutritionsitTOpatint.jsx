@@ -18,6 +18,7 @@ const StaffPatientView = ({ route, navigation }) => {
   const [userRole, setUserRole] = useState("");
   const [nutritionPlan, setNutritionPlan] = useState(null);
 
+
   const { patientId } = route.params || {};
 
   const fetchPatientData = async () => {
@@ -72,7 +73,8 @@ const StaffPatientView = ({ route, navigation }) => {
       setNutritionPlan(fixedData.length > 0 ? fixedData[0] : null);
 
     } catch (error) {
-      console.log("Error fetching nutrition plan:", error.response?.data || error.message);
+        console.log("تفاصيل خطأ الممرض:", error.response?.status, error.response?.data);
+    //   console.log("Error fetching nutrition plan:", error.response?.data || error.message);
       setNutritionPlan(null);
     }
   };
@@ -194,6 +196,15 @@ const StaffPatientView = ({ route, navigation }) => {
         <TabView.Item style={styles.tabItem}>
           <ScrollView contentContainerStyle={styles.tabContent}>
             <Text style={styles.sectionTitle}>بيانات الجلسات</Text>
+            <Button
+                title={"ادخال بيانات الجلسة"}
+                buttonStyle={styles.addButton}
+                onPress={() =>
+                  navigation.navigate("NurseTasks", {
+                    patientId: patient.patient_id
+                  })
+                }
+            />
           </ScrollView>
         </TabView.Item>
 
