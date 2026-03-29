@@ -3,8 +3,10 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
 
-import SearchPatient from "../patinet/searchPatinet"; 
+// استيراد الصفحة الجديدة (تأكد من صحة المسار لديك)
+import DailySchedules from "../Nurse/DailySchedules"; 
 import ProfileSettingsScreen from "../SettingsWithProfile/SettingWithProfile";
+import SearchPatient from "../patinet/searchPatinet"; // خليناها كخيار ثانوي
 
 const Tab = createBottomTabNavigator();
 
@@ -12,19 +14,18 @@ const NursePages = () => {
   return (
     <View style={styles.container}>
       <Tab.Navigator
+        initialRouteName="Schedules" // جعل جدول الجلسات هو الصفحة الأولى
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarStyle: styles.tabBar,
-          tabBarActiveTintColor: "#382120", 
+          tabBarActiveTintColor: "#2563eb", // لون أزرق طبي احترافي
           tabBarInactiveTintColor: "#9CA3AF",
           tabBarLabelStyle: styles.tabLabel,
           tabBarIcon: ({ color, focused }) => {
             let iconName;
 
-            if (route.name === "Profile") {
-              iconName = focused ? "person" : "person-outline";
-            } else if (route.name === "Weight") {
-              iconName = focused ? "stats-chart" : "stats-chart-outline";
+            if (route.name === "Schedules") {
+              iconName = focused ? "calendar" : "calendar-outline";
             } else if (route.name === "Search") {
               iconName = focused ? "search" : "search-outline";
             } else if (route.name === "Settings") {
@@ -35,11 +36,21 @@ const NursePages = () => {
           },
         })}
       >
+        {/* الصفحة الأساسية الجديدة: جدول الجلسات */}
+        <Tab.Screen
+          name="Schedules"
+          component={DailySchedules}
+          options={{ title: "جلسات اليوم" }}
+        />
+
+        {/* صفحة البحث: أصبحت اختيارية للممرض */}
         <Tab.Screen
           name="Search"
           component={SearchPatient}
-          options={{ title: "بحث" }}
+          options={{ title: "بحث عن مريض" }}
         />
+
+        {/* صفحة الإعدادات */}
         <Tab.Screen
           name="Settings"
           component={ProfileSettingsScreen}
