@@ -18,6 +18,8 @@ const StaffPatientView = ({ route, navigation }) => {
   const [userRole, setUserRole] = useState("");
   const [nutritionPlan, setNutritionPlan] = useState(null);
 
+  const [sessions, setSessions] = useState([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
 
   const { patientId } = route.params || {};
 
@@ -42,8 +44,8 @@ const StaffPatientView = ({ route, navigation }) => {
 
       setPatient(response.data);
 
-     
       fetchNutritionPlan(response.data.patient_id);
+      fetchSessions(response.data.patient_id);
 
     } catch (error) {
       console.log("Error:", error.response?.data || error.message);
@@ -73,9 +75,31 @@ const StaffPatientView = ({ route, navigation }) => {
       setNutritionPlan(fixedData.length > 0 ? fixedData[0] : null);
 
     } catch (error) {
-        console.log("تفاصيل خطأ الممرض:", error.response?.status, error.response?.data);
-    //   console.log("Error fetching nutrition plan:", error.response?.data || error.message);
+      console.log("تفاصيل خطأ الممرض:", error.response?.status, error.response?.data);
       setNutritionPlan(null);
+    }
+  };
+
+  const fetchSessions = async (patientId) => {
+    try {
+      setSessionsLoading(true);
+
+      const token = await AsyncStorage.getItem("token");
+
+      const response = await axios.get(
+        `https://medikidneysys.onrender.com/dialysis-sessions?patientId=${patientId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setSessions(response.data || []);
+
+    } catch (error) {
+      console.log("خطأ الجلسات:", error.response?.data || error.message);
+      setSessions([]);
+    } finally {
+      setSessionsLoading(false);
     }
   };
 
@@ -96,7 +120,6 @@ const StaffPatientView = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
 
-      {/* Header */}
       <View style={styles.headerCard}>
         <Text style={styles.headerTitle}>بيانات المريض</Text>
 
@@ -113,14 +136,13 @@ const StaffPatientView = ({ route, navigation }) => {
         )}
       </View>
 
-      {/* Tabs */}
       <Tab
         value={tabIndex}
         onChange={setTabIndex}
         scrollable
         indicatorStyle={styles.indicator}
       >
-        <Tab.Item title="الغذاء" icon={{ name: "restaurant", color: "#2A7FFF" }} titleStyle={styles.tabText} />
+        <Tab.Item title="جدول التغذية" icon={{ name: "restaurant", color: "#2A7FFF" }} titleStyle={styles.tabText} />
         <Tab.Item title="الجلسات" icon={{ name: "opacity", color: "#2A7FFF" }} titleStyle={styles.tabText} />
         <Tab.Item title="ملاحظات الطبيب" icon={{ name: "description", color: "#2A7FFF" }} titleStyle={styles.tabText} />
         <Tab.Item title="الفحوصات" icon={{ name: "science", color: "#2A7FFF" }} titleStyle={styles.tabText} />
@@ -149,35 +171,12 @@ const StaffPatientView = ({ route, navigation }) => {
               <View style={styles.nutritionCard}>
                 <Text style={styles.mealType}>{nutritionPlan.title || "برنامج غذائي"}</Text>
 
-                <Text style={styles.mealContent}>
-                  <Text style={styles.bold}>الوصف: </Text>
-                  {nutritionPlan.description || "لا يوجد وصف"}
-                </Text>
-
-                <Text style={styles.mealContent}>
-                  <Text style={styles.bold}>المسموحات: </Text>
-                  {nutritionPlan.allowedItems || "لا يوجد"}
-                </Text>
-
-                <Text style={styles.mealContent}>
-                  <Text style={styles.bold}>الممنوعات: </Text>
-                  {nutritionPlan.forbiddenItems || "لا يوجد"}
-                </Text>
-
-                <Text style={styles.mealContent}>
-                  <Text style={styles.bold}>الفطور: </Text>
-                  {nutritionPlan.breakfast || "غير محدد"}
-                </Text>
-
-                <Text style={styles.mealContent}>
-                  <Text style={styles.bold}>الغداء: </Text>
-                  {nutritionPlan.lunch || "غير محدد"}
-                </Text>
-
-                <Text style={styles.mealContent}>
-                  <Text style={styles.bold}>العشاء: </Text>
-                  {nutritionPlan.dinner || "غير محدد"}
-                </Text>
+                <Text style={styles.mealContent}><Text style={styles.bold}>الوصف: </Text>{nutritionPlan.description || "لا يوجد وصف"}</Text>
+                <Text style={styles.mealContent}><Text style={styles.bold}>المسموحات: </Text>{nutritionPlan.allowedItems || "لا يوجد"}</Text>
+                <Text style={styles.mealContent}><Text style={styles.bold}>الممنوعات: </Text>{nutritionPlan.forbiddenItems || "لا يوجد"}</Text>
+                <Text style={styles.mealContent}><Text style={styles.bold}>الفطور: </Text>{nutritionPlan.breakfast || "غير محدد"}</Text>
+                <Text style={styles.mealContent}><Text style={styles.bold}>الغداء: </Text>{nutritionPlan.lunch || "غير محدد"}</Text>
+                <Text style={styles.mealContent}><Text style={styles.bold}>العشاء: </Text>{nutritionPlan.dinner || "غير محدد"}</Text>
 
                 {nutritionPlan.mealNotes && (
                   <View style={styles.notesBox}>
@@ -188,7 +187,6 @@ const StaffPatientView = ({ route, navigation }) => {
             ) : (
               <Text style={styles.infoText}>لا يوجد برنامج غذائي</Text>
             )}
-
           </ScrollView>
         </TabView.Item>
 
@@ -196,15 +194,44 @@ const StaffPatientView = ({ route, navigation }) => {
         <TabView.Item style={styles.tabItem}>
           <ScrollView contentContainerStyle={styles.tabContent}>
             <Text style={styles.sectionTitle}>بيانات الجلسات</Text>
+
             <Button
-                title={"ادخال بيانات الجلسة"}
-                buttonStyle={styles.addButton}
-                onPress={() =>
-                  navigation.navigate("NurseTasks", {
-                    patientId: patient.patient_id
-                  })
-                }
+              title={"ادخال بيانات الجلسة"}
+              buttonStyle={styles.addButton}
+              onPress={() =>
+                navigation.navigate("NurseTasks", {
+                  patientId: patient.patient_id
+                })
+              }
             />
+
+            {sessionsLoading ? (
+              <ActivityIndicator size="large" color="#2A7FFF" style={{ marginTop: 20 }} />
+            ) : sessions.length > 0 ? (
+              sessions.map((session, index) => (
+                <View key={index} style={styles.sessionCard}>
+
+                  <Text style={styles.sessionTitle}>جلسة #{session.id}</Text>
+
+                  <Text style={styles.sessionText}><Text style={styles.bold}>التاريخ: </Text>{new Date(session.date).toLocaleDateString('en-GB') || "غير متوفر"}</Text>
+                  <Text style={styles.sessionText}><Text style={styles.bold}>وقت البدء: </Text>{session.startTime ? new Date(session.startTime).toLocaleTimeString() : "غير متوفر"}</Text>
+                  <Text style={styles.sessionText}><Text style={styles.bold}>وقت الانتهاء: </Text>{session.endTime ? new Date(session.endTime).toLocaleTimeString() : "غير متوفر"}</Text>
+
+                  <Text style={styles.sessionText}><Text style={styles.bold}>الوزن قبل: </Text>{session.weightBefore ?? "غير متوفر"} كغم</Text>
+                  <Text style={styles.sessionText}><Text style={styles.bold}>الوزن بعد: </Text>{session.weightAfter ?? "غير متوفر"} كغم</Text>
+                  <Text style={styles.sessionText}><Text style={styles.bold}>السوائل المسحوبة: </Text>{session.fluidRemoved ?? "غير متوفر"} لتر</Text>
+
+                  <Text style={styles.sessionText}><Text style={styles.bold}>الضغط قبل: </Text>{session.bloodPressureBefore || "غير متوفر"}</Text>
+                  <Text style={styles.sessionText}><Text style={styles.bold}>الضغط بعد: </Text>{session.bloodPressureAfter || "غير متوفر"}</Text>
+
+                  <Text style={styles.sessionText}><Text style={styles.bold}>ملاحظات: </Text>{session.notes || "لا يوجد"}</Text>
+
+                </View>
+              ))
+            ) : (
+              <Text style={styles.infoText}>لا توجد جلسات</Text>
+            )}
+
           </ScrollView>
         </TabView.Item>
 
@@ -244,6 +271,11 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 25, textAlign: "center" },
   addButton: { backgroundColor: "#2A7FFF", borderRadius: 12, paddingHorizontal: 35, paddingVertical: 15 },
   nutritionCard: { width: "100%", backgroundColor: "#fff", borderRadius: 15, padding: 15, marginVertical: 10 },
+
+  sessionCard: { width: "100%", backgroundColor: "#fff", borderRadius: 15, padding: 15, marginVertical: 10, elevation: 3 },
+  sessionTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10, textAlign: "right", color: "#2A7FFF" },
+  sessionText: { fontSize: 14, marginBottom: 5, textAlign: "right" },
+
   mealType: { fontSize: 18, fontWeight: "bold", marginBottom: 10, textAlign: "right" },
   mealContent: { fontSize: 15, marginBottom: 6, textAlign: "right" },
   bold: { fontWeight: "bold" },
