@@ -17,7 +17,6 @@ const StaffPatientView = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState("");
   const [nutritionPlan, setNutritionPlan] = useState(null);
-
   const [sessions, setSessions] = useState([]);
   const [sessionsLoading, setSessionsLoading] = useState(false);
 
@@ -26,7 +25,6 @@ const StaffPatientView = ({ route, navigation }) => {
   const fetchPatientData = async () => {
     try {
       setLoading(true);
-
       const token = await AsyncStorage.getItem("token");
       const role = await AsyncStorage.getItem("role");
       setUserRole(role);
@@ -43,7 +41,6 @@ const StaffPatientView = ({ route, navigation }) => {
       );
 
       setPatient(response.data);
-
       fetchNutritionPlan(response.data.patient_id);
       fetchSessions(response.data.patient_id);
 
@@ -83,18 +80,14 @@ const StaffPatientView = ({ route, navigation }) => {
   const fetchSessions = async (patientId) => {
     try {
       setSessionsLoading(true);
-
       const token = await AsyncStorage.getItem("token");
 
       const response = await axios.get(
         `https://medikidneysys.onrender.com/dialysis-sessions?patientId=${patientId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setSessions(response.data || []);
-
     } catch (error) {
       console.log("خطأ الجلسات:", error.response?.data || error.message);
       setSessions([]);
@@ -195,22 +188,11 @@ const StaffPatientView = ({ route, navigation }) => {
           <ScrollView contentContainerStyle={styles.tabContent}>
             <Text style={styles.sectionTitle}>بيانات الجلسات</Text>
 
-            <Button
-              title={"ادخال بيانات الجلسة"}
-              buttonStyle={styles.addButton}
-              onPress={() =>
-                navigation.navigate("NurseTasks", {
-                  patientId: patient.patient_id
-                })
-              }
-            />
-
             {sessionsLoading ? (
               <ActivityIndicator size="large" color="#2A7FFF" style={{ marginTop: 20 }} />
             ) : sessions.length > 0 ? (
               sessions.map((session, index) => (
                 <View key={index} style={styles.sessionCard}>
-
                   <Text style={styles.sessionTitle}>جلسة #{session.id}</Text>
 
                   <Text style={styles.sessionText}><Text style={styles.bold}>التاريخ: </Text>{new Date(session.date).toLocaleDateString('en-GB') || "غير متوفر"}</Text>
@@ -225,13 +207,11 @@ const StaffPatientView = ({ route, navigation }) => {
                   <Text style={styles.sessionText}><Text style={styles.bold}>الضغط بعد: </Text>{session.bloodPressureAfter || "غير متوفر"}</Text>
 
                   <Text style={styles.sessionText}><Text style={styles.bold}>ملاحظات: </Text>{session.notes || "لا يوجد"}</Text>
-
                 </View>
               ))
             ) : (
               <Text style={styles.infoText}>لا توجد جلسات</Text>
             )}
-
           </ScrollView>
         </TabView.Item>
 
