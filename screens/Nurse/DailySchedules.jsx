@@ -1,67 +1,83 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react"; // ضفنا useCallback
 import { 
   View, Text, StyleSheet, FlatList, TouchableOpacity, 
-  ActivityIndicator, Animated, LayoutAnimation, Platform, UIManager 
+  ActivityIndicator, LayoutAnimation, Platform, UIManager, ScrollView 
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useFocusEffect } from '@react-navigation/native'; // ضروري للتحديث التلقائي
 
-// تفعيل الأنيميشن للـ Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const DailySchedules = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
-  const [schedules, setSchedules] = useState([]);
-  const [expandedId, setExpandedId] = useState(null); // لتحديد أي مريض تم الضغط عليه
+  const [shifts, setShifts] = useState([]);
+  const [expandedPatientId, setExpandedPatientId] = useState(null); 
+  const [activeShift, setActiveShift] = useState(null);
 
+  // دالة جلب الشفتات من الـ API
   const fetchTodaySchedules = async () => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem("token");
-      const today = new Date().toISOString().split('T')[0];
 
       const response = await axios.get(
-        "https://medikidneysys.onrender.com/schedules",
+        "https://medikidneysys.onrender.com/dialysis-scheduling/nurse/today",
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // فلترة مواعيد اليوم فقط
-      const todayData = response.data.filter(item => item.date === today);
-      setSchedules(todayData);
+      setShifts(response.data.shifts);
+      
+      // إذا لم يتم اختيار شفت بعد، اختر أول شفت فيه مرضى
+      if (!activeShift) {
+        const firstActiveShift = response.data.shifts.find(s => s.patientCount > 0);
+        if (firstActiveShift) setActiveShift(firstActiveShift.shiftNumber);
+        else setActiveShift(1); // افتراضي شفت 1
+      }
+
     } catch (error) {
-      console.log(error);
+      console.log("Error fetching shifts:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchTodaySchedules();
-  }, []);
+  // استخدام useFocusEffect لتحديث البيانات كل ما ترجع للشاشة
+  useFocusEffect(
+    useCallback(() => {
+      fetchTodaySchedules();
+    }, [activeShift])
+  );
 
   const toggleExpand = (id) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpandedId(expandedId === id ? null : id);
+    setExpandedPatientId(expandedPatientId === id ? null : id);
   };
 
-  const renderItem = ({ item }) => {
-    const isExpanded = expandedId === item.id;
+  const renderPatient = ({ item }) => {
+    const isExpanded = expandedPatientId === item.patientId;
 
     return (
       <View style={[styles.card, isExpanded && styles.expandedCard]}>
         <TouchableOpacity 
           style={styles.cardHeader} 
-          onPress={() => toggleExpand(item.id)}
+          onPress={() => toggleExpand(item.patientId)}
           activeOpacity={0.7}
         >
           <View style={styles.patientInfo}>
-            <Text style={styles.patientName}>{item.patient_name || `مريض رقم ${item.patient_id}`}</Text>
-            <View style={styles.timeBadge}>
-              <Text style={styles.timeText}>{item.startTime || "08:00"}</Text>
-              <MaterialCommunityIcons name="clock-outline" size={14} color="#64748b" />
+            <Text style={styles.patientName}>{item.patientName}</Text>
+            <View style={styles.badgeRow}>
+                <View style={styles.machineBadge}>
+                    <Text style={styles.machineText}>ماكينة: {item.machineNumber}</Text>
+                </View>
+                {item.hasSessionToday && (
+                    <View style={styles.doneBadge}>
+                        <Text style={styles.doneText}>تمت الجلسة</Text>
+                    </View>
+                )}
             </View>
           </View>
           <MaterialCommunityIcons 
@@ -73,25 +89,39 @@ const DailySchedules = ({ navigation }) => {
 
         {isExpanded && (
           <View style={styles.actionRow}>
-            {/* الزر الأول: ملف المريض */}
+            {/* زر الانتقال لملف المريض (Staff Profile) */}
             <TouchableOpacity 
               style={[styles.actionButton, styles.profileButton]}
-              onPress={() => navigation.navigate("PatientProfile", { patientId: item.patient_id })}
+              onPress={() => {
+                navigation.navigate("StaffPatientView", { 
+                  patientId: item.patientId 
+                });
+              }}
             >
               <MaterialCommunityIcons name="account-details" size={20} color="#2563eb" />
               <Text style={styles.profileButtonText}>عرض الملف</Text>
             </TouchableOpacity>
 
-            {/* الزر الثاني: بيانات الجلسة */}
+            {/* زر البدء بالجلسة */}
             <TouchableOpacity 
-              style={[styles.actionButton, styles.sessionButton]}
+              style={[
+                styles.actionButton, 
+                item.hasSessionToday ? styles.disabledButton : styles.sessionButton
+              ]}
+              disabled={item.hasSessionToday}
               onPress={() => navigation.navigate("NurseTasks", { 
-                patientId: item.patient_id,
-                scheduleId: item.id 
+                patientId: item.patientId,
+                scheduleId: item.scheduleId 
               })}
             >
-              <MaterialCommunityIcons name="play-circle" size={20} color="#fff" />
-              <Text style={styles.sessionButtonText}>بدء الجلسة</Text>
+              <MaterialCommunityIcons 
+                name={item.hasSessionToday ? "check-circle" : "play-circle"} 
+                size={20} 
+                color="#fff" 
+              />
+              <Text style={styles.sessionButtonText}>
+                {item.hasSessionToday ? "تم التسجيل" : "بدء الجلسة"}
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -102,19 +132,43 @@ const DailySchedules = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>جلسات اليوم</Text>
+        <Text style={styles.headerTitle}>جدول الشفتات</Text>
         <Text style={styles.headerDate}>{new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' })}</Text>
       </View>
 
-      {loading ? (
+      <View style={styles.shiftSelector}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{paddingHorizontal: 15}}>
+          {shifts.map((shift) => (
+            <TouchableOpacity 
+              key={shift.shiftNumber}
+              style={[styles.shiftTab, activeShift === shift.shiftNumber && styles.activeShiftTab]}
+              onPress={() => setActiveShift(shift.shiftNumber)}
+            >
+              <Text style={[styles.shiftTabText, activeShift === shift.shiftNumber && styles.activeShiftTabText]}>
+                شفت {shift.shiftNumber}
+              </Text>
+              <View style={[styles.countBadge, activeShift === shift.shiftNumber && styles.activeCountBadge]}>
+                <Text style={styles.countText}>{shift.patientCount}</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      {loading && shifts.length === 0 ? (
         <ActivityIndicator size="large" color="#2563eb" style={{ marginTop: 50 }} />
       ) : (
         <FlatList
-          data={schedules}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderItem}
+          data={shifts.find(s => s.shiftNumber === activeShift)?.patients || []}
+          keyExtractor={(item) => item.scheduleId.toString()}
+          renderItem={renderPatient}
           contentContainerStyle={styles.listContent}
-          ListEmptyComponent={<Text style={styles.emptyText}>لا توجد مواعيد مجدولة اليوم</Text>}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+                <MaterialCommunityIcons name="account-off-outline" size={60} color="#cbd5e1" />
+                <Text style={styles.emptyText}>لا يوجد مرضى في هذا الشفت</Text>
+            </View>
+          }
         />
       )}
     </View>
@@ -125,53 +179,35 @@ export default DailySchedules;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
-  header: { padding: 25, backgroundColor: "#fff", borderBottomWidth: 1, borderBottomColor: "#e2e8f0" },
-  headerTitle: { fontSize: 24, fontWeight: "bold", color: "#1e293b", textAlign: 'right' },
-  headerDate: { fontSize: 14, color: "#64748b", textAlign: 'right', marginTop: 5 },
+  header: { padding: 20, backgroundColor: "#fff", borderBottomWidth: 1, borderBottomColor: "#f1f5f9" },
+  headerTitle: { fontSize: 22, fontWeight: "bold", color: "#1e293b", textAlign: 'right' },
+  headerDate: { fontSize: 14, color: "#64748b", textAlign: 'right', marginTop: 4 },
+  shiftSelector: { backgroundColor: '#fff', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
+  shiftTab: { flexDirection: 'row-reverse', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#f1f5f9', marginLeft: 10 },
+  activeShiftTab: { backgroundColor: '#2563eb' },
+  shiftTabText: { fontSize: 14, fontWeight: '600', color: '#64748b' },
+  activeShiftTabText: { color: '#fff' },
+  countBadge: { backgroundColor: '#cbd5e1', borderRadius: 10, paddingHorizontal: 6, marginRight: 8 },
+  activeCountBadge: { backgroundColor: 'rgba(255,255,255,0.3)' },
+  countText: { fontSize: 11, fontWeight: 'bold', color: '#1e293b' },
   listContent: { padding: 15 },
-  card: { 
-    backgroundColor: "#fff", 
-    borderRadius: 16, 
-    marginBottom: 12, 
-    elevation: 2, 
-    shadowColor: "#000", 
-    shadowOpacity: 0.05, 
-    shadowRadius: 10,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#f1f5f9'
-  },
+  card: { backgroundColor: "#fff", borderRadius: 16, marginBottom: 12, elevation: 2, borderWidth: 1, borderColor: '#f1f5f9', overflow: 'hidden' },
   expandedCard: { borderColor: '#2563eb', borderWidth: 1.5 },
-  cardHeader: { 
-    flexDirection: "row-reverse", 
-    justifyContent: "space-between", 
-    alignItems: "center", 
-    padding: 18 
-  },
-  patientInfo: { alignItems: 'flex-end' },
-  patientName: { fontSize: 17, fontWeight: "700", color: "#334155" },
-  timeBadge: { flexDirection: 'row', alignItems: 'center', marginTop: 4, backgroundColor: '#f1f5f9', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
-  timeText: { fontSize: 12, color: "#64748b", marginRight: 4, fontWeight: '600' },
-  actionRow: { 
-    flexDirection: "row-reverse", 
-    padding: 15, 
-    backgroundColor: "#f8fafc", 
-    borderTopWidth: 1, 
-    borderTopColor: "#e2e8f0",
-    justifyContent: 'space-between'
-  },
-  actionButton: { 
-    flexDirection: 'row-reverse', 
-    alignItems: 'center', 
-    paddingVertical: 10, 
-    paddingHorizontal: 15, 
-    borderRadius: 10,
-    width: '48%',
-    justifyContent: 'center'
-  },
-  profileButton: { backgroundColor: "#eff6ff", borderWidth: 1, borderColor: "#dbeafe" },
+  cardHeader: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center", padding: 18 },
+  patientInfo: { alignItems: 'flex-end', flex: 1 },
+  patientName: { fontSize: 16, fontWeight: "700", color: "#334155", marginBottom: 6 },
+  badgeRow: { flexDirection: 'row-reverse' },
+  machineBadge: { backgroundColor: '#eff6ff', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
+  machineText: { fontSize: 12, color: "#2563eb", fontWeight: '600' },
+  doneBadge: { backgroundColor: '#f0fdf4', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, marginRight: 8 },
+  doneText: { fontSize: 12, color: "#16a34a", fontWeight: '600' },
+  actionRow: { flexDirection: "row-reverse", padding: 15, backgroundColor: "#f8fafc", borderTopWidth: 1, borderTopColor: "#e2e8f0", justifyContent: 'space-between' },
+  actionButton: { flexDirection: 'row-reverse', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15, borderRadius: 10, width: '48%', justifyContent: 'center' },
+  profileButton: { backgroundColor: "#fff", borderWidth: 1, borderColor: "#dbeafe" },
   profileButtonText: { color: "#2563eb", fontWeight: "bold", marginRight: 8 },
   sessionButton: { backgroundColor: "#2563eb" },
+  disabledButton: { backgroundColor: "#cbd5e1" },
   sessionButtonText: { color: "#fff", fontWeight: "bold", marginRight: 8 },
-  emptyText: { textAlign: 'center', marginTop: 50, color: '#94a3b8' }
+  emptyContainer: { alignItems: 'center', marginTop: 80 },
+  emptyText: { textAlign: 'center', marginTop: 10, color: '#94a3b8', fontSize: 16 }
 });
