@@ -1,14 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator
-} from "react-native";
+import {View,Text,StyleSheet,ScrollView,ActivityIndicator,TouchableOpacity} from "react-native";
 import { Tab, TabView, Button } from "@rneui/base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons"; // مكتبة الأيقونات
 import { useFocusEffect } from "@react-navigation/native";
 
 const StaffPatientView = ({ route, navigation }) => {
@@ -123,6 +118,15 @@ const StaffPatientView = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.topHeader}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="chevron-forward" size={28} color="#0f172a" /> 
+        </TouchableOpacity>
+        <Text style={styles.topHeaderText}>ملف المريض</Text>
+      </View>
 
       <View style={styles.headerCard}>
         <Text style={styles.headerTitle}>بيانات المريض</Text>
@@ -290,6 +294,15 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F0F2F5" },
   loadingContainer: { flex: 1, justifyContent: "center" },
   headerCard: { backgroundColor: "#fff", padding: 20, marginHorizontal: 15, marginTop: 15, borderRadius: 20, elevation: 4 },
+  topHeader: { 
+    flexDirection: 'row-reverse', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    paddingHorizontal: 20, 
+    paddingTop: 50, 
+    paddingBottom: 15,
+    backgroundColor: '#fff'
+  },
   headerTitle: { fontSize: 22, fontWeight: "800", textAlign: "right", marginBottom: 15 },
   infoRow: { flexDirection: "row-reverse", justifyContent: "space-between", flexWrap: "wrap", alignItems: "center" },
   infoValue: { fontSize: 15, fontWeight: "700", color: "#2A7FFF", backgroundColor: "#E0EBFF", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, marginVertical: 4 },

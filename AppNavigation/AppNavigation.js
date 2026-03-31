@@ -41,7 +41,7 @@ const AppNavigator = () => {
       <Stack.Screen name="ResetPassword" component={ResetPassword} />
       <Stack.Screen name="NutritionistTable" component={NutritionistTable} />
       <Stack.Screen name="PatientProfile" component={PatientProfile} />
-      <Stack.Screen name="StaffPatientView" component={StaffPatientView} />
+      <Stack.Screen name="StaffPatientView" component={StaffPatientView} options={{ headerShown: false }}  />
       <Stack.Screen name='ShowSessions' component={ShowSessions} /> 
       <Stack.Screen name='DailySchedules' component={DailySchedules} /> 
 
