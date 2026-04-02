@@ -112,7 +112,6 @@ const PatientProfile = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
 
-      {/* Header */}
       <View style={styles.headerCard}>
         <Text style={styles.headerTitle}>ملف المريض</Text>
         <View style={styles.infoRow}>
@@ -124,7 +123,6 @@ const PatientProfile = ({ route, navigation }) => {
         </View>
       </View>
 
-      {/* Tabs */}
       <Tab
         value={tabIndex}
         onChange={setTabIndex}
@@ -139,7 +137,6 @@ const PatientProfile = ({ route, navigation }) => {
 
       <TabView value={tabIndex} onChange={setTabIndex}>
 
-        {/* Nutrition */}
         <TabView.Item style={styles.tabItem}>
           <ScrollView contentContainerStyle={styles.tabContent}>
             <Text style={styles.sectionTitle}>آخر برنامج غذائي</Text>
@@ -165,38 +162,41 @@ const PatientProfile = ({ route, navigation }) => {
           </ScrollView>
         </TabView.Item>
 
-        {/* Lab */}
         <TabView.Item style={styles.tabItem}>
           <ScrollView contentContainerStyle={styles.tabContent}>
             <Text style={styles.sectionTitle}>الفحوصات المخبرية</Text>
           </ScrollView>
         </TabView.Item>
 
-        {/* Dates */}
         <TabView.Item style={styles.tabItem}>
           <ScrollView contentContainerStyle={styles.tabContent}>
             <Text style={styles.sectionTitle}>المواعيد مع الطبيب</Text>
+              <Button
+                title="احجز موعدك "
+                buttonStyle={styles.addButton}
+                onPress={() =>
+                    navigation.navigate("DatesDoctor", {
+                        patientId: patient.patient_id
+                      })
+                  }
+              />
           </ScrollView>
         </TabView.Item>
 
-        {/* Sessions */}
-      {/* Sessions */}
+     
 <TabView.Item style={styles.tabItem}>
   <ScrollView contentContainerStyle={styles.tabContent}>
     <Text style={styles.sectionTitle}>بيانات الجلسات</Text>
     {sessions.length > 0 ? (
       sessions.map((session, index) => (
         <View key={index} style={styles.sessionCard}>
-          {/* التعديل هون: استخدمنا session_id بدل id */}
           <Text style={styles.sessionTitle}>جلسة #{session.session_id}</Text>
           
           <Text style={styles.sessionText}><Text style={styles.bold}>التاريخ: </Text>{formatDate(session.date)}</Text>
           
-          {/* التعديل هون: استخدمنا start_time و end_time */}
           <Text style={styles.sessionText}><Text style={styles.bold}>وقت البدء: </Text>{session.start_time ? new Date(session.start_time).toLocaleTimeString() : "-"}</Text>
           <Text style={styles.sessionText}><Text style={styles.bold}>وقت الانتهاء: </Text>{session.end_time ? new Date(session.end_time).toLocaleTimeString() : "-"}</Text>
           
-          {/* التعديل هون: الأسماء بالـ underscore حسب الـ JSON تبعك */}
           <Text style={styles.sessionText}><Text style={styles.bold}>الوزن قبل: </Text>{session.weight_before ?? "-"}</Text>
           <Text style={styles.sessionText}><Text style={styles.bold}>الوزن بعد: </Text>{session.weight_after ?? "-"}</Text>
           
@@ -205,7 +205,6 @@ const PatientProfile = ({ route, navigation }) => {
           <Text style={styles.sessionText}><Text style={styles.bold}>الضغط قبل: </Text>{session.blood_pressure_before || "-"}</Text>
           <Text style={styles.sessionText}><Text style={styles.bold}>الضغط بعد: </Text>{session.blood_pressure_after || "-"}</Text>
           
-          {/* اسم الممرض اللي عمل الجلسة (إضافة حلوة) */}
           <Text style={styles.sessionText}><Text style={styles.bold}>الممرض: </Text>{session.nurse?.full_name || "-"}</Text>
           
           {session.notes && <Text style={styles.sessionText}>📝 {session.notes}</Text>}
@@ -245,6 +244,7 @@ const styles = StyleSheet.create({
   sessionCard: { width: "100%", backgroundColor: "#fff", borderRadius: 15, padding: 15, marginVertical: 10, elevation: 3 },
   sessionTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10, textAlign: "right", color: "#2A7FFF" },
   sessionText: { fontSize: 14, marginBottom: 5, textAlign: "right" }
+  
 });
 
 export default PatientProfile;
