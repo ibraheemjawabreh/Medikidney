@@ -1,89 +1,206 @@
-import { Card } from "@rneui/base"
+import React, { useState, useEffect } from "react";
+import { Text, View, ScrollView, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, FlatList } from "react-native";
+import { Card } from "@rneui/themed";
 import { Picker } from "@react-native-picker/picker";
-import { useState } from "react";
-import {Text,View,TouchableOpacity,FlatList,StyleSheet}from "react-native";
-import { Button } from "@rneui/themed";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const DatesDoctor=()=>{
+const DatesDoctor = () => {
   const [selectDoctor, setSelectDoctor] = useState("");
-  const [date, setDate] = useState(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [schedule, setSchedule] = useState([]); 
+  const [appointments, setAppointments] = useState([]); 
+  const [selectedDay, setSelectedDay] = useState(null); 
+  const [loading, setLoading] = useState(false);
+  const [doctorsList, setDoctorsList] = useState([]);
 
+  // 1. جلب قائمة الأطباء عند فتح الشاشة
+  const fetchAllDoctors = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await axios.get('https://medikidneysys.onrender.com/reports/booking-doctors', {
+        params: { search: '' },
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDoctorsList(response.data);
+    } catch (error) {
+      console.log("Error Doctors List:", error.message);
+    }
+  };
 
-  return(
-    <View style={styles.container} >
-      <Text>اخحجز موعدك مع الطبيب</Text>
-      <View style={styles.Card}>
-          <Card>
-            <Card.Title>
-              الطبيب
-            </Card.Title>
-            <Picker
-              selectedValue={selectDoctor}
-              onValueChange={(value) => {
-                setSelectDoctor(value);
-                setDate(null);
-                setSelectedSlot(null);
-             }}
-
-            >
-
-          <Picker.Item label="اختر الطبيب" value="" />
-          <Picker.Item label="Ahmed" value="ahmed" />
-          <Picker.Item label="Samer" value="samer" />
-        </Picker>
-            <Card.Divider/>
-            <Text>الاسم :احمد جمعة</Text>
-            <Text> التخصص : اخصائي امراض كلى</Text>
-          </Card>
-      </View>
+  // 2. جلب جدول الطبيب المختار
+  const fetchDoctorSchedule = async (doctorId) => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      console.log("جاري جلب جدول الطبيب رقم:", doctorId);
       
-      <View>
+      const response = await axios.get(`https://medikidneysys.onrender.com/doctor-schedule`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { doctorId: doctorId }
+      });
+      
+      console.log("بيانات الجدول المستلمة:", response.data);
+      setSchedule(response.data);
+    } catch (error) {
+      console.log("Schedule Error:", error.response?.data || error.message);
+      Alert.alert("تنبيه", "لا يوجد جدول متاح لهذا الطبيب حالياً");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      </View>
+  // 3. جلب المراجعات المحجوزة بناءً على اليوم المختار
+  const fetchBookedConsultations = async (dayDate) => {
+    if (!dayDate) return;
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      console.log("طلب المراجعات للتاريخ:", dayDate);
+      
+      const response = await axios.get(`https://medikidneysys.onrender.com/clinic-consultations`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { 
+          doctorId: selectDoctor,
+          date: dayDate 
+        }
+      });
+      setAppointments(response.data);
+    } catch (error) {
+      console.log("Consultations Error 400 - فحص المعاملات:", error.response?.data);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    fetchAllDoctors();
+  }, []);
 
+  useEffect(() => {
+    if (selectDoctor) {
+      fetchDoctorSchedule(selectDoctor);
+      setSelectedDay(null);
+      setAppointments([]);
+    }
+  }, [selectDoctor]);
 
+  useEffect(() => {
+    if (selectedDay) {
+      // استخراج التاريخ الصحيح سواء كان الحقل اسمه date أو available_date
+      const dateToSend = selectedDay.date || selectedDay.available_date || selectedDay.day_date;
+      fetchBookedConsultations(dateToSend);
+    }
+  }, [selectedDay]);
 
-
+  const renderAppointment = ({ item }) => (
+    <View style={styles.apptItem}>
+      <Text style={styles.apptTime}>
+        {item.apptTime?.includes('T') ? item.apptTime.split('T')[1].substring(0, 5) : (item.apptTime || "00:00")}
+      </Text>
+      <Text style={styles.apptPatient}>{item.patientName || item.full_name || "مريض مجهول"}</Text>
+      <View style={styles.statusDot} />
     </View>
-  )
-}
+  );
 
+  return (
+    <View style={styles.container}>
+      <Text style={styles.mainHeader}>إدارة مواعيد العيادة</Text>
 
+      <Card containerStyle={styles.topCard}>
+        <Text style={styles.label}>اختر الطبيب المسؤول:</Text>
+        <Picker
+          selectedValue={selectDoctor}
+          onValueChange={(val) => setSelectDoctor(val)}
+        >
+          <Picker.Item label="-- اختر طبيباً من القائمة --" value="" />
+          {doctorsList.map((doc) => (
+            <Picker.Item 
+              key={doc.doctor_id.toString()} 
+              label={`د. ${doc.full_name}`} 
+              value={doc.doctor_id.toString()} 
+            />
+          ))}
+        </Picker>
+      </Card>
 
+      {loading && <ActivityIndicator color="#059669" size="large" style={{marginVertical: 20}} />}
 
+      {schedule && schedule.length > 0 ? (
+        <View style={[styles.section, { minHeight: 140, backgroundColor: '#f0fdf4', padding: 10, borderRadius: 15 }]}>
+          <Text style={styles.sectionTitle}>الأيام المتاحة في جدول الطبيب:</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+            {schedule.map((day, index) => {
+              // تحديد التاريخ والاسم بشكل مرن
+              const dDate = day.date || day.available_date || day.day_date;
+              const dName = day.dayName || day.day_name || "يوم";
+              
+              return (
+                <TouchableOpacity 
+                  key={index} 
+                  onPress={() => {
+                    console.log("تم اختيار يوم:", dDate);
+                    setSelectedDay(day);
+                  }}
+                  style={[
+                    styles.dayBtn, 
+                    (selectedDay?.date === dDate || selectedDay?.available_date === dDate) && styles.selectedDayBtn
+                  ]}
+                >
+                  <Text style={[styles.dayText, (selectedDay?.date === dDate || selectedDay?.available_date === dDate) && {color: '#fff'}]}>
+                    {dName}
+                  </Text>
+                  <Text style={[styles.dateText, (selectedDay?.date === dDate || selectedDay?.available_date === dDate) && {color: '#fff'}]}>
+                    {dDate}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      ) : (
+        !loading && selectDoctor !== "" && (
+          <Text style={styles.emptyError}>لا توجد أيام متاحة في جدول هذا الطبيب</Text>
+        )
+      )}
 
-export default DatesDoctor
+      {selectedDay && !loading && (
+        <View style={styles.listSection}>
+          <Text style={styles.sectionTitle}>
+            مراجعات يوم ({selectedDay.date || selectedDay.available_date}):
+          </Text>
+          <FlatList
+            data={appointments}
+            renderItem={renderAppointment}
+            keyExtractor={(item, index) => index.toString()}
+            ListEmptyComponent={<Text style={styles.empty}>لا يوجد حجوزات لهذا اليوم</Text>}
+          />
+        </View>
+      )}
+    </View>
+  );
+};
 
+export default DatesDoctor;
 
-
-const styles=StyleSheet.create({
-  container:{
-    width:'100%',
-    flex: 1,
-    backgroundColor: "#F9FAFB",
-    padding: 16
-  },
-  Card:{
-
-  }
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#f8fafc", padding: 15 },
+  mainHeader: { fontSize: 20, fontWeight: 'bold', color: '#0f172a', textAlign: 'center', marginTop: 40, marginBottom: 10 },
+  topCard: { borderRadius: 15, padding: 5, elevation: 2 },
+  label: { fontSize: 13, color: '#64748b', textAlign: 'right', marginRight: 10 },
+  section: { marginTop: 20, width: '100%' },
+  sectionTitle: { fontSize: 16, fontWeight: 'bold', color: '#1e293b', marginBottom: 10, textAlign: 'right' },
+  dayBtn: { backgroundColor: '#fff', padding: 15, borderRadius: 12, marginRight: 10, borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'center', justifyContent: 'center', minWidth: 100, height: 80 },
+  selectedDayBtn: { backgroundColor: '#059669', borderColor: '#059669' },
+  dayText: { fontWeight: 'bold', color: '#475569' },
+  dateText: { fontSize: 11, color: '#94a3b8', marginTop: 4 },
+  listSection: { flex: 1, marginTop: 20 },
+  apptItem: { flexDirection: 'row-reverse', backgroundColor: '#fff', padding: 15, borderRadius: 12, marginBottom: 8, alignItems: 'center', justifyContent: 'space-between', elevation: 1 },
+  apptTime: { fontSize: 16, fontWeight: 'bold', color: '#059669' },
+  apptPatient: { fontSize: 14, color: '#334155' },
+  statusDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#3b82f6' },
+  empty: { textAlign: 'center', color: '#94a3b8', marginTop: 30 },
+  emptyError: { textAlign: 'center', marginTop: 20, color: '#ef4444', fontWeight: '500' }
+});
 
 
 
