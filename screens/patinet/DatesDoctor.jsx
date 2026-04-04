@@ -21,6 +21,7 @@ const DatesDoctor = () => {
   const [allDaySlots, setAllDaySlots] = useState([]); // المواعيد المدمجة والمرتبة
   const [reason, setReason] = useState("");
   const [isAllowed, setIsAllowed] = useState(true);
+  // مم
   const [restrictionReason, setRestrictionReason] = useState("");
 
   useEffect(() => { fetchAllDoctors(); }, []);
