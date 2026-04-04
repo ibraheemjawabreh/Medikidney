@@ -1,19 +1,45 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, ScrollView, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, FlatList } from "react-native";
-import { Card } from "@rneui/themed";
+import { Text, View, ScrollView, StyleSheet, ActivityIndicator, Alert, Pressable } from "react-native";
+import { Card, Icon, Input, Button } from "@rneui/themed";
 import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+const daysTranslation = {
+  "SUNDAY": "الأحد", "MONDAY": "الاثنين", "TUESDAY": "الثلاثاء", 
+  "WEDNESDAY": "الأربعاء", "THURSDAY": "الخميس", "FRIDAY": "الجمعة", "SATURDAY": "السبت"
+};
+
 const DatesDoctor = () => {
   const [selectDoctor, setSelectDoctor] = useState("");
-  const [schedule, setSchedule] = useState([]); 
-  const [appointments, setAppointments] = useState([]); 
-  const [selectedDay, setSelectedDay] = useState(null); 
+  const [schedule, setSchedule] = useState([]);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedSlot, setSelectedSlot] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
   const [doctorsList, setDoctorsList] = useState([]);
+  const [allDaySlots, setAllDaySlots] = useState([]); // المواعيد المدمجة والمرتبة
+  const [reason, setReason] = useState("");
+  const [isAllowed, setIsAllowed] = useState(true);
+  const [restrictionReason, setRestrictionReason] = useState("");
 
-  // 1. جلب قائمة الأطباء عند فتح الشاشة
+  useEffect(() => { fetchAllDoctors(); }, []);
+
+  useEffect(() => {
+    if (selectDoctor) {
+      fetchDoctorSchedule(selectDoctor);
+      setSelectedDay(null);
+      setAllDaySlots([]);
+      setSelectedSlot(null);
+    }
+  }, [selectDoctor]);
+
+  useEffect(() => {
+    if (selectedDay) {
+      fetchAvailability();
+    }
+  }, [selectedDay]);
+
   const fetchAllDoctors = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -22,158 +48,203 @@ const DatesDoctor = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDoctorsList(response.data);
-    } catch (error) {
-      console.log("Error Doctors List:", error.message);
-    }
+    } catch (e) { console.log("Doctors Error:", e.message); }
   };
 
-  // 2. جلب جدول الطبيب المختار
-  const fetchDoctorSchedule = async (doctorId) => {
+  const fetchDoctorSchedule = async (id) => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem("token");
-      console.log("جاري جلب جدول الطبيب رقم:", doctorId);
-      
       const response = await axios.get(`https://medikidneysys.onrender.com/doctor-schedule`, {
         headers: { Authorization: `Bearer ${token}` },
-        params: { doctorId: doctorId }
+        params: { doctorId: Number(id) }
       });
-      
-      console.log("بيانات الجدول المستلمة:", response.data);
       setSchedule(response.data);
-    } catch (error) {
-      console.log("Schedule Error:", error.response?.data || error.message);
-      Alert.alert("تنبيه", "لا يوجد جدول متاح لهذا الطبيب حالياً");
-    } finally {
-      setLoading(false);
-    }
+    } catch (e) { Alert.alert("تنبيه", "لا يوجد دوام مسجل"); } 
+    finally { setLoading(false); }
   };
 
-  // 3. جلب المراجعات المحجوزة بناءً على اليوم المختار
-  const fetchBookedConsultations = async (dayDate) => {
-    if (!dayDate) return;
+  const fetchAvailability = async () => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem("token");
-      console.log("طلب المراجعات للتاريخ:", dayDate);
-      
-      const response = await axios.get(`https://medikidneysys.onrender.com/clinic-consultations`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { 
-          doctorId: selectDoctor,
-          date: dayDate 
-        }
+      const targetDate = getNextDateForDay(selectedDay.weekday);
+      const dateStr = formatDate(targetDate);
+
+      const response = await axios.get(`https://medikidneysys.onrender.com/clinic-consultations/availability`, {
+        params: { doctorId: Number(selectDoctor), date: dateStr },
+        headers: { Authorization: `Bearer ${token}` }
       });
-      setAppointments(response.data);
-    } catch (error) {
-      console.log("Consultations Error 400 - فحص المعاملات:", error.response?.data);
+
+      // دمج المواعيد المتاحة والمحجوزة وترتيبها زمنياً
+      const available = (response.data.availableSlots || []).map(time => ({ time, isBooked: false }));
+      const booked = (response.data.bookedSlots || []).map(time => ({ time, isBooked: true }));
+      
+      const combined = [...available, ...booked].sort((a, b) => a.time.localeCompare(b.time));
+      
+      setAllDaySlots(combined);
+      setIsAllowed(response.data.bookingAllowed);
+      setRestrictionReason(response.data.bookingRestrictionReason || "");
+
+      if (!response.data.bookingAllowed) {
+        Alert.alert("تنبيه", response.data.bookingRestrictionReason);
+      }
+    } catch (e) {
+      console.log("Availability Error:", e.message);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchAllDoctors();
-  }, []);
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
-  useEffect(() => {
-    if (selectDoctor) {
-      fetchDoctorSchedule(selectDoctor);
-      setSelectedDay(null);
-      setAppointments([]);
+  const formatTimeTo12H = (timeStr) => {
+    const [h, m] = timeStr.split(':');
+    let hh = parseInt(h);
+    const suffix = hh >= 12 ? "م" : "ص";
+    hh = hh % 12 || 12;
+    return `${hh.toString().padStart(2, '0')}:${m} ${suffix}`;
+  };
+
+  const getNextDateForDay = (dayName) => {
+    const daysOrder = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+    const targetDayIndex = daysOrder.indexOf(dayName.toUpperCase());
+    const now = new Date();
+    const resultDate = new Date(now);
+    const currentDayIndex = now.getDay();
+    let distance = (targetDayIndex + 7 - currentDayIndex) % 7;
+    resultDate.setDate(now.getDate() + distance);
+    return resultDate;
+  };
+
+  const handleFinalBook = async () => {
+    if (!reason.trim()) { Alert.alert("تنبيه", "يرجى كتابة سبب الزيارة"); return; }
+    if (!isAllowed) { Alert.alert("خطأ", restrictionReason); return; }
+    
+    try {
+      setBookingLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      const targetDate = getNextDateForDay(selectedDay.weekday);
+      const dateStr = formatDate(targetDate);
+      const timeStr = `${dateStr}T${selectedSlot}`;
+
+      const body = {
+        doctorId: Number(selectDoctor),
+        apptDate: dateStr, 
+        apptTime: timeStr,
+        visitReason: reason,
+        notes: "تم الحجز من تطبيق الموبايل"
+      };
+
+      await axios.post('https://medikidneysys.onrender.com/clinic-consultations/book', body, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      Alert.alert("نجاح", "تم حجز موعدك بنجاح ✅");
+      setSelectedSlot(null);
+      setReason("");
+      fetchAvailability(); 
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || "فشل الحجز";
+      Alert.alert("خطأ", Array.isArray(errorMsg) ? errorMsg[0] : errorMsg);
+    } finally {
+      setBookingLoading(false);
     }
-  }, [selectDoctor]);
-
-  useEffect(() => {
-    if (selectedDay) {
-      // استخراج التاريخ الصحيح سواء كان الحقل اسمه date أو available_date
-      const dateToSend = selectedDay.date || selectedDay.available_date || selectedDay.day_date;
-      fetchBookedConsultations(dateToSend);
-    }
-  }, [selectedDay]);
-
-  const renderAppointment = ({ item }) => (
-    <View style={styles.apptItem}>
-      <Text style={styles.apptTime}>
-        {item.apptTime?.includes('T') ? item.apptTime.split('T')[1].substring(0, 5) : (item.apptTime || "00:00")}
-      </Text>
-      <Text style={styles.apptPatient}>{item.patientName || item.full_name || "مريض مجهول"}</Text>
-      <View style={styles.statusDot} />
-    </View>
-  );
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.mainHeader}>إدارة مواعيد العيادة</Text>
+      <Text style={styles.mainHeader}>حجز موعد طبي</Text>
+      
+      <ScrollView style={{ flex: 1 }}>
+        <Card containerStyle={styles.topCard}>
+          <Text style={styles.label}>اختر الطبيب:</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker selectedValue={selectDoctor} onValueChange={setSelectDoctor}>
+              <Picker.Item label="اختر من القائمة..." value="" />
+              {doctorsList.map(d => <Picker.Item key={d.doctor_id} label={`د. ${d.full_name}`} value={d.doctor_id.toString()} />)}
+            </Picker>
+          </View>
+          <Text style={[styles.label, {marginTop: 15}]}>سبب الزيارة:</Text>
+          <Input 
+            placeholder="مثلاً: مراجعة دورية" 
+            value={reason} 
+            onChangeText={setReason} 
+            inputContainerStyle={styles.inputContainer}
+          />
+        </Card>
 
-      <Card containerStyle={styles.topCard}>
-        <Text style={styles.label}>اختر الطبيب المسؤول:</Text>
-        <Picker
-          selectedValue={selectDoctor}
-          onValueChange={(val) => setSelectDoctor(val)}
-        >
-          <Picker.Item label="-- اختر طبيباً من القائمة --" value="" />
-          {doctorsList.map((doc) => (
-            <Picker.Item 
-              key={doc.doctor_id.toString()} 
-              label={`د. ${doc.full_name}`} 
-              value={doc.doctor_id.toString()} 
-            />
-          ))}
-        </Picker>
-      </Card>
+        {schedule.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>أيام دوام الطبيب:</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{flexDirection: 'row-reverse'}}>
+              {schedule.map((item, i) => (
+                <Pressable 
+                  key={i} 
+                  onPress={() => setSelectedDay(item)} 
+                  style={[styles.dayBtn, selectedDay?.schedule_id === item.schedule_id && styles.selectedDayBtn]}
+                >
+                  <Text style={[styles.dayText, { color: selectedDay?.schedule_id === item.schedule_id ? '#fff' : '#334155' }]}>
+                    {daysTranslation[item.weekday] || item.weekday}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
-      {loading && <ActivityIndicator color="#059669" size="large" style={{marginVertical: 20}} />}
-
-      {schedule && schedule.length > 0 ? (
-        <View style={[styles.section, { minHeight: 140, backgroundColor: '#f0fdf4', padding: 10, borderRadius: 15 }]}>
-          <Text style={styles.sectionTitle}>الأيام المتاحة في جدول الطبيب:</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-            {schedule.map((day, index) => {
-              // تحديد التاريخ والاسم بشكل مرن
-              const dDate = day.date || day.available_date || day.day_date;
-              const dName = day.dayName || day.day_name || "يوم";
-              
-              return (
-                <TouchableOpacity 
+        <View style={{ padding: 16 }}>
+          {loading ? (
+            <ActivityIndicator color="#059669" size="large" />
+          ) : (
+            <View>
+              {allDaySlots.map((slot, index) => (
+                <Pressable 
                   key={index} 
-                  onPress={() => {
-                    console.log("تم اختيار يوم:", dDate);
-                    setSelectedDay(day);
-                  }}
+                  onPress={() => !slot.isBooked && setSelectedSlot(slot.time)} 
+                  disabled={slot.isBooked}
                   style={[
-                    styles.dayBtn, 
-                    (selectedDay?.date === dDate || selectedDay?.available_date === dDate) && styles.selectedDayBtn
+                    styles.slotItem, 
+                    selectedSlot === slot.time && styles.selectedSlotBorder,
+                    slot.isBooked && styles.bookedSlot
                   ]}
                 >
-                  <Text style={[styles.dayText, (selectedDay?.date === dDate || selectedDay?.available_date === dDate) && {color: '#fff'}]}>
-                    {dName}
+                  <Text style={[styles.slotTimeText, slot.isBooked && {color: '#94a3b8'}]}>
+                    {formatTimeTo12H(slot.time)}
                   </Text>
-                  <Text style={[styles.dateText, (selectedDay?.date === dDate || selectedDay?.available_date === dDate) && {color: '#fff'}]}>
-                    {dDate}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
+                  
+                  {slot.isBooked ? (
+                    <Text style={styles.bookedLabel}>محجوز</Text>
+                  ) : (
+                    <Icon 
+                      name={selectedSlot === slot.time ? "check-circle" : "circle"} 
+                      type="feather" 
+                      color="#059669" 
+                      size={20} 
+                    />
+                  )}
+                </Pressable>
+              ))}
+            </View>
+          )}
         </View>
-      ) : (
-        !loading && selectDoctor !== "" && (
-          <Text style={styles.emptyError}>لا توجد أيام متاحة في جدول هذا الطبيب</Text>
-        )
-      )}
+      </ScrollView>
 
-      {selectedDay && !loading && (
-        <View style={styles.listSection}>
-          <Text style={styles.sectionTitle}>
-            مراجعات يوم ({selectedDay.date || selectedDay.available_date}):
-          </Text>
-          <FlatList
-            data={appointments}
-            renderItem={renderAppointment}
-            keyExtractor={(item, index) => index.toString()}
-            ListEmptyComponent={<Text style={styles.empty}>لا يوجد حجوزات لهذا اليوم</Text>}
+      {selectedSlot && (
+        <View style={styles.footer}>
+          <Button 
+            title={bookingLoading ? "جاري الحجز..." : `تأكيد حجز الساعة ${formatTimeTo12H(selectedSlot)}`} 
+            onPress={handleFinalBook} 
+            loading={bookingLoading}
+            buttonStyle={styles.bookBtn}
+            disabled={!isAllowed}
           />
+          {!isAllowed && <Text style={styles.errorText}>{restrictionReason}</Text>}
         </View>
       )}
     </View>
@@ -183,24 +254,27 @@ const DatesDoctor = () => {
 export default DatesDoctor;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8fafc", padding: 15 },
-  mainHeader: { fontSize: 20, fontWeight: 'bold', color: '#0f172a', textAlign: 'center', marginTop: 40, marginBottom: 10 },
-  topCard: { borderRadius: 15, padding: 5, elevation: 2 },
-  label: { fontSize: 13, color: '#64748b', textAlign: 'right', marginRight: 10 },
-  section: { marginTop: 20, width: '100%' },
-  sectionTitle: { fontSize: 16, fontWeight: 'bold', color: '#1e293b', marginBottom: 10, textAlign: 'right' },
-  dayBtn: { backgroundColor: '#fff', padding: 15, borderRadius: 12, marginRight: 10, borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'center', justifyContent: 'center', minWidth: 100, height: 80 },
+  container: { flex: 1, backgroundColor: "#f8fafc" },
+  mainHeader: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginTop: 50, color: '#0f172a' },
+  topCard: { borderRadius: 20, elevation: 4, padding: 15 },
+  label: { textAlign: 'right', marginBottom: 8, color: '#64748b', fontSize: 14, fontWeight: '600' },
+  pickerWrapper: { backgroundColor: '#f1f5f9', borderRadius: 12, marginBottom: 5 },
+  inputContainer: { backgroundColor: '#f1f5f9', borderRadius: 12, borderBottomWidth: 0, paddingHorizontal: 10 },
+  section: { marginTop: 20, paddingHorizontal: 16 },
+  sectionTitle: { textAlign: 'right', fontSize: 16, fontWeight: 'bold', marginBottom: 10, color: '#334155' },
+  dayBtn: { paddingVertical: 12, paddingHorizontal: 20, backgroundColor: '#fff', borderRadius: 12, marginLeft: 10, borderWidth: 1, borderColor: '#e2e8f0' },
   selectedDayBtn: { backgroundColor: '#059669', borderColor: '#059669' },
-  dayText: { fontWeight: 'bold', color: '#475569' },
-  dateText: { fontSize: 11, color: '#94a3b8', marginTop: 4 },
-  listSection: { flex: 1, marginTop: 20 },
-  apptItem: { flexDirection: 'row-reverse', backgroundColor: '#fff', padding: 15, borderRadius: 12, marginBottom: 8, alignItems: 'center', justifyContent: 'space-between', elevation: 1 },
-  apptTime: { fontSize: 16, fontWeight: 'bold', color: '#059669' },
-  apptPatient: { fontSize: 14, color: '#334155' },
-  statusDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#3b82f6' },
-  empty: { textAlign: 'center', color: '#94a3b8', marginTop: 30 },
-  emptyError: { textAlign: 'center', marginTop: 20, color: '#ef4444', fontWeight: '500' }
+  dayText: { fontWeight: 'bold' },
+  slotItem: { flexDirection: 'row-reverse', justifyContent: 'space-between', backgroundColor: '#fff', padding: 18, borderRadius: 15, marginBottom: 10, borderWidth: 1, borderColor: '#e2e8f0', elevation: 1 },
+  selectedSlotBorder: { borderColor: '#059669', borderWidth: 2, backgroundColor: '#f0fdf4' },
+  bookedSlot: { backgroundColor: '#f1f5f9', borderColor: '#cbd5e1', opacity: 0.7 },
+  slotTimeText: { fontWeight: 'bold', color: '#1e293b', fontSize: 15 },
+  bookedLabel: { color: '#ef4444', fontSize: 12, fontWeight: 'bold' },
+  footer: { padding: 20, backgroundColor: '#fff', borderTopWidth: 1, borderColor: '#f1f5f9' },
+  bookBtn: { backgroundColor: '#059669', borderRadius: 15, height: 60, fontWeight: 'bold' },
+  errorText: { color: '#ef4444', textAlign: 'center', marginTop: 10, fontSize: 12 },
 });
+
 
 
 
