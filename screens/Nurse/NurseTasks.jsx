@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { 
   View, Text, StyleSheet, TextInput, TouchableOpacity, 
-  ScrollView, ActivityIndicator, Alert 
+  ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform 
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -11,21 +11,22 @@ const NurseTasks = ({ route, navigation }) => {
   const { patientId, patientName } = route.params || {};
   
   const [loading, setLoading] = useState(false);
-  const [isStarted, setIsStarted] = useState(false); // حالة الجلسة محلياً
+  const [isStarted, setIsStarted] = useState(false);
 
-  // بيانات البداية (تخزن محلياً)
+  // بيانات البداية
   const [weightBefore, setWeightBefore] = useState("");
   const [bpBefore, setBpBefore] = useState("");
   const [startTime, setStartTime] = useState("");
 
-  // بيانات النهاية (تجمع مع البداية وترسل للسيرفر)
+  // بيانات النهاية والحالة والملاحظات
   const [weightAfter, setWeightAfter] = useState("");
   const [bpAfter, setBpAfter] = useState("");
   const [fluidRemoved, setFluidRemoved] = useState("");
+  const [status, setStatus] = useState("COMPLETED");
+  const [notes, setNotes] = useState(""); // حقل الملاحظات الجديد
   const [scheduleId, setScheduleId] = useState(route.params?.scheduleId?.toString() || "");
 
-  // 1. التحقق من وجود جلسة مخزنة في ذاكرة الموبايل عند فتح الصفحة
-useEffect(() => {
+  useEffect(() => {
     const checkLocalSession = async () => {
       try {
         const savedSession = await AsyncStorage.getItem(`active_session_${patientId}`);
@@ -34,7 +35,6 @@ useEffect(() => {
           setWeightBefore(data.weightBefore);
           setBpBefore(data.bpBefore);
           setStartTime(data.startTime);
-          // أضف هذا السطر لضمان بقاء الـ ID
           if(data.scheduleId) setScheduleId(data.scheduleId.toString()); 
           setIsStarted(true);
         }
@@ -45,147 +45,164 @@ useEffect(() => {
     checkLocalSession();
   }, [patientId]);
 
-  // 2. دالة بدء الجلسة "محلياً"
-const handleStartSessionLocally = async () => {
-  if (!weightBefore || !bpBefore || !scheduleId) {
-    Alert.alert("تنبيه", "يرجى إدخال الوزن والضغط ورقم الموعد (Schedule ID)");
-    return;
-  }
+  const handleStartSessionLocally = async () => {
+    if (!weightBefore || !bpBefore || !scheduleId) {
+      Alert.alert("تنبيه", "يرجى إدخال الوزن والضغط ورقم الموعد");
+      return;
+    }
 
-  const sessionData = {
-    weightBefore,
-    bpBefore,
-    scheduleId: Number(scheduleId), // تأكدنا أنه رقم هنا
-    startTime: new Date().toISOString(),
-  };
-
-  try {
-    await AsyncStorage.setItem(`active_session_${patientId}`, JSON.stringify(sessionData));
-    setStartTime(sessionData.startTime);
-    setIsStarted(true);
-    Alert.alert("تم البدء", "تم حفظ بيانات البداية ورقم الموعد محلياً.");
-  } catch (e) {
-    Alert.alert("خطأ", "فشل حفظ البيانات محلياً");
-  }
-};
-
-  // 3. دالة إنهاء الجلسة وإرسال الـ POST للسيرفر
- const handleFinalSubmit = async () => {
-  if (!weightAfter || !bpAfter || !fluidRemoved) {
-    Alert.alert("تنبيه", "يرجى إكمال بيانات نهاية الجلسة");
-    return;
-  }
-
-  try {
-    setLoading(true);
-    const token = await AsyncStorage.getItem("token");
-    
-    // جلب البيانات المخزنة للتأكد من الـ scheduleId
-    const savedSession = await AsyncStorage.getItem(`active_session_${patientId}`);
-    const localData = JSON.parse(savedSession);
-
-    const finalPayload = {
-      patientId: Number(patientId),
-      scheduleId: Number(localData.scheduleId || scheduleId), // نأخذه من الذاكرة أو الحالة
-      date: new Date().toISOString().split('T')[0],
-      startTime: startTime,
-      endTime: new Date().toISOString(),
-      weightBefore: Number(weightBefore),
-      weightAfter: Number(weightAfter),
-      bloodPressureBefore: bpBefore,
-      bloodPressureAfter: bpAfter,
-      fluidRemoved: Number(fluidRemoved)
+    const sessionData = {
+      weightBefore,
+      bpBefore,
+      scheduleId: Number(scheduleId),
+      startTime: new Date().toISOString(),
     };
 
-    console.log("إرسال البيانات النهائية:", finalPayload);
+    try {
+      await AsyncStorage.setItem(`active_session_${patientId}`, JSON.stringify(sessionData));
+      setStartTime(sessionData.startTime);
+      setIsStarted(true);
+    } catch (e) {
+      Alert.alert("خطأ", "فشل حفظ البيانات محلياً");
+    }
+  };
 
-    await axios.post(
-      "https://medikidneysys.onrender.com/dialysis-sessions", 
-      finalPayload, 
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+  const handleFinalSubmit = async () => {
+    if (!weightAfter || !bpAfter || !fluidRemoved) {
+      Alert.alert("تنبيه", "يرجى إكمال بيانات نهاية الجلسة");
+      return;
+    }
 
-    await AsyncStorage.removeItem(`active_session_${patientId}`);
-    Alert.alert("نجاح", "تم تسجيل الجلسة بالكامل.");
-    navigation.goBack(); 
-  } catch (error) {
-    console.log("❌ خطأ السيرفر:", error.response?.data);
-    Alert.alert("فشل الإرسال", error.response?.data?.message?.toString() || "تأكد من رقم الموعد (Schedule ID)");
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      const savedSession = await AsyncStorage.getItem(`active_session_${patientId}`);
+      const localData = JSON.parse(savedSession);
 
-  // 4. دالة لإلغاء الجلسة المحلية (في حال الخطأ)
+      const finalPayload = {
+        patientId: Number(patientId),
+        scheduleId: Number(localData.scheduleId || scheduleId),
+        date: new Date().toISOString().split('T')[0],
+        startTime: startTime,
+        endTime: new Date().toISOString(),
+        weightBefore: Number(weightBefore),
+        weightAfter: Number(weightAfter),
+        bloodPressureBefore: bpBefore,
+        bloodPressureAfter: bpAfter,
+        fluidRemoved: Number(fluidRemoved),
+        status: status,
+        notes: notes || "لا توجد ملاحظات إضافية" // إرسال الملاحظات المكتوبة
+      };
+
+      await axios.post(
+        "https://medikidneysys.onrender.com/dialysis-sessions", 
+        finalPayload, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      await AsyncStorage.removeItem(`active_session_${patientId}`);
+      Alert.alert("نجاح ✅", "تم تسجيل الجلسة بالكامل.");
+      navigation.goBack(); 
+    } catch (error) {
+      Alert.alert("فشل الإرسال", error.response?.data?.message?.toString() || "تأكد من البيانات");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCancelLocal = async () => {
-    Alert.alert("تنبيه", "هل أنت متأكد من إلغاء الجلسة الحالية ومسح البيانات؟", [
+    Alert.alert("تنبيه", "هل أنت متأكد من مسح الجلسة؟", [
       { text: "تراجع", style: "cancel" },
-      { text: "نعم، إلغاء", onPress: async () => {
+      { text: "نعم، مسح", onPress: async () => {
           await AsyncStorage.removeItem(`active_session_${patientId}`);
           setIsStarted(false);
           setWeightBefore("");
           setBpBefore("");
+          setNotes("");
       }}
     ]);
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.headerCard}>
-        <Text style={styles.patientName}>{patientName || "ملف المريض"}</Text>
-        <Text style={styles.subHeader}>إدارة جلسة الغسيل الكلوي</Text>
-      </View>
-
-      {!isStarted ? (
-        // واجهة البداية
-        <View style={styles.card}>
-          <View style={styles.titleRow}>
-            <MaterialCommunityIcons name="play-circle" size={24} color="#2563eb" />
-            <Text style={styles.cardTitle}>بيانات ما قبل الجلسة</Text>
-          </View>
-          
-          <Text style={styles.label}>الوزن قبل الجلسة (kg)</Text>
-          <TextInput style={styles.input} value={weightBefore} onChangeText={setWeightBefore} keyboardType="numeric" placeholder="مثلاً 75.5" />
-
-          <Text style={styles.label}>الضغط قبل الجلسة</Text>
-          <TextInput style={styles.input} value={bpBefore} onChangeText={setBpBefore} placeholder="120/80" />
-
-          <TouchableOpacity style={styles.primaryButton} onPress={handleStartSessionLocally}>
-            <Text style={styles.buttonText}>بدء الجلسة الآن</Text>
-          </TouchableOpacity>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <ScrollView style={styles.container}>
+        <View style={styles.headerCard}>
+          <Text style={styles.patientName}>{patientName || "ملف المريض"}</Text>
+          <Text style={styles.subHeader}>إدارة تقرير الغسيل الكلوي</Text>
         </View>
-      ) : (
-        // واجهة الإنهاء
-        <View style={[styles.card, {borderColor: '#10b981'}]}>
-          <View style={styles.titleRow}>
-            <MaterialCommunityIcons name="check-circle" size={24} color="#10b981" />
-            <Text style={[styles.cardTitle, {color: '#10b981'}]}>بيانات ما بعد الجلسة</Text>
+
+        {!isStarted ? (
+          <View style={styles.card}>
+            <View style={styles.titleRow}>
+              <MaterialCommunityIcons name="play-circle" size={24} color="#2563eb" />
+              <Text style={styles.cardTitle}>ما قبل الجلسة</Text>
+            </View>
+            <Text style={styles.label}>الوزن قبل (kg)</Text>
+            <TextInput style={styles.input} value={weightBefore} onChangeText={setWeightBefore} keyboardType="numeric" placeholder="75.0" />
+            <Text style={styles.label}>الضغط قبل</Text>
+            <TextInput style={styles.input} value={bpBefore} onChangeText={setBpBefore} placeholder="120/80" />
+            <TouchableOpacity style={styles.primaryButton} onPress={handleStartSessionLocally}>
+              <Text style={styles.buttonText}>بدء الجلسة</Text>
+            </TouchableOpacity>
           </View>
+        ) : (
+          <View style={[styles.card, {borderColor: '#10b981'}]}>
+            <View style={styles.titleRow}>
+              <MaterialCommunityIcons name="check-circle" size={24} color="#10b981" />
+              <Text style={[styles.cardTitle, {color: '#10b981'}]}>بيانات الإنهاء</Text>
+            </View>
 
-          <View style={styles.infoBox}>
-            <Text style={styles.infoText}>وقت البدء المسجل: {new Date(startTime).toLocaleTimeString('ar-EG')}</Text>
-            <Text style={styles.infoText}>الوزن الأولي: {weightBefore} kg</Text>
+            <Text style={styles.label}>حالة الجلسة</Text>
+            <View style={styles.statusRow}>
+              {["COMPLETED", "CANCELLED", "INCOMPLETE"].map((st) => (
+                <TouchableOpacity 
+                  key={st}
+                  style={[styles.statusBtn, status === st && (st === "COMPLETED" ? styles.statusBtnActive : st === "CANCELLED" ? styles.statusBtnActiveRed : styles.statusBtnActiveOrange)]} 
+                  onPress={() => setStatus(st)}
+                >
+                  <Text style={[styles.statusBtnText, status === st && styles.statusBtnTextActive]}>
+                    {st === "COMPLETED" ? "مكتملة" : st === "CANCELLED" ? "ملغية" : "جزئية"}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.label}>الوزن بعد (kg)</Text>
+            <TextInput style={styles.input} value={weightAfter} onChangeText={setWeightAfter} keyboardType="numeric" placeholder="72.5" />
+
+            <Text style={styles.label}>الضغط بعد</Text>
+            <TextInput style={styles.input} value={bpAfter} onChangeText={setBpAfter} placeholder="115/75" />
+
+            <Text style={styles.label}>السوائل المسحوبة (L)</Text>
+            <TextInput style={styles.input} value={fluidRemoved} onChangeText={setFluidRemoved} keyboardType="numeric" placeholder="2.5" />
+
+            {/* حقل الملاحظات الجديد */}
+            <Text style={styles.label}>ملاحظات التمريض</Text>
+            <TextInput 
+              style={[styles.input, styles.textArea]} 
+              value={notes} 
+              onChangeText={setNotes} 
+              placeholder="اكتب أي ملاحظات طبية هنا..." 
+              multiline={true}
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+
+            <TouchableOpacity style={styles.successButton} onPress={handleFinalSubmit} disabled={loading}>
+              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>إرسال التقرير</Text>}
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.cancelLink} onPress={handleCancelLocal}>
+              <Text style={styles.cancelText}>إلغاء البيانات</Text>
+            </TouchableOpacity>
           </View>
-
-          <Text style={styles.label}>الوزن بعد الجلسة (kg)</Text>
-          <TextInput style={styles.input} value={weightAfter} onChangeText={setWeightAfter} keyboardType="numeric" placeholder="مثلاً 72.0" />
-
-          <Text style={styles.label}>الضغط بعد الجلسة</Text>
-          <TextInput style={styles.input} value={bpAfter} onChangeText={setBpAfter} placeholder="110/70" />
-
-          <Text style={styles.label}>كمية السوائل المسحوبة (L)</Text>
-          <TextInput style={styles.input} value={fluidRemoved} onChangeText={setFluidRemoved} keyboardType="numeric" placeholder="3.0" />
-
-          <TouchableOpacity style={styles.successButton} onPress={handleFinalSubmit} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>إرسال وحفظ الجلسة</Text>}
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.cancelLink} onPress={handleCancelLocal}>
-            <Text style={styles.cancelText}>إلغاء ومسح البيانات الحالية</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </ScrollView>
+        )}
+        <View style={{ height: 100 }} /> 
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -194,18 +211,24 @@ export default NurseTasks;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f1f5f9", padding: 15 },
   headerCard: { backgroundColor: "#1e3a8a", padding: 25, borderRadius: 20, marginBottom: 20, alignItems: 'center' },
-  patientName: { color: "#fff", fontSize: 22, fontWeight: "bold" },
-  subHeader: { color: "#bfdbfe", fontSize: 14, marginTop: 5 },
-  card: { backgroundColor: "#fff", borderRadius: 20, padding: 20, borderWidth: 1, borderColor: '#e2e8f0', elevation: 3 },
-  titleRow: { flexDirection: 'row-reverse', alignItems: 'center', marginBottom: 20 },
-  cardTitle: { fontSize: 18, fontWeight: "bold", marginRight: 10, color: '#1e293b' },
-  label: { fontSize: 14, color: "#64748b", marginBottom: 8, textAlign: 'right', fontWeight: '600' },
-  input: { backgroundColor: "#f8fafc", padding: 15, borderRadius: 12, borderWidth: 1, borderColor: "#cbd5e1", textAlign: 'right', marginBottom: 20, fontSize: 16 },
-  primaryButton: { backgroundColor: "#2563eb", padding: 18, borderRadius: 15, alignItems: "center" },
-  successButton: { backgroundColor: "#10b981", padding: 18, borderRadius: 15, alignItems: "center" },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  infoBox: { backgroundColor: '#f0fdf4', padding: 15, borderRadius: 12, marginBottom: 20, borderLeftWidth: 4, borderLeftColor: '#10b981' },
-  infoText: { textAlign: 'right', color: '#166534', fontSize: 13, marginBottom: 5 },
-  cancelLink: { marginTop: 20, alignItems: 'center' },
-  cancelText: { color: '#ef4444', fontSize: 14, textDecorationLine: 'underline' }
+  patientName: { color: "#fff", fontSize: 20, fontWeight: "bold" },
+  subHeader: { color: "#bfdbfe", fontSize: 12, marginTop: 5 },
+  card: { backgroundColor: "#fff", borderRadius: 20, padding: 20, borderWidth: 1, borderColor: '#e2e8f0', elevation: 2 },
+  titleRow: { flexDirection: 'row-reverse', alignItems: 'center', marginBottom: 15 },
+  cardTitle: { fontSize: 17, fontWeight: "bold", marginRight: 8, color: '#1e293b' },
+  label: { fontSize: 13, color: "#64748b", marginBottom: 6, textAlign: 'right', fontWeight: '700' },
+  input: { backgroundColor: "#f8fafc", padding: 12, borderRadius: 10, borderWidth: 1, borderColor: "#cbd5e1", textAlign: 'right', marginBottom: 12, color: '#1e293b' },
+  textArea: { minHeight: 80, textAlignVertical: 'top', paddingTop: 10 }, // ستايل الملاحظات
+  primaryButton: { backgroundColor: "#2563eb", padding: 16, borderRadius: 12, alignItems: "center" },
+  successButton: { backgroundColor: "#10b981", padding: 16, borderRadius: 12, alignItems: "center", marginTop: 10 },
+  buttonText: { color: "#fff", fontSize: 15, fontWeight: "bold" },
+  statusRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 15 },
+  statusBtn: { flex: 1, padding: 10, borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 8, alignItems: 'center', marginHorizontal: 2 },
+  statusBtnActive: { backgroundColor: '#10b981', borderColor: '#10b981' },
+  statusBtnActiveRed: { backgroundColor: '#ef4444', borderColor: '#ef4444' },
+  statusBtnActiveOrange: { backgroundColor: '#f59e0b', borderColor: '#f59e0b' },
+  statusBtnText: { color: '#64748b', fontSize: 11, fontWeight: 'bold' },
+  statusBtnTextActive: { color: '#fff' },
+  cancelLink: { marginTop: 15, alignItems: 'center' },
+  cancelText: { color: '#ef4444', fontSize: 12, textDecorationLine: 'underline' }
 });

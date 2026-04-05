@@ -1,5 +1,5 @@
-import { useState,useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, StatusBar } from 'react-native';
 import { Icon } from '@rneui/themed';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,42 +10,30 @@ const ProfileSettingsScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-  getProfile();
-}, []);
+    getProfile();
+  }, []);
 
-
-const getProfile = async () => {
-  try {
-    const token = await AsyncStorage.getItem("token");
-
-    const response = await axios.get(
-      "https://medikidneysys.onrender.com/users/profile",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    console.log("PROFILE DATA:", response.data);
-
-    setUserData(response.data);
-
-  } catch (error) {
-    console.log(error);
-  }
-};
+  const getProfile = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await axios.get(
+        "https://medikidneysys.onrender.com/users/profile",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setUserData(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('token');
-      
       navigation.reset({
         index: 0,
         routes: [{ name: 'Login' }],
       });
     } catch (error) {
-      console.error("Error logging out:", error);
       Alert.alert("خطأ", "حدث خطأ أثناء محاولة تسجيل الخروج");
     }
   };
@@ -53,10 +41,10 @@ const getProfile = async () => {
   const confirmLogout = () => {
     Alert.alert(
       "تسجيل الخروج",
-      "هل أنت متأكد أنك تريد تسجيل الخروج من التطبيق؟",
+      "هل أنت متأكد أنك تريد تسجيل الخروج؟",
       [
         { text: "إلغاء", style: "cancel" },
-        { text: "نعم، اخرج", style: "destructive", onPress: handleLogout }
+        { text: "خروج", style: "destructive", onPress: handleLogout }
       ]
     );
   };
@@ -71,34 +59,35 @@ const getProfile = async () => {
     if (!result.canceled) setImage(result.assets[0].uri);
   };
 
-  const SettingItem = ({ icon, title, onPress, id }) => (
-    <TouchableOpacity key={id} style={styles.item} onPress={onPress}>
-      <Icon name="chevron-left" size={20} color="#ccc" />
+  const SettingItem = ({ icon, title, onPress }) => (
+    <TouchableOpacity style={styles.item} onPress={onPress}>
+      <Icon name="chevron-left" size={18} color="#94a3b8" />
       <View style={styles.itemContent}>
         <Text style={styles.itemText}>{title}</Text>
-        <Icon name={icon} size={22} color="#382120" />
+        <View style={styles.iconCircle}>
+          <Icon name={icon} size={20} color="#059669" />
+        </View>
       </View>
     </TouchableOpacity>
   );
 
-
   if (!userData) {
-  return <Text>Loading...</Text>;
-}
+    return (
+      <View style={[styles.container, {justifyContent: 'center'}]}>
+        <Text style={{textAlign: 'center', color: '#64748b'}}>جاري التحميل...</Text>
+      </View>
+    );
+  }
 
-const role = userData.role;
+  const role = userData.role;
+  let data = role === "PATIENT" ? userData.patient : 
+             role === "NURSE" ? userData.nurse : 
+             userData.nutritionist;
 
-let data = null;
-
-if (role === "PATIENT") {
-  data = userData.patient;
-} else if (role === "NURSE") {
-  data = userData.nurse;
-} else if (role === "NUTRITIONIST") {
-  data = userData.nutritionist;
-}
-return (
+  return (
     <ScrollView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
+      
       <View style={styles.header}>
         <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
           {image ? (
@@ -107,52 +96,44 @@ return (
             <Icon name="person" size={50} color="#fff" />
           )}
           <View style={styles.editIcon}>
-            <Icon name="edit" size={12} color="#fff" />
+            <Icon name="camera-alt" size={14} color="#fff" />
           </View>
         </TouchableOpacity>
 
         <Text style={styles.name}>{data?.full_name || "مستخدم"}</Text>
-
         <Text style={styles.subText}>{data?.phone || "059xxxxxxx"}</Text>
 
         <View style={styles.roleBadge}>
           <Text style={styles.roleText}>{role}</Text>
         </View>
-
-        {role !== "PATIENT" && data?.email && (
-          <Text style={[styles.subText, { marginTop: 8, color: '#a27d7b', fontWeight: 'bold' }]}>
-            {data.email}
-          </Text>
-        )}
       </View>
 
       <View style={styles.list}>
+        <Text style={styles.sectionTitle}>الإعدادات العامة</Text>
+        
         <SettingItem
-          id="1"
           icon="lock"
           title="تغيير كلمة المرور"
           onPress={() => navigation.navigate("ChangePassword")}
         />
         <SettingItem
-          id="2"
           icon="person"
-          title="تعديل الحساب"
+          title="تعديل بيانات الحساب"
           onPress={() => {}}
         />
         <SettingItem
-          id="3"
           icon="language"
           title="لغة التطبيق"
           onPress={() => {}}
         />
         <SettingItem
-          id="4"
           icon="info"
-          title="عن التطبيق"
+          title="عن تطبيق MediKidney"
           onPress={() => navigation.navigate("AboutApp")}
         />
 
         <TouchableOpacity style={styles.logoutBtn} onPress={confirmLogout}>
+          <Icon name="logout" size={20} color="#fff" style={{marginRight: 10}} />
           <Text style={styles.logoutText}>تسجيل الخروج</Text>
         </TouchableOpacity>
       </View>
@@ -160,100 +141,132 @@ return (
   );
 };
 
-export default ProfileSettingsScreen;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#ecfdf5', // نفس خلفية تسجيل الدخول
   },
   header: {
-    backgroundColor: '#382120',
-    padding: 40,
+    backgroundColor: '#204a42', // اللون الكحلي الداكن من زر تسجيل الدخول
+    paddingTop: 60,
+    paddingBottom: 40,
     alignItems: 'center',
-    borderBottomRightRadius: 50,
+    borderBottomRightRadius: 40,
+    borderBottomLeftRadius: 40,
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
   },
   avatarContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#5e3c3a',
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: '#606a7b',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#fff',
+    borderWidth: 3,
+    borderColor: '#059669', // اللون الأخضر الطبي
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
   },
   editIcon: {
     position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#a27d7b',
-    borderRadius: 10,
-    padding: 4,
+    bottom: 5,
+    right: 5,
+    backgroundColor: '#204a42',
+    borderRadius: 15,
+    padding: 6,
+    borderWidth: 2,
+    borderColor: '#0f172a',
   },
   name: {
     color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 10,
+    fontSize: 22,
+    fontWeight: '900',
+    marginTop: 15,
   },
   subText: {
-    color: '#ccc',
-    fontSize: 12,
+    color: '#94a3b8',
+    fontSize: 14,
+    marginTop: 4,
+  },
+  roleBadge: {
+    backgroundColor: 'rgba(5, 150, 105, 0.2)',
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#059669',
+  },
+  roleText: {
+    color: '#059669',
+    fontSize: 11,
+    fontWeight: 'bold',
   },
   list: {
-    padding: 20,
+    padding: 25,
+  },
+  sectionTitle: {
+    textAlign: 'right',
+    color: '#64748b',
+    fontSize: 13,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    marginRight: 5,
   },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 15,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#eee',
+    paddingVertical: 12,
+    backgroundColor: '#fff',
+    paddingHorizontal: 15,
+    borderRadius: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   itemContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex:1,
-    justifyContent:"flex-end",
+    flex: 1,
+    justifyContent: "flex-end",
   },
   itemText: {
-    marginRight: 15,
-    fontSize: 16,
-    color: '#333',
-    flexShrink:1,
-    textAlign:"right",
+    marginRight: 12,
+    fontSize: 15,
+    color: '#1e293b', // لون النص الداكن من تسجيل الدخول
+    fontWeight: '600',
+    textAlign: "right",
+  },
+  iconCircle: {
+    width: 35,
+    height: 35,
+    backgroundColor: '#f0fdf4',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logoutBtn: {
-    marginTop: 30,
-    backgroundColor: '#e74c3c',
-    padding: 15,
-    borderRadius: 10,
+    marginTop: 20,
+    backgroundColor: '#ef4444', // أحمر واضح للخروج
+    padding: 16,
+    borderRadius: 16,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    elevation: 2,
   },
   logoutText: {
     color: '#fff',
-    fontWeight: 'bold',
-  },
-  roleBadge: {
-    backgroundColor: '#5e3c3a',
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    borderRadius: 20,
-    marginTop: 10,
-    borderWidth: 1,
-    borderColor: '#a27d7b',
-  },
-  roleText: {
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
+    fontWeight: '900',
+    fontSize: 16,
   },
 });
+
+export default ProfileSettingsScreen;
