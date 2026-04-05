@@ -40,6 +40,7 @@ const LoginScreen = ({ navigation }) => {
         else alert("Role not found: " + userRole);
       } else {
         alert(data.message || "فشل تسجيل الدخول");
+        
       }
     } catch (err) {
       if (err.inner) {
@@ -53,7 +54,6 @@ const LoginScreen = ({ navigation }) => {
       setIsLoading(false);
     }
   };
-
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === "ios" ? "padding" : "height"} 

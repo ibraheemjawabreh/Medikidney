@@ -6,13 +6,11 @@ import {
   ScrollView,
   ActivityIndicator,
   StatusBar,
-  Dimensions,
-  TouchableOpacity
+  Dimensions
 } from "react-native";
 import { Tab, TabView, Button, Icon, Divider } from "@rneui/base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
@@ -21,10 +19,8 @@ const StaffPatientView = ({ route, navigation }) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState("");
   const [nutritionPlan, setNutritionPlan] = useState(null);
   const [sessions, setSessions] = useState([]);
-  const [sessionsLoading, setSessionsLoading] = useState(false);
 
   const { patientId } = route.params || {};
 
@@ -32,22 +28,27 @@ const StaffPatientView = ({ route, navigation }) => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem("token");
-      const role = await AsyncStorage.getItem("userRole"); // جلب الدور الوظيفي
-      setUserRole(role);
+
+      if (!patientId) {
+        alert("خطأ: لم يتم تمرير رقم المريض");
+        navigation.goBack();
+        return;
+      }
 
       const response = await axios.get(
         `https://medikidneysys.onrender.com/users/profile/patients/${patientId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const patientData = response.data;
-      setPatient(patientData);
-      fetchNutritionPlan(patientData.patient_id);
-      fetchSessions(patientData.patient_id);
+      setPatient(response.data);
 
+      if (response.data?.patient_id) {
+        fetchNutritionPlan(response.data.patient_id);
+        fetchSessions(response.data.patient_id);
+      }
     } catch (error) {
-      console.log("Error fetching patient:", error.message);
-      alert("عذراً: تعذر العثور على بيانات المريض");
+      console.log("Error:", error.response?.data || error.message);
+      alert("المريض غير موجود أو حدث خطأ أثناء جلب البيانات");
       navigation.goBack();
     } finally {
       setLoading(false);
@@ -69,21 +70,14 @@ const StaffPatientView = ({ route, navigation }) => {
 
   const fetchSessions = async (id) => {
     try {
-      setSessionsLoading(true);
       const token = await AsyncStorage.getItem("token");
       const response = await axios.get(
         `https://medikidneysys.onrender.com/dialysis-sessions?patientId=${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setSessions(Array.isArray(response.data) ? response.data : []);
-    } catch (e) { setSessions([]); } finally { setSessionsLoading(false); }
+      setSessions(response.data || []);
+    } catch (e) { setSessions([]); }
   };
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchPatientData();
-    }, [patientId])
-  );
 
   const formatDate = (date) => {
     if (!date) return "-";
@@ -101,11 +95,17 @@ const StaffPatientView = ({ route, navigation }) => {
     </View>
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchPatientData();
+    }, [patientId])
+  );
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#059669" />
-        <Text style={{ marginTop: 10, color: '#64748b' }}>جاري تحميل البيانات...</Text>
+        <Text style={{ marginTop: 10, color: '#64748b' }}>جاري تحميل ملف المريض...</Text>
       </View>
     );
   }
@@ -114,12 +114,8 @@ const StaffPatientView = ({ route, navigation }) => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
       
-      {/* Header: بطاقة تعريف المريض بنفس تصميم صفحة المريض */}
+      {/* Header */}
       <View style={styles.headerContainer}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-forward" size={24} color="#fff" />
-        </TouchableOpacity>
-
         <View style={styles.avatarCircle}>
           <Icon name="account-circle" size={70} color="#cbd5e1" />
         </View>
@@ -157,28 +153,15 @@ const StaffPatientView = ({ route, navigation }) => {
       >
         <Tab.Item title="التغذية" titleStyle={styles.tabTitle} icon={{ name: "food-apple", type: "material-community", color: tabIndex === 0 ? "#059669" : "#94a3b8" }} />
         <Tab.Item title="الجلسات" titleStyle={styles.tabTitle} icon={{ name: "water-sync", type: "material-community", color: tabIndex === 1 ? "#059669" : "#94a3b8" }} />
-        <Tab.Item title="الملاحظات" titleStyle={styles.tabTitle} icon={{ name: "note-text", type: "material-community", color: tabIndex === 2 ? "#059669" : "#94a3b8" }} />
+        <Tab.Item title="ملاحظات الطبيب" titleStyle={styles.tabTitle} icon={{ name: "file-document-outline", type: "material-community", color: tabIndex === 2 ? "#059669" : "#94a3b8" }} />
         <Tab.Item title="الفحوصات" titleStyle={styles.tabTitle} icon={{ name: "flask-outline", type: "material-community", color: tabIndex === 3 ? "#059669" : "#94a3b8" }} />
       </Tab>
 
       <TabView value={tabIndex} onChange={setTabIndex} animationType="spring">
-        
-        {/* TAB 1: التغذية */}
+        {/* Nutrition */}
         <TabView.Item style={styles.tabViewContent}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 20 }}>
-            <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
-                <Text style={styles.sectionHeading}>الخطة الغذائية</Text>
-                {userRole === "NUTRITIONIST" && (
-                    <Button
-                        title="تعديل"
-                        type="clear"
-                        titleStyle={{ color: '#059669', fontSize: 14 }}
-                        icon={{ name: 'edit', type: 'material', size: 16, color: '#059669' }}
-                        onPress={() => navigation.navigate("NutritionistTable", { patientId: patient.patient_id })}
-                    />
-                )}
-            </View>
-
+            <Text style={styles.sectionHeading}>الخطة الغذائية الحالية</Text>
             {nutritionPlan ? (
               <View style={styles.nutritionCard}>
                 <View style={styles.planHeader}>
@@ -190,92 +173,112 @@ const StaffPatientView = ({ route, navigation }) => {
                   <InfoItem label="الممنوعات" value={nutritionPlan.forbiddenItems} icon="close-circle-outline" color="#ef4444" />
                   <Divider style={{ marginVertical: 10 }} />
                   <View style={styles.mealsGrid}>
-                    <View style={styles.mealSmallBox}><Text style={styles.mealLabel}>الفطور</Text><Text style={styles.mealText}>{nutritionPlan.breakfast}</Text></View>
-                    <View style={styles.mealSmallBox}><Text style={styles.mealLabel}>الغداء</Text><Text style={styles.mealText}>{nutritionPlan.lunch}</Text></View>
-                    <View style={styles.mealSmallBox}><Text style={styles.mealLabel}>العشاء</Text><Text style={styles.mealText}>{nutritionPlan.dinner}</Text></View>
+                    <View style={styles.mealSmallBox}>
+                      <Text style={styles.mealLabel}>الفطور</Text>
+                      <Text style={styles.mealText}>{nutritionPlan.breakfast}</Text>
+                    </View>
+                    <View style={styles.mealSmallBox}>
+                      <Text style={styles.mealLabel}>الغداء</Text>
+                      <Text style={styles.mealText}>{nutritionPlan.lunch}</Text>
+                    </View>
+                    <View style={styles.mealSmallBox}>
+                      <Text style={styles.mealLabel}>العشاء</Text>
+                      <Text style={styles.mealText}>{nutritionPlan.dinner}</Text>
+                    </View>
                   </View>
                   {nutritionPlan.mealNotes && (
-                    <View style={styles.noteContainer}><Text style={styles.noteText}>💡 {nutritionPlan.mealNotes}</Text></View>
+                    <View style={styles.noteContainer}>
+                      <Text style={styles.noteText}>💡 {nutritionPlan.mealNotes}</Text>
+                    </View>
                   )}
                 </View>
               </View>
             ) : (
               <View style={styles.emptyState}>
                 <Icon name="food-off" type="material-community" size={50} color="#cbd5e1" />
-                <Text style={styles.emptyText}>لا توجد خطة مسجلة</Text>
+                <Text style={styles.emptyText}>لا توجد خطة غذائية مسجلة حالياً</Text>
               </View>
             )}
           </ScrollView>
         </TabView.Item>
 
-        {/* TAB 2: الجلسات */}
+        {/* Sessions */}
         <TabView.Item style={styles.tabViewContent}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 20 }}>
-            <Text style={styles.sectionHeading}>سجل الجلسات</Text>
-            {sessionsLoading ? (
-               <ActivityIndicator color="#059669" />
-            ) : sessions.length > 0 ? (
-              sessions.map((session, index) => (
+            <Text style={styles.sectionHeading}>سجل جلسات الغسيل</Text>
+            {sessions.length > 0 ? (
+              sessions.reverse().map((session, index) => (
                 <View key={index} style={styles.sessionCard}>
                   <View style={styles.sessionHeader}>
                     <Text style={styles.sessionDate}>{formatDate(session.date)}</Text>
                     <Text style={styles.sessionId}>جلسة #{session.session_id}</Text>
                   </View>
                   <View style={styles.sessionStatsGrid}>
-                    <View style={styles.miniStat}><Text style={styles.miniLabel}>الضغط (قبل/بعد)</Text><Text style={styles.miniValue}>{session.blood_pressure_before} / {session.blood_pressure_after}</Text></View>
-                    <View style={styles.miniStat}><Text style={styles.miniLabel}>الوزن (قبل/بعد)</Text><Text style={styles.miniValue}>{session.weight_before}kg / {session.weight_after}kg</Text></View>
-                    <View style={styles.miniStat}><Text style={styles.miniLabel}>سوائل مسحوبة</Text><Text style={[styles.miniValue, {color: '#059669'}]}>{session.fluid_removed} لتر</Text></View>
+                    <View style={styles.miniStat}>
+                      <Text style={styles.miniLabel}>الضغط (قبل/بعد)</Text>
+                      <Text style={styles.miniValue}>{session.blood_pressure_before} / {session.blood_pressure_after}</Text>
+                    </View>
+                    <View style={styles.miniStat}>
+                      <Text style={styles.miniLabel}>الوزن (قبل/بعد)</Text>
+                      <Text style={styles.miniValue}>{session.weight_before}kg / {session.weight_after}kg</Text>
+                    </View>
+                    <View style={styles.miniStat}>
+                      <Text style={[styles.miniValue, {color: '#059669'}]}>سوائل مسحوبة: {session.fluid_removed} لتر</Text>
+                    </View>
                   </View>
                   <View style={styles.nurseInfo}>
                     <Icon name="medical-bag" type="material-community" size={16} color="#64748b" />
                     <Text style={styles.nurseName}>الممرض: {session.nurse?.full_name || "غير مسجل"}</Text>
                   </View>
+                  {session.notes && <Text style={styles.sessionNotes}>📝 {session.notes}</Text>}
                 </View>
               ))
             ) : (
-              <Text style={styles.emptyText}>لا توجد جلسات مسجلة</Text>
+              <Text style={styles.emptyText}>لم يتم تسجيل أي جلسات بعد</Text>
             )}
           </ScrollView>
         </TabView.Item>
 
-        {/* TAB 3: الملاحظات */}
+        {/* Doctor Notes (فارغ حالياً) */}
         <TabView.Item style={styles.tabViewContent}>
-            <View style={styles.appointmentContainer}>
-                <Icon name="note-edit-outline" type="material-community" size={80} color="#059669" />
-                <Text style={styles.sectionHeading}>ملاحظات الفريق الطبي</Text>
-                <Text style={styles.emptyText}>سيتم عرض ملاحظات الأطباء والتمريض هنا قريباً</Text>
+          <ScrollView contentContainerStyle={{ padding: 20 }}>
+            <Text style={styles.sectionHeading}>ملاحظات الطبيب</Text>
+            <View style={styles.emptyState}>
+              <Icon name="file-document-outline" type="material-community" size={50} color="#cbd5e1" />
+              <Text style={styles.emptyText}>لا توجد ملاحظات حالياً</Text>
             </View>
+          </ScrollView>
         </TabView.Item>
 
-        {/* TAB 4: الفحوصات */}
+        {/* Lab Tests (فارغ حالياً) */}
         <TabView.Item style={styles.tabViewContent}>
-          <View style={styles.appointmentContainer}>
-            <Icon name="test-tube" type="material-community" size={80} color="#059669" />
-            <Text style={styles.sectionHeading}>نتائج الفحوصات</Text>
-            <Text style={styles.emptyText}>لا توجد فحوصات مخبرية متاحة للعرض حالياً</Text>
-          </View>
+          <ScrollView contentContainerStyle={{ padding: 20 }}>
+            <Text style={styles.sectionHeading}>الفحوصات المخبرية</Text>
+            <View style={styles.emptyState}>
+              <Icon name="flask-outline" type="material-community" size={50} color="#cbd5e1" />
+              <Text style={styles.emptyText}>قريباً: عرض نتائج الفحوصات</Text>
+            </View>
+          </ScrollView>
         </TabView.Item>
-
       </TabView>
     </View>
   );
 };
 
+// **ستايلات نسخة المريض بدون أي تعديل**
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#ecfdf5" },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: '#fff' },
   
   headerContainer: {
-    backgroundColor: "#0f172a",
-    paddingTop: 50,
+    backgroundColor: "#204a42",
+    paddingTop: 40,
     paddingBottom: 25,
     alignItems: "center",
     borderBottomRightRadius: 30,
     borderBottomLeftRadius: 30,
     elevation: 10,
-    position: 'relative'
   },
-  backBtn: { position: 'absolute', right: 20, top: 50, zIndex: 10 },
   avatarCircle: {
     width: 90,
     height: 90,
@@ -304,11 +307,11 @@ const styles = StyleSheet.create({
   statValue: { color: "#fff", fontSize: 14, fontWeight: "bold" },
 
   tabBar: { backgroundColor: "#fff", elevation: 0, borderBottomWidth: 1, borderColor: '#e2e8f0' },
-  tabIndicator: { backgroundColor: "#059669", height: 3 },
+  tabIndicator: { backgroundColor: "#204a42", height: 3 },
   tabTitle: { fontSize: 11, fontWeight: "bold", color: "#64748b" },
   tabViewContent: { flex: 1, width: width },
 
-  sectionHeading: { fontSize: 18, fontWeight: "900", color: "#1e293b", textAlign: "right" },
+  sectionHeading: { fontSize: 18, fontWeight: "900", color: "#1e293b", textAlign: "right", marginBottom: 15 },
   
   nutritionCard: { backgroundColor: "#fff", borderRadius: 20, overflow: "hidden", elevation: 3, borderWidth: 1, borderColor: '#e2e8f0' },
   planHeader: { backgroundColor: "#059669", padding: 12, flexDirection: "row-reverse", alignItems: "center" },
@@ -336,8 +339,8 @@ const styles = StyleSheet.create({
   miniValue: { fontSize: 13, fontWeight: 'bold', color: '#334155', textAlign: 'right' },
   nurseInfo: { flexDirection: 'row-reverse', alignItems: 'center', marginTop: 5 },
   nurseName: { fontSize: 12, color: '#64748b', marginRight: 5 },
+  sessionNotes: { backgroundColor: '#f1f5f9', padding: 8, borderRadius: 8, marginTop: 10, fontSize: 12, color: '#475569', textAlign: 'right' },
 
-  appointmentContainer: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
   emptyState: { alignItems: 'center', marginTop: 40 },
   emptyText: { color: "#94a3b8", textAlign: "center", marginTop: 10, fontSize: 14 }
 });

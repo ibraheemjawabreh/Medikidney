@@ -67,14 +67,14 @@ const DailySchedules = ({ navigation }) => {
           <View style={styles.patientInfo}>
             <Text style={styles.patientName}>{item.patientName}</Text>
             <View style={styles.badgeRow}>
-                <View style={styles.machineBadge}>
-                    <Text style={styles.machineText}>ماكينة: {item.machineNumber}</Text>
+              <View style={styles.machineBadge}>
+                <Text style={styles.machineText}>ماكينة: {item.machineNumber}</Text>
+              </View>
+              {item.hasSessionToday && (
+                <View style={styles.doneBadge}>
+                  <Text style={styles.doneText}>تمت الجلسة</Text>
                 </View>
-                {item.hasSessionToday && (
-                    <View style={styles.doneBadge}>
-                        <Text style={styles.doneText}>تمت الجلسة</Text>
-                    </View>
-                )}
+              )}
             </View>
           </View>
           <MaterialCommunityIcons 
@@ -86,13 +86,6 @@ const DailySchedules = ({ navigation }) => {
 
         {isExpanded && (
           <View style={styles.actionRow}>
-            {/* تم تعطيل زر "عرض الملف" مؤقتاً لحين التأكد من الـ API والـ ID الصحيح من الباك-إند
-              onPress={() => {
-                navigation.navigate("StaffPatientView", { 
-                  patientId: item.userId || item.patientId 
-                });
-              }}
-            */}
             <TouchableOpacity 
               style={[styles.actionButton, styles.disabledProfileButton]}
               onPress={() => alert("قريباً: سيتم تفعيل عرض الملف بعد ربط الـ API الجديد")}
@@ -101,7 +94,6 @@ const DailySchedules = ({ navigation }) => {
               <Text style={styles.disabledProfileButtonText}>عرض الملف</Text>
             </TouchableOpacity>
 
-            {/* زر البدء بالجلسة - شغال تمام */}
             <TouchableOpacity 
               style={[
                 styles.actionButton, 
@@ -128,7 +120,6 @@ const DailySchedules = ({ navigation }) => {
     );
   };
 
-  // ... باقي كود الـ UI (نفسه بدون تغيير)
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -156,7 +147,7 @@ const DailySchedules = ({ navigation }) => {
       </View>
 
       {loading && shifts.length === 0 ? (
-        <ActivityIndicator size="large" color="#2563eb" style={{ marginTop: 50 }} />
+        <ActivityIndicator size="large" color="#059669" style={{ marginTop: 50 }} />
       ) : (
         <FlatList
           data={shifts.find(s => s.shiftNumber === activeShift)?.patients || []}
@@ -165,8 +156,8 @@ const DailySchedules = ({ navigation }) => {
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-                <MaterialCommunityIcons name="account-off-outline" size={60} color="#cbd5e1" />
-                <Text style={styles.emptyText}>لا يوجد مرضى في هذا الشفت</Text>
+              <MaterialCommunityIcons name="account-off-outline" size={60} color="#cbd5e1" />
+              <Text style={styles.emptyText}>لا يوجد مرضى في هذا الشفت</Text>
             </View>
           }
         />
@@ -178,37 +169,40 @@ const DailySchedules = ({ navigation }) => {
 export default DailySchedules;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8fafc" },
-  header: { padding: 20, backgroundColor: "#fff", borderBottomWidth: 1, borderBottomColor: "#f1f5f9" },
-  headerTitle: { fontSize: 22, fontWeight: "bold", color: "#1e293b", textAlign: 'right' },
-  headerDate: { fontSize: 14, color: "#64748b", textAlign: 'right', marginTop: 4 },
-  shiftSelector: { backgroundColor: '#fff', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
+  container: { flex: 1, backgroundColor: "#ecfdf5" },
+  header: { padding: 20, backgroundColor: "#204a42", borderBottomWidth: 1, borderBottomColor: "#1e293b", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
+  headerTitle: { fontSize: 22, fontWeight: "900", color: "#fff", textAlign: 'right' },
+  headerDate: { fontSize: 14, color: "#94a3b8", textAlign: 'right', marginTop: 4 },
+  
+  shiftSelector: { backgroundColor: '#f8fafc', paddingVertical: 12 },
   shiftTab: { flexDirection: 'row-reverse', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#f1f5f9', marginLeft: 10 },
-  activeShiftTab: { backgroundColor: '#2563eb' },
+  activeShiftTab: { backgroundColor: '#059669' },
   shiftTabText: { fontSize: 14, fontWeight: '600', color: '#64748b' },
   activeShiftTabText: { color: '#fff' },
   countBadge: { backgroundColor: '#cbd5e1', borderRadius: 10, paddingHorizontal: 6, marginRight: 8 },
   activeCountBadge: { backgroundColor: 'rgba(255,255,255,0.3)' },
   countText: { fontSize: 11, fontWeight: 'bold', color: '#1e293b' },
+
   listContent: { padding: 15 },
   card: { backgroundColor: "#fff", borderRadius: 16, marginBottom: 12, elevation: 2, borderWidth: 1, borderColor: '#f1f5f9', overflow: 'hidden' },
-  expandedCard: { borderColor: '#2563eb', borderWidth: 1.5 },
+  expandedCard: { borderColor: '#059669', borderWidth: 1.5 },
   cardHeader: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center", padding: 18 },
   patientInfo: { alignItems: 'flex-end', flex: 1 },
-  patientName: { fontSize: 16, fontWeight: "700", color: "#334155", marginBottom: 6 },
+  patientName: { fontSize: 16, fontWeight: "700", color: "#1e293b", marginBottom: 6 },
   badgeRow: { flexDirection: 'row-reverse' },
   machineBadge: { backgroundColor: '#eff6ff', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
   machineText: { fontSize: 12, color: "#2563eb", fontWeight: '600' },
   doneBadge: { backgroundColor: '#f0fdf4', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, marginRight: 8 },
   doneText: { fontSize: 12, color: "#16a34a", fontWeight: '600' },
+
   actionRow: { flexDirection: "row-reverse", padding: 15, backgroundColor: "#f8fafc", borderTopWidth: 1, borderTopColor: "#e2e8f0", justifyContent: 'space-between' },
   actionButton: { flexDirection: 'row-reverse', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15, borderRadius: 10, width: '48%', justifyContent: 'center' },
-  // ستايل الزر المعطل
   disabledProfileButton: { backgroundColor: "#f1f5f9", borderWidth: 1, borderColor: "#e2e8f0" },
   disabledProfileButtonText: { color: "#94a3b8", fontWeight: "bold", marginRight: 8 },
-  sessionButton: { backgroundColor: "#2563eb" },
+  sessionButton: { backgroundColor: "#059669" },
   disabledButton: { backgroundColor: "#cbd5e1" },
   sessionButtonText: { color: "#fff", fontWeight: "bold", marginRight: 8 },
+
   emptyContainer: { alignItems: 'center', marginTop: 80 },
   emptyText: { textAlign: 'center', marginTop: 10, color: '#94a3b8', fontSize: 16 }
 });
