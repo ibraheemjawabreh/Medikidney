@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { View, TextInput, TouchableOpacity, Text, Alert, ScrollView } from "react-native";
+import { 
+  View, TextInput, TouchableOpacity, Text, Alert, ScrollView, 
+  ActivityIndicator, StyleSheet, StatusBar, KeyboardAvoidingView, 
+  Platform, TouchableWithoutFeedback, Keyboard 
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Icon } from "@rneui/base";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const NutritionistTable = ({ route, navigation }) => {
   const patientId = route.params?.patientId;
 
+  // --- States ---
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [forbiddenItems, setForbiddenItems] = useState("");
@@ -12,55 +19,52 @@ const NutritionistTable = ({ route, navigation }) => {
   const [breakfast, setBreakfast] = useState("");
   const [lunch, setLunch] = useState("");
   const [dinner, setDinner] = useState("");
-  const [mealNotes, setMealNotes] = useState("");
+  const [mealNotes, setMealNotes] = useState(""); // استعادة حالة الملاحظات
+  
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+  
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+
   const [loading, setLoading] = useState(true);
-  const [existingPlanId, setExistingPlanId] = useState(null);
+  const [programId, setProgramId] = useState(null);
 
   useEffect(() => {
-    const fetchCurrentPlan = async () => {
-      try {
-        if (!patientId) return;
-        const token = await AsyncStorage.getItem("token");
-        if (!token) throw new Error("لم يتم تسجيل الدخول");
-
-        const response = await fetch(
-          `https://medikidneysys.onrender.com/nutrition-programs?patientId=${patientId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        const data = await response.json();
-
-        if (data.length > 0) {
-          const plan = data[0]; 
-          setExistingPlanId(plan.id);
-
-          setTitle(plan.title || "");
-          setDescription(plan.description || "");
-
-        
-          setForbiddenItems(plan.forbiddenItems || plan.forbidden_items || "");
-          setAllowedItems(plan.allowedItems || plan.allowed_items || "");
-          setBreakfast(plan.breakfast || "");
-          setLunch(plan.lunch || "");
-          setDinner(plan.dinner || "");
-          setMealNotes(plan.mealNotes || plan.meal_notes || "");
-        }
-      } catch (error) {
-        console.log("Fetch Plan Error:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchCurrentPlan();
   }, [patientId]);
 
-  const savePlan = async () => {
+  const fetchCurrentPlan = async () => {
     try {
-      if (!patientId) return Alert.alert("خطأ", "لم يتم اختيار المريض");
+      const token = await AsyncStorage.getItem("token");
+      const response = await fetch(
+        `https://medikidneysys.onrender.com/nutrition-programs?patientId=${patientId}`,
+        { headers: { "Authorization": `Bearer ${token}` } }
+      );
+      const data = await response.json();
 
+      if (Array.isArray(data) && data.length > 0) {
+        const plan = data.sort((a, b) => (b.id || 0) - (a.id || 0))[0];
+        setProgramId(plan.id || plan.program_id);
+        setTitle(plan.title || "");
+        setDescription(plan.description || "");
+        setForbiddenItems(plan.forbidden_items || plan.forbiddenItems || "");
+        setAllowedItems(plan.allowed_items || plan.allowedItems || "");
+        setBreakfast(plan.breakfast || "");
+        setLunch(plan.lunch || "");
+        setDinner(plan.dinner || "");
+        setMealNotes(plan.meal_notes || plan.mealNotes || ""); // تعبئة الملاحظات من السيرفر
+        
+        if (plan.startDate || plan.start_date) setStartDate(new Date(plan.startDate || plan.start_date));
+        if (plan.endDate || plan.end_date) setEndDate(new Date(plan.endDate || plan.end_date));
+      }
+    } catch (error) { console.log(error); } finally { setLoading(false); }
+  };
+
+  const handleSave = async () => {
+    try {
       const token = await AsyncStorage.getItem("token");
       const nutritionistId = await AsyncStorage.getItem("userId");
-      if (!token) return Alert.alert("خطأ", "لم يتم تسجيل الدخول");
 
       const bodyData = {
         patientId: Number(patientId),
@@ -72,69 +76,122 @@ const NutritionistTable = ({ route, navigation }) => {
         breakfast,
         lunch,
         dinner,
-        mealNotes,
-        startDate: new Date().toISOString(),
-        endDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
+        mealNotes, // إرسال الملاحظات
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
       };
 
-      let response;
-      if (existingPlanId) {
-        response = await fetch(
-          `https://medikidneysys.onrender.com/nutrition-programs/${existingPlanId}`,
-          {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify(bodyData)
-          }
-        );
-      } else {
-        response = await fetch(
-          `https://medikidneysys.onrender.com/nutrition-programs`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify(bodyData)
-          }
-        );
+      const response = await fetch(
+        `https://medikidneysys.onrender.com/nutrition-programs${programId ? `/${programId}` : ""}`,
+        {
+          method: programId ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+          body: JSON.stringify(bodyData)
+        }
+      );
+
+      if (response.ok) {
+        Alert.alert("✅ تم", "تم حفظ البرنامج بنجاح", [{ text: "تم", onPress: () => navigation.goBack() }]);
       }
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "تعذر حفظ الخطة");
-
-      Alert.alert("نجاح", existingPlanId ? "تم تعديل الخطة بنجاح!" : "تم إنشاء الخطة بنجاح!");
-      setExistingPlanId(data.id || existingPlanId);
-
-    } catch (error) {
-      console.log("Save Plan Error:", error);
-      Alert.alert("خطأ", error.message);
-    }
+    } catch (error) { Alert.alert("خطأ", "فشل الاتصال بالسيرفر"); }
   };
 
-  if (loading) return <Text style={{ textAlign: "center", marginTop: 50 }}>جاري تحميل البيانات...</Text>;
+  const onStartChange = (event, selectedDate) => {
+    setShowStartPicker(false);
+    if (selectedDate) setStartDate(selectedDate);
+  };
+
+  const onEndChange = (event, selectedDate) => {
+    setShowEndPicker(false);
+    if (selectedDate) setEndDate(selectedDate);
+  };
+
+  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator size="large" color="#059669" /></View>;
 
   return (
-    <ScrollView style={{ padding: 20 }}>
-      <TextInput placeholder="عنوان الخطة" value={title} onChangeText={setTitle} style={styles.input} />
-      <TextInput placeholder="الوصف" value={description} onChangeText={setDescription} style={styles.input} />
-      <TextInput placeholder="الممنوعات" value={forbiddenItems} onChangeText={setForbiddenItems} style={styles.input} />
-      <TextInput placeholder="المسموحات" value={allowedItems} onChangeText={setAllowedItems} style={styles.input} />
-      <TextInput placeholder="الفطور" value={breakfast} onChangeText={setBreakfast} style={styles.input} />
-      <TextInput placeholder="الغداء" value={lunch} onChangeText={setLunch} style={styles.input} />
-      <TextInput placeholder="العشاء" value={dinner} onChangeText={setDinner} style={styles.input} />
-      <TextInput placeholder="ملاحظات" value={mealNotes} onChangeText={setMealNotes} style={styles.input} />
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+          <Text style={styles.headerTitle}>{programId ? "تعديل البرنامج الغذائي" : "إنشاء برنامج جديد"}</Text>
 
-      <TouchableOpacity onPress={savePlan} style={styles.button}>
-        <Text style={{ color: "#fff", fontWeight: "bold" }}>
-          {existingPlanId ? "تعديل الخطة" : "حفظ الخطة"}
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
+          <View style={styles.formCard}>
+            <Text style={styles.label}>عنوان البرنامج</Text>
+            <TextInput value={title} onChangeText={setTitle} style={styles.input} placeholder="مثال: دايت الأسبوع 2" />
+
+            <Text style={styles.label}>الوصف العام (الوصفة)</Text>
+            <TextInput value={description} onChangeText={setDescription} style={[styles.input, { height: 60 }]} multiline />
+
+            <View style={styles.rowBetween}>
+              <View style={{ width: '48%' }}>
+                <Text style={styles.label}>تاريخ البدء</Text>
+                <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.dateSelector}>
+                  <Icon name="calendar-edit" type="material-community" size={18} color="#204a42" />
+                  <Text style={styles.dateText}>{startDate.toLocaleDateString('ar-EG')}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={{ width: '48%' }}>
+                <Text style={styles.label}>تاريخ الانتهاء</Text>
+                <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.dateSelector}>
+                  <Icon name="calendar-check" type="material-community" size={18} color="#204a42" />
+                  <Text style={styles.dateText}>{endDate.toLocaleDateString('ar-EG')}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {showStartPicker && <DateTimePicker value={startDate} mode="date" display="default" onChange={onStartChange} />}
+            {showEndPicker && <DateTimePicker value={endDate} mode="date" display="default" onChange={onEndChange} />}
+
+            <View style={styles.rowBetween}>
+                <View style={{ width: '48%' }}><Text style={[styles.label, {color: 'red'}]}>الممنوعات</Text><TextInput value={forbiddenItems} onChangeText={setForbiddenItems} style={[styles.input, {height: 80}]} multiline/></View>
+                <View style={{ width: '48%' }}><Text style={[styles.label, {color: 'green'}]}>المسموحات</Text><TextInput value={allowedItems} onChangeText={setAllowedItems} style={[styles.input, {height: 80}]} multiline/></View>
+            </View>
+
+            <Text style={styles.sectionTitle}>الوجبات</Text>
+            <MealInput label="فطور" value={breakfast} onChange={setBreakfast} />
+            <MealInput label="غداء" value={lunch} onChange={setLunch} />
+            <MealInput label="عشاء" value={dinner} onChange={setDinner} />
+
+            {/* --- حقل الملاحظات الإضافية --- */}
+            <Text style={styles.label}>ملاحظات إضافية على الوجبات</Text>
+            <TextInput 
+              value={mealNotes} 
+              onChangeText={setMealNotes} 
+              style={[styles.input, { height: 80, textAlignVertical: 'top' }]} 
+              placeholder="اكتب أي تعليمات خاصة هنا..."
+              multiline 
+            />
+
+            <TouchableOpacity onPress={handleSave} style={[styles.saveBtn, { backgroundColor: programId ? '#0ea5e9' : '#204a42' }]}>
+              <Text style={styles.saveBtnText}>{programId ? "تحديث الخطة" : "اعتماد الخطة"}</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
-const styles = {
-  input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 8, marginBottom: 12, padding: 10, textAlign: "right" },
-  button: { backgroundColor: "#2A7FFF", padding: 15, borderRadius: 8, alignItems: "center", marginTop: 10 },
-};
+const MealInput = ({ label, value, onChange }) => (
+  <View style={{ marginBottom: 10 }}>
+    <Text style={styles.label}>{label}</Text>
+    <TextInput value={value} onChangeText={onChange} style={[styles.input, { height: 50 }]} multiline />
+  </View>
+);
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#f1f5f9', padding: 15 },
+  loadingContainer: { flex: 1, justifyContent: "center" },
+  headerTitle: { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginVertical: 15 },
+  formCard: { backgroundColor: '#fff', borderRadius: 20, padding: 20, elevation: 5 },
+  label: { textAlign: 'right', fontWeight: 'bold', marginBottom: 5, fontSize: 13, color: '#475569' },
+  input: { borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 10, textAlign: 'right', backgroundColor: '#f8fafc', marginBottom: 15 },
+  rowBetween: { flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 10 },
+  dateSelector: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#f1f5f9', padding: 12, borderRadius: 10, borderWidth: 1, borderColor: '#cbd5e1' },
+  dateText: { marginRight: 10, color: '#204a42', fontWeight: 'bold' },
+  sectionTitle: { textAlign: 'right', fontWeight: 'bold', fontSize: 16, color: '#204a42', marginVertical: 10 },
+  saveBtn: { padding: 15, borderRadius: 12, alignItems: 'center', marginTop: 20 },
+  saveBtnText: { color: '#fff', fontWeight: 'bold' }
+});
 
 export default NutritionistTable;
