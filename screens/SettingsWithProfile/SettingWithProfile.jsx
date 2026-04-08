@@ -8,23 +8,39 @@ import axios from 'axios';
 const ProfileSettingsScreen = ({ navigation }) => {
   const [image, setImage] = useState(null);
   const [userData, setUserData] = useState(null);
-
+const [loading, setLoading] = useState(true); // حالة التحميل
   useEffect(() => {
     getProfile();
   }, []);
 
   const getProfile = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-      const response = await axios.get(
-        "https://medikidneysys.onrender.com/users/profile",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setUserData(response.data);
-    } catch (error) {
-      console.log(error);
+  try {
+    setLoading(true);
+    const token = await AsyncStorage.getItem("token");
+
+    // 1. إذا لم يوجد توكن، توقف فوراً ولا ترسل طلب للسيرفر
+    if (!token) {
+      setLoading(false);
+      return; 
     }
-  };
+
+    const response = await axios.get(
+      "https://medikidneysys.onrender.com/users/profile",
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    
+    setUserData(response.data);
+  } catch (error) {
+    // 2. إذا كان الخطأ 403 (باسورد مؤقتة)، لا تظهر خطأ في الكونسول، فقط وجهه للتغيير
+    if (error.response && error.response.status === 403) {
+      console.log("الحساب يحتاج تغيير كلمة مرور");
+    } else {
+      console.log("Profile Error:", error.message);
+    }
+  } finally {
+    setLoading(false);
+  }
+};;
 
   const handleLogout = async () => {
     try {

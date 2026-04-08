@@ -7,6 +7,7 @@ import { StyleSheet, View } from "react-native";
 import DailySchedules from "../Nurse/DailySchedules"; 
 import ProfileSettingsScreen from "../SettingsWithProfile/SettingWithProfile";
 import SearchPatient from "../patinet/searchPatinet"; // خليناها كخيار ثانوي
+import selectPatinet from './selectPatinet'
 
 const Tab = createBottomTabNavigator();
 
@@ -14,7 +15,7 @@ const NursePages = () => {
   return (
     <View style={styles.container}>
       <Tab.Navigator
-        initialRouteName="Schedules" // جعل جدول الجلسات هو الصفحة الأولى
+        initialRouteName="selectPatinet" // جعل جدول الجلسات هو الصفحة الأولى
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarStyle: styles.tabBar,
@@ -24,7 +25,7 @@ const NursePages = () => {
           tabBarIcon: ({ color, focused }) => {
             let iconName;
 
-            if (route.name === "Schedules") {
+            if (route.name === "selectPatinet") {
               iconName = focused ? "calendar" : "calendar-outline";
             } else if (route.name === "Search") {
               iconName = focused ? "search" : "search-outline";
@@ -38,8 +39,8 @@ const NursePages = () => {
       >
         {/* الصفحة الأساسية الجديدة: جدول الجلسات */}
         <Tab.Screen
-          name="Schedules"
-          component={DailySchedules}
+          name="selectPatinet"
+          component={selectPatinet}
           options={{ title: "جلسات اليوم" }}
         />
 

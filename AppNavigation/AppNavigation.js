@@ -19,6 +19,8 @@ import PatientProfile from '../screens/patinet/PatinetProfile';
 import StaffPatientView from '../screens/patinet/NurseNutritionsitTOpatint';
 import ShowSessions from '../screens/Sessions/ShowSessions'
 import DailySchedules from '../screens/Nurse/DailySchedules'
+import SelectPatient from '../screens/Nurse/selectPatinet'
+import PatientState from '../screens/Nurse/patinetState'
 
 
 const Stack = createNativeStackNavigator();
@@ -44,6 +46,10 @@ const AppNavigator = () => {
       <Stack.Screen name="StaffPatientView" component={StaffPatientView} options={{ headerShown: false }}  />
       <Stack.Screen name='ShowSessions' component={ShowSessions} /> 
       <Stack.Screen name='DailySchedules' component={DailySchedules} /> 
+      <Stack.Screen name='SelectPatient' component={SelectPatient} /> 
+      <Stack.Screen name='PatientState' component={PatientState} /> 
+
+
 
     </Stack.Navigator>
   );
