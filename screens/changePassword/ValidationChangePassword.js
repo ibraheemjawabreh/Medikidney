@@ -7,7 +7,7 @@ const ValidationChange = yup.object().shape({
 
     newPassword: yup
         .string()
-        .min(6, "كلمة السر يجب أن تكون 6 أحرف على الأقل")
+        .min(8, "كلمة المرور قصيرة جداً، يجب أن تكون 8 خانات على الأقل")
         .required("يجب عليك ادخال كلمة السر الجديدة"),
 
     confirmPassword: yup
@@ -17,4 +17,3 @@ const ValidationChange = yup.object().shape({
 });
 
 export default ValidationChange;
-

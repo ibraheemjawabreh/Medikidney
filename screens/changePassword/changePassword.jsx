@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, Alert, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { Text, View, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { Button, Input } from "@rneui/themed";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,22 +15,26 @@ const ChangePassword = ({ navigation, route }) => {
   const [errors, seterrors] = useState({});
   const [loading, setLoading] = useState(false);
 
- const handleChangePassword = async () => {
+  const handleChangePassword = async () => {
     try {
       setLoading(true);
-      
-      // اختيار التوكن (القادم من صفحة اللوجن)
-      const token = tempToken || await AsyncStorage.getItem("token");
+      seterrors({}); // تصفير الأخطاء السابقة
 
-      // تجهيز البيانات بنفس الصيغة التي يحبها السيرفر
+      // 1. التحقق من صحة المدخلات (يمنع أقل من 8 خانات)
+      await ValidationChange.validate(
+        { oldPassword, newPassword, confirmPassword },
+        { abortEarly: false }
+      );
+
+      // 2. إذا نجح التحقق، نجهز التوكن والبيانات
+      const token = tempToken || await AsyncStorage.getItem("token");
       const payload = {
         oldPassword: oldPassword,
         newPassword: newPassword,
         confirmPassword: confirmPassword
       };
 
-      console.log("البيانات المرسلة:", payload); // لمراقبة ما يخرج من التطبيق
-
+      // 3. الطلب من السيرفر
       const response = await axios.patch(
         "https://medikidneysys.onrender.com/auth/change-password",
         payload,
@@ -42,40 +46,45 @@ const ChangePassword = ({ navigation, route }) => {
         }
       );
 
+      // 4. معالجة النجاح والتوجيه
       if (response.status === 200 || response.status === 201) {
-        // 1. استخراج التوكن الجديد من رد السيرفر بعد التغيير
-        const newToken = response.data.access_token; 
+        const newToken = response.data.access_token;
 
         if (newToken) {
-          // 2. تخزين التوكن الجديد (الآن أصبح غير مقيد ويمكنه دخول البروفايل)
           await AsyncStorage.setItem("token", newToken);
           await AsyncStorage.setItem("role", userRole);
           
-          Alert.alert("نجاح ✅", "تم تفعيل حسابك بنجاح");
+          Alert.alert("نجاح ✅", "تم تحديث كلمة المرور بنجاح");
 
-          // 3. التوجه للصفحة الرئيسية
-          if (userRole === "PATIENT") {
+          const role = userRole ? userRole.toUpperCase() : "";
+
+          // التوجيه حسب الرتبة
+          if (role === "PATIENT") {
             navigation.replace("Patinet");
-          } else if (userRole === "NURSE") {
+          } else if (role === "NURSE") {
             navigation.replace("NurseHome");
+          } else if (role === "NUTRITIONIST") {
+            navigation.replace("NutritionistHome");
+          } else {
+            navigation.replace("Login");
           }
-        } else {
-          // في حال لم يرسل السيرفر توكن جديد، نطلب منه تسجيل الدخول مرة أخرى بالباسورد الجديدة
-          Alert.alert("تم التغيير", "يرجى تسجيل الدخول بكلمة المرور الجديدة");
-          navigation.replace("Login");
         }
       }
 
     } catch (err) {
-      // طباعة الخطأ القادم من السيرفر بالتفصيل في الـ Console
-      console.log("خطأ السيرفر (400):", err.response?.data);
-
-      const errorMessage = err.response?.data?.message || "حدث خطأ ما";
-      
-      // إذا كان الخطأ عبارة عن مصفوفة (Array) كما يفعل NestJS أحياناً
-      const finalMessage = Array.isArray(errorMessage) ? errorMessage.join("\n") : errorMessage;
-      
-      Alert.alert("فشل التغيير", finalMessage);
+      if (err.name === "ValidationError") {
+        // عرض أخطاء الـ Yup (مثل: رسالة الـ 8 خانات)
+        const validationErrors = {};
+        err.inner.forEach((error) => {
+          validationErrors[error.path] = error.message;
+        });
+        seterrors(validationErrors);
+      } else {
+        // عرض أخطاء السيرفر (مثل: كلمة المرور القديمة غير صحيحة)
+        const serverMsg = err.response?.data?.message || "حدث خطأ ما";
+        const finalMsg = Array.isArray(serverMsg) ? serverMsg.join("\n") : serverMsg;
+        Alert.alert("فشل العملية", finalMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -85,10 +94,8 @@ const ChangePassword = ({ navigation, route }) => {
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.headerSection}>
-          <Text style={styles.header}>{isInitialChange ? "خطوة أخيرة" : "أمن الحساب"}</Text>
-          <Text style={styles.subtitle}>
-            {isInitialChange ? "يرجى تعيين كلمة مرور جديدة لتفعيل حسابك" : "حدث كلمة المرور الخاصة بك"}
-          </Text>
+          <Text style={styles.header}>{isInitialChange ? "تفعيل الحساب" : "أمن الحساب"}</Text>
+          <Text style={styles.subtitle}>يجب أن تتكون كلمة المرور من 8 خانات على الأقل</Text>
         </View>
 
         <View style={styles.card}>
@@ -105,7 +112,7 @@ const ChangePassword = ({ navigation, route }) => {
 
           <Text style={styles.label}>كلمة المرور الجديدة</Text>
           <Input
-            placeholder="كلمة المرور الجديدة"
+            placeholder="8 خانات على الأقل"
             value={newPassword}
             onChangeText={setnewPassword}
             errorMessage={errors.newPassword}
@@ -138,7 +145,6 @@ const ChangePassword = ({ navigation, route }) => {
   );
 };
 
-// ... ستايلاتك تبقى كما هي
 export default ChangePassword;
 
 const styles = StyleSheet.create({
