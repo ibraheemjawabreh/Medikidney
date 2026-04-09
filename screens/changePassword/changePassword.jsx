@@ -14,94 +14,113 @@ const ChangePassword = ({ navigation, route }) => {
   const [confirmPassword, setconfirmPassword] = useState("");
   const [errors, seterrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [skipLoading, setSkipLoading] = useState(false);
 
+  // دالة مساعدة لتخزين التوكن والتوجيه حسب الدور (Role)
+  const handleNavigationAfterSuccess = async (token) => {
+    try {
+      await AsyncStorage.setItem("token", token);
+      await AsyncStorage.setItem("role", userRole);
+      
+      const role = userRole ? userRole.toUpperCase() : "";
+
+      if (role === "PATIENT") {
+        navigation.replace("Patinet");
+      } else if (role === "NURSE") {
+        navigation.replace("NurseHome");
+      } else if (role === "NUTRITIONIST") {
+        navigation.replace("NutritionistHome");
+      } else {
+        navigation.replace("Login");
+      }
+    } catch (error) {
+      console.error("Storage Error:", error);
+    }
+  };
+
+  // 1. دالة تحديث كلمة المرور (إلزامية أو اختيارية)
   const handleChangePassword = async () => {
     try {
       setLoading(true);
-      seterrors({}); // تصفير الأخطاء السابقة
+      seterrors({});
 
-      // 1. التحقق من صحة المدخلات (يمنع أقل من 8 خانات)
+      // التحقق من صحة المدخلات عبر Yup
       await ValidationChange.validate(
         { oldPassword, newPassword, confirmPassword },
         { abortEarly: false }
       );
 
-      // 2. إذا نجح التحقق، نجهز التوكن والبيانات
-      const token = tempToken || await AsyncStorage.getItem("token");
-      const payload = {
-        oldPassword: oldPassword,
-        newPassword: newPassword,
-        confirmPassword: confirmPassword
-      };
-
-      // 3. الطلب من السيرفر
       const response = await axios.patch(
-        "https://medikidneysys.onrender.com/auth/change-password",
-        payload,
+        "https://medikidneysys.onrender.com/auth/set-initial-password",
+        { oldPassword, newPassword, confirmPassword },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${tempToken}`,
             "Content-Type": "application/json",
           },
         }
       );
 
-      // 4. معالجة النجاح والتوجيه
       if (response.status === 200 || response.status === 201) {
-        const newToken = response.data.access_token;
-
-        if (newToken) {
-          await AsyncStorage.setItem("token", newToken);
-          await AsyncStorage.setItem("role", userRole);
-          
-          Alert.alert("نجاح ✅", "تم تحديث كلمة المرور بنجاح");
-
-          const role = userRole ? userRole.toUpperCase() : "";
-
-          // التوجيه حسب الرتبة
-          if (role === "PATIENT") {
-            navigation.replace("Patinet");
-          } else if (role === "NURSE") {
-            navigation.replace("NurseHome");
-          } else if (role === "NUTRITIONIST") {
-            navigation.replace("NutritionistHome");
-          } else {
-            navigation.replace("Login");
-          }
-        }
+        Alert.alert("نجاح ✅", "تم تحديث كلمة المرور بنجاح");
+        // نستخدم التوكن الجديد الذي يرجعه السيرفر بعد التحديث
+        handleNavigationAfterSuccess(response.data.access_token);
       }
-
     } catch (err) {
       if (err.name === "ValidationError") {
-        // عرض أخطاء الـ Yup (مثل: رسالة الـ 8 خانات)
         const validationErrors = {};
         err.inner.forEach((error) => {
           validationErrors[error.path] = error.message;
         });
         seterrors(validationErrors);
       } else {
-        // عرض أخطاء السيرفر (مثل: كلمة المرور القديمة غير صحيحة)
         const serverMsg = err.response?.data?.message || "حدث خطأ ما";
-        const finalMsg = Array.isArray(serverMsg) ? serverMsg.join("\n") : serverMsg;
-        Alert.alert("فشل العملية", finalMsg);
+        Alert.alert("فشل العملية", Array.isArray(serverMsg) ? serverMsg[0] : serverMsg);
       }
     } finally {
       setLoading(false);
     }
   };
 
+  // 2. دالة تخطي التغيير (Skip)
+  const handleSkip = async () => {
+    try {
+      setSkipLoading(true);
+      const response = await axios.patch(
+        "https://medikidneysys.onrender.com/auth/skip-initial-password-change",
+        {}, // Body فارغ
+        {
+          headers: {
+            Authorization: `Bearer ${tempToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        // عند التخطي، ندخل بالتوكن المؤقت الذي معنا (أو الجديد إذا أرجعه السيرفر)
+        const finalToken = response.data.access_token || tempToken;
+        handleNavigationAfterSuccess(finalToken);
+      }
+    } catch (err) {
+      const serverMsg = err.response?.data?.message || "لا يمكن التخطي حالياً";
+      Alert.alert("تنبيه", Array.isArray(serverMsg) ? serverMsg[0] : serverMsg);
+    } finally {
+      setSkipLoading(false);
+    }
+  };
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.headerSection}>
-          <Text style={styles.header}>{isInitialChange ? "تفعيل الحساب" : "أمن الحساب"}</Text>
-          <Text style={styles.subtitle}>يجب أن تتكون كلمة المرور من 8 خانات على الأقل</Text>
+          <Text style={styles.header}>تفعيل الحساب</Text>
+          <Text style={styles.subtitle}>يمكنك حماية حسابك بكلمة مرور جديدة أو التخطي للآن</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.label}>كلمة المرور القديمة</Text>
+          <Text style={styles.label}>كلمة المرور المؤقتة</Text>
           <Input
-            placeholder="كلمة المرور الحالية"
+            placeholder="كلمة المرور التي وصلتك"
             value={oldPassword}
             onChangeText={setoldPassword}
             errorMessage={errors.oldPassword}
@@ -136,8 +155,19 @@ const ChangePassword = ({ navigation, route }) => {
             title="تحديث ودخول"
             onPress={handleChangePassword}
             loading={loading}
+            disabled={skipLoading}
             buttonStyle={styles.button}
             containerStyle={styles.buttonContainer}
+          />
+
+          <Button
+            title="التخطي للآن"
+            type="clear"
+            onPress={handleSkip}
+            loading={skipLoading}
+            disabled={loading}
+            titleStyle={styles.skipTitle}
+            containerStyle={styles.skipContainer}
           />
         </View>
       </ScrollView>
@@ -152,10 +182,31 @@ const styles = StyleSheet.create({
   scrollContainer: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 20, paddingVertical: 30 },
   headerSection: { marginBottom: 30, alignItems: 'center' },
   header: { fontSize: 28, fontWeight: "900", color: "#0f172a" },
-  subtitle: { fontSize: 14, color: "#64748b", textAlign: "center", marginTop: 5 },
-  card: { backgroundColor: "#FFFFFF", borderRadius: 25, padding: 25, elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 10, borderWidth: 1, borderColor: '#e2e8f0' },
+  subtitle: { fontSize: 14, color: "#64748b", textAlign: "center", marginTop: 5, paddingHorizontal: 20 },
+  card: { 
+    backgroundColor: "#FFFFFF", 
+    borderRadius: 25, 
+    padding: 25, 
+    elevation: 5, 
+    shadowColor: "#000", 
+    shadowOffset: { width: 0, height: 4 }, 
+    shadowOpacity: 0.1, 
+    shadowRadius: 10, 
+    borderWidth: 1, 
+    borderColor: '#e2e8f0' 
+  },
   label: { fontSize: 14, fontWeight: "900", color: "#334155", marginBottom: 5, textAlign: 'right', marginRight: 10 },
-  inputContainer: { borderBottomWidth: 0, backgroundColor: "#f8fafc", borderRadius: 15, paddingHorizontal: 15, borderWidth: 1, borderColor: "#e2e8f0", height: 55 },
+  inputContainer: { 
+    borderBottomWidth: 0, 
+    backgroundColor: "#f8fafc", 
+    borderRadius: 15, 
+    paddingHorizontal: 15, 
+    borderWidth: 1, 
+    borderColor: "#e2e8f0", 
+    height: 55 
+  },
   buttonContainer: { borderRadius: 15, marginTop: 10 },
   button: { backgroundColor: "#0f172a", borderRadius: 15, paddingVertical: 15 },
+  skipContainer: { marginTop: 15 },
+  skipTitle: { color: "#64748b", fontWeight: "bold", fontSize: 16 },
 });
