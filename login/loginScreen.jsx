@@ -29,21 +29,20 @@ const LoginScreen = ({ navigation }) => {
 
       const data = await response.json();
       
-   if (response.ok) {
-        // فحص حالة تغيير كلمة المرور بناءً على الـ API الخاص بك
-        // لاحظ أننا نفحص data.user.mustChangePassword
+if (response.ok) {
+        // فحص هل يحتاج المستخدم لتغيير كلمة المرور لأول مرة
         if (data.user && data.user.mustChangePassword === true) {
-          console.log("المستخدم يحتاج لتغيير كلمة المرور");
+          console.log("المستخدم يحتاج لتفعيل الحساب لأول مرة");
           
-          navigation.replace("ChangePassword", { 
+          // التوجه لصفحتك الجديدة التي أنشأتها
+          navigation.replace("ChangePasswordFirstTime", { 
             tempToken: data.access_token, 
-            isInitialChange: true,
             userRole: data.user.role 
           });
-          return; // نوقف العملية هنا لكي لا يخزن التوكن كتوكن نهائي
+          return; // نوقف العملية هنا لكي لا يخزن التوكن كتوكن نهائي الآن
         }
 
-        // إذا لم يكن مطلوباً تغييرها، نكمل الدخول الطبيعي
+        // إذا كان الحساب مفعلاً مسبقاً، نكمل الدخول الطبيعي
         await AsyncStorage.setItem("token", data.access_token);
         await AsyncStorage.setItem("role", data.user.role);
 
@@ -53,16 +52,8 @@ const LoginScreen = ({ navigation }) => {
         else if (userRole === "NUTRITIONIST") navigation.replace("NutritionistHome");
 
       } else {
-        // إذا رجع السيرفر 403 مع رسالة تغيير كلمة المرور
-        if (response.status === 403 && data.message.includes("كلمة المرور المؤقتة")) {
-            navigation.replace("ChangePassword", { 
-                tempToken: data.access_token, 
-                isInitialChange: true,
-                userRole: "PATIENT" // أو حسب البيانات الراجعة
-            });
-        } else {
-            alert(data.message || "فشل تسجيل الدخول");
-        }
+        // في حال فشل تسجيل الدخول (كلمة مرور خطأ مثلاً)
+        Alert.alert("خطأ", data.message || "بيانات الدخول غير صحيحة");
       }
     } catch (err) {
       // ... معالجة أخطاء الـ Validation والاتصال (تبقى كما هي عندك)

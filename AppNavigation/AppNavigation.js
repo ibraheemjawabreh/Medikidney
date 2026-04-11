@@ -21,6 +21,7 @@ import ShowSessions from '../screens/Sessions/ShowSessions'
 import DailySchedules from '../screens/Nurse/DailySchedules'
 import SelectPatient from '../screens/Nurse/selectPatinet'
 import PatientState from '../screens/Nurse/patinetState'
+import ChangePasswordFirstTime from '../screens/changePassword/changepasswordafteerlogin'
 
 
 const Stack = createNativeStackNavigator();
@@ -48,6 +49,7 @@ const AppNavigator = () => {
       <Stack.Screen name='DailySchedules' component={DailySchedules} /> 
       <Stack.Screen name='SelectPatient' component={SelectPatient} /> 
       <Stack.Screen name='PatientState' component={PatientState} /> 
+      <Stack.Screen name="ChangePasswordFirstTime" component={ChangePasswordFirstTime} />
 
 
 

@@ -5,66 +5,44 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ValidationChange from "./ValidationChangePassword";
 
-const ChangePassword = ({ navigation, route }) => {
-  // استلام البيانات المرسلة من صفحة Login
-  const { tempToken, isInitialChange, userRole } = route.params || {};
-
+const ChangePassword = ({ navigation }) => {
   const [oldPassword, setoldPassword] = useState("");
   const [newPassword, setnewPassword] = useState("");
   const [confirmPassword, setconfirmPassword] = useState("");
   const [errors, seterrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [skipLoading, setSkipLoading] = useState(false);
 
-  // دالة مساعدة لتخزين التوكن والتوجيه حسب الدور (Role)
-  const handleNavigationAfterSuccess = async (token) => {
-    try {
-      await AsyncStorage.setItem("token", token);
-      await AsyncStorage.setItem("role", userRole);
-      
-      const role = userRole ? userRole.toUpperCase() : "";
-
-      if (role === "PATIENT") {
-        navigation.replace("Patinet");
-      } else if (role === "NURSE") {
-        navigation.replace("NurseHome");
-      } else if (role === "NUTRITIONIST") {
-        navigation.replace("NutritionistHome");
-      } else {
-        navigation.replace("Login");
-      }
-    } catch (error) {
-      console.error("Storage Error:", error);
-    }
-  };
-
-  // 1. دالة تحديث كلمة المرور (إلزامية أو اختيارية)
   const handleChangePassword = async () => {
     try {
       setLoading(true);
       seterrors({});
 
-      // التحقق من صحة المدخلات عبر Yup
+      // 1. التحقق من المدخلات
       await ValidationChange.validate(
         { oldPassword, newPassword, confirmPassword },
         { abortEarly: false }
       );
 
+      // 2. جلب التوكن المخزن في الجهاز
+      const token = await AsyncStorage.getItem("token");
+
+      // 3. إرسال طلب تغيير كلمة المرور التقليدي
       const response = await axios.patch(
-        "https://medikidneysys.onrender.com/auth/set-initial-password",
+        "https://medikidneysys.onrender.com/auth/change-password",
         { oldPassword, newPassword, confirmPassword },
         {
           headers: {
-            Authorization: `Bearer ${tempToken}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
       );
 
       if (response.status === 200 || response.status === 201) {
-        Alert.alert("نجاح ✅", "تم تحديث كلمة المرور بنجاح");
-        // نستخدم التوكن الجديد الذي يرجعه السيرفر بعد التحديث
-        handleNavigationAfterSuccess(response.data.access_token);
+        Alert.alert("نجاح ✅", "تم تغيير كلمة المرور بنجاح");
+        
+        // بعد التغيير بنجاح، نعود للصفحة السابقة (البروفايل مثلاً)
+        navigation.goBack();
       }
     } catch (err) {
       if (err.name === "ValidationError") {
@@ -82,45 +60,18 @@ const ChangePassword = ({ navigation, route }) => {
     }
   };
 
-  // 2. دالة تخطي التغيير (Skip)
-  const handleSkip = async () => {
-    try {
-      setSkipLoading(true);
-      const response = await axios.patch(
-        "https://medikidneysys.onrender.com/auth/skip-initial-password-change",
-        {}, // Body فارغ
-        {
-          headers: {
-            Authorization: `Bearer ${tempToken}`,
-          },
-        }
-      );
-
-      if (response.status === 200 || response.status === 201) {
-        // عند التخطي، ندخل بالتوكن المؤقت الذي معنا (أو الجديد إذا أرجعه السيرفر)
-        const finalToken = response.data.access_token || tempToken;
-        handleNavigationAfterSuccess(finalToken);
-      }
-    } catch (err) {
-      const serverMsg = err.response?.data?.message || "لا يمكن التخطي حالياً";
-      Alert.alert("تنبيه", Array.isArray(serverMsg) ? serverMsg[0] : serverMsg);
-    } finally {
-      setSkipLoading(false);
-    }
-  };
-
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.headerSection}>
-          <Text style={styles.header}>تفعيل الحساب</Text>
-          <Text style={styles.subtitle}>يمكنك حماية حسابك بكلمة مرور جديدة أو التخطي للآن</Text>
+          <Text style={styles.header}>أمن الحساب</Text>
+          <Text style={styles.subtitle}>تأكد من اختيار كلمة مرور قوية لحماية بياناتك الطبية</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.label}>كلمة المرور المؤقتة</Text>
+          <Text style={styles.label}>كلمة المرور الحالية</Text>
           <Input
-            placeholder="كلمة المرور التي وصلتك"
+            placeholder="أدخل كلمة المرور الحالية"
             value={oldPassword}
             onChangeText={setoldPassword}
             errorMessage={errors.oldPassword}
@@ -152,22 +103,19 @@ const ChangePassword = ({ navigation, route }) => {
           />
 
           <Button
-            title="تحديث ودخول"
+            title="تحديث كلمة المرور"
             onPress={handleChangePassword}
             loading={loading}
-            disabled={skipLoading}
             buttonStyle={styles.button}
             containerStyle={styles.buttonContainer}
           />
-
+          
           <Button
-            title="التخطي للآن"
+            title="إلغاء"
             type="clear"
-            onPress={handleSkip}
-            loading={skipLoading}
-            disabled={loading}
-            titleStyle={styles.skipTitle}
-            containerStyle={styles.skipContainer}
+            onPress={() => navigation.goBack()}
+            titleStyle={{ color: "#ef4444" }}
+            containerStyle={{ marginTop: 10 }}
           />
         </View>
       </ScrollView>
@@ -207,6 +155,4 @@ const styles = StyleSheet.create({
   },
   buttonContainer: { borderRadius: 15, marginTop: 10 },
   button: { backgroundColor: "#0f172a", borderRadius: 15, paddingVertical: 15 },
-  skipContainer: { marginTop: 15 },
-  skipTitle: { color: "#64748b", fontWeight: "bold", fontSize: 16 },
 });
