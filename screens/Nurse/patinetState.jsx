@@ -190,4 +190,4 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', marginTop: 80 }
 });
 
-export default PatientState;
+export default PatientState

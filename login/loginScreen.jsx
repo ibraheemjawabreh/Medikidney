@@ -34,17 +34,21 @@ if (response.ok) {
         if (data.user && data.user.mustChangePassword === true) {
           console.log("المستخدم يحتاج لتفعيل الحساب لأول مرة");
           
-          // التوجه لصفحتك الجديدة التي أنشأتها
           navigation.replace("ChangePasswordFirstTime", { 
             tempToken: data.access_token, 
             userRole: data.user.role 
           });
-          return; // نوقف العملية هنا لكي لا يخزن التوكن كتوكن نهائي الآن
+          return; 
         }
 
-        // إذا كان الحساب مفعلاً مسبقاً، نكمل الدخول الطبيعي
         await AsyncStorage.setItem("token", data.access_token);
         await AsyncStorage.setItem("role", data.user.role);
+        // حفظ معرف الممرض أو المستخدم لنستعمله لاحقاً
+        if (data.user.id) {
+          await AsyncStorage.setItem("userId", String(data.user.id));
+        } else if (data.user.userId) {
+          await AsyncStorage.setItem("userId", String(data.user.userId));
+        }
 
         const userRole = data.user.role;
         if (userRole === "PATIENT") navigation.replace("Patinet");

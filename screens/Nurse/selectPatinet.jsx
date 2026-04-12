@@ -92,7 +92,13 @@ const SelectPatient = ({ route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>اختيار مرضى الشفت</Text>
+        <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <Text style={[styles.headerTitle, { marginBottom: 0 }]}>اختيار مرضى الشفت</Text>
+          <Pressable onPress={() => navigation.navigate("PatientState")} style={{ paddingHorizontal: 12, paddingVertical: 8, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 10, flexDirection: 'row-reverse', alignItems: 'center', gap: 6 }}>
+            <MaterialCommunityIcons name="format-list-checks" size={20} color="#fff" />
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>حالة الغسيل</Text>
+          </Pressable>
+        </View>
         <View style={styles.shiftTabs}>
           {shifts.map((s) => (
             <Pressable
