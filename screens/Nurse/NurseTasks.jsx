@@ -157,14 +157,14 @@ const NurseTasks = ({ route, navigation }) => {
 
             <Text style={styles.label}>حالة الجلسة</Text>
             <View style={styles.statusRow}>
-              {["COMPLETED", "CANCELLED", "INCOMPLETE"].map((st) => (
+              {["COMPLETED", "CANCELLED", "MISSED"].map((st) => (
                 <TouchableOpacity 
                   key={st}
                   style={[styles.statusBtn, status === st && (st === "COMPLETED" ? styles.statusBtnActive : st === "CANCELLED" ? styles.statusBtnActiveRed : styles.statusBtnActiveOrange)]} 
                   onPress={() => setStatus(st)}
                 >
                   <Text style={[styles.statusBtnText, status === st && styles.statusBtnTextActive]}>
-                    {st === "COMPLETED" ? "مكتملة" : st === "CANCELLED" ? "ملغية" : "جزئية"}
+                    {st === "COMPLETED" ? "مكتملة" : st === "CANCELLED" ? "ملغية" : "متغيب"}
                   </Text>
                 </TouchableOpacity>
               ))}

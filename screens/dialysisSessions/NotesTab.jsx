@@ -1,8 +1,31 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, Pressable, Text } from 'react-native';
+import { View, TextInput, StyleSheet, Pressable, Text, Alert, ActivityIndicator } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const NotesTab = () => {
+const NotesTab = ({ route }) => {
+  const { sessionId } = route.params;
   const [note, setNote] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSaveNote = async () => {
+    if (!note.trim()) return Alert.alert("تنبيه", "يرجى كتابة ملاحظة أولاً");
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      await axios.patch(
+        `https://medikidneysys.onrender.com/dialysis-sessions/${sessionId}`,
+        { notes: note },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      Alert.alert("تم الحفظ", "تم حفظ الملاحظة بنجاح");
+    } catch (error) {
+      Alert.alert("خطأ", "فشل حفظ الملاحظة");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -14,8 +37,8 @@ const NotesTab = () => {
         value={note}
         onChangeText={setNote}
       />
-      <Pressable style={styles.btn} onPress={() => alert("تم حفظ الملاحظة")}>
-        <Text style={styles.btnText}>حفظ الملاحظة</Text>
+      <Pressable style={styles.btn} onPress={handleSaveNote} disabled={loading}>
+        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>حفظ الملاحظة</Text>}
       </Pressable>
     </View>
   );
@@ -28,4 +51,4 @@ const styles = StyleSheet.create({
   btnText: { color: '#fff', fontWeight: 'bold' }
 });
 
-export default NotesTab;
+export default NotesTab;
