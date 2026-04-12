@@ -1,12 +1,12 @@
-import React, { useState, useCallback } from "react"; 
-import { 
-  View, Text, StyleSheet, FlatList, TouchableOpacity, 
-  ActivityIndicator, LayoutAnimation, Platform, UIManager, ScrollView 
+import React, { useState, useCallback } from "react";
+import {
+  View, Text, StyleSheet, FlatList, TouchableOpacity,
+  ActivityIndicator, LayoutAnimation, Platform, UIManager, ScrollView
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useFocusEffect } from '@react-navigation/native'; 
+import { useFocusEffect } from '@react-navigation/native';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -15,7 +15,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 const DailySchedules = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [shifts, setShifts] = useState([]);
-  const [expandedPatientId, setExpandedPatientId] = useState(null); 
+  const [expandedPatientId, setExpandedPatientId] = useState(null);
   const [activeShift, setActiveShift] = useState(null);
 
   const fetchTodaySchedules = async () => {
@@ -29,7 +29,7 @@ const DailySchedules = ({ navigation }) => {
       );
 
       setShifts(response.data.shifts);
-      
+
       if (!activeShift) {
         const firstActiveShift = response.data.shifts.find(s => s.patientCount > 0);
         if (firstActiveShift) setActiveShift(firstActiveShift.shiftNumber);
@@ -59,8 +59,8 @@ const DailySchedules = ({ navigation }) => {
 
     return (
       <View style={[styles.card, isExpanded && styles.expandedCard]}>
-        <TouchableOpacity 
-          style={styles.cardHeader} 
+        <TouchableOpacity
+          style={styles.cardHeader}
           onPress={() => toggleExpand(item.patientId)}
           activeOpacity={0.7}
         >
@@ -77,16 +77,16 @@ const DailySchedules = ({ navigation }) => {
               )}
             </View>
           </View>
-          <MaterialCommunityIcons 
-            name={isExpanded ? "chevron-up" : "chevron-down"} 
-            size={24} 
-            color="#94a3b8" 
+          <MaterialCommunityIcons
+            name={isExpanded ? "chevron-up" : "chevron-down"}
+            size={24}
+            color="#94a3b8"
           />
         </TouchableOpacity>
 
         {isExpanded && (
           <View style={styles.actionRow}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.actionButton, styles.disabledProfileButton]}
               onPress={() => alert("قريباً: سيتم تفعيل عرض الملف بعد ربط الـ API الجديد")}
             >
@@ -94,21 +94,21 @@ const DailySchedules = ({ navigation }) => {
               <Text style={styles.disabledProfileButtonText}>عرض الملف</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
-                styles.actionButton, 
+                styles.actionButton,
                 item.hasSessionToday ? styles.disabledButton : styles.sessionButton
               ]}
               disabled={item.hasSessionToday}
-              onPress={() => navigation.navigate("NurseTasks", { 
+              onPress={() => navigation.navigate("NurseTasks", {
                 patientId: item.patientId,
-                scheduleId: item.scheduleId 
+                scheduleId: item.scheduleId
               })}
             >
-              <MaterialCommunityIcons 
-                name={item.hasSessionToday ? "check-circle" : "play-circle"} 
-                size={20} 
-                color="#fff" 
+              <MaterialCommunityIcons
+                name={item.hasSessionToday ? "check-circle" : "play-circle"}
+                size={20}
+                color="#fff"
               />
               <Text style={styles.sessionButtonText}>
                 {item.hasSessionToday ? "تم التسجيل" : "بدء الجلسة"}
@@ -128,9 +128,9 @@ const DailySchedules = ({ navigation }) => {
       </View>
 
       <View style={styles.shiftSelector}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{paddingHorizontal: 15}}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 15 }}>
           {shifts.map((shift) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               key={shift.shiftNumber}
               style={[styles.shiftTab, activeShift === shift.shiftNumber && styles.activeShiftTab]}
               onPress={() => setActiveShift(shift.shiftNumber)}
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   header: { padding: 20, backgroundColor: "#204a42", borderBottomWidth: 1, borderBottomColor: "#1e293b", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
   headerTitle: { fontSize: 22, fontWeight: "900", color: "#fff", textAlign: 'right' },
   headerDate: { fontSize: 14, color: "#94a3b8", textAlign: 'right', marginTop: 4 },
-  
+
   shiftSelector: { backgroundColor: '#f8fafc', paddingVertical: 12 },
   shiftTab: { flexDirection: 'row-reverse', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#f1f5f9', marginLeft: 10 },
   activeShiftTab: { backgroundColor: '#059669' },

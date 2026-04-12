@@ -22,6 +22,15 @@ import DailySchedules from '../screens/Nurse/DailySchedules'
 import SelectPatient from '../screens/Nurse/selectPatinet'
 import PatientState from '../screens/Nurse/patinetState'
 import ChangePasswordFirstTime from '../screens/changePassword/changepasswordafteerlogin'
+import MedicationsTab from '../screens/dialysisSessions/MedicationsTab'
+import NotesTab from '../screens/dialysisSessions/NotesTab'
+import SessionDetails from '../screens/dialysisSessions/SessionDetails'
+import SettingsTab from '../screens/dialysisSessions/SettingsTab'
+import SymptomsTab from '../screens/dialysisSessions/SymptomsTab'
+import VitalSignsTab from '../screens/dialysisSessions/VitalSignsTab'
+import NurseStack from '../screens/Nurse/nurseStack'
+
+
 
 
 const Stack = createNativeStackNavigator();
@@ -50,6 +59,15 @@ const AppNavigator = () => {
       <Stack.Screen name='SelectPatient' component={SelectPatient} /> 
       <Stack.Screen name='PatientState' component={PatientState} /> 
       <Stack.Screen name="ChangePasswordFirstTime" component={ChangePasswordFirstTime} />
+      <Stack.Screen name='MedicationsTab' component={MedicationsTab} /> 
+      <Stack.Screen name='NotesTab' component={NotesTab} /> 
+      <Stack.Screen name='SessionDetails' component={SessionDetails} /> 
+      <Stack.Screen name='SettingsTab' component={SettingsTab} /> 
+      <Stack.Screen name='SymptomsTab' component={SymptomsTab} /> 
+      <Stack.Screen name='VitalSignsTab' component={VitalSignsTab} /> 
+      {/* <Stack.Screen name='NurseStack' component={NurseStack} />  */}
+
+
 
 
 
