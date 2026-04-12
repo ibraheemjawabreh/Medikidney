@@ -2,38 +2,90 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import VitalSignsTab from './VitalSignsTab';
 import MedicationsTab from './MedicationsTab';
-import SettingsTab from './SettingsTab';
+import SettingsTab from './';
 import SymptomsTab from './SymptomsTab';
-import NotesTab from './NotesTab';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const SessionDetails = ({ route, navigation }) => {
   const { patient } = route.params;
   const sessionId = patient.sessionId;
-  
+
   // الحالة لتحديد المرحلة الحالية (1 إلى 5)
   const [step, setStep] = useState(1);
 
   const steps = [
-    { id: 1, title: "العلامات الحيوية", component: <VitalSignsTab route={{params: {sessionId}}} /> },
-    { id: 2, title: "إعدادات الجهاز", component: <SettingsTab route={{params: {sessionId}}} /> },
-    { id: 3, title: "الأدوية", component: <MedicationsTab route={{params: {sessionId}}} /> },
-    { id: 4, title: "الأعراض", component: <SymptomsTab route={{params: {sessionId}}} /> },
-    { id: 5, title: "ملاحظات إضافية", component: <NotesTab route={{params: {sessionId}}} /> },
+    { id: 1, title: "العلامات الحيوية", component: <VitalSignsTab route={{ params: { sessionId } }} /> },
+    { id: 2, title: "إعدادات الجهاز", component: <SettingsTab route={{ params: { sessionId } }} /> },
+    { id: 3, title: "الأدوية", component: <MedicationsTab route={{ params: { sessionId } }} /> },
+    { id: 4, title: "الأعراض والملاحظات", component: <SymptomsTab route={{ params: { sessionId } }} /> },
   ];
 
   const currentStepData = steps.find(s => s.id === step);
+  const [isFinishing, setIsFinishing] = useState(false);
+
+  React.useEffect(() => {
+    const loadStep = async () => {
+      try {
+        const savedStep = await AsyncStorage.getItem(`step_${sessionId}`);
+        if (savedStep) {
+          setStep(parseInt(savedStep, 10));
+        }
+      } catch (e) {
+        console.log("Error loading step:", e);
+      }
+    };
+    loadStep();
+  }, [sessionId]);
+
+  const changeStep = async (newStep) => {
+    setStep(newStep);
+    try {
+      await AsyncStorage.setItem(`step_${sessionId}`, newStep.toString());
+    } catch (e) {
+      console.log("Error saving step:", e);
+    }
+  };
+
+  const handleFinishSession = async () => {
+    try {
+      setIsFinishing(true);
+      const token = await AsyncStorage.getItem('token');
+      const API = "https://medikidneysys.onrender.com";
+      await axios.patch(
+        `${API}/dialysis-sessions/${sessionId}/status`,
+        { status: "COMPLETED" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // مسح الخطوة المحفوظة لأن الجلسة انتهت
+      await AsyncStorage.removeItem(`step_${sessionId}`);
+      // بعد نجاح التحديث نغلق الصفحة
+      navigation.goBack();
+    } catch (error) {
+      console.log('Error finishing session:', error.response?.data || error.message);
+      alert('فشل في إنهاء الجلسة، يرجى المحاولة مرة أخرى.');
+    } finally {
+      setIsFinishing(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
       {/* Header مع مؤشر التقدم */}
       <View style={styles.header}>
-        <Text style={styles.patientName}>{patient.patientName}</Text>
+        <View style={{ flexDirection: 'row-reverse', width: '100%', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+          <Pressable onPress={() => navigation.goBack()} style={{ padding: 5, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 10 }}>
+            <MaterialCommunityIcons name="arrow-right" size={24} color="#fff" />
+          </Pressable>
+          <Text style={styles.patientName}>{patient.patientName}</Text>
+          <View style={{ width: 34 }} />
+        </View>
         <View style={styles.stepIndicatorContainer}>
           {steps.map((s) => (
-            <View 
-              key={s.id} 
-              style={[styles.stepDot, step >= s.id ? styles.activeDot : styles.inactiveDot]} 
+            <View
+              key={s.id}
+              style={[styles.stepDot, step >= s.id ? styles.activeDot : styles.inactiveDot]}
             />
           ))}
         </View>
@@ -48,19 +100,19 @@ const SessionDetails = ({ route, navigation }) => {
       {/* أزرار التحكم في المراحل */}
       <View style={styles.footer}>
         {step > 1 ? (
-          <Pressable style={styles.backBtn} onPress={() => setStep(step - 1)}>
+          <Pressable style={styles.backBtn} onPress={() => changeStep(step - 1)}>
             <Text style={styles.backBtnText}>السابق</Text>
           </Pressable>
-        ) : <View style={{flex: 1}} />}
+        ) : <View style={{ flex: 1 }} />}
 
-        {step < 5 ? (
-          <Pressable style={styles.nextBtn} onPress={() => setStep(step + 1)}>
+        {step < 4 ? (
+          <Pressable style={styles.nextBtn} onPress={() => changeStep(step + 1)}>
             <Text style={styles.nextBtnText}>التالي</Text>
             <MaterialCommunityIcons name="arrow-left" size={20} color="#fff" />
           </Pressable>
         ) : (
-          <Pressable style={[styles.nextBtn, {backgroundColor: '#059669'}]} onPress={() => navigation.goBack()}>
-            <Text style={styles.nextBtnText}>إنهاء وإغلاق</Text>
+          <Pressable style={[styles.nextBtn, { backgroundColor: '#059669', opacity: isFinishing ? 0.7 : 1 }]} onPress={handleFinishSession} disabled={isFinishing}>
+            <Text style={styles.nextBtnText}>{isFinishing ? "جاري الإنهاء..." : "إنهاء وإغلاق"}</Text>
           </Pressable>
         )}
       </View>
