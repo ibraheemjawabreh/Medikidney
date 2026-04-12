@@ -21,6 +21,7 @@ const { width } = Dimensions.get("window");
 const StaffPatientView = ({ route, navigation }) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [subTabIndex, setSubTabIndex] = useState(0);
+  const [infoSubTabIndex, setInfoSubTabIndex] = useState(0);
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [nutritionPlan, setNutritionPlan] = useState(null);
@@ -81,7 +82,7 @@ const StaffPatientView = ({ route, navigation }) => {
       const token = await AsyncStorage.getItem("token");
       const storedUser = await AsyncStorage.getItem("user");
       const storedRole = await AsyncStorage.getItem("userRole") || await AsyncStorage.getItem("role");
-      
+
       let finalRole = "GUEST";
 
       if (storedUser) {
@@ -89,8 +90,8 @@ const StaffPatientView = ({ route, navigation }) => {
           const parsed = JSON.parse(storedUser);
           // هذا السطر هو "السر"؛ يفحص كل الاحتمالات الممكنة لمكان وجود الرتبة في الـ JSON
           finalRole = parsed.role || parsed.user?.role || parsed.data?.user?.role || storedRole || "GUEST";
-        } catch (e) { 
-          finalRole = storedRole || "GUEST"; 
+        } catch (e) {
+          finalRole = storedRole || "GUEST";
         }
       } else if (storedRole) {
         finalRole = storedRole;
@@ -108,7 +109,7 @@ const StaffPatientView = ({ route, navigation }) => {
       }
 
       const response = await axios.get(
-        `https://medikidneysys.onrender.com/users/profile/patients/${patientId}`, 
+        `https://medikidneysys.onrender.com/users/profile/patients/${patientId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPatient(response.data);
@@ -185,12 +186,12 @@ const StaffPatientView = ({ route, navigation }) => {
           </Text>
         </View>
       </View>
-      <Button 
-        title="معاينة" 
-        icon={<Icon name="file-pdf-box" type="material-community" color="white" size={20} />} 
-        buttonStyle={styles.downloadBtn} 
-        onPress={() => handleDownload(fileUrl)} 
-        disabled={!fileUrl} 
+      <Button
+        title="معاينة"
+        icon={<Icon name="file-pdf-box" type="material-community" color="white" size={20} />}
+        buttonStyle={styles.downloadBtn}
+        onPress={() => handleDownload(fileUrl)}
+        disabled={!fileUrl}
       />
     </View>
   );
@@ -207,7 +208,7 @@ const StaffPatientView = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#204a42" />
-      
+
       {/* Header Section */}
       <View style={styles.headerContainer}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -216,21 +217,22 @@ const StaffPatientView = ({ route, navigation }) => {
         <View style={styles.avatarCircle}><Icon name="account-circle" type="material-community" size={80} color="#cbd5e1" /></View>
         <Text style={styles.patientName}>{patient?.full_name}</Text>
         <View style={styles.idBadge}><Text style={styles.idText}>رقم المريض: {patient?.patient_id}</Text></View>
-        
+
         <View style={styles.quickStats}>
           <View style={styles.statBox}><Text style={styles.statLabel}>فصيلة الدم</Text><Text style={styles.statValue}>{patient?.blood_type || "N/A"}</Text></View>
           <Divider orientation="vertical" width={1} color="rgba(255,255,255,0.2)" />
           <View style={styles.statBox}><Text style={styles.statLabel}>الجنس</Text><Text style={styles.statValue}>{patient?.gender === 'Male' ? 'ذكر' : 'أنثى'}</Text></View>
           <Divider orientation="vertical" width={1} color="rgba(255,255,255,0.2)" />
-          <View style={styles.statBox}><Text style={styles.statLabel}>الهوية</Text><Text style={[styles.statValue, {fontSize: 13}]}>{patient?.national_id || "---"}</Text></View>
+          <View style={styles.statBox}><Text style={styles.statLabel}>الهوية</Text><Text style={[styles.statValue, { fontSize: 13 }]}>{patient?.national_id || "---"}</Text></View>
         </View>
       </View>
 
-      <Tab value={tabIndex} onChange={setTabIndex} indicatorStyle={styles.tabIndicator} containerStyle={styles.tabBar} variant="default">
+      <Tab value={tabIndex} onChange={setTabIndex} indicatorStyle={styles.tabIndicator} containerStyle={styles.tabBar} variant="default" scrollable>
         <Tab.Item title="التغذية" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="food-apple" type="material-community" size={22} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />} />
         <Tab.Item title="الجلسات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="clock-outline" type="material-community" size={22} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />} />
         <Tab.Item title="الفحوصات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="clipboard-pulse" type="material-community" size={22} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />} />
         <Tab.Item title="الملاحظات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="note-edit-outline" type="material-community" size={22} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />} />
+        <Tab.Item title="معلومات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="card-account-details-outline" type="material-community" size={22} color={tabIndex === 4 ? "#204a42" : "#94a3b8"} />} />
       </Tab>
 
       <TabView value={tabIndex} onChange={setTabIndex}>
@@ -240,8 +242,8 @@ const StaffPatientView = ({ route, navigation }) => {
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionHeading}>البرنامج الغذائي</Text>
               {canEditNutrition && (
-                <TouchableOpacity 
-                  onPress={() => navigation.navigate("NutritionistTable", { patientId: patient?.patient_id })} 
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("NutritionistTable", { patientId: patient?.patient_id })}
                   style={styles.editBtn}>
                   <Icon name="pencil-outline" type="material-community" size={16} color="#fff" />
                   <Text style={styles.editBtnText}>تعديل</Text>
@@ -261,7 +263,7 @@ const StaffPatientView = ({ route, navigation }) => {
                     <Icon name="arrow-left-thin" type="material-community" size={20} color="#cbd5e1" />
                     <View style={styles.dateSubBox}><Text style={styles.dateLabelText}>إلى تاريخ:</Text><Text style={styles.dateValueText}>{formatDate(nutritionPlan.endDate || nutritionPlan.end_date)}</Text></View>
                   </View>
-                  
+
                   <View style={styles.descriptionSection}>
                     <Text style={styles.descTitle}>وصف البرنامج:</Text>
                     <Text style={styles.descContent}>{nutritionPlan.description || "لا يوجد وصف"}</Text>
@@ -292,8 +294,8 @@ const StaffPatientView = ({ route, navigation }) => {
                 <Icon name="food-off-outline" type="material-community" size={60} color="#cbd5e1" />
                 <Text style={styles.emptyText}>لا يوجد برنامج غذائي حالي</Text>
                 {canEditNutrition && (
-                  <Button 
-                    title="إنشاء برنامج" 
+                  <Button
+                    title="إنشاء برنامج"
                     onPress={() => navigation.navigate("NutritionistTable", { patientId: patient?.patient_id })}
                     buttonStyle={[styles.editBtn, { marginTop: 15, paddingHorizontal: 20 }]}
                   />
@@ -306,7 +308,19 @@ const StaffPatientView = ({ route, navigation }) => {
         {/* TAB 1: Sessions */}
         <TabView.Item style={styles.tabViewContent}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
-            <Text style={styles.sectionHeading}>سجل جلسات الغسيل</Text>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionHeading}>سجل جلسات الغسيل</Text>
+              <TouchableOpacity
+                style={styles.statsBtn}
+                onPress={() => navigation.navigate("PatientSessionStatistics", {
+                  patientId: patient?.patient_id,
+                  patientName: patient?.full_name,
+                })}
+              >
+                <Icon name="chart-line" type="material-community" size={16} color="#fff" />
+                <Text style={styles.statsBtnText}>إحصائيات</Text>
+              </TouchableOpacity>
+            </View>
             {sessions.length > 0 ? sessions.map((session, index) => (
               <View key={index} style={styles.sessionCard}>
                 <View style={styles.sessionHeader}>
@@ -385,10 +399,72 @@ const StaffPatientView = ({ route, navigation }) => {
 
         {/* TAB 3: Notes */}
         <TabView.Item style={styles.tabViewContent}>
-            <View style={styles.emptyState}>
-              <Icon name="note-text-outline" type="material-community" size={60} color="#cbd5e1" />
-              <Text style={styles.emptyText}>قريباً</Text>
+          <View style={styles.emptyState}>
+            <Icon name="note-text-outline" type="material-community" size={60} color="#cbd5e1" />
+            <Text style={styles.emptyText}>قريباً</Text>
+          </View>
+        </TabView.Item>
+
+        {/* TAB 4: Patient Info */}
+        <TabView.Item style={styles.tabViewContent}>
+          <View style={{ flex: 1 }}>
+            <View style={styles.subTabContainer}>
+              <TouchableOpacity onPress={() => setInfoSubTabIndex(0)} style={[styles.subTabItem, infoSubTabIndex === 0 && styles.subTabActive]}>
+                <Text style={[styles.subTabText, infoSubTabIndex === 0 && styles.subTextActive]}>البيانات الأساسية</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setInfoSubTabIndex(1)} style={[styles.subTabItem, infoSubTabIndex === 1 && styles.subTabActive]}>
+                <Text style={[styles.subTabText, infoSubTabIndex === 1 && styles.subTextActive]}>التاريخ الطبي</Text>
+              </TouchableOpacity>
             </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
+              {infoSubTabIndex === 0 && (
+                <View>
+                  <Text style={styles.sectionHeading}>البيانات الشخصية</Text>
+                  <View style={styles.nutritionCard}>
+                    <View style={styles.planBody}>
+                      <InfoItem label="الاسم الكامل" value={patient?.full_name} icon="account" />
+                      <Divider style={{ marginVertical: 10 }} />
+                      <InfoItem label="رقم الهوية" value={patient?.national_id} icon="card-account-details-outline" />
+                      <Divider style={{ marginVertical: 10 }} />
+                      <InfoItem label="تاريخ الميلاد" value={patient?.date_of_birth || patient?.birth_date ? formatDate(patient?.date_of_birth || patient?.birth_date) : null} icon="calendar" />
+                      <Divider style={{ marginVertical: 10 }} />
+                      <InfoItem label="الجنس" value={patient?.gender === 'Male' ? 'ذكر' : 'أنثى'} icon="gender-male-female" />
+                      <Divider style={{ marginVertical: 10 }} />
+                      <InfoItem label="رقم الهاتف" value={patient?.phone_number || patient?.phone} icon="phone" />
+                      <Divider style={{ marginVertical: 10 }} />
+                      <InfoItem label="رقم الطوارئ" value={patient?.emergency_contact} icon="phone-alert" color="#ef4444" />
+                      <Divider style={{ marginVertical: 10 }} />
+                      <InfoItem label="البريد الإلكتروني" value={patient?.email} icon="email" />
+                      <Divider style={{ marginVertical: 10 }} />
+                      <InfoItem label="العنوان" value={patient?.address} icon="map-marker" />
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              {infoSubTabIndex === 1 && (
+                <View>
+                  <Text style={styles.sectionHeading}>التاريخ الطبي للمريض</Text>
+                  <View style={styles.nutritionCard}>
+                    <View style={styles.planBody}>
+                      <InfoItem label="فصيلة الدم" value={patient?.blood_type} icon="water-plus" color="#ef4444" />
+                      <Divider style={{ marginVertical: 10 }} />
+                      <InfoItem label="الأمراض المزمنة" value={patient?.chronic_diseases} icon="medical-bag" />
+                      <Divider style={{ marginVertical: 10 }} />
+                      <InfoItem label="الحساسية" value={patient?.allergies} icon="allergy" color="#f59e0b" />
+                      <Divider style={{ marginVertical: 10 }} />
+                      <InfoItem label="تاريخ طبي إضافي" value={patient?.medical_history_notes} icon="file-document-outline" />
+                      <Divider style={{ marginVertical: 10 }} />
+                      <InfoItem label="حالة التدخين" value={patient?.smoking_status === true || patient?.smoking_status === "true" ? "مدخن" : "غير مدخن"} icon="smoking" color={patient?.smoking_status === true || patient?.smoking_status === "true" ? "#ef4444" : "#059669"} />
+                      <Divider style={{ marginVertical: 10 }} />
+                      <InfoItem label="ملاحظات عامة" value={patient?.notes} icon="note-text-outline" />
+                    </View>
+                  </View>
+                </View>
+              )}
+            </ScrollView>
+          </View>
         </TabView.Item>
       </TabView>
     </View>
@@ -423,6 +499,8 @@ const styles = StyleSheet.create({
   sectionHeading: { fontSize: 20, fontWeight: "800", color: "#1e293b", textAlign: "right", marginBottom: 15 },
   editBtn: { flexDirection: 'row-reverse', backgroundColor: '#204a42', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, alignItems: 'center' },
   editBtnText: { color: '#fff', fontSize: 13, fontWeight: 'bold', marginRight: 5 },
+  statsBtn: { flexDirection: 'row-reverse', backgroundColor: '#059669', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, alignItems: 'center', gap: 4 },
+  statsBtnText: { color: '#fff', fontSize: 13, fontWeight: 'bold', marginRight: 5 },
   nutritionCard: { backgroundColor: "#fff", borderRadius: 25, overflow: "hidden", elevation: 4, borderWidth: 1, borderColor: '#f1f5f9' },
   planHeader: { backgroundColor: "#204a42", padding: 15, flexDirection: "row-reverse", justifyContent: 'space-between', alignItems: "center" },
   planTitle: { color: "#fff", fontWeight: "bold", fontSize: 16 },

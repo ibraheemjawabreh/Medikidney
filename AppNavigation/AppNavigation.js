@@ -29,6 +29,7 @@ import SettingsTab from '../screens/dialysisSessions/SettingsTab'
 import SymptomsTab from '../screens/dialysisSessions/SymptomsTab'
 import VitalSignsTab from '../screens/dialysisSessions/VitalSignsTab'
 import NurseStack from '../screens/Nurse/nurseStack'
+import PatientSessionStatistics from '../screens/patinet/PatientSessionStatistics'
 
 
 
@@ -66,6 +67,7 @@ const AppNavigator = () => {
       <Stack.Screen name='SymptomsTab' component={SymptomsTab} /> 
       <Stack.Screen name='VitalSignsTab' component={VitalSignsTab} /> 
       {/* <Stack.Screen name='NurseStack' component={NurseStack} />  */}
+      <Stack.Screen name='PatientSessionStatistics' component={PatientSessionStatistics} />
 
 
 
