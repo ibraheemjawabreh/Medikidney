@@ -102,7 +102,7 @@ const PatientState = ({ route }) => {
       setLoading(true);
       const token = await AsyncStorage.getItem("token");
 
-      await axios.post(
+      const createRes = await axios.post(
         `${API}/dialysis-sessions`,
         {
           patientId: patient.patientId,
@@ -116,11 +116,16 @@ const PatientState = ({ route }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      Alert.alert("تم بدء الجلسة ✅", "يمكنك الآن إدخال البيانات الحيوية");
+      const newSessionId = createRes.data?.sessionId || createRes.data?.id;
+
       void fetchStatus();
+      // الدخول فوراً على تفاصيل الجلسة بعد ئم إنشائها
+      navigation.navigate("SessionDetails", { 
+        patient: { ...patient, sessionId: newSessionId, sessionStatus: 'PENDING' } 
+      });
+
     } catch (error) {
       const msg = error.response?.data?.message;
-      // إذا كانت الجلسة موجودة مسبقاً، نعيد جلب البيانات فقط
       if (typeof msg === "string" && (msg.includes("موجود") || msg.includes("exist"))) {
         void fetchStatus();
       } else {
@@ -135,10 +140,11 @@ const PatientState = ({ route }) => {
   const getStatusInfo = (status) => {
     switch (status) {
       case "COMPLETED": return { label: "مكتملة", color: "#059669", icon: "check-circle", bg: "#f0fdf4" };
-      case "PENDING": return { label: "قيد الانتظار", color: "#d97706", icon: "clock-outline", bg: "#fffbeb" };
+      case "PENDING": 
+      case "IN_PROGRESS": return { label: "تم البدء (جاري الغسيل)", color: "#2563eb", icon: "sync", bg: "#eff6ff" };
       case "CANCELLED": return { label: "ملغية", color: "#ef4444", icon: "close-circle", bg: "#fef2f2" };
       case "MISSED": return { label: "غائب", color: "#6b7280", icon: "account-off", bg: "#f9fafb" };
-      default: return { label: "لم تبدأ", color: "#6b7280", icon: "play-circle-outline", bg: "#f9fafb" };
+      default: return { label: "لم يتم البدء", color: "#6b7280", icon: "play-circle-outline", bg: "#f9fafb" };
     }
   };
 

@@ -1,83 +1,478 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Alert } from 'react-native';
+// screens/dialysisSessions/MedicationsTab.jsx
+
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, ScrollView, TextInput, StyleSheet,
+  Alert, Pressable, ActivityIndicator, Platform,
+} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+const API = "https://medikidneysys.onrender.com";
+
+// ── الأدوية الشائعة (أزرار جاهزة) ────────────────────────────
+const PRESET_MEDS = [
+  { name: "HEPARIN",  icon: "needle",       color: "#ef4444", dosage: 5000, unit: "IU",  label: "هيبارين" },
+  { name: "EPO",      icon: "blood-bag",     color: "#3b82f6", dosage: 4000, unit: "IU",  label: "EPO" },
+  { name: "IRON",     icon: "pill",          color: "#f59e0b", dosage: 100,  unit: "mg",  label: "حديد" },
+  { name: "SALINE",   icon: "water",         color: "#0ea5e9", dosage: 500,  unit: "ml",  label: "محلول ملحي" },
+];
+
+// ── تنسيق الوقت ──────────────────────────────────────────────
+const formatTime = (dateStr) => {
+  if (!dateStr) return "";
+  return new Date(dateStr).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+};
+
+// ── مساعد للتأكيد (ويب + Expo Go + Native) ──────────────────
+const confirmAction = async (msg) => {
+  if (Platform.OS === 'web') {
+    return window.confirm(msg);
+  }
+  return new Promise(resolve => {
+    Alert.alert("تأكيد", msg, [
+      { text: "إلغاء", onPress: () => resolve(false), style: "cancel" },
+      { text: "نعم",    onPress: () => resolve(true) },
+    ], { cancelable: true, onDismiss: () => resolve(false) });
+  });
+};
+
+const showAlert = (title, msg) => {
+  if (Platform.OS === 'web') {
+    alert(`${title}: ${msg}`);
+  } else {
+    Alert.alert(title, msg);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════
 const MedicationsTab = ({ route }) => {
-  const { sessionId } = route.params;
-  const [loading, setLoading] = useState(false);
-  const [medForm, setMedForm] = useState({ name: '', dosage: '', unit: 'IU', notes: '' });
+  const sessionId = route?.params?.sessionId;
 
-  const commonMeds = [
-    { name: 'HEPARIN', dosage: '5000', unit: 'IU' },
-    { name: 'EPO', dosage: '4000', unit: 'IU' },
-    { name: 'IRON', dosage: '100', unit: 'mg' },
-    { name: 'SALINE', dosage: '500', unit: 'ml' }
-  ];
+  const [meds,           setMeds]           = useState([]);
+  const [loading,        setLoading]        = useState(false);
+  const [isSubmitting,   setIsSubmitting]   = useState(false);
+  const [showCustom,     setShowCustom]     = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState(null); // الدواء الشائع المختار
+  const [presetDosage,   setPresetDosage]   = useState('');   // الجرعة المعدلة
+  const [presetNotes,    setPresetNotes]    = useState('');
+  const [customForm,     setCustomForm]     = useState({ name: '', dosage: '', unit: 'mg', notes: '' });
 
-  const handlePostMed = async (medData) => {
+  // ── جلب الأدوية المسجلة ─────────────────────────────────────
+  const fetchMeds = async () => {
+    if (!sessionId) return;
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem("token");
-      await axios.post(
-        `https://medikidneysys.onrender.com/dialysis-sessions/${sessionId}/details/medications`,
-        {
-          medicationName: medData.name,
-          dosage: parseFloat(medData.dosage),
-          unit: medData.unit,
-          notes: medData.notes || "تم الإعطاء"
-        },
+      const { data } = await axios.get(
+        `${API}/dialysis-sessions/${sessionId}/details/medications`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      Alert.alert("تم", `تم تسجيل ${medData.name} بنجاح`);
-    } catch (error) {
-      Alert.alert("خطأ", "فشل تسجيل الدواء");
+      const list = Array.isArray(data) ? data : data?.data || [];
+      if (list.length > 0) console.log("💊 Medication sample object:", JSON.stringify(list[0]));
+      setMeds([...list].reverse());
+    } catch (err) {
+      console.log("Fetch meds err:", err.response?.data || err.message);
+      setMeds([]);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => { fetchMeds(); }, [sessionId]);
+
+  // ── إرسال دواء (من الأزرار الجاهزة أو المخصص) ──────────────
+  const postMed = async (medData) => {
+    try {
+      setIsSubmitting(true);
+      const token = await AsyncStorage.getItem("token");
+      await axios.post(
+        `${API}/dialysis-sessions/${sessionId}/details/medications`,
+        {
+          medicationName: medData.name,
+          dosage:         Number(medData.dosage),
+          unit:           medData.unit,
+          notes:          medData.notes || "تم الإعطاء بنجاح",
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      showAlert("تم ✅", `تم تسجيل ${medData.label || medData.name}`);
+      fetchMeds();
+    } catch (err) {
+      console.log("Post med err:", err.response?.data || err.message);
+      showAlert("خطأ", err.response?.data?.message || "فشل في تسجيل الدواء");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // ── حذف دواء ────────────────────────────────────────────────
+  const deleteMed = async (medicationId) => {
+    const numId = parseInt(medicationId, 10);
+    if (isNaN(numId)) return;
+
+    const confirmed = await confirmAction("هل تريد حذف هذا الدواء من السجل؟");
+    if (!confirmed) return;
+
+    try {
+      const token = await AsyncStorage.getItem("token");
+      await axios.delete(
+        `${API}/dialysis-sessions/${sessionId}/details/medications/${numId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setMeds(prev => prev.filter(m => parseInt(m.id || m.medicationId, 10) !== numId));
+    } catch (err) {
+      console.log("Delete med err:", err.response?.data || err.message);
+      showAlert("خطأ", "لم ينجح الحذف.");
+    }
+  };
+
+  // ── إرسال الدواء المخصص ─────────────────────────────────────
+  const handleCustomSubmit = () => {
+    if (!customForm.name || !customForm.dosage) {
+      return showAlert("تنبيه", "يرجى إدخال اسم الدواء والجرعة على الأقل.");
+    }
+    postMed(customForm);
+    setCustomForm({ name: '', dosage: '', unit: 'mg', notes: '' });
+    setShowCustom(false);
+  };
+
+  const setField = (key, val) => setCustomForm(p => ({ ...p, [key]: val }));
+
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.sectionTitle}>أدوية شائعة (ضغط سريع):</Text>
-      <View style={styles.grid}>
-        {commonMeds.map((med, index) => (
-          <Pressable key={index} style={styles.medBtn} onPress={() => handlePostMed(med)}>
-            <MaterialCommunityIcons name="pill" size={20} color="#059669" />
-            <Text style={styles.medBtnText}>{med.name}</Text>
-            <Text style={styles.medBtnSub}>{med.dosage} {med.unit}</Text>
-          </Pressable>
-        ))}
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+
+      {/* ── العنوان ── */}
+      <View style={styles.topBar}>
+        <Pressable
+          onPress={() => setShowCustom(v => !v)}
+          style={[styles.customBtn, showCustom && styles.customBtnActive]}
+        >
+          <MaterialCommunityIcons name={showCustom ? "close" : "plus"} size={18} color="#fff" />
+          <Text style={styles.customBtnText}>{showCustom ? "إلغاء" : "دواء مخصص"}</Text>
+        </Pressable>
+        <Text style={styles.pageTitle}>الأدوية</Text>
       </View>
 
-      <View style={styles.customForm}>
-        <Text style={styles.sectionTitle}>دواء مخصص:</Text>
-        <TextInput style={styles.input} placeholder="اسم الدواء" value={medForm.name} onChangeText={(t)=>setMedForm({...medForm, name: t})} />
-        <View style={styles.row}>
-          <TextInput style={[styles.input, {flex: 2}]} placeholder="الجرعة" keyboardType="numeric" onChangeText={(t)=>setMedForm({...medForm, dosage: t})} />
-          <TextInput style={[styles.input, {flex: 1}]} placeholder="الوحدة" onChangeText={(t)=>setMedForm({...medForm, unit: t})} />
+      {/* ── أزرار الأدوية الشائعة ── */}
+      {!showCustom && (
+        <View style={styles.presetSection}>
+          <Text style={styles.sectionLabel}>أدوية شائعة — اضغط لتحديد الجرعة</Text>
+          <View style={styles.presetGrid}>
+            {PRESET_MEDS.map((med) => {
+              const isActive = selectedPreset?.name === med.name;
+              return (
+                <Pressable
+                  key={med.name}
+                  style={[
+                    styles.presetCard,
+                    { borderTopColor: med.color },
+                    isActive && { borderWidth: 2, borderColor: med.color }
+                  ]}
+                  onPress={() => {
+                    if (isActive) {
+                      setSelectedPreset(null);
+                      setPresetDosage('');
+                      setPresetNotes('');
+                    } else {
+                      setSelectedPreset(med);
+                      setPresetDosage(String(med.dosage));
+                      setPresetNotes('');
+                    }
+                  }}
+                >
+                  <View style={[styles.presetIconWrap, { backgroundColor: med.color + '15' }]}>
+                    <MaterialCommunityIcons name={med.icon} size={26} color={med.color} />
+                  </View>
+                  <Text style={styles.presetName}>{med.label}</Text>
+                  <Text style={styles.presetDose}>{med.dosage} {med.unit}</Text>
+                  {isActive ? (
+                    <View style={[styles.presetChip, { backgroundColor: med.color }]}>
+                      <Text style={[styles.presetChipText, { color: '#fff' }]}>محدد ✓</Text>
+                    </View>
+                  ) : (
+                    <View style={[styles.presetChip, { backgroundColor: med.color + '15' }]}>
+                      <Text style={[styles.presetChipText, { color: med.color }]}>اختيار</Text>
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
+
+          {/* ── حقل الجرعة بعد اختيار دواء شائع ── */}
+          {selectedPreset && (
+            <View style={[styles.formCard, { borderTopColor: selectedPreset.color }]}>
+              <Text style={styles.formTitle}>
+                تحديد جرعة {selectedPreset.label}
+              </Text>
+
+              <Text style={styles.fieldLabel}>الجرعة ({selectedPreset.unit}) *</Text>
+              <View style={styles.inputBox}>
+                <MaterialCommunityIcons name={selectedPreset.icon} size={18} color={selectedPreset.color} style={{ marginLeft: 6 }} />
+                <TextInput
+                  style={styles.inp}
+                  placeholder={String(selectedPreset.dosage)}
+                  placeholderTextColor="#9ca3af"
+                  keyboardType="numeric"
+                  value={presetDosage}
+                  onChangeText={setPresetDosage}
+                />
+                <Text style={styles.unitSuffix}>{selectedPreset.unit}</Text>
+              </View>
+
+              <Text style={styles.fieldLabel}>ملاحظات (اختياري)</Text>
+              <View style={[styles.inputBox, { height: 60, alignItems: 'flex-start', paddingTop: 10 }]}>
+                <TextInput
+                  style={[styles.inp, { textAlignVertical: 'top' }]}
+                  placeholder="مثال: تم إعطاء الدواء..."
+                  placeholderTextColor="#9ca3af"
+                  multiline
+                  value={presetNotes}
+                  onChangeText={setPresetNotes}
+                />
+              </View>
+
+              <Pressable
+                style={[styles.saveBtn, { backgroundColor: selectedPreset.color }, isSubmitting && { opacity: 0.6 }]}
+                onPress={() => {
+                  if (!presetDosage) return showAlert("تنبيه", "يرجى إدخال الجرعة.");
+                  postMed({
+                    name: selectedPreset.name,
+                    label: selectedPreset.label,
+                    dosage: presetDosage,
+                    unit: selectedPreset.unit,
+                    notes: presetNotes,
+                  });
+                  setSelectedPreset(null);
+                  setPresetDosage('');
+                  setPresetNotes('');
+                }}
+                disabled={isSubmitting}
+              >
+                {isSubmitting
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <Text style={styles.saveBtnText}>تسجيل {selectedPreset.label}</Text>
+                }
+              </Pressable>
+            </View>
+          )}
         </View>
-        <Pressable style={styles.submitBtn} onPress={() => handlePostMed(medForm)}>
-          <Text style={styles.submitBtnText}>تسجيل الدواء المخصص</Text>
-        </Pressable>
-      </View>
+      )}
+
+      {/* ── فورم الدواء المخصص ── */}
+      {showCustom && (
+        <View style={styles.formCard}>
+          <Text style={styles.formTitle}>تسجيل دواء مخصص</Text>
+
+          <Text style={styles.fieldLabel}>اسم الدواء *</Text>
+          <View style={styles.inputBox}>
+            <MaterialCommunityIcons name="pill" size={18} color="#059669" style={{ marginLeft: 6 }} />
+            <TextInput
+              style={styles.inp}
+              placeholder="مثال: Paracetamol"
+              placeholderTextColor="#9ca3af"
+              value={customForm.name}
+              onChangeText={t => setField('name', t)}
+            />
+          </View>
+
+          <View style={styles.twoCol}>
+            <View style={{ flex: 2 }}>
+              <Text style={styles.fieldLabel}>الجرعة *</Text>
+              <View style={styles.inputBox}>
+                <TextInput
+                  style={styles.inp}
+                  placeholder="500"
+                  placeholderTextColor="#9ca3af"
+                  keyboardType="numeric"
+                  value={customForm.dosage}
+                  onChangeText={t => setField('dosage', t)}
+                />
+              </View>
+            </View>
+            <View style={{ width: 10 }} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.fieldLabel}>الوحدة</Text>
+              <View style={styles.inputBox}>
+                <TextInput
+                  style={styles.inp}
+                  placeholder="mg"
+                  placeholderTextColor="#9ca3af"
+                  value={customForm.unit}
+                  onChangeText={t => setField('unit', t)}
+                />
+              </View>
+            </View>
+          </View>
+
+          <Text style={styles.fieldLabel}>ملاحظات (اختياري)</Text>
+          <View style={[styles.inputBox, { height: 70, alignItems: 'flex-start', paddingTop: 10 }]}>
+            <TextInput
+              style={[styles.inp, { textAlignVertical: 'top' }]}
+              placeholder="أي ملاحظة حول الدواء..."
+              placeholderTextColor="#9ca3af"
+              multiline
+              value={customForm.notes}
+              onChangeText={t => setField('notes', t)}
+            />
+          </View>
+
+          <Pressable
+            style={[styles.saveBtn, isSubmitting && { backgroundColor: '#6ee7b7' }]}
+            onPress={handleCustomSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting
+              ? <ActivityIndicator color="#fff" size="small" />
+              : <Text style={styles.saveBtnText}>حفظ الدواء</Text>
+            }
+          </Pressable>
+        </View>
+      )}
+
+      {/* ── سجل الأدوية المعطاة ── */}
+      <Text style={styles.historyLabel}>
+        الأدوية المسجلة ({meds.length})
+      </Text>
+
+      {loading ? (
+        <ActivityIndicator color="#059669" style={{ marginTop: 20 }} />
+      ) : meds.length === 0 ? (
+        <View style={styles.emptyBox}>
+          <MaterialCommunityIcons name="pill-off" size={48} color="#d1d5db" />
+          <Text style={styles.emptyText}>لم يتم تسجيل أي أدوية بعد</Text>
+          <Text style={styles.emptySub}>اضغط على أحد الأدوية الشائعة أو أضف دواء مخصص</Text>
+        </View>
+      ) : (
+        meds.map((med, index) => {
+          const medId = med.medication_id || med.medicationId || med.id;
+          return (
+            <View key={medId || index} style={styles.medCard}>
+              <View style={styles.medHeader}>
+                {/* اسم الدواء + الوقت */}
+                <View style={styles.medRight}>
+                  <View style={styles.medIconCircle}>
+                    <MaterialCommunityIcons name="pill" size={18} color="#059669" />
+                  </View>
+                  <View>
+                    <Text style={styles.medName}>{med.medication_name || med.medicationName}</Text>
+                    <Text style={styles.medTime}>{formatTime(med.recorded_at || med.administered_at || med.createdAt || med.administeredAt)}</Text>
+                  </View>
+                </View>
+                {/* الجرعة + حذف */}
+                <View style={styles.medLeft}>
+                  <View style={styles.doseBadge}>
+                    <Text style={styles.doseText}>{med.dosage} {med.unit}</Text>
+                  </View>
+                  <Pressable onPress={() => deleteMed(medId)} style={styles.deleteBtn}>
+                    <MaterialCommunityIcons name="trash-can-outline" size={18} color="#ef4444" />
+                  </Pressable>
+                </View>
+              </View>
+              {/* الملاحظات */}
+              {med.notes ? (
+                <View style={styles.noteRow}>
+                  <Text style={styles.noteText}>{med.notes}</Text>
+                  <MaterialCommunityIcons name="note-text-outline" size={14} color="#9ca3af" />
+                </View>
+              ) : null}
+            </View>
+          );
+        })
+      )}
+
+      <View style={{ height: 20 }} />
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 15, backgroundColor: '#F3F4F6' },
-  sectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 10, textAlign: 'right', color: '#4b5563' },
-  grid: { flexDirection: 'row-reverse', flexWrap: 'wrap', justifyContent: 'space-between' },
-  medBtn: { backgroundColor: '#fff', width: '48%', padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 10, elevation: 2 },
-  medBtnText: { fontWeight: 'bold', color: '#1f2937', marginTop: 5 },
-  medBtnSub: { fontSize: 11, color: '#6b7280' },
-  customForm: { backgroundColor: '#fff', padding: 15, borderRadius: 15, marginTop: 10 },
-  input: { backgroundColor: '#f9fafb', borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 8, padding: 10, marginBottom: 10, textAlign: 'right' },
-  row: { flexDirection: 'row-reverse', gap: 10 },
-  submitBtn: { backgroundColor: '#059669', padding: 15, borderRadius: 10, alignItems: 'center' },
-  submitBtnText: { color: '#fff', fontWeight: 'bold' }
-});
-
 export default MedicationsTab;
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#f3f4f6' },
+  content:   { padding: 16, paddingBottom: 40 },
+
+  // شريط العنوان
+  topBar: {
+    flexDirection: 'row-reverse', justifyContent: 'space-between',
+    alignItems: 'center', marginBottom: 16,
+  },
+  pageTitle: { fontSize: 18, fontWeight: '800', color: '#111827' },
+  customBtn: {
+    flexDirection: 'row-reverse', alignItems: 'center', gap: 6,
+    backgroundColor: '#059669', paddingHorizontal: 14, paddingVertical: 9, borderRadius: 10,
+  },
+  customBtnActive: { backgroundColor: '#dc2626' },
+  customBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+
+  // الأدوية الشائعة
+  presetSection: { marginBottom: 20 },
+  sectionLabel: { textAlign: 'right', color: '#6b7280', fontSize: 12, fontWeight: '600', marginBottom: 10 },
+  presetGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', justifyContent: 'space-between' },
+  presetCard: {
+    backgroundColor: '#fff', width: '48%', padding: 16, borderRadius: 14,
+    alignItems: 'center', marginBottom: 12, elevation: 2,
+    borderTopWidth: 3, borderTopColor: '#059669',
+  },
+  presetIconWrap: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  presetName: { fontWeight: '800', color: '#1f2937', fontSize: 14, marginBottom: 2 },
+  presetDose: { fontSize: 12, color: '#6b7280', fontWeight: '600', marginBottom: 8 },
+  presetChip: { paddingHorizontal: 14, paddingVertical: 5, borderRadius: 20 },
+  presetChipText: { fontSize: 12, fontWeight: '800' },
+
+  // فورم مخصص
+  formCard: {
+    backgroundColor: '#fff', borderRadius: 16, padding: 18, marginBottom: 16,
+    elevation: 2, borderTopWidth: 3, borderTopColor: '#059669',
+  },
+  formTitle: { fontSize: 15, fontWeight: '800', color: '#111827', textAlign: 'right', marginBottom: 12 },
+  fieldLabel: { textAlign: 'right', color: '#374151', fontSize: 12, fontWeight: '600', marginBottom: 6, marginTop: 10 },
+  twoCol: { flexDirection: 'row-reverse', marginTop: 4 },
+  inputBox: {
+    flexDirection: 'row-reverse', alignItems: 'center',
+    backgroundColor: '#f9fafb', borderWidth: 1, borderColor: '#e5e7eb',
+    borderRadius: 10, paddingHorizontal: 10, height: 48,
+  },
+  inp: { flex: 1, textAlign: 'right', fontSize: 15, color: '#1f2937', fontWeight: '600' },
+  unitSuffix: { color: '#6b7280', fontSize: 13, fontWeight: '800', marginRight: 6 },
+  saveBtn: {
+    backgroundColor: '#059669', padding: 14, borderRadius: 10,
+    alignItems: 'center', marginTop: 18, minHeight: 50, justifyContent: 'center',
+  },
+  saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+
+  // السجل
+  historyLabel: { textAlign: 'right', fontSize: 14, fontWeight: '800', color: '#374151', marginBottom: 12 },
+  medCard: {
+    backgroundColor: '#fff', borderRadius: 14, marginBottom: 10, padding: 14,
+    borderWidth: 1, borderColor: '#e5e7eb', elevation: 1,
+  },
+  medHeader: {
+    flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center',
+  },
+  medRight: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10 },
+  medLeft:  { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
+  medIconCircle: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center',
+  },
+  medName: { fontSize: 14, fontWeight: '800', color: '#111827', textAlign: 'right' },
+  medTime: { fontSize: 11, color: '#9ca3af', textAlign: 'right', marginTop: 2 },
+  doseBadge: {
+    backgroundColor: '#eff6ff', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20,
+  },
+  doseText: { color: '#3b82f6', fontSize: 12, fontWeight: '800' },
+  deleteBtn: { padding: 5, backgroundColor: '#fef2f2', borderRadius: 8 },
+  noteRow: {
+    flexDirection: 'row-reverse', alignItems: 'center', gap: 6,
+    marginTop: 10, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#f3f4f6',
+  },
+  noteText: { color: '#6b7280', fontSize: 12, flex: 1, textAlign: 'right' },
+
+  // فارغ
+  emptyBox:  { alignItems: 'center', paddingTop: 40, gap: 8 },
+  emptyText: { fontSize: 15, color: '#6b7280', fontWeight: '700' },
+  emptySub:  { fontSize: 12, color: '#9ca3af', textAlign: 'center' },
+});
