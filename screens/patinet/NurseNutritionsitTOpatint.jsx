@@ -12,8 +12,8 @@ import {
   Linking,
 } from "react-native";
 import { Tab, TabView, Button, Icon, Divider } from "@rneui/base";
+import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
@@ -38,23 +38,23 @@ const StaffPatientView = ({ route, navigation }) => {
   const canEditNutrition = isNutritionist || isAdmin;
 
   // --- Functions (Fetch Data) ---
-  const fetchMedicalTests = async (id, token) => {
+  const fetchMedicalTests = async (id) => {
     try {
-      const response = await axios.get(`https://medikidneysys.onrender.com/medical-tests?patientId=${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await api.get(`/medical-tests?patientId=${id}`);
       setMedicalTests(Array.isArray(response.data) ? response.data : []);
     } catch (e) { console.log("Error tests:", e.message); }
   };
 
-  const fetchRadiology = async (id, token) => {
+  const fetchRadiology = async (id) => {
     try {
-      const response = await axios.get(`https://medikidneysys.onrender.com/radiology-requests?patientId=${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await api.get(`/radiology-requests?patientId=${id}`);
       setRadiology(Array.isArray(response.data) ? response.data : []);
     } catch (e) { console.log("Error rad:", e.message); }
   };
 
-  const fetchNutritionPlan = async (id, token) => {
+  const fetchNutritionPlan = async (id) => {
     try {
-      const response = await axios.get(`https://medikidneysys.onrender.com/nutrition-programs?patientId=${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await api.get(`/nutrition-programs?patientId=${id}`);
       if (response.data && response.data.length > 0) {
         const sorted = response.data.sort((a, b) => (b.id || 0) - (a.id || 0));
         setNutritionPlan(sorted[0]);
@@ -62,16 +62,16 @@ const StaffPatientView = ({ route, navigation }) => {
     } catch (e) { setNutritionPlan(null); }
   };
 
-  const fetchSessions = async (id, token) => {
+  const fetchSessions = async (id) => {
     try {
-      const response = await axios.get(`https://medikidneysys.onrender.com/dialysis-sessions?patientId=${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await api.get(`/dialysis-sessions?patientId=${id}`);
       setSessions(Array.isArray(response.data) ? response.data : []);
     } catch (e) { setSessions([]); }
   };
 
-  const fetchPrescriptions = async (id, token) => {
+  const fetchPrescriptions = async (id) => {
     try {
-      const response = await axios.get(`https://medikidneysys.onrender.com/prescriptions?patientId=${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await api.get(`/prescriptions?patientId=${id}`);
       setPrescriptions(Array.isArray(response.data) ? response.data : []);
     } catch (e) { setPrescriptions([]); }
   };
@@ -108,20 +108,19 @@ const StaffPatientView = ({ route, navigation }) => {
         return;
       }
 
-      const response = await axios.get(
-        `https://medikidneysys.onrender.com/users/profile/patients/${patientId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+      const response = await api.get(
+        `/users/profile/patients/${patientId}`
       );
       setPatient(response.data);
 
       const realId = response.data?.patient_id;
       if (realId) {
         await Promise.all([
-          fetchNutritionPlan(realId, token),
-          fetchSessions(realId, token),
-          fetchPrescriptions(realId, token),
-          fetchMedicalTests(realId, token),
-          fetchRadiology(realId, token)
+          fetchNutritionPlan(realId),
+          fetchSessions(realId),
+          fetchPrescriptions(realId),
+          fetchMedicalTests(realId),
+          fetchRadiology(realId)
         ]);
       }
     } catch (error) {
@@ -141,7 +140,7 @@ const StaffPatientView = ({ route, navigation }) => {
 
   const handleDownload = async (url) => {
     if (!url) { Alert.alert("تنبيه", "الملف غير متوفر حالياً"); return; }
-    const fullUrl = url.startsWith('http') ? url : `https://medikidneysys.onrender.com${url}`;
+    const fullUrl = url.startsWith('http') ? url : `${api.defaults.baseURL}${url}`;
     try { await Linking.openURL(fullUrl); } catch (e) { Alert.alert("خطأ", "لا يمكن فتح الرابط حالياً."); }
   };
 

@@ -6,10 +6,7 @@ import {
   ScrollView, ActivityIndicator, Alert, Platform
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const API = "https://medikidneysys.onrender.com";
+import api from "../../services/api";
 
 const SYMPTOMS_LIST = [
   { id: 'LOW_BP', label: 'هبوط ضغط', icon: 'arrow-down-bold-circle-outline', color: '#ef4444' },
@@ -34,20 +31,14 @@ const SymptomsTab = ({ route }) => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-      
       // جلب الأعراض المسجلة
-      const sympRes = await axios.get(
-        `${API}/dialysis-sessions/${sessionId}/details/symptoms`,
-        { headers: { Authorization: `Bearer ${token}` } }
+      const sympRes = await api.get(
+        `/dialysis-sessions/${sessionId}/details/symptoms`
       );
       setHistory(Array.isArray(sympRes.data) ? sympRes.data : sympRes.data?.data || []);
 
       // جلب الملاحظات العامة للجلسة
-      const sessionRes = await axios.get(
-        `${API}/dialysis-sessions/${sessionId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const sessionRes = await api.get(`/dialysis-sessions/${sessionId}`);
       if (sessionRes.data?.notes) setNote(sessionRes.data.notes);
       
     } catch (err) {
@@ -74,22 +65,18 @@ const SymptomsTab = ({ route }) => {
 
     try {
       setIsSubmitting(true);
-      const token = await AsyncStorage.getItem("token");
-
       // 1. تسجيل الأعراض (إرسال كل عرض مختار في طلب منفصل)
       const symptomPromises = selectedIds.map(type => 
-        axios.post(
-          `${API}/dialysis-sessions/${sessionId}/details/symptoms`,
-          { symptomType: type, severity: "MILD", notes: "مسجل عبر القائمة السريعة" },
-          { headers: { Authorization: `Bearer ${token}` } }
+        api.post(
+          `/dialysis-sessions/${sessionId}/details/symptoms`,
+          { symptomType: type, severity: "MILD", notes: "مسجر عبر القائمة السريعة" }
         )
       );
 
       // 2. تحديث ملاحظات الجلسة
-      const notePromise = axios.patch(
-        `${API}/dialysis-sessions/${sessionId}`,
-        { notes: note },
-        { headers: { Authorization: `Bearer ${token}` } }
+      const notePromise = api.patch(
+        `/dialysis-sessions/${sessionId}`,
+        { notes: note }
       );
 
       await Promise.all([...symptomPromises, notePromise]);
@@ -107,10 +94,8 @@ const SymptomsTab = ({ route }) => {
 
   const handleDeleteSymptom = async (id) => {
     try {
-      const token = await AsyncStorage.getItem("token");
-      await axios.delete(
-        `${API}/dialysis-sessions/${sessionId}/details/symptoms/${id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+      await api.delete(
+        `/dialysis-sessions/${sessionId}/details/symptoms/${id}`
       );
       fetchData();
     } catch (err) {

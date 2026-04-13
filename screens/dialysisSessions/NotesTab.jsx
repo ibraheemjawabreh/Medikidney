@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Pressable, Text, Alert, ActivityIndicator } from 'react-native';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../../services/api';
 
 const NotesTab = ({ route }) => {
   const { sessionId } = route.params;
@@ -12,11 +11,9 @@ const NotesTab = ({ route }) => {
     if (!note.trim()) return Alert.alert("تنبيه", "يرجى كتابة ملاحظة أولاً");
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-      await axios.patch(
-        `https://medikidneysys.onrender.com/dialysis-sessions/${sessionId}`,
-        { notes: note },
-        { headers: { Authorization: `Bearer ${token}` } }
+      await api.patch(
+        `/dialysis-sessions/${sessionId}`,
+        { notes: note }
       );
       Alert.alert("تم الحفظ", "تم حفظ الملاحظة بنجاح");
     } catch (error) {

@@ -1,7 +1,7 @@
 import { Input, Button } from "@rneui/base";
 import { Text, View, StyleSheet, Alert } from "react-native";
 import { useState } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import ValidationEmail from "./ValidationEmail";
 
 const EmailInput = ({ navigation }) => {
@@ -16,15 +16,9 @@ const EmailInput = ({ navigation }) => {
 
     await ValidationEmail.validate({ email }, { abortEarly: false });
 
-    const response = await axios.post(
-      "https://medikidneysys.onrender.com/auth/forgot-password",
-      { email },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          accept: "*/*",
-        },
-      }
+    const response = await api.post(
+      "/auth/forgot-password",
+      { email }
     );
 
     console.log("Server response:", response.data);

@@ -12,8 +12,7 @@ import {
   Alert
 } from "react-native";
 import { Tab, TabView, Button, Icon, Divider } from "@rneui/base";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
+import api from "../../services/api";
 import { useFocusEffect } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
@@ -36,11 +35,7 @@ const PatientProfile = ({ navigation }) => {
   const fetchPatientData = useCallback(async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-      const response = await axios.get(
-        `https://medikidneysys.onrender.com/users/profile`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.get(`/users/profile`);
 
       const patientInfo = response.data.patient;
       setPatient(patientInfo);
@@ -48,12 +43,12 @@ const PatientProfile = ({ navigation }) => {
       if (patientInfo?.patient_id) {
         const pId = patientInfo.patient_id;
         await Promise.all([
-          fetchNutritionPlan(pId, token),
-          fetchSessions(pId, token),
-          fetchPrescriptions(pId, token),
-          fetchMedicalTests(pId, token),
-          fetchRadiology(pId, token),
-          fetchMyAppointments(token) // جلب المواعيد
+          fetchNutritionPlan(pId),
+          fetchSessions(pId),
+          fetchPrescriptions(pId),
+          fetchMedicalTests(pId),
+          fetchRadiology(pId),
+          fetchMyAppointments() // جلب المواعيد
         ]);
       }
     } catch (error) {
@@ -67,11 +62,9 @@ const PatientProfile = ({ navigation }) => {
   useFocusEffect(useCallback(() => { fetchPatientData(); }, [fetchPatientData]));
 
   // دالة جلب المواعيد (تعتمد نفس منطق الكود المرفق)
-  const fetchMyAppointments = async (token) => {
+  const fetchMyAppointments = async () => {
     try {
-      const response = await axios.get(`https://medikidneysys.onrender.com/clinic-consultations`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get(`/clinic-consultations`);
       // فلترة المواعيد النشطة فقط
       const activeAppts = (response.data || []).filter(a => a.status !== 'CANCELLED');
       setMyAppointments(activeAppts);
@@ -88,9 +81,9 @@ const PatientProfile = ({ navigation }) => {
     return `${hh % 12 || 12}:${m} ${hh >= 12 ? "م" : "ص"}`;
   };
 
-  const fetchNutritionPlan = async (id, token) => {
+  const fetchNutritionPlan = async (id) => {
     try {
-      const response = await axios.get(`https://medikidneysys.onrender.com/nutrition-programs?patientId=${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await api.get(`/nutrition-programs?patientId=${id}`);
       if (response.data && response.data.length > 0) {
         const sorted = response.data.sort((a, b) => (b.id || 0) - (a.id || 0));
         setNutritionPlan(sorted[0]);
@@ -98,30 +91,30 @@ const PatientProfile = ({ navigation }) => {
     } catch (e) { setNutritionPlan(null); }
   };
 
-  const fetchSessions = async (id, token) => {
+  const fetchSessions = async (id) => {
     try {
-      const response = await axios.get(`https://medikidneysys.onrender.com/dialysis-sessions?patientId=${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await api.get(`/dialysis-sessions?patientId=${id}`);
       setSessions(Array.isArray(response.data) ? response.data : []);
     } catch (e) { setSessions([]); }
   };
 
-  const fetchPrescriptions = async (id, token) => {
+  const fetchPrescriptions = async (id) => {
     try {
-      const response = await axios.get(`https://medikidneysys.onrender.com/prescriptions?patientId=${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await api.get(`/prescriptions?patientId=${id}`);
       setPrescriptions(Array.isArray(response.data) ? response.data : []);
     } catch (e) { setPrescriptions([]); }
   };
 
-  const fetchMedicalTests = async (id, token) => {
+  const fetchMedicalTests = async (id) => {
     try {
-      const response = await axios.get(`https://medikidneysys.onrender.com/medical-tests?patientId=${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await api.get(`/medical-tests?patientId=${id}`);
       setMedicalTests(Array.isArray(response.data) ? response.data : []);
     } catch (e) { setMedicalTests([]); }
   };
 
-  const fetchRadiology = async (id, token) => {
+  const fetchRadiology = async (id) => {
     try {
-      const response = await axios.get(`https://medikidneysys.onrender.com/radiology-requests?patientId=${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await api.get(`/radiology-requests?patientId=${id}`);
       setRadiology(Array.isArray(response.data) ? response.data : []);
     } catch (e) { setRadiology([]); }
   };
@@ -131,21 +124,35 @@ const PatientProfile = ({ navigation }) => {
     return new Date(date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
-  const handleDownload = async (url) => {
-    if (!url) {
+  const handleDownload = async (id, type) => {
+    if (!id) {
       Alert.alert("تنبيه", "الملف غير متوفر حالياً");
       return;
     }
-    let fullUrl = url.trim();
-    if (!fullUrl.startsWith('http')) {
-      const cleanPath = fullUrl.startsWith('/') ? fullUrl : `/${fullUrl}`;
-      fullUrl = `https://medikidneysys.onrender.com${cleanPath}`;
-    }
+    
     try {
+      const endpoint = type === 'lab' 
+        ? `/medical-tests/${id}/result-url` 
+        : `/radiology-requests/${id}/file-url`;
+        
+      const response = await api.get(endpoint);
+      const fullUrl = response.data.url;
+
+      if (!fullUrl) {
+        Alert.alert("خطأ", "فشل في جلب رابط الملف");
+        return;
+      }
+
       const supported = await Linking.canOpenURL(fullUrl);
-      if (supported) { await Linking.openURL(fullUrl); }
-      else { Alert.alert("خطأ", "لا يمكن فتح هذا النوع من الروابط على جهازك."); }
-    } catch (e) { Alert.alert("خطأ", "حدث مشكلة أثناء محاولة فتح الملف."); }
+      if (supported) { 
+        await Linking.openURL(fullUrl); 
+      } else { 
+        Alert.alert("خطأ", "لا يمكن فتح هذا النوع من الروابط على جهازك."); 
+      }
+    } catch (e) { 
+      console.log("Download Error:", e.message);
+      Alert.alert("خطأ", "حدث مشكلة أثناء محاولة فتح الملف."); 
+    }
   };
 
   // --- Sub-Components ---
@@ -171,7 +178,7 @@ const PatientProfile = ({ navigation }) => {
     </View>
   );
 
-  const MedicalCard = ({ title, date, doctor, description, status, fileUrl, typeIcon }) => (
+  const MedicalCard = ({ id, type, title, date, doctor, description, status, hasFile, typeIcon }) => (
     <View style={styles.reportCard}>
       <View style={styles.reportHeader}>
         <View style={styles.reportTitleRow}>
@@ -191,10 +198,10 @@ const PatientProfile = ({ navigation }) => {
       </View>
       <Button 
         title="معاينة الملف" 
-        icon={<Icon name="file-pdf-box" type="material-community" color="white" size={20} style={{marginLeft: 5}} />} 
+        icon={<Icon name="file-pdf-box" type="material-community" color="white" size={20} containerStyle={{marginLeft: 5}} />} 
         buttonStyle={styles.downloadBtn} 
-        onPress={() => handleDownload(fileUrl)} 
-        disabled={!fileUrl} 
+        onPress={() => handleDownload(id, type)} 
+        disabled={!hasFile} 
       />
     </View>
   );
@@ -327,10 +334,32 @@ const PatientProfile = ({ navigation }) => {
                 </View>
               )}
               {subTabIndex === 1 && medicalTests.map((test, idx) => (
-                <MedicalCard key={idx} title={test.test_type} date={test.date_completed} doctor={test.doctor?.full_name} description={test.description} status={test.result ? 'COMPLETED' : 'PENDING'} fileUrl={test.result} typeIcon="test-tube" />
+                <MedicalCard 
+                  key={idx} 
+                  id={test.test_id}
+                  type="lab"
+                  title={test.test_type} 
+                  date={test.date_completed} 
+                  doctor={test.doctor?.full_name} 
+                  description={test.description} 
+                  status={test.result ? 'COMPLETED' : 'PENDING'} 
+                  hasFile={!!test.result} 
+                  typeIcon="test-tube" 
+                />
               ))}
               {subTabIndex === 2 && radiology.map((rad, idx) => (
-                <MedicalCard key={idx} title={rad.image_type} date={rad.completed_at} doctor={rad.doctor?.full_name} description={rad.description} status={rad.status} fileUrl={rad.image_path} typeIcon="file-image-outline" />
+                <MedicalCard 
+                  key={idx} 
+                  id={rad.image_id}
+                  type="radiology"
+                  title={rad.image_type} 
+                  date={rad.completed_at} 
+                  doctor={rad.doctor?.full_name} 
+                  description={rad.description} 
+                  status={rad.status} 
+                  hasFile={!!rad.image_path} 
+                  typeIcon="file-image-outline" 
+                />
               ))}
             </ScrollView>
           </View>
@@ -387,7 +416,16 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: '#fff' },
   loadingText: { marginTop: 12, color: '#64748b' },
-  headerContainer: { backgroundColor: "#204a42", paddingTop: 40, paddingBottom: 25, alignItems: "center", borderBottomRightRadius: 30, borderBottomLeftRadius: 30, elevation: 10 },
+  headerContainer: { 
+    backgroundColor: "#204a42", 
+    paddingTop: 40, 
+    paddingBottom: 25, 
+    alignItems: "center", 
+    borderBottomRightRadius: 30, 
+    borderBottomLeftRadius: 30, 
+    elevation: 10,
+    boxShadow: '0px 4px 10px rgba(0,0,0,0.3)'
+  },
   avatarCircle: { width: 90, height: 90, borderRadius: 45, backgroundColor: "rgba(255,255,255,0.1)", justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#059669" },
   patientName: { color: "#fff", fontSize: 22, fontWeight: "900", marginTop: 10 },
   idBadge: { backgroundColor: "#1e293b", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 10, marginTop: 8 },
@@ -403,11 +441,23 @@ const styles = StyleSheet.create({
   scrollPadding: { padding: 20 },
   subTabContainer: { flexDirection: 'row-reverse', backgroundColor: '#f1f5f9', margin: 15, borderRadius: 12, padding: 4 },
   subTabItem: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 10 },
-  subTabActive: { backgroundColor: '#fff', elevation: 2 },
+  subTabActive: { 
+    backgroundColor: '#fff', 
+    elevation: 2,
+    boxShadow: '0px 1px 3px rgba(0,0,0,0.1)'
+  },
   subTabText: { fontSize: 14, color: '#64748b', fontWeight: '600' },
   subTextActive: { color: '#204a42', fontWeight: 'bold' },
   sectionHeading: { fontSize: 20, fontWeight: "800", color: "#1e293b", textAlign: "right", marginBottom: 15 },
-  nutritionCard: { backgroundColor: "#fff", borderRadius: 25, overflow: "hidden", elevation: 4, borderWidth: 1, borderColor: '#f1f5f9' },
+  nutritionCard: { 
+    backgroundColor: "#fff", 
+    borderRadius: 25, 
+    overflow: "hidden", 
+    elevation: 4, 
+    borderWidth: 1, 
+    borderColor: '#f1f5f9',
+    boxShadow: '0px 4px 6px rgba(0,0,0,0.1)'
+  },
   planHeader: { backgroundColor: "#204a42", padding: 15, flexDirection: "row-reverse", justifyContent: 'space-between', alignItems: "center" },
   planTitle: { color: "#fff", fontWeight: "bold", fontSize: 16 },
   planBody: { padding: 20 },
@@ -425,7 +475,16 @@ const styles = StyleSheet.create({
   mealIconCircle: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
   mealLabel: { fontSize: 12, fontWeight: 'bold', textAlign: 'right' },
   mealContent: { fontSize: 14, color: '#334155', textAlign: 'right', marginTop: 2 },
-  sessionCard: { backgroundColor: "#fff", borderRadius: 20, padding: 15, marginBottom: 15, elevation: 2, borderRightWidth: 6, borderRightColor: '#204a42' },
+  sessionCard: { 
+    backgroundColor: "#fff", 
+    borderRadius: 20, 
+    padding: 15, 
+    marginBottom: 15, 
+    elevation: 2, 
+    borderRightWidth: 6, 
+    borderRightColor: '#204a42',
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.05)'
+  },
   sessionHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
   sessionDateBox: { flexDirection: 'row', alignItems: 'center' },
   sessionDate: { fontSize: 13, color: '#64748b', marginLeft: 5 },
@@ -436,7 +495,16 @@ const styles = StyleSheet.create({
   metricValue: { fontSize: 14, fontWeight: 'bold' },
   emptyState: { alignItems: 'center', marginTop: 50 },
   emptyText: { color: "#94a3b8", textAlign: "center", marginTop: 10 },
-  prescriptionCard: { backgroundColor: "#fff", borderRadius: 15, padding: 15, marginBottom: 15, elevation: 3, borderRightWidth: 5, borderRightColor: '#059669' },
+  prescriptionCard: { 
+    backgroundColor: '#fff', 
+    borderRadius: 15, 
+    padding: 15, 
+    marginBottom: 15, 
+    elevation: 3, 
+    borderRightWidth: 5, 
+    borderRightColor: '#059669',
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.1)'
+  },
   prescriptionHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
   prescriptionDoctor: { fontSize: 15, fontWeight: 'bold', color: '#1e293b' },
   prescriptionDate: { fontSize: 13, color: '#64748b' },
@@ -444,7 +512,16 @@ const styles = StyleSheet.create({
   drugNameRow: { flexDirection: 'row-reverse', alignItems: 'center', marginBottom: 4 },
   drugName: { fontSize: 15, fontWeight: 'bold', color: '#204a42', marginRight: 8 },
   drugInstructions: { fontSize: 14, color: '#475569', textAlign: 'right' },
-  reportCard: { backgroundColor: '#fff', borderRadius: 15, padding: 16, marginBottom: 15, elevation: 3, borderLeftWidth: 4, borderLeftColor: '#204a42' },
+  reportCard: { 
+    backgroundColor: '#fff', 
+    borderRadius: 15, 
+    padding: 16, 
+    marginBottom: 15, 
+    elevation: 3, 
+    borderLeftWidth: 4, 
+    borderLeftColor: '#204a42',
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.1)'
+  },
   reportHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   reportTitleRow: { flexDirection: 'row-reverse', alignItems: 'center' },
   reportTitle: { fontSize: 17, fontWeight: 'bold', color: '#1e293b', marginRight: 8 },
@@ -457,7 +534,17 @@ const styles = StyleSheet.create({
   downloadBtn: { backgroundColor: '#204a42', borderRadius: 10, marginTop: 10, height: 48 },
 
   // ستايلات قسم المواعيد المحدثة
-  bookingPrimaryBtn: { backgroundColor: '#204a42', flexDirection: 'row-reverse', width: '100%', paddingVertical: 16, borderRadius: 15, justifyContent: 'center', alignItems: 'center', elevation: 4 },
+  bookingPrimaryBtn: { 
+    backgroundColor: '#204a42', 
+    flexDirection: 'row-reverse', 
+    width: '100%', 
+    paddingVertical: 16, 
+    borderRadius: 15, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    elevation: 4,
+    boxShadow: '0px 4px 8px rgba(32,74,66,0.3)'
+  },
   bookingPrimaryBtnText: { color: '#fff', fontSize: 17, fontWeight: 'bold', marginRight: 10 },
   apptCardSimple: { 
     flexDirection: 'row-reverse', 
@@ -468,7 +555,8 @@ const styles = StyleSheet.create({
     borderRightWidth: 5, 
     borderRightColor: '#059669',
     elevation: 2,
-    alignItems: 'center'
+    alignItems: 'center',
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.05)'
   },
   apptCardIcon: { backgroundColor: '#dcfce7', padding: 10, borderRadius: 12, marginLeft: 15 },
   apptCardInfo: { flex: 1, alignItems: 'flex-start' },

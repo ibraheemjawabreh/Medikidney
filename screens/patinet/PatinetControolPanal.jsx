@@ -68,6 +68,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 20,
     borderTopWidth: 0,
+    boxShadow: '0px -2px 8px rgba(0,0,0,0.1)'
   },
   tabLabel: {
     fontSize: 12,

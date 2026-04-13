@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View, StyleSheet, ActivityIndicator } from "react-native";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../../services/api";
 
 const ShowSessions = ({ route }) => {
   const { sessionId } = route.params; 
@@ -11,12 +10,7 @@ const ShowSessions = ({ route }) => {
   const fetchSessionDetails = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-      
-      const response = await axios.get(
-        `https://medikidneysys.onrender.com/dialysis-sessions/${sessionId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.get(`/dialysis-sessions/${sessionId}`);
 
       // تعيين البيانات الحقيقية القادمة من السيرفر
       setSessionDetails(response.data);

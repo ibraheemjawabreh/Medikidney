@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Text, View, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { Button, Input } from "@rneui/themed";
-import axios from "axios";
+import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ChangePasswordFirstTime = ({ navigation, route }) => {
@@ -38,8 +38,8 @@ const ChangePasswordFirstTime = ({ navigation, route }) => {
 
     try {
       setLoading(true);
-      const response = await axios.patch(
-        "https://medikidneysys.onrender.com/auth/set-initial-password",
+      const response = await api.patch(
+        "/auth/set-initial-password",
         { newPassword, confirmPassword },
         { headers: { Authorization: `Bearer ${tempToken}` } }
       );
@@ -60,8 +60,8 @@ const ChangePasswordFirstTime = ({ navigation, route }) => {
   const handleSkip = async () => {
     try {
       setSkipLoading(true);
-      const response = await axios.patch(
-        "https://medikidneysys.onrender.com/auth/skip-initial-password-change",
+      const response = await api.patch(
+        "/auth/skip-initial-password-change",
         {},
         { headers: { Authorization: `Bearer ${tempToken}` } }
       );

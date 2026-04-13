@@ -3,8 +3,7 @@ import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
   ActivityIndicator, LayoutAnimation, Platform, UIManager, ScrollView
 } from "react-native";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../../services/api";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -21,12 +20,7 @@ const DailySchedules = ({ navigation }) => {
   const fetchTodaySchedules = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-
-      const response = await axios.get(
-        "https://medikidneysys.onrender.com/dialysis-scheduling/nurse/today",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.get("/dialysis-scheduling/nurse/today");
 
       setShifts(response.data.shifts);
 

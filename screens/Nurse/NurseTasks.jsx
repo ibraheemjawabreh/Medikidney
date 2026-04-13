@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   View, Text, StyleSheet, TextInput, TouchableOpacity, 
   ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform 
 } from "react-native";
-import axios from "axios";
+import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 const NurseTasks = ({ route, navigation }) => {
   const { patientId, patientName } = route.params || {};
@@ -94,10 +95,9 @@ const NurseTasks = ({ route, navigation }) => {
         notes: notes || "لا توجد ملاحظات إضافية" // إرسال الملاحظات المكتوبة
       };
 
-      await axios.post(
-        "https://medikidneysys.onrender.com/dialysis-sessions", 
-        finalPayload, 
-        { headers: { Authorization: `Bearer ${token}` } }
+      await api.post(
+        "/dialysis-sessions", 
+        finalPayload
       );
 
       await AsyncStorage.removeItem(`active_session_${patientId}`);

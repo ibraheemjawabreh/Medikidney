@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import VitalSignsTab from './VitalSignsTab';
 import MedicationsTab from './MedicationsTab';
-import SettingsTab from './';
+import SettingsTab from './SettingsTab';
 import SymptomsTab from './SymptomsTab';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import api from '../../services/api';
 
 const SessionDetails = ({ route, navigation }) => {
   const { patient } = route.params;
@@ -51,12 +51,9 @@ const SessionDetails = ({ route, navigation }) => {
   const handleFinishSession = async () => {
     try {
       setIsFinishing(true);
-      const token = await AsyncStorage.getItem('token');
-      const API = "https://medikidneysys.onrender.com";
-      await axios.patch(
-        `${API}/dialysis-sessions/${sessionId}/status`,
-        { status: "COMPLETED" },
-        { headers: { Authorization: `Bearer ${token}` } }
+      await api.patch(
+        `/dialysis-sessions/${sessionId}/status`,
+        { status: "COMPLETED" }
       );
       // مسح الخطوة المحفوظة لأن الجلسة انتهت
       await AsyncStorage.removeItem(`step_${sessionId}`);

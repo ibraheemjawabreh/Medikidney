@@ -5,12 +5,8 @@ import {
   View, Text, ScrollView, TextInput, StyleSheet,
   Alert, Pressable, ActivityIndicator,
 } from 'react-native';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Platform } from 'react-native'; // ضيف هاي فوق مع import
-
-const API = "https://medikidneysys.onrender.com";
+import api from "../../services/api";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 // ── تنسيق الوقت بشكل واضح ────────────────────────────────────────────────────
 const formatDateTime = (dateStr) => {
@@ -182,11 +178,8 @@ const VitalSignsTab = ({ route }) => {
   const fetchVitals = async () => {
     if (!sessionId) return;
     try {
-      setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-      const { data } = await axios.get(
-        `${API}/dialysis-sessions/${sessionId}/details/vital-signs`,
-        { headers: { Authorization: `Bearer ${token}` } }
+      const { data } = await api.get(
+        `/dialysis-sessions/${sessionId}/details/vital-signs`
       );
       const list = Array.isArray(data) ? data : data?.data || [];
       if (list.length > 0) console.log("📋 Vital Sign sample object:", JSON.stringify(list[0]));
@@ -209,17 +202,15 @@ const VitalSignsTab = ({ route }) => {
 
     try {
       setIsSubmitting(true);
-      const token = await AsyncStorage.getItem("token");
-      await axios.post(
-        `${API}/dialysis-sessions/${sessionId}/details/vital-signs`,
+      await api.post(
+        `/dialysis-sessions/${sessionId}/details/vital-signs`,
         {
           systolic:         Number(systolic),
           diastolic:        Number(diastolic),
           pulse:            Number(pulse),
           temperature:      Number(temperature),
           oxygenSaturation: form.oxygen ? Number(form.oxygen) : null,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+        }
       );
       Alert.alert("تم ✅", "تم حفظ القراءة بنجاح");
       setForm({ systolic: '', diastolic: '', pulse: '', temperature: '', oxygen: '' });
@@ -255,10 +246,8 @@ const VitalSignsTab = ({ route }) => {
     if (!confirmed) return;
 
     try {
-      const token = await AsyncStorage.getItem("token");
-      await axios.delete(
-        `${API}/dialysis-sessions/${sessionId}/details/vital-signs/${numericId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+      await api.delete(
+        `/dialysis-sessions/${sessionId}/details/vital-signs/${numericId}`
       );
       setVitals(prev => prev.filter(v => (v.vital_id || v.id) !== numericId));
     } catch (err) {

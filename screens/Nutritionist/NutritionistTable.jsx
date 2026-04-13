@@ -5,6 +5,7 @@ import {
   Platform, TouchableWithoutFeedback, Keyboard 
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../../services/api";
 import { Icon } from "@rneui/base";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -36,12 +37,8 @@ const NutritionistTable = ({ route, navigation }) => {
 
   const fetchCurrentPlan = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-      const response = await fetch(
-        `https://medikidneysys.onrender.com/nutrition-programs?patientId=${patientId}`,
-        { headers: { "Authorization": `Bearer ${token}` } }
-      );
-      const data = await response.json();
+      const response = await api.get(`/nutrition-programs?patientId=${patientId}`);
+      const data = response.data;
 
       if (Array.isArray(data) && data.length > 0) {
         const plan = data.sort((a, b) => (b.id || 0) - (a.id || 0))[0];
@@ -63,9 +60,8 @@ const NutritionistTable = ({ route, navigation }) => {
 
   const handleSave = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
       const nutritionistId = await AsyncStorage.getItem("userId");
-
+      
       const bodyData = {
         patientId: Number(patientId),
         nutritionistId: Number(nutritionistId),
@@ -76,21 +72,17 @@ const NutritionistTable = ({ route, navigation }) => {
         breakfast,
         lunch,
         dinner,
-        mealNotes, // إرسال الملاحظات
+        mealNotes,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
       };
 
-      const response = await fetch(
-        `https://medikidneysys.onrender.com/nutrition-programs${programId ? `/${programId}` : ""}`,
-        {
-          method: programId ? "PATCH" : "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-          body: JSON.stringify(bodyData)
-        }
-      );
+      const endpoint = `/nutrition-programs${programId ? `/${programId}` : ""}`;
+      const response = programId 
+        ? await api.patch(endpoint, bodyData)
+        : await api.post(endpoint, bodyData);
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         Alert.alert("✅ تم", "تم حفظ البرنامج بنجاح", [{ text: "تم", onPress: () => navigation.goBack() }]);
       }
     } catch (error) { Alert.alert("خطأ", "فشل الاتصال بالسيرفر"); }

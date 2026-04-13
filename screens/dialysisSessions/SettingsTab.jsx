@@ -5,11 +5,9 @@ import {
   View, Text, ScrollView, TextInput, StyleSheet,
   Alert, Pressable, ActivityIndicator,
 } from 'react-native';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from "../../services/api";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
-const API = "https://medikidneysys.onrender.com";
 
 const FIELDS = [
   {
@@ -65,10 +63,8 @@ const SettingsTab = ({ route }) => {
     if (!sessionId) return;
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-      const { data } = await axios.get(
-        `${API}/dialysis-sessions/${sessionId}/details/dialysis-settings/latest`,
-        { headers: { Authorization: `Bearer ${token}` } }
+      const { data } = await api.get(
+        `/dialysis-sessions/${sessionId}/details/dialysis-settings/latest`
       );
 
       const obj = data?.data || data;
@@ -100,17 +96,15 @@ const SettingsTab = ({ route }) => {
 
     try {
       setIsSubmitting(true);
-      const token = await AsyncStorage.getItem("token");
       const payload = {
         bloodFlowRate: Number(bloodFlowRate),
         dialysateFlow: Number(dialysateFlow),
         ultrafiltrationRate: Number(ultrafiltrationRate),
       };
 
-      const res = await axios.post(
-        `${API}/dialysis-sessions/${sessionId}/details/dialysis-settings`,
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
+      const res = await api.post(
+        `/dialysis-sessions/${sessionId}/details/dialysis-settings`,
+        payload
       );
 
       // تحديث الحالة فوراً بالقيم المسجلة لضمان الظهور السريع
@@ -138,10 +132,8 @@ const SettingsTab = ({ route }) => {
         onPress: async () => {
           try {
             setLoading(true);
-            const token = await AsyncStorage.getItem("token");
-            await axios.delete(
-              `${API}/dialysis-sessions/${sessionId}/details/dialysis-settings/${settingId}`,
-              { headers: { Authorization: `Bearer ${token}` } }
+            await api.delete(
+              `/dialysis-sessions/${sessionId}/details/dialysis-settings/${settingId}`
             );
             setSaved(null);
             setForm({ bloodFlowRate: '', dialysateFlow: '', ultrafiltrationRate: '' });

@@ -11,12 +11,10 @@ import {
   Alert,
 } from "react-native";
 import { Icon, Divider } from "@rneui/base";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
+import api from "../../services/api";
 import { useFocusEffect } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
-const BASE_URL = "https://medikidneysys.onrender.com";
 
 // ترجمة أنواع الأعراض
 const symptomTranslations = {
@@ -220,11 +218,8 @@ const PatientSessionStatistics = ({ route, navigation }) => {
   const fetchStatistics = useCallback(async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-      const headers = { Authorization: `Bearer ${token}` };
-
       // جلب كل الجلسات (هذا الـ endpoint مسموح به)
-      const sessionsRes = await axios.get(`${BASE_URL}/dialysis-sessions?patientId=${patientId}`, { headers });
+      const sessionsRes = await api.get(`/dialysis-sessions?patientId=${patientId}`);
       const sessionsList = Array.isArray(sessionsRes.data) ? sessionsRes.data : [];
       setSessions(sessionsList);
 
@@ -262,7 +257,7 @@ const PatientSessionStatistics = ({ route, navigation }) => {
 
       // جلب آخر جلسة شاملة لقراءات العلامات الحيوية
       try {
-        const lastSessionRes = await axios.get(`${BASE_URL}/dialysis-sessions/patient/${patientId}/last-session`, { headers });
+        const lastSessionRes = await api.get(`/dialysis-sessions/patient/${patientId}/last-session`);
         const lastSession = lastSessionRes.data;
         if (lastSession?.vitalSigns && lastSession.vitalSigns.length > 0) {
           lastSession.vitalSigns.forEach((v) => {

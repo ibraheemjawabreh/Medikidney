@@ -4,11 +4,10 @@ import {
   Alert, Pressable, TextInput, Animated, StatusBar, Platform
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../../services/api";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-const API_BASE = "https://medikidneysys.onrender.com";
+
 
 const DaysMap = {
   SUNDAY: "الأحد", MONDAY: "الاثنين", TUESDAY: "الثلاثاء",
@@ -33,7 +32,7 @@ const AppointmentScreen = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  const token = useRef(null);
+
 
   // --- Helpers ---
   const formatDate = (date) => date.toISOString().split('T')[0];
@@ -54,28 +53,16 @@ const AppointmentScreen = () => {
   };
 
   // --- API Logic ---
-  const api = async (method, endpoint, params = {}, data = {}) => {
-    return axios({
-      method,
-      url: `${API_BASE}${endpoint}`,
-      params,
-      data,
-      headers: { Authorization: `Bearer ${token.current}` },
-      timeout: 45000
-    });
-  };
+
 
   // 1. تشغيل النظام وجلب البيانات الأولية
   const initData = async () => {
     try {
-      const savedToken = await AsyncStorage.getItem("token");
-      if (!savedToken) return Alert.alert("خطأ", "انتهت الجلسة، سجل دخولك");
-      token.current = savedToken;
 
       // جلب الأطباء وجلب مواعيد المريض الحالية في نفس الوقت
       const [docsRes, myApptsRes] = await Promise.all([
-        api('get', '/reports/booking-doctors'),
-        api('get', '/clinic-consultations') // نفترض أن هذا المسار يعيد مواعيد المريض المسجل
+        api.get('/reports/booking-doctors'),
+        api.get('/clinic-consultations') // نفترض أن هذا المسار يعيد مواعيد المريض المسجل
       ]);
 
       setDoctors(Array.isArray(docsRes.data) ? docsRes.data : []);
@@ -114,15 +101,8 @@ const handleCancelAppointment = (apptId) => {
             try {
               setLoading(true);
               
-              // محاولة الحذف باستخدام axios مباشرة للتأكد من المسار
-              const response = await axios({
-                method: 'delete',
-                url: `${API_BASE}/clinic-consultations/${apptId}`,
-                headers: { 
-                  'Authorization': `Bearer ${token.current}`,
-                  'Accept': '*/*'
-                }
-              });
+              // محاولة الحذف باستخدام api الموحد
+              const response = await api.delete(`/clinic-consultations/${apptId}`);
 
               if (response.status === 200 || response.status === 204) {
                 Alert.alert("تم ✅", "تم إلغاء الموعد بنجاح");
@@ -157,7 +137,7 @@ const handleCancelAppointment = (apptId) => {
 
     try {
       setLoading(true);
-      const res = await api('get', '/doctor-schedule', { doctorId: docId });
+      const res = await api.get('/doctor-schedule', { params: { doctorId: docId } });
       setSchedules(res.data || []);
     } catch (e) {
       Alert.alert("تنبيه", "لا يوجد جدول لهذا الطبيب");
@@ -176,9 +156,11 @@ const handleCancelAppointment = (apptId) => {
     try {
       setLoading(true);
       const date = getNextDate(day.weekday);
-      const res = await api('get', '/clinic-consultations/availability', {
-        doctorId: selectedDoctor,
-        date: date
+      const res = await api.get('/clinic-consultations/availability', {
+        params: {
+          doctorId: selectedDoctor,
+          date: date
+        }
       });
 
       const { availableSlots = [], bookedSlots = [], bookingAllowed, bookingRestrictionReason } = res.data;
@@ -204,7 +186,7 @@ const handleCancelAppointment = (apptId) => {
     try {
       setBookingLoading(true);
       const date = getNextDate(selectedDay.weekday);
-      await api('post', '/clinic-consultations/book', {}, {
+      await api.post('/clinic-consultations/book', {
         doctorId: Number(selectedDoctor),
         apptDate: date,
         apptTime: `${date}T${selectedSlot}`,

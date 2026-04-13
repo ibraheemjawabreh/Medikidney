@@ -3,12 +3,10 @@ import {
   Text, View, ScrollView, StyleSheet,
   ActivityIndicator, Pressable, Alert,
 } from "react-native";
-import axios from "axios";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import api from "../../services/api";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
-const API = "https://medikidneysys.onrender.com";
 
 const SelectPatient = () => {
   const navigation = useNavigation();
@@ -30,15 +28,9 @@ const SelectPatient = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-
       const [scheduleRes, profileRes] = await Promise.all([
-        axios.get(`${API}/dialysis-scheduling/nurse/today`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${API}/users/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        api.get("/dialysis-scheduling/nurse/today"),
+        api.get("/users/profile"),
       ]);
 
       const nurseId = profileRes.data?.nurse?.nurse_id ?? null;
@@ -100,17 +92,14 @@ const SelectPatient = () => {
 
     try {
       setProceeding(true);
-      const token = await AsyncStorage.getItem("token");
-      const allPatientsInShifts = shifts.flatMap(s => s.patients);
 
       for (const patientId of newOnly) {
-        const patient = allPatientsInShifts.find(p => p.patientId === patientId);
+        const patient = currentShift.patients.find(p => p.patientId === patientId);
         if (patient) {
           try {
-            await axios.post(
-              `${API}/dialysis-scheduling/assign-nurse`,
-              { scheduleId: patient.scheduleId },
-              { headers: { Authorization: `Bearer ${token}` } }
+            await api.post(
+              "/dialysis-scheduling/assign-nurse",
+              { scheduleId: patient.scheduleId }
             );
           } catch (err) {
             console.warn("فشل حجز المريض:", patient.patientName);

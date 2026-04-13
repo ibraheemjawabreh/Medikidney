@@ -5,11 +5,8 @@ import {
   View, Text, ScrollView, TextInput, StyleSheet,
   Alert, Pressable, ActivityIndicator, Platform,
 } from 'react-native';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from "../../services/api";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
-const API = "https://medikidneysys.onrender.com";
 
 // ── الأدوية الشائعة (أزرار جاهزة) ────────────────────────────
 const PRESET_MEDS = [
@@ -64,10 +61,8 @@ const MedicationsTab = ({ route }) => {
     if (!sessionId) return;
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-      const { data } = await axios.get(
-        `${API}/dialysis-sessions/${sessionId}/details/medications`,
-        { headers: { Authorization: `Bearer ${token}` } }
+      const { data } = await api.get(
+        `/dialysis-sessions/${sessionId}/details/medications`
       );
       const list = Array.isArray(data) ? data : data?.data || [];
       if (list.length > 0) console.log("💊 Medication sample object:", JSON.stringify(list[0]));
@@ -86,16 +81,14 @@ const MedicationsTab = ({ route }) => {
   const postMed = async (medData) => {
     try {
       setIsSubmitting(true);
-      const token = await AsyncStorage.getItem("token");
-      await axios.post(
-        `${API}/dialysis-sessions/${sessionId}/details/medications`,
+      await api.post(
+        `/dialysis-sessions/${sessionId}/details/medications`,
         {
           medicationName: medData.name,
           dosage:         Number(medData.dosage),
           unit:           medData.unit,
           notes:          medData.notes || "تم الإعطاء بنجاح",
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+        }
       );
       showAlert("تم ✅", `تم تسجيل ${medData.label || medData.name}`);
       fetchMeds();
@@ -116,10 +109,8 @@ const MedicationsTab = ({ route }) => {
     if (!confirmed) return;
 
     try {
-      const token = await AsyncStorage.getItem("token");
-      await axios.delete(
-        `${API}/dialysis-sessions/${sessionId}/details/medications/${numId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+      await api.delete(
+        `/dialysis-sessions/${sessionId}/details/medications/${numId}`
       );
       setMeds(prev => prev.filter(m => parseInt(m.id || m.medicationId, 10) !== numId));
     } catch (err) {

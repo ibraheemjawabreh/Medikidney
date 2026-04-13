@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, StatusBar } from 'react-native';
 import { Icon } from '@rneui/themed';
 import * as ImagePicker from 'expo-image-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import api from "../../services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileSettingsScreen = ({ navigation }) => {
   const [image, setImage] = useState(null);
@@ -16,18 +16,7 @@ const [loading, setLoading] = useState(true); // حالة التحميل
   const getProfile = async () => {
   try {
     setLoading(true);
-    const token = await AsyncStorage.getItem("token");
-
-    // 1. إذا لم يوجد توكن، توقف فوراً ولا ترسل طلب للسيرفر
-    if (!token) {
-      setLoading(false);
-      return; 
-    }
-
-    const response = await axios.get(
-      "https://medikidneysys.onrender.com/users/profile",
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    const response = await api.get("/users/profile");
     
     setUserData(response.data);
   } catch (error) {

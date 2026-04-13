@@ -1,8 +1,7 @@
 import { Button, Input } from "@rneui/base";
 import { useState } from "react";
 import { View, StyleSheet, Text, FlatList, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
+import api from "../../services/api";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const SearchPatient = ({ navigation }) => {
@@ -15,10 +14,8 @@ const SearchPatient = ({ navigation }) => {
     if (!queryText) return;
     try {
       setIsLoading(true);
-      const token = await AsyncStorage.getItem("token");
-      const response = await axios.get(
-        `https://medikidneysys.onrender.com/users/profile/patients/search?name=${queryText}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+      const response = await api.get(
+        `/users/profile/patients/search?name=${queryText}`
       );
       setPatients(response.data);
     } catch (err) {

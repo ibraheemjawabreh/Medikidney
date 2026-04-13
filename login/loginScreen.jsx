@@ -5,6 +5,8 @@ import LoginValidation from "./loginValidation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
+import api from "../services/api";
+
 const LoginScreen = ({ navigation }) => {
   const [username, setusername] = useState("");
   const [password, setpassword] = useState("");
@@ -21,46 +23,45 @@ const LoginScreen = ({ navigation }) => {
       );
       seterrors({});
       
-      const response = await fetch("https://medikidneysys.onrender.com/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
+      const response = await api.post("/auth/login", { username, password });
+      const data = response.data;
       
-if (response.ok) {
-        // فحص هل يحتاج المستخدم لتغيير كلمة المرور لأول مرة
-        if (data.user && data.user.mustChangePassword === true) {
-          console.log("المستخدم يحتاج لتفعيل الحساب لأول مرة");
-          
-          navigation.replace("ChangePasswordFirstTime", { 
-            tempToken: data.access_token, 
-            userRole: data.user.role 
-          });
-          return; 
-        }
-
-        await AsyncStorage.setItem("token", data.access_token);
-        await AsyncStorage.setItem("role", data.user.role);
-        // حفظ معرف الممرض أو المستخدم لنستعمله لاحقاً
-        if (data.user.id) {
-          await AsyncStorage.setItem("userId", String(data.user.id));
-        } else if (data.user.userId) {
-          await AsyncStorage.setItem("userId", String(data.user.userId));
-        }
-
-        const userRole = data.user.role;
-        if (userRole === "PATIENT") navigation.replace("Patinet");
-        else if (userRole === "NURSE") navigation.replace("NurseHome");
-        else if (userRole === "NUTRITIONIST") navigation.replace("NutritionistHome");
-
-      } else {
-        // في حال فشل تسجيل الدخول (كلمة مرور خطأ مثلاً)
-        Alert.alert("خطأ", data.message || "بيانات الدخول غير صحيحة");
+      // فحص هل يحتاج المستخدم لتغيير كلمة المرور لأول مرة
+      if (data.user && data.user.mustChangePassword === true) {
+        console.log("المستخدم يحتاج لتفعيل الحساب لأول مرة");
+        
+        navigation.replace("ChangePasswordFirstTime", { 
+          tempToken: data.access_token, 
+          userRole: data.user.role 
+        });
+        return; 
       }
+
+      await AsyncStorage.setItem("token", data.access_token);
+      await AsyncStorage.setItem("role", data.user.role);
+      // حفظ معرف الممرض أو المستخدم لنستعمله لاحقاً
+      if (data.user.id) {
+        await AsyncStorage.setItem("userId", String(data.user.id));
+      } else if (data.user.userId) {
+        await AsyncStorage.setItem("userId", String(data.user.userId));
+      }
+
+      const userRole = data.user.role;
+      if (userRole === "PATIENT") navigation.replace("Patinet");
+      else if (userRole === "NURSE") navigation.replace("NurseHome");
+      else if (userRole === "NUTRITIONIST") navigation.replace("NutritionistHome");
+
     } catch (err) {
-      // ... معالجة أخطاء الـ Validation والاتصال (تبقى كما هي عندك)
+      if (err.name === "ValidationError") {
+        const newErrors = {};
+        err.inner.forEach((error) => {
+          newErrors[error.path] = error.message;
+        });
+        seterrors(newErrors);
+      } else {
+        const msg = err.response?.data?.message || "بيانات الدخول غير صحيحة أو وجد خطأ في الاتصال";
+        Alert.alert("خطأ", msg);
+      }
     } finally {
       setIsLoading(false);
     }

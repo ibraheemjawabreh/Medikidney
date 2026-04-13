@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Text, View, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { Button, Input } from "@rneui/themed";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../../services/api";
 import ValidationChange from "./ValidationChangePassword";
 
 const ChangePassword = ({ navigation }) => {
@@ -23,19 +22,10 @@ const ChangePassword = ({ navigation }) => {
         { abortEarly: false }
       );
 
-      // 2. جلب التوكن المخزن في الجهاز
-      const token = await AsyncStorage.getItem("token");
-
       // 3. إرسال طلب تغيير كلمة المرور التقليدي
-      const response = await axios.patch(
-        "https://medikidneysys.onrender.com/auth/change-password",
-        { oldPassword, newPassword, confirmPassword },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+      const response = await api.patch(
+        "/auth/change-password",
+        { oldPassword, newPassword, confirmPassword }
       );
 
       if (response.status === 200 || response.status === 201) {

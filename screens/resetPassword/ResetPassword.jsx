@@ -1,7 +1,7 @@
 import { Input, Button } from "@rneui/base";
 import { Text, View, StyleSheet, Alert } from "react-native";
 import { useState } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import ValidationPassword from "./ValidationPassword";
 
 const ResetPassword = ({ route, navigation }) => {
@@ -24,12 +24,11 @@ const ResetPassword = ({ route, navigation }) => {
         { abortEarly: false }
       );
 
-      const response = await axios.post(
-        "https://medikidneysys.onrender.com/auth/reset-password",
+      const response = await api.post(
+        "/auth/reset-password",
         { email, newPassword, confirmPassword },
         {
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         }

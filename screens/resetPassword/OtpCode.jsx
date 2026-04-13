@@ -1,7 +1,7 @@
 import { Input, Button } from "@rneui/base";
 import { Text, View, StyleSheet, Alert } from "react-native";
 import { useState } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import ValidationOtpCode from "./ValidationOtpCode";
 
 const OtpCode = ({ route, navigation }) => {
@@ -14,10 +14,9 @@ const OtpCode = ({ route, navigation }) => {
       setLoading(true);
       await ValidationOtpCode.validate({ code }, { abortEarly: false });
 
-      const response = await axios.post(
-        "https://medikidneysys.onrender.com/auth/verify-otp",
-        { email, otp: code },
-        { headers: { "Content-Type": "application/json" } }
+      const response = await api.post(
+        "/auth/verify-otp",
+        { email, otp: code }
       );
 
       if (response.data?.token) {

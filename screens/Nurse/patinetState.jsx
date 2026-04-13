@@ -4,11 +4,9 @@ import {
   ActivityIndicator, RefreshControl, Alert
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import axios from "axios";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-
-const API = "https://medikidneysys.onrender.com";
+import api from "../../services/api";
 
 const PatientState = ({ route }) => {
   const navigation = useNavigation();
@@ -23,15 +21,9 @@ const PatientState = ({ route }) => {
   const fetchStatus = async (isRefresh = false) => {
     try {
       isRefresh ? setRefreshing(true) : setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-
       const [scheduleRes, profileRes] = await Promise.all([
-        axios.get(`${API}/dialysis-scheduling/nurse/today`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${API}/users/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        api.get("/dialysis-scheduling/nurse/today"),
+        api.get("/users/profile"),
       ]);
 
       const nurseId = profileRes.data?.nurse?.nurse_id ?? null;
@@ -68,10 +60,8 @@ const PatientState = ({ route }) => {
           onPress: async () => {
             try {
               setLoading(true);
-              const token = await AsyncStorage.getItem("token");
-              await axios.delete(
-                `${API}/dialysis-scheduling/assign-nurse/${patient.scheduleId}`,
-                { headers: { Authorization: `Bearer ${token}` } }
+              await api.delete(
+                `/dialysis-scheduling/assign-nurse/${patient.scheduleId}`
               );
 
               // تحديث التخزين المحلي للعداد في الشاشة السابقة
@@ -100,10 +90,8 @@ const PatientState = ({ route }) => {
   const handleStartSession = async (patient) => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-
-      const createRes = await axios.post(
-        `${API}/dialysis-sessions`,
+      const createRes = await api.post(
+        "/dialysis-sessions",
         {
           patientId: patient.patientId,
           scheduleId: patient.scheduleId,
@@ -112,8 +100,7 @@ const PatientState = ({ route }) => {
           status: "PENDING",
           weightBefore: 0,
           bloodPressureBefore: "0/0",
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+        }
       );
 
       const newSessionId = createRes.data?.sessionId || createRes.data?.id;
