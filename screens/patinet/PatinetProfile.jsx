@@ -220,7 +220,28 @@ const PatientProfile = ({ navigation }) => {
       <StatusBar barStyle="light-content" backgroundColor="#204a42" />
       
       <View style={styles.headerContainer}>
-        <View style={styles.avatarCircle}><Icon name="account-circle" type="material-community" size={80} color="#cbd5e1" /></View>
+        {/* زر رجوع */}
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Icon name="arrow-left" type="material-community" size={28} color="#fff" />
+        </TouchableOpacity>
+
+        {/* زر معلومات المريض */}
+        <TouchableOpacity
+          style={styles.infoButton}
+          onPress={() => navigation.navigate('PatinetInfo', {})}
+        >
+          <Icon name="card-account-details-outline" type="material-community" size={24} color="#fff" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate('PatinetInfo', {})}
+          activeOpacity={0.85}
+        >
+          <View style={styles.avatarCircle}>
+            <Icon name="account-circle" type="material-community" size={80} color="#cbd5e1" />
+          </View>
+        </TouchableOpacity>
+
         <Text style={styles.patientName}>{patient?.full_name}</Text>
         <View style={styles.idBadge}><Text style={styles.idText}>رقم المريض: {patient?.patient_id}</Text></View>
         
@@ -234,10 +255,10 @@ const PatientProfile = ({ navigation }) => {
       </View>
 
       <Tab value={tabIndex} onChange={setTabIndex} indicatorStyle={styles.tabIndicator} containerStyle={styles.tabBar} variant="default">
-        <Tab.Item title="التغذية" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="food-apple" type="material-community" size={22} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />} />
-        <Tab.Item title="الجلسات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="clock-outline" type="material-community" size={22} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />} />
-        <Tab.Item title="الفحوصات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="clipboard-pulse" type="material-community" size={22} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />} />
-        <Tab.Item title="المواعيد" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="calendar-clock" type="material-community" size={22} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />} />
+        <Tab.Item title="التغذية" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="food-apple" type="material-community" size={22} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />} />
+        <Tab.Item title="الجلسات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="clock-outline" type="material-community" size={22} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />} />
+        <Tab.Item title="الفحوصات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="clipboard-pulse" type="material-community" size={22} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />} />
+        <Tab.Item title="المواعيد" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="calendar-clock" type="material-community" size={22} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />} />
       </Tab>
 
       <TabView value={tabIndex} onChange={setTabIndex}>
@@ -336,28 +357,28 @@ const PatientProfile = ({ navigation }) => {
               {subTabIndex === 1 && medicalTests.map((test, idx) => (
                 <MedicalCard 
                   key={idx} 
-                  id={test.test_id}
+                  id={test.test_id || test.id}
                   type="lab"
                   title={test.test_type} 
                   date={test.date_completed} 
                   doctor={test.doctor?.full_name} 
                   description={test.description} 
-                  status={test.result ? 'COMPLETED' : 'PENDING'} 
-                  hasFile={!!test.result} 
+                  status={test.status || (test.result ? 'COMPLETED' : 'PENDING')} 
+                  hasFile={!!(test.test_id || test.id)} 
                   typeIcon="test-tube" 
                 />
               ))}
               {subTabIndex === 2 && radiology.map((rad, idx) => (
                 <MedicalCard 
                   key={idx} 
-                  id={rad.image_id}
+                  id={rad.image_id || rad.id}
                   type="radiology"
                   title={rad.image_type} 
                   date={rad.completed_at} 
                   doctor={rad.doctor?.full_name} 
                   description={rad.description} 
                   status={rad.status} 
-                  hasFile={!!rad.image_path} 
+                  hasFile={!!(rad.image_id || rad.id)} 
                   typeIcon="file-image-outline" 
                 />
               ))}
@@ -424,8 +445,11 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 30, 
     borderBottomLeftRadius: 30, 
     elevation: 10,
+    position: 'relative',
     boxShadow: '0px 4px 10px rgba(0,0,0,0.3)'
   },
+  backButton: { position: 'absolute', left: 20, top: 42, zIndex: 10, padding: 5 },
+  infoButton: { position: 'absolute', right: 20, top: 42, zIndex: 10, padding: 5, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 12 },
   avatarCircle: { width: 90, height: 90, borderRadius: 45, backgroundColor: "rgba(255,255,255,0.1)", justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#059669" },
   patientName: { color: "#fff", fontSize: 22, fontWeight: "900", marginTop: 10 },
   idBadge: { backgroundColor: "#1e293b", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 10, marginTop: 8 },
@@ -436,7 +460,7 @@ const styles = StyleSheet.create({
   statValue: { color: "#fff", fontSize: 15, fontWeight: "bold" },
   tabBar: { backgroundColor: "#fff", elevation: 0, borderBottomWidth: 1, borderColor: '#e2e8f0' },
   tabIndicator: { backgroundColor: "#204a42", height: 3 },
-  tabTitle: { fontSize: 13, fontWeight: "bold", marginTop: 4 },
+  tabTitle: { fontSize: 11, fontWeight: "bold", marginTop: 4, textAlign: 'center' },
   tabViewContent: { flex: 1, width: width },
   scrollPadding: { padding: 20 },
   subTabContainer: { flexDirection: 'row-reverse', backgroundColor: '#f1f5f9', margin: 15, borderRadius: 12, padding: 4 },

@@ -28,6 +28,11 @@
     },
     "plugins": [
       "@react-native-community/datetimepicker"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "19cf59de-b570-4f11-8a9c-d2a49320062f"
+      }
+    }
   }
 }

@@ -16,6 +16,8 @@ const SYMPTOMS_LIST = [
   { id: 'CHEST_PAIN', label: 'ألم في الصدر', icon: 'heart-pulse', color: '#ec4899' },
   { id: 'DIZZINESS', label: 'دوخة / دوار', icon: 'rotate-3d-variant', color: '#8b5cf6' },
   { id: 'ITCHING', label: 'حكة جلدية', icon: 'hand-back-right-outline', color: '#06b6d4' },
+  { id: 'MUSCLE_PAIN', label: 'ألم عضلات', icon: 'arm-flex-outline', color: '#f97316' },
+  { id: 'OTHER', label: 'أخرى / ملاحظة', icon: 'dots-horizontal-circle-outline', color: '#6b7280' },
 ];
 
 const SymptomsTab = ({ route }) => {
@@ -59,38 +61,54 @@ const SymptomsTab = ({ route }) => {
 
   // ── حفظ الكل (الأعراض والملاحظات) ──────────────────────────
   const handleSaveAll = async () => {
-    if (selectedIds.length === 0 && !note.trim()) {
-      return Alert.alert("تنبيه", "يرجى اختيار عرض واحد على الأقل أو كتابة ملاحظة.");
+  if (selectedIds.length === 0 && !note.trim()) {
+    return Alert.alert("تنبيه", "يرجى اختيار عرض واحد على الأقل أو كتابة ملاحظة.");
+  }
+
+  try {
+    setIsSubmitting(true);
+    const promises = [];
+
+    // إرسال الأعراض المختارة
+    selectedIds.forEach(type => {
+      promises.push(
+        api.post(`/dialysis-sessions/${sessionId}/details/symptoms`, {
+          symptomType: type, // القيمة هنا ستكون مثلاً 'LOW_BP'
+          severity: "MILD",  // قيمة مسموحة حسب رسالة الخطأ
+          notes: "تم تسجيل العرض"
+        })
+      );
+    });
+
+    // إرسال الملاحظة العامة كنوع 'OTHER'
+    if (note.trim()) {
+      promises.push(
+        api.post(`/dialysis-sessions/${sessionId}/details/symptoms`, {
+          symptomType: "OTHER", // استخدمنا القيمة المسموحة للملاحظات
+          severity: "MILD",
+          notes: note 
+        })
+      );
     }
 
-    try {
-      setIsSubmitting(true);
-      // 1. تسجيل الأعراض (إرسال كل عرض مختار في طلب منفصل)
-      const symptomPromises = selectedIds.map(type => 
-        api.post(
-          `/dialysis-sessions/${sessionId}/details/symptoms`,
-          { symptomType: type, severity: "MILD", notes: "مسجر عبر القائمة السريعة" }
-        )
-      );
+    await Promise.all(promises);
 
-      // 2. تحديث ملاحظات الجلسة
-      const notePromise = api.patch(
-        `/dialysis-sessions/${sessionId}`,
-        { notes: note }
-      );
+    Alert.alert("تم الحفظ ✅", "تم تسجيل البيانات بنجاح");
+    setSelectedIds([]);
+    setNote('');
+    fetchData(); 
 
-      await Promise.all([...symptomPromises, notePromise]);
+  } catch (err) {
+    // طباعة الخطأ القادم من السيرفر للتأكد
+    console.log("Detailed Error:", err.response?.data);
+    Alert.alert("خطأ", "تأكد من اختيار قيم صحيحة");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
-      Alert.alert("تم الحفظ ✅", "تم تسجيل الأعراض والملاحظات بنجاح");
-      setSelectedIds([]);
-      fetchData(); // تحديث السجل
-    } catch (err) {
-      console.log("Save All Error:", err.response?.data || err.message);
-      Alert.alert("خطأ", "فشل في حفظ البيانات");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+
+
 
   const handleDeleteSymptom = async (id) => {
     try {
@@ -168,21 +186,34 @@ const SymptomsTab = ({ route }) => {
       </Pressable>
 
       {/* ── سجل الأعراض الحالية ── */}
-      {history.length > 0 && (
-        <View style={styles.historySection}>
-          <Text style={styles.historyTitle}>الأعراض المسجلة سابقاً ({history.length})</Text>
-          {history.map((h, i) => (
-            <View key={i} style={styles.historyRow}>
-              <Pressable onPress={() => handleDeleteSymptom(h.id || h.symptom_id)}>
-                <MaterialCommunityIcons name="close-circle" size={18} color="#ef4444" />
-              </Pressable>
-              <Text style={styles.historyText}>
-                 - {SYMPTOMS_LIST.find(s => s.id === h.symptomType)?.label || h.symptomType}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
+{history.length > 0 && (
+  <View style={styles.historySection}>
+    <Text style={styles.historyTitle}>الأعراض والملحوظات المسجلة ({history.length})</Text>
+    {history.map((h, i) => {
+  // 1. التأكد من جلب النوع الصحيح (السيرفر غالباً يرسلها symptomType)
+  const typeKey = h.symptomType || h.symptom_type;
+  const noteContent = h.notes || h.note || "";
+  
+  // 2. البحث في المصفوفة المحلية
+  const symptomInfo = SYMPTOMS_LIST.find(s => s.id === typeKey);
+  
+  return (
+    <View key={i} style={styles.historyRow}>
+      <Pressable onPress={() => handleDeleteSymptom(h.id || h.symptom_id)}>
+        <MaterialCommunityIcons name="close-circle" size={18} color="#ef4444" />
+      </Pressable>
+      
+      <Text style={styles.historyText}>
+        {typeKey === 'OTHER' 
+          ? `📝 ملاحظة: ${noteContent}` 
+          : `- ${symptomInfo?.label || typeKey || 'عرض غير معروف'} ${noteContent ? `(${noteContent})` : ''}`
+        }
+      </Text>
+    </View>
+  );
+})}
+  </View>
+)}
 
       <View style={{ height: 30 }} />
     </ScrollView>

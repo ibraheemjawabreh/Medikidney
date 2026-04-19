@@ -11,7 +11,7 @@ import {
   Alert,
   Linking,
 } from "react-native";
-import { Tab, TabView, Button, Icon, Divider } from "@rneui/base";
+import { Tab, Button, Icon, Divider } from "@rneui/base";
 import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
@@ -21,7 +21,6 @@ const { width } = Dimensions.get("window");
 const StaffPatientView = ({ route, navigation }) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [subTabIndex, setSubTabIndex] = useState(0);
-  const [infoSubTabIndex, setInfoSubTabIndex] = useState(0);
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [nutritionPlan, setNutritionPlan] = useState(null);
@@ -138,10 +137,28 @@ const StaffPatientView = ({ route, navigation }) => {
     return new Date(date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
-  const handleDownload = async (url) => {
-    if (!url) { Alert.alert("تنبيه", "الملف غير متوفر حالياً"); return; }
-    const fullUrl = url.startsWith('http') ? url : `${api.defaults.baseURL}${url}`;
-    try { await Linking.openURL(fullUrl); } catch (e) { Alert.alert("خطأ", "لا يمكن فتح الرابط حالياً."); }
+  const handleDownload = async (id, type) => {
+    if (!id) { Alert.alert("تنبيه", "الملف غير متوفر حالياً"); return; }
+    try {
+      const endpoint = type === 'lab'
+        ? `/medical-tests/${id}/result-url`
+        : `/radiology-requests/${id}/file-url`;
+
+      const response = await api.get(endpoint);
+      const fullUrl = response.data?.url || response.data;
+
+      if (!fullUrl) { Alert.alert("خطأ", "فشل في جلب رابط الملف"); return; }
+
+      const supported = await Linking.canOpenURL(fullUrl);
+      if (supported) {
+        await Linking.openURL(fullUrl);
+      } else {
+        Alert.alert("خطأ", "لا يمكن فتح هذا النوع من الروابط.");
+      }
+    } catch (e) {
+      console.log("Download Error:", e.message);
+      Alert.alert("خطأ", "حدثت مشكلة أثناء محاولة فتح الملف.");
+    }
   };
 
   // --- Sub-Components ---
@@ -167,7 +184,7 @@ const StaffPatientView = ({ route, navigation }) => {
     </View>
   );
 
-  const MedicalCard = ({ title, date, doctor, description, status, fileUrl, typeIcon }) => (
+  const MedicalCard = ({ id, type, title, date, doctor, description, status, hasFile, typeIcon }) => (
     <View style={styles.reportCard}>
       <View style={styles.reportHeader}>
         <View style={styles.reportTitleRow}>
@@ -186,11 +203,11 @@ const StaffPatientView = ({ route, navigation }) => {
         </View>
       </View>
       <Button
-        title="معاينة"
-        icon={<Icon name="file-pdf-box" type="material-community" color="white" size={20} />}
+        title="معاينة الملف"
+        icon={<Icon name="file-pdf-box" type="material-community" color="white" size={20} containerStyle={{ marginLeft: 5 }} />}
         buttonStyle={styles.downloadBtn}
-        onPress={() => handleDownload(fileUrl)}
-        disabled={!fileUrl}
+        onPress={() => handleDownload(id, type)}
+        disabled={!hasFile}
       />
     </View>
   );
@@ -213,7 +230,24 @@ const StaffPatientView = ({ route, navigation }) => {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-left" type="material-community" size={28} color="#fff" />
         </TouchableOpacity>
-        <View style={styles.avatarCircle}><Icon name="account-circle" type="material-community" size={80} color="#cbd5e1" /></View>
+
+        {/* زر معلومات المريض */}
+        <TouchableOpacity
+          style={styles.infoButton}
+          onPress={() => navigation.navigate('PatinetInfo', { patientId })}
+        >
+          <Icon name="card-account-details-outline" type="material-community" size={24} color="#fff" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate('PatinetInfo', { patientId })}
+          activeOpacity={0.85}
+        >
+          <View style={styles.avatarCircle}>
+            <Icon name="account-circle" type="material-community" size={80} color="#cbd5e1" />
+          </View>
+        </TouchableOpacity>
+
         <Text style={styles.patientName}>{patient?.full_name}</Text>
         <View style={styles.idBadge}><Text style={styles.idText}>رقم المريض: {patient?.patient_id}</Text></View>
 
@@ -226,18 +260,18 @@ const StaffPatientView = ({ route, navigation }) => {
         </View>
       </View>
 
-      <Tab value={tabIndex} onChange={setTabIndex} indicatorStyle={styles.tabIndicator} containerStyle={styles.tabBar} variant="default" scrollable>
-        <Tab.Item title="التغذية" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="food-apple" type="material-community" size={22} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />} />
-        <Tab.Item title="الجلسات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="clock-outline" type="material-community" size={22} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />} />
-        <Tab.Item title="الفحوصات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="clipboard-pulse" type="material-community" size={22} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />} />
-        <Tab.Item title="الملاحظات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="note-edit-outline" type="material-community" size={22} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />} />
-        <Tab.Item title="معلومات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} icon={<Icon name="card-account-details-outline" type="material-community" size={22} color={tabIndex === 4 ? "#204a42" : "#94a3b8"} />} />
+      <Tab value={tabIndex} onChange={setTabIndex} indicatorStyle={styles.tabIndicator} containerStyle={styles.tabBar} variant="default">
+        <Tab.Item title="التغذية" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="food-apple" type="material-community" size={22} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />} />
+        <Tab.Item title="الجلسات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="clock-outline" type="material-community" size={22} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />} />
+        <Tab.Item title="الفحوصات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="clipboard-pulse" type="material-community" size={22} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />} />
+        <Tab.Item title="الملاحظات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="note-edit-outline" type="material-community" size={22} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />} />
       </Tab>
 
-      <TabView value={tabIndex} onChange={setTabIndex}>
+      {/* ── Tab Content ── */}
+      <View style={{ flex: 1 }}>
         {/* TAB 0: Nutrition */}
-        <TabView.Item style={styles.tabViewContent}>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
+        {tabIndex === 0 && (
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding} style={{ flex: 1 }}>
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionHeading}>البرنامج الغذائي</Text>
               {canEditNutrition && (
@@ -302,11 +336,11 @@ const StaffPatientView = ({ route, navigation }) => {
               </View>
             )}
           </ScrollView>
-        </TabView.Item>
+        )}
 
         {/* TAB 1: Sessions */}
-        <TabView.Item style={styles.tabViewContent}>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
+        {tabIndex === 1 && (
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding} style={{ flex: 1 }}>
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionHeading}>سجل جلسات الغسيل</Text>
               <TouchableOpacity
@@ -336,10 +370,10 @@ const StaffPatientView = ({ route, navigation }) => {
               </View>
             )) : <View style={styles.emptyState}><Icon name="database-off" type="material-community" size={50} color="#cbd5e1" /><Text style={styles.emptyText}>لا توجد جلسات مسجلة</Text></View>}
           </ScrollView>
-        </TabView.Item>
+        )}
 
         {/* TAB 2: Medical Tests */}
-        <TabView.Item style={styles.tabViewContent}>
+        {tabIndex === 2 && (
           <View style={{ flex: 1 }}>
             <View style={styles.subTabContainer}>
               <TouchableOpacity onPress={() => setSubTabIndex(0)} style={[styles.subTabItem, subTabIndex === 0 && styles.subTabActive]}><Text style={[styles.subTabText, subTabIndex === 0 && styles.subTextActive]}>الأدوية</Text></TouchableOpacity>
@@ -387,85 +421,45 @@ const StaffPatientView = ({ route, navigation }) => {
                 </View>
               )}
               {subTabIndex === 1 && medicalTests.map((test, idx) => (
-                <MedicalCard key={idx} title={test.test_type} date={test.date_completed} doctor={test.doctor?.full_name} description={test.description} status={test.result ? 'COMPLETED' : 'PENDING'} fileUrl={test.result} typeIcon="test-tube" />
+                <MedicalCard
+                  key={idx}
+                  id={test.test_id || test.id}
+                  type="lab"
+                  title={test.test_type}
+                  date={test.date_completed}
+                  doctor={test.doctor?.full_name}
+                  description={test.description}
+                  status={test.status || (test.result ? 'COMPLETED' : 'PENDING')}
+                  hasFile={!!(test.test_id || test.id)}
+                  typeIcon="test-tube"
+                />
               ))}
               {subTabIndex === 2 && radiology.map((rad, idx) => (
-                <MedicalCard key={idx} title={rad.image_type} date={rad.completed_at} doctor={rad.doctor?.full_name} description={rad.description} status={rad.status} fileUrl={rad.image_path} typeIcon="file-image-outline" />
+                <MedicalCard
+                  key={idx}
+                  id={rad.image_id || rad.id}
+                  type="radiology"
+                  title={rad.image_type}
+                  date={rad.completed_at}
+                  doctor={rad.doctor?.full_name}
+                  description={rad.description}
+                  status={rad.status}
+                  hasFile={!!(rad.image_id || rad.id)}
+                  typeIcon="file-image-outline"
+                />
               ))}
             </ScrollView>
           </View>
-        </TabView.Item>
+        )}
 
         {/* TAB 3: Notes */}
-        <TabView.Item style={styles.tabViewContent}>
+        {tabIndex === 3 && (
           <View style={styles.emptyState}>
             <Icon name="note-text-outline" type="material-community" size={60} color="#cbd5e1" />
             <Text style={styles.emptyText}>قريباً</Text>
           </View>
-        </TabView.Item>
-
-        {/* TAB 4: Patient Info */}
-        <TabView.Item style={styles.tabViewContent}>
-          <View style={{ flex: 1 }}>
-            <View style={styles.subTabContainer}>
-              <TouchableOpacity onPress={() => setInfoSubTabIndex(0)} style={[styles.subTabItem, infoSubTabIndex === 0 && styles.subTabActive]}>
-                <Text style={[styles.subTabText, infoSubTabIndex === 0 && styles.subTextActive]}>البيانات الأساسية</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setInfoSubTabIndex(1)} style={[styles.subTabItem, infoSubTabIndex === 1 && styles.subTabActive]}>
-                <Text style={[styles.subTabText, infoSubTabIndex === 1 && styles.subTextActive]}>التاريخ الطبي</Text>
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
-              {infoSubTabIndex === 0 && (
-                <View>
-                  <Text style={styles.sectionHeading}>البيانات الشخصية</Text>
-                  <View style={styles.nutritionCard}>
-                    <View style={styles.planBody}>
-                      <InfoItem label="الاسم الكامل" value={patient?.full_name} icon="account" />
-                      <Divider style={{ marginVertical: 10 }} />
-                      <InfoItem label="رقم الهوية" value={patient?.national_id} icon="card-account-details-outline" />
-                      <Divider style={{ marginVertical: 10 }} />
-                      <InfoItem label="تاريخ الميلاد" value={patient?.date_of_birth || patient?.birth_date ? formatDate(patient?.date_of_birth || patient?.birth_date) : null} icon="calendar" />
-                      <Divider style={{ marginVertical: 10 }} />
-                      <InfoItem label="الجنس" value={patient?.gender === 'Male' ? 'ذكر' : 'أنثى'} icon="gender-male-female" />
-                      <Divider style={{ marginVertical: 10 }} />
-                      <InfoItem label="رقم الهاتف" value={patient?.phone_number || patient?.phone} icon="phone" />
-                      <Divider style={{ marginVertical: 10 }} />
-                      <InfoItem label="رقم الطوارئ" value={patient?.emergency_contact} icon="phone-alert" color="#ef4444" />
-                      <Divider style={{ marginVertical: 10 }} />
-                      <InfoItem label="البريد الإلكتروني" value={patient?.email} icon="email" />
-                      <Divider style={{ marginVertical: 10 }} />
-                      <InfoItem label="العنوان" value={patient?.address} icon="map-marker" />
-                    </View>
-                  </View>
-                </View>
-              )}
-
-              {infoSubTabIndex === 1 && (
-                <View>
-                  <Text style={styles.sectionHeading}>التاريخ الطبي للمريض</Text>
-                  <View style={styles.nutritionCard}>
-                    <View style={styles.planBody}>
-                      <InfoItem label="فصيلة الدم" value={patient?.blood_type} icon="water-plus" color="#ef4444" />
-                      <Divider style={{ marginVertical: 10 }} />
-                      <InfoItem label="الأمراض المزمنة" value={patient?.chronic_diseases} icon="medical-bag" />
-                      <Divider style={{ marginVertical: 10 }} />
-                      <InfoItem label="الحساسية" value={patient?.allergies} icon="allergy" color="#f59e0b" />
-                      <Divider style={{ marginVertical: 10 }} />
-                      <InfoItem label="تاريخ طبي إضافي" value={patient?.medical_history_notes} icon="file-document-outline" />
-                      <Divider style={{ marginVertical: 10 }} />
-                      <InfoItem label="حالة التدخين" value={patient?.smoking_status === true || patient?.smoking_status === "true" ? "مدخن" : "غير مدخن"} icon="smoking" color={patient?.smoking_status === true || patient?.smoking_status === "true" ? "#ef4444" : "#059669"} />
-                      <Divider style={{ marginVertical: 10 }} />
-                      <InfoItem label="ملاحظات عامة" value={patient?.notes} icon="note-text-outline" />
-                    </View>
-                  </View>
-                </View>
-              )}
-            </ScrollView>
-          </View>
-        </TabView.Item>
-      </TabView>
+        )}
+      </View>
     </View>
   );
 };
@@ -476,6 +470,7 @@ const styles = StyleSheet.create({
   loadingText: { marginTop: 12, color: '#64748b' },
   headerContainer: { backgroundColor: "#204a42", paddingTop: 50, paddingBottom: 25, alignItems: "center", borderBottomRightRadius: 30, borderBottomLeftRadius: 30, elevation: 10, position: 'relative' },
   backButton: { position: 'absolute', left: 20, top: 50, zIndex: 10, padding: 5 },
+  infoButton: { position: 'absolute', right: 20, top: 50, zIndex: 10, padding: 5, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 12 },
   avatarCircle: { width: 90, height: 90, borderRadius: 45, backgroundColor: "rgba(255,255,255,0.1)", justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#059669" },
   patientName: { color: "#fff", fontSize: 22, fontWeight: "900", marginTop: 10 },
   idBadge: { backgroundColor: "#1e293b", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 10, marginTop: 8 },
@@ -484,9 +479,9 @@ const styles = StyleSheet.create({
   statBox: { alignItems: "center", flex: 1 },
   statLabel: { color: "#94a3b8", fontSize: 11, marginBottom: 4 },
   statValue: { color: "#fff", fontSize: 15, fontWeight: "bold" },
-  tabBar: { backgroundColor: "#fff", elevation: 0, borderBottomWidth: 1, borderColor: '#e2e8f0' },
-  tabIndicator: { backgroundColor: "#204a42", height: 3 },
-  tabTitle: { fontSize: 14, fontWeight: "bold", paddingHorizontal: 0, marginTop: 4 },
+  tabBar: { backgroundColor: "#fff", elevation: 2, borderBottomWidth: 1, borderColor: '#e2e8f0' },
+  tabIndicator: { backgroundColor: "#204a42", height: 3, borderRadius: 3 },
+  tabTitle: { fontSize: 11, fontWeight: "bold", marginTop: 3, textAlign: 'center' },
   tabViewContent: { flex: 1, width: width },
   scrollPadding: { padding: 20 },
   subTabContainer: { flexDirection: 'row-reverse', backgroundColor: '#f1f5f9', margin: 15, borderRadius: 12, padding: 4 },
