@@ -90,16 +90,28 @@ const PatientState = ({ route }) => {
   const handleStartSession = async (patient) => {
     try {
       setLoading(true);
+      const now = new Date();
+
+      // نبني تاريخ اليوم كـ ISO كامل (منتصف الليل UTC) كما يتوقعه الباك-إند
+      const todayISO = new Date(
+        Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+      ).toISOString(); // → "2026-04-19T00:00:00.000Z"
+
       const createRes = await api.post(
         "/dialysis-sessions",
         {
-          patientId: patient.patientId,
-          scheduleId: patient.scheduleId,
-          date: new Date().toISOString().split("T")[0],
-          startTime: new Date().toISOString(),
-          status: "PENDING",
-          weightBefore: 0,
-          bloodPressureBefore: "0/0",
+          patientId:          patient.patientId,
+          scheduleId:         patient.scheduleId,
+          date:               todayISO,
+          startTime:          now.toISOString(),
+          status:             "PENDING",
+          // القيم الأولية كـ null - سيملأها الممرض لاحقاً من التابات
+          weightBefore:       null,
+          weightAfter:        null,
+          fluidRemoved:       null,
+          bloodPressureBefore: null,
+          bloodPressureAfter:  null,
+          notes:              null,
         }
       );
 

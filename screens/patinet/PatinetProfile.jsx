@@ -27,7 +27,7 @@ const PatientProfile = ({ navigation }) => {
   const [prescriptions, setPrescriptions] = useState([]);
   const [medicalTests, setMedicalTests] = useState([]);
   const [radiology, setRadiology] = useState([]);
-  
+
   // الحالة الخاصة بالمواعيد
   const [myAppointments, setMyAppointments] = useState([]);
 
@@ -68,8 +68,8 @@ const PatientProfile = ({ navigation }) => {
       // فلترة المواعيد النشطة فقط
       const activeAppts = (response.data || []).filter(a => a.status !== 'CANCELLED');
       setMyAppointments(activeAppts);
-    } catch (e) { 
-      setMyAppointments([]); 
+    } catch (e) {
+      setMyAppointments([]);
     }
   };
 
@@ -129,12 +129,12 @@ const PatientProfile = ({ navigation }) => {
       Alert.alert("تنبيه", "الملف غير متوفر حالياً");
       return;
     }
-    
+
     try {
-      const endpoint = type === 'lab' 
-        ? `/medical-tests/${id}/result-url` 
+      const endpoint = type === 'lab'
+        ? `/medical-tests/${id}/result-url`
         : `/radiology-requests/${id}/file-url`;
-        
+
       const response = await api.get(endpoint);
       const fullUrl = response.data.url;
 
@@ -144,14 +144,14 @@ const PatientProfile = ({ navigation }) => {
       }
 
       const supported = await Linking.canOpenURL(fullUrl);
-      if (supported) { 
-        await Linking.openURL(fullUrl); 
-      } else { 
-        Alert.alert("خطأ", "لا يمكن فتح هذا النوع من الروابط على جهازك."); 
+      if (supported) {
+        await Linking.openURL(fullUrl);
+      } else {
+        Alert.alert("خطأ", "لا يمكن فتح هذا النوع من الروابط على جهازك.");
       }
-    } catch (e) { 
+    } catch (e) {
       console.log("Download Error:", e.message);
-      Alert.alert("خطأ", "حدث مشكلة أثناء محاولة فتح الملف."); 
+      Alert.alert("خطأ", "حدث مشكلة أثناء محاولة فتح الملف.");
     }
   };
 
@@ -196,12 +196,12 @@ const PatientProfile = ({ navigation }) => {
           </Text>
         </View>
       </View>
-      <Button 
-        title="معاينة الملف" 
-        icon={<Icon name="file-pdf-box" type="material-community" color="white" size={20} containerStyle={{marginLeft: 5}} />} 
-        buttonStyle={styles.downloadBtn} 
-        onPress={() => handleDownload(id, type)} 
-        disabled={!hasFile} 
+      <Button
+        title="معاينة الملف"
+        icon={<Icon name="file-pdf-box" type="material-community" color="white" size={20} containerStyle={{ marginLeft: 5 }} />}
+        buttonStyle={styles.downloadBtn}
+        onPress={() => handleDownload(id, type)}
+        disabled={!hasFile}
       />
     </View>
   );
@@ -218,7 +218,7 @@ const PatientProfile = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#204a42" />
-      
+
       <View style={styles.headerContainer}>
         {/* زر رجوع */}
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -244,13 +244,13 @@ const PatientProfile = ({ navigation }) => {
 
         <Text style={styles.patientName}>{patient?.full_name}</Text>
         <View style={styles.idBadge}><Text style={styles.idText}>رقم المريض: {patient?.patient_id}</Text></View>
-        
+
         <View style={styles.quickStats}>
           <View style={styles.statBox}><Text style={styles.statLabel}>فصيلة الدم</Text><Text style={styles.statValue}>{patient?.blood_type || "N/A"}</Text></View>
           <Divider orientation="vertical" width={1} color="rgba(255,255,255,0.2)" />
           <View style={styles.statBox}><Text style={styles.statLabel}>الجنس</Text><Text style={styles.statValue}>{patient?.gender === 'Male' ? 'ذكر' : 'أنثى'}</Text></View>
           <Divider orientation="vertical" width={1} color="rgba(255,255,255,0.2)" />
-          <View style={styles.statBox}><Text style={styles.statLabel}>الهوية</Text><Text style={[styles.statValue, {fontSize: 13}]}>{patient?.national_id || "---"}</Text></View>
+          <View style={styles.statBox}><Text style={styles.statLabel}>الهوية</Text><Text style={[styles.statValue, { fontSize: 13 }]}>{patient?.national_id || "---"}</Text></View>
         </View>
       </View>
 
@@ -265,7 +265,7 @@ const PatientProfile = ({ navigation }) => {
         {/* TAB 0: Nutrition */}
         <TabView.Item style={styles.tabViewContent}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
-             <Text style={styles.sectionHeading}>البرنامج الغذائي</Text>
+            <Text style={styles.sectionHeading}>البرنامج الغذائي</Text>
             {nutritionPlan ? (
               <View style={styles.nutritionCard}>
                 <View style={styles.planHeader}>
@@ -273,7 +273,7 @@ const PatientProfile = ({ navigation }) => {
                   <Icon name="calendar-check" type="material-community" color="#fff" size={20} />
                 </View>
                 <View style={styles.planBody}>
-                   <View style={styles.dateInfoContainer}>
+                  <View style={styles.dateInfoContainer}>
                     <View style={styles.dateSubBox}><Text style={styles.dateLabelText}>من تاريخ:</Text><Text style={styles.dateValueText}>{formatDate(nutritionPlan.startDate || nutritionPlan.start_date)}</Text></View>
                     <Icon name="arrow-left-thin" type="material-community" size={20} color="#cbd5e1" />
                     <View style={styles.dateSubBox}><Text style={styles.dateLabelText}>إلى تاريخ:</Text><Text style={styles.dateValueText}>{formatDate(nutritionPlan.endDate || nutritionPlan.end_date)}</Text></View>
@@ -301,102 +301,17 @@ const PatientProfile = ({ navigation }) => {
             <Text style={styles.sectionHeading}>سجل جلسات الغسيل</Text>
             {sessions.length > 0 ? sessions.map((session, index) => (
               <View key={index} style={styles.sessionCard}>
-                {/* Header: date + ID + status */}
                 <View style={styles.sessionHeader}>
                   <View style={styles.sessionDateBox}>
                     <Icon name="calendar-range" type="material-community" size={16} color="#64748b" />
                     <Text style={styles.sessionDate}>{formatDate(session.date)}</Text>
                   </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <View style={[styles.statusBadge, { backgroundColor: session.status === 'COMPLETED' ? '#dcfce7' : '#fef3c7' }]}>
-                      <Text style={[styles.statusText, { color: session.status === 'COMPLETED' ? '#166534' : '#92400e' }]}>
-                        {session.status === 'COMPLETED' ? 'مكتملة' : 'جارية'}
-                      </Text>
-                    </View>
-                    <Text style={styles.sessionId}>#{session.session_id || session.id}</Text>
-                  </View>
+                  <Text style={styles.sessionId}>#{session.id}</Text>
                 </View>
-
-                {/* Time row */}
-                <View style={styles.sessionTimeRow}>
-                  <View style={styles.sessionTimeBox}>
-                    <Icon name="clock-start" type="material-community" size={14} color="#059669" />
-                    <Text style={styles.sessionTimeText}>
-                      {session.start_time ? new Date(session.start_time).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '—'}
-                    </Text>
-                    <Text style={styles.sessionTimeLabel}>بداية</Text>
-                  </View>
-                  <Icon name="arrow-left" type="material-community" size={16} color="#94a3b8" />
-                  <View style={styles.sessionTimeBox}>
-                    <Icon name="clock-end" type="material-community" size={14} color="#ef4444" />
-                    <Text style={styles.sessionTimeText}>
-                      {session.end_time ? new Date(session.end_time).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '—'}
-                    </Text>
-                    <Text style={styles.sessionTimeLabel}>انتهاء</Text>
-                  </View>
+                <View style={styles.sessionContent}>
+                  <View style={styles.sessionMetric}><Text style={styles.metricLabel}>ضغط الدم</Text><Text style={styles.metricValue}>{session.blood_pressure_before} ← {session.blood_pressure_after}</Text></View>
+                  <View style={styles.sessionMetric}><Text style={styles.metricLabel}>الوزن</Text><Text style={styles.metricValue}>{session.weight_before}kg ← {session.weight_after}kg</Text></View>
                 </View>
-
-                {/* Metrics grid */}
-                <View style={styles.sessionMetricsGrid}>
-                  <View style={styles.sessionMetricBox}>
-                    <Icon name="heart-pulse" type="material-community" size={16} color="#ef4444" />
-                    <Text style={styles.metricLabel}>ضغط قبل</Text>
-                    <Text style={styles.metricValue}>{session.blood_pressure_before || '—'}</Text>
-                  </View>
-                  <View style={styles.sessionMetricBox}>
-                    <Icon name="heart-pulse" type="material-community" size={16} color="#059669" />
-                    <Text style={styles.metricLabel}>ضغط بعد</Text>
-                    <Text style={styles.metricValue}>{session.blood_pressure_after || '—'}</Text>
-                  </View>
-                  <View style={styles.sessionMetricBox}>
-                    <Icon name="weight" type="material-community" size={16} color="#3b82f6" />
-                    <Text style={styles.metricLabel}>وزن قبل</Text>
-                    <Text style={styles.metricValue}>{session.weight_before ? `${session.weight_before}kg` : '—'}</Text>
-                  </View>
-                  <View style={styles.sessionMetricBox}>
-                    <Icon name="weight" type="material-community" size={16} color="#8b5cf6" />
-                    <Text style={styles.metricLabel}>وزن بعد</Text>
-                    <Text style={styles.metricValue}>{session.weight_after ? `${session.weight_after}kg` : '—'}</Text>
-                  </View>
-                </View>
-
-                {/* Fluid removed */}
-                {session.fluid_removed != null && (
-                  <View style={styles.sessionFluidRow}>
-                    <Icon name="water" type="material-community" size={16} color="#0369a1" />
-                    <Text style={styles.sessionFluidText}>سائل مسحوب: <Text style={{ fontWeight: 'bold', color: '#0369a1' }}>{session.fluid_removed} لتر</Text></Text>
-                  </View>
-                )}
-
-                {/* Schedule info */}
-                {session.schedule && (
-                  <View style={styles.sessionScheduleRow}>
-                    <Icon name="calendar-week" type="material-community" size={14} color="#64748b" />
-                    <Text style={styles.sessionScheduleText}>
-                      {{
-                        SUNDAY: 'الأحد', MONDAY: 'الاثنين', TUESDAY: 'الثلاثاء',
-                        WEDNESDAY: 'الأربعاء', THURSDAY: 'الخميس', FRIDAY: 'الجمعة', SATURDAY: 'السبت'
-                      }[session.schedule.weekday] || session.schedule.weekday}
-                      {' • '}وردية {session.schedule.shift_number} • جهاز {session.schedule.machine_number}
-                    </Text>
-                  </View>
-                )}
-
-                {/* Nurse */}
-                {session.nurse && (
-                  <View style={styles.sessionNurseRow}>
-                    <Icon name="account-nurse" type="material-community" size={14} color="#64748b" />
-                    <Text style={styles.sessionNurseText}>الممرض: {session.nurse.full_name}</Text>
-                  </View>
-                )}
-
-                {/* Notes */}
-                {session.notes && (
-                  <View style={styles.sessionNotesBox}>
-                    <Icon name="note-text-outline" type="material-community" size={14} color="#64748b" />
-                    <Text style={styles.sessionNotesText}>{session.notes}</Text>
-                  </View>
-                )}
               </View>
             )) : <View style={styles.emptyState}><Icon name="database-off" type="material-community" size={50} color="#cbd5e1" /><Text style={styles.emptyText}>لا توجد جلسات مسجلة</Text></View>}
           </ScrollView>
@@ -440,31 +355,31 @@ const PatientProfile = ({ navigation }) => {
                 </View>
               )}
               {subTabIndex === 1 && medicalTests.map((test, idx) => (
-                <MedicalCard 
-                  key={idx} 
+                <MedicalCard
+                  key={idx}
                   id={test.test_id || test.id}
                   type="lab"
-                  title={test.test_type} 
-                  date={test.date_completed} 
-                  doctor={test.doctor?.full_name} 
-                  description={test.description} 
-                  status={test.status || (test.result ? 'COMPLETED' : 'PENDING')} 
-                  hasFile={!!(test.test_id || test.id)} 
-                  typeIcon="test-tube" 
+                  title={test.test_type}
+                  date={test.date_completed}
+                  doctor={test.doctor?.full_name}
+                  description={test.description}
+                  status={test.status || (test.result ? 'COMPLETED' : 'PENDING')}
+                  hasFile={!!(test.test_id || test.id)}
+                  typeIcon="test-tube"
                 />
               ))}
               {subTabIndex === 2 && radiology.map((rad, idx) => (
-                <MedicalCard 
-                  key={idx} 
+                <MedicalCard
+                  key={idx}
                   id={rad.image_id || rad.id}
                   type="radiology"
-                  title={rad.image_type} 
-                  date={rad.completed_at} 
-                  doctor={rad.doctor?.full_name} 
-                  description={rad.description} 
-                  status={rad.status} 
-                  hasFile={!!(rad.image_id || rad.id)} 
-                  typeIcon="file-image-outline" 
+                  title={rad.image_type}
+                  date={rad.completed_at}
+                  doctor={rad.doctor?.full_name}
+                  description={rad.description}
+                  status={rad.status}
+                  hasFile={!!(rad.image_id || rad.id)}
+                  typeIcon="file-image-outline"
                 />
               ))}
             </ScrollView>
@@ -474,43 +389,43 @@ const PatientProfile = ({ navigation }) => {
         {/* TAB 3: Appointments (Updated) */}
         <TabView.Item style={styles.tabViewContent}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
-              <Text style={styles.sectionHeading}>إدارة المواعيد</Text>
-              
-              <TouchableOpacity 
-                style={styles.bookingPrimaryBtn} 
-                onPress={() => navigation.navigate("DatesDoctor", { patientId: patient?.patient_id })}
-                activeOpacity={0.8}
-              >
-                <Icon name="calendar-plus" type="material-community" color="white" size={24} />
-                <Text style={styles.bookingPrimaryBtnText}>إنشاء وإدارة المواعيد</Text>
-              </TouchableOpacity>
+            <Text style={styles.sectionHeading}>إدارة المواعيد</Text>
 
-              <View style={{ marginTop: 25 }}>
-                 <Text style={[styles.sectionHeading, {fontSize: 18, marginBottom: 15}]}>مواعيدك المحجوزة</Text>
-                 
-                 {myAppointments.length > 0 ? myAppointments.map((appt, index) => (
-                   <View key={appt.appointment_id || index} style={styles.apptCardSimple}>
-                      <View style={styles.apptCardIcon}>
-                         <Icon name="calendar-clock" type="material-community" color="#059669" size={28} />
-                      </View>
-                      <View style={styles.apptCardInfo}>
-                         <Text style={styles.apptCardDoc}>د. {appt.doctor?.full_name}</Text>
-                         <View style={styles.apptCardRow}>
-                            <Icon name="calendar" type="material-community" size={14} color="#64748b" />
-                            <Text style={styles.apptCardDetail}>{appt.appt_date}</Text>
-                            <View style={{width: 10}} />
-                            <Icon name="clock-outline" type="material-community" size={14} color="#64748b" />
-                            <Text style={styles.apptCardDetail}>{formatTime(appt.appt_time)}</Text>
-                         </View>
-                      </View>
-                   </View>
-                 )) : (
-                  <View style={styles.emptyApptBox}>
-                     <Icon name="calendar-blank" type="material-community" size={40} color="#cbd5e1" />
-                     <Text style={styles.emptyText}>لا توجد مواعيد نشطة حالياً</Text>
+            <TouchableOpacity
+              style={styles.bookingPrimaryBtn}
+              onPress={() => navigation.navigate("DatesDoctor", { patientId: patient?.patient_id })}
+              activeOpacity={0.8}
+            >
+              <Icon name="calendar-plus" type="material-community" color="white" size={24} />
+              <Text style={styles.bookingPrimaryBtnText}>إنشاء وإدارة المواعيد</Text>
+            </TouchableOpacity>
+
+            <View style={{ marginTop: 25 }}>
+              <Text style={[styles.sectionHeading, { fontSize: 18, marginBottom: 15 }]}>مواعيدك المحجوزة</Text>
+
+              {myAppointments.length > 0 ? myAppointments.map((appt, index) => (
+                <View key={appt.appointment_id || index} style={styles.apptCardSimple}>
+                  <View style={styles.apptCardIcon}>
+                    <Icon name="calendar-clock" type="material-community" color="#059669" size={28} />
                   </View>
-                 )}
-              </View>
+                  <View style={styles.apptCardInfo}>
+                    <Text style={styles.apptCardDoc}>د. {appt.doctor?.full_name}</Text>
+                    <View style={styles.apptCardRow}>
+                      <Icon name="calendar" type="material-community" size={14} color="#64748b" />
+                      <Text style={styles.apptCardDetail}>{appt.appt_date}</Text>
+                      <View style={{ width: 10 }} />
+                      <Icon name="clock-outline" type="material-community" size={14} color="#64748b" />
+                      <Text style={styles.apptCardDetail}>{formatTime(appt.appt_time)}</Text>
+                    </View>
+                  </View>
+                </View>
+              )) : (
+                <View style={styles.emptyApptBox}>
+                  <Icon name="calendar-blank" type="material-community" size={40} color="#cbd5e1" />
+                  <Text style={styles.emptyText}>لا توجد مواعيد نشطة حالياً</Text>
+                </View>
+              )}
+            </View>
           </ScrollView>
         </TabView.Item>
       </TabView>
@@ -522,13 +437,13 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: '#fff' },
   loadingText: { marginTop: 12, color: '#64748b' },
-  headerContainer: { 
-    backgroundColor: "#204a42", 
-    paddingTop: 40, 
-    paddingBottom: 25, 
-    alignItems: "center", 
-    borderBottomRightRadius: 30, 
-    borderBottomLeftRadius: 30, 
+  headerContainer: {
+    backgroundColor: "#204a42",
+    paddingTop: 40,
+    paddingBottom: 25,
+    alignItems: "center",
+    borderBottomRightRadius: 30,
+    borderBottomLeftRadius: 30,
     elevation: 10,
     position: 'relative',
     boxShadow: '0px 4px 10px rgba(0,0,0,0.3)'
@@ -550,20 +465,20 @@ const styles = StyleSheet.create({
   scrollPadding: { padding: 20 },
   subTabContainer: { flexDirection: 'row-reverse', backgroundColor: '#f1f5f9', margin: 15, borderRadius: 12, padding: 4 },
   subTabItem: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 10 },
-  subTabActive: { 
-    backgroundColor: '#fff', 
+  subTabActive: {
+    backgroundColor: '#fff',
     elevation: 2,
     boxShadow: '0px 1px 3px rgba(0,0,0,0.1)'
   },
   subTabText: { fontSize: 14, color: '#64748b', fontWeight: '600' },
   subTextActive: { color: '#204a42', fontWeight: 'bold' },
   sectionHeading: { fontSize: 20, fontWeight: "800", color: "#1e293b", textAlign: "right", marginBottom: 15 },
-  nutritionCard: { 
-    backgroundColor: "#fff", 
-    borderRadius: 25, 
-    overflow: "hidden", 
-    elevation: 4, 
-    borderWidth: 1, 
+  nutritionCard: {
+    backgroundColor: "#fff",
+    borderRadius: 25,
+    overflow: "hidden",
+    elevation: 4,
+    borderWidth: 1,
     borderColor: '#f1f5f9',
     boxShadow: '0px 4px 6px rgba(0,0,0,0.1)'
   },
@@ -584,45 +499,32 @@ const styles = StyleSheet.create({
   mealIconCircle: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
   mealLabel: { fontSize: 12, fontWeight: 'bold', textAlign: 'right' },
   mealContent: { fontSize: 14, color: '#334155', textAlign: 'right', marginTop: 2 },
-  sessionCard: { 
-    backgroundColor: "#fff", 
-    borderRadius: 20, 
-    padding: 15, 
-    marginBottom: 15, 
-    elevation: 2, 
-    borderRightWidth: 6, 
+  sessionCard: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 15,
+    marginBottom: 15,
+    elevation: 3,
+    borderRightWidth: 6,
     borderRightColor: '#204a42',
-    boxShadow: '0px 2px 4px rgba(0,0,0,0.05)'
   },
-  sessionHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 15, alignItems: 'center' },
-  sessionDateBox: { flexDirection: 'row-reverse', alignItems: 'center' },
-  sessionDate: { fontSize: 13, color: '#64748b', marginRight: 5 },
-  sessionId: { fontSize: 14, fontWeight: '800', color: '#1e293b' },
-  sessionTimeRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', backgroundColor: '#f8fafc', padding: 10, borderRadius: 12, alignItems: 'center', marginBottom: 15 },
-  sessionTimeBox: { alignItems: 'center' },
-  sessionTimeText: { fontSize: 15, fontWeight: 'bold', color: '#1e293b', marginVertical: 2 },
-  sessionTimeLabel: { fontSize: 11, color: '#64748b' },
-  sessionMetricsGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 10, marginBottom: 15 },
-  sessionMetricBox: { width: '48%', backgroundColor: '#fff', padding: 10, borderRadius: 12, borderWidth: 1, borderColor: '#f1f5f9', alignItems: 'center' },
-  metricLabel: { fontSize: 11, color: '#64748b', marginVertical: 4 },
-  metricValue: { fontSize: 14, fontWeight: 'bold', color: '#1e293b' },
-  sessionFluidRow: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#f0f9ff', padding: 10, borderRadius: 10, marginBottom: 10 },
-  sessionFluidText: { fontSize: 13, color: '#0369a1', marginRight: 8 },
-  sessionScheduleRow: { flexDirection: 'row-reverse', alignItems: 'center', paddingVertical: 8, borderTopWidth: 1, borderColor: '#f1f5f9' },
-  sessionScheduleText: { fontSize: 12, color: '#475569', marginRight: 8 },
-  sessionNurseRow: { flexDirection: 'row-reverse', alignItems: 'center', paddingVertical: 8, borderTopWidth: 1, borderColor: '#f1f5f9' },
-  sessionNurseText: { fontSize: 12, color: '#475569', marginRight: 8 },
-  sessionNotesBox: { flexDirection: 'row-reverse', backgroundColor: '#fef2f2', padding: 10, borderRadius: 10, marginTop: 5 },
-  sessionNotesText: { fontSize: 13, color: '#991b1b', marginRight: 8, flex: 1, textAlign: 'right' },
+  sessionHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  sessionDateBox: { flexDirection: 'row', alignItems: 'center' },
+  sessionDate: { fontSize: 13, color: '#64748b', marginLeft: 5 },
+  sessionId: { fontSize: 14, fontWeight: '800' },
+  sessionContent: { flexDirection: 'row-reverse', justifyContent: 'space-between' },
+  sessionMetric: { flex: 1, alignItems: 'flex-end' },
+  metricLabel: { fontSize: 11, color: '#94a3b8' },
+  metricValue: { fontSize: 14, fontWeight: 'bold' },
   emptyState: { alignItems: 'center', marginTop: 50 },
   emptyText: { color: "#94a3b8", textAlign: "center", marginTop: 10 },
-  prescriptionCard: { 
-    backgroundColor: '#fff', 
-    borderRadius: 15, 
-    padding: 15, 
-    marginBottom: 15, 
-    elevation: 3, 
-    borderRightWidth: 5, 
+  prescriptionCard: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 15,
+    elevation: 3,
+    borderRightWidth: 5,
     borderRightColor: '#059669',
     boxShadow: '0px 2px 4px rgba(0,0,0,0.1)'
   },
@@ -633,13 +535,13 @@ const styles = StyleSheet.create({
   drugNameRow: { flexDirection: 'row-reverse', alignItems: 'center', marginBottom: 4 },
   drugName: { fontSize: 15, fontWeight: 'bold', color: '#204a42', marginRight: 8 },
   drugInstructions: { fontSize: 14, color: '#475569', textAlign: 'right' },
-  reportCard: { 
-    backgroundColor: '#fff', 
-    borderRadius: 15, 
-    padding: 16, 
-    marginBottom: 15, 
-    elevation: 3, 
-    borderLeftWidth: 4, 
+  reportCard: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 16,
+    marginBottom: 15,
+    elevation: 3,
+    borderLeftWidth: 4,
     borderLeftColor: '#204a42',
     boxShadow: '0px 2px 4px rgba(0,0,0,0.1)'
   },
@@ -655,25 +557,25 @@ const styles = StyleSheet.create({
   downloadBtn: { backgroundColor: '#204a42', borderRadius: 10, marginTop: 10, height: 48 },
 
   // ستايلات قسم المواعيد المحدثة
-  bookingPrimaryBtn: { 
-    backgroundColor: '#204a42', 
-    flexDirection: 'row-reverse', 
-    width: '100%', 
-    paddingVertical: 16, 
-    borderRadius: 15, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
+  bookingPrimaryBtn: {
+    backgroundColor: '#204a42',
+    flexDirection: 'row-reverse',
+    width: '100%',
+    paddingVertical: 16,
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
     elevation: 4,
     boxShadow: '0px 4px 8px rgba(32,74,66,0.3)'
   },
   bookingPrimaryBtnText: { color: '#fff', fontSize: 17, fontWeight: 'bold', marginRight: 10 },
-  apptCardSimple: { 
-    flexDirection: 'row-reverse', 
-    backgroundColor: '#fff', 
-    padding: 15, 
-    borderRadius: 15, 
-    marginBottom: 12, 
-    borderRightWidth: 5, 
+  apptCardSimple: {
+    flexDirection: 'row-reverse',
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 15,
+    marginBottom: 12,
+    borderRightWidth: 5,
     borderRightColor: '#059669',
     elevation: 2,
     alignItems: 'center',

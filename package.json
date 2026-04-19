@@ -37,5 +37,13 @@
     "react-native-web": "^0.21.0",
     "yup": "^1.7.1"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "@rneui/themed": {
+      "@rneui/base": "$@rneui/base"
+    },
+    "@rneui/base": {
+      "react-native-safe-area-context": "$react-native-safe-area-context"
+    }
+  }
 }
