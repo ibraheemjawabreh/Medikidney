@@ -301,17 +301,102 @@ const PatientProfile = ({ navigation }) => {
             <Text style={styles.sectionHeading}>سجل جلسات الغسيل</Text>
             {sessions.length > 0 ? sessions.map((session, index) => (
               <View key={index} style={styles.sessionCard}>
+                {/* Header: date + ID + status */}
                 <View style={styles.sessionHeader}>
                   <View style={styles.sessionDateBox}>
                     <Icon name="calendar-range" type="material-community" size={16} color="#64748b" />
                     <Text style={styles.sessionDate}>{formatDate(session.date)}</Text>
                   </View>
-                  <Text style={styles.sessionId}>#{session.id}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <View style={[styles.statusBadge, { backgroundColor: session.status === 'COMPLETED' ? '#dcfce7' : '#fef3c7' }]}>
+                      <Text style={[styles.statusText, { color: session.status === 'COMPLETED' ? '#166534' : '#92400e' }]}>
+                        {session.status === 'COMPLETED' ? 'مكتملة' : 'جارية'}
+                      </Text>
+                    </View>
+                    <Text style={styles.sessionId}>#{session.session_id || session.id}</Text>
+                  </View>
                 </View>
-                <View style={styles.sessionContent}>
-                  <View style={styles.sessionMetric}><Text style={styles.metricLabel}>ضغط الدم</Text><Text style={styles.metricValue}>{session.blood_pressure_before} ← {session.blood_pressure_after}</Text></View>
-                  <View style={styles.sessionMetric}><Text style={styles.metricLabel}>الوزن</Text><Text style={styles.metricValue}>{session.weight_before}kg ← {session.weight_after}kg</Text></View>
+
+                {/* Time row */}
+                <View style={styles.sessionTimeRow}>
+                  <View style={styles.sessionTimeBox}>
+                    <Icon name="clock-start" type="material-community" size={14} color="#059669" />
+                    <Text style={styles.sessionTimeText}>
+                      {session.start_time ? new Date(session.start_time).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                    </Text>
+                    <Text style={styles.sessionTimeLabel}>بداية</Text>
+                  </View>
+                  <Icon name="arrow-left" type="material-community" size={16} color="#94a3b8" />
+                  <View style={styles.sessionTimeBox}>
+                    <Icon name="clock-end" type="material-community" size={14} color="#ef4444" />
+                    <Text style={styles.sessionTimeText}>
+                      {session.end_time ? new Date(session.end_time).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                    </Text>
+                    <Text style={styles.sessionTimeLabel}>انتهاء</Text>
+                  </View>
                 </View>
+
+                {/* Metrics grid */}
+                <View style={styles.sessionMetricsGrid}>
+                  <View style={styles.sessionMetricBox}>
+                    <Icon name="heart-pulse" type="material-community" size={16} color="#ef4444" />
+                    <Text style={styles.metricLabel}>ضغط قبل</Text>
+                    <Text style={styles.metricValue}>{session.blood_pressure_before || '—'}</Text>
+                  </View>
+                  <View style={styles.sessionMetricBox}>
+                    <Icon name="heart-pulse" type="material-community" size={16} color="#059669" />
+                    <Text style={styles.metricLabel}>ضغط بعد</Text>
+                    <Text style={styles.metricValue}>{session.blood_pressure_after || '—'}</Text>
+                  </View>
+                  <View style={styles.sessionMetricBox}>
+                    <Icon name="weight" type="material-community" size={16} color="#3b82f6" />
+                    <Text style={styles.metricLabel}>وزن قبل</Text>
+                    <Text style={styles.metricValue}>{session.weight_before ? `${session.weight_before}kg` : '—'}</Text>
+                  </View>
+                  <View style={styles.sessionMetricBox}>
+                    <Icon name="weight" type="material-community" size={16} color="#8b5cf6" />
+                    <Text style={styles.metricLabel}>وزن بعد</Text>
+                    <Text style={styles.metricValue}>{session.weight_after ? `${session.weight_after}kg` : '—'}</Text>
+                  </View>
+                </View>
+
+                {/* Fluid removed */}
+                {session.fluid_removed != null && (
+                  <View style={styles.sessionFluidRow}>
+                    <Icon name="water" type="material-community" size={16} color="#0369a1" />
+                    <Text style={styles.sessionFluidText}>سائل مسحوب: <Text style={{ fontWeight: 'bold', color: '#0369a1' }}>{session.fluid_removed} لتر</Text></Text>
+                  </View>
+                )}
+
+                {/* Schedule info */}
+                {session.schedule && (
+                  <View style={styles.sessionScheduleRow}>
+                    <Icon name="calendar-week" type="material-community" size={14} color="#64748b" />
+                    <Text style={styles.sessionScheduleText}>
+                      {{
+                        SUNDAY: 'الأحد', MONDAY: 'الاثنين', TUESDAY: 'الثلاثاء',
+                        WEDNESDAY: 'الأربعاء', THURSDAY: 'الخميس', FRIDAY: 'الجمعة', SATURDAY: 'السبت'
+                      }[session.schedule.weekday] || session.schedule.weekday}
+                      {' • '}وردية {session.schedule.shift_number} • جهاز {session.schedule.machine_number}
+                    </Text>
+                  </View>
+                )}
+
+                {/* Nurse */}
+                {session.nurse && (
+                  <View style={styles.sessionNurseRow}>
+                    <Icon name="account-nurse" type="material-community" size={14} color="#64748b" />
+                    <Text style={styles.sessionNurseText}>الممرض: {session.nurse.full_name}</Text>
+                  </View>
+                )}
+
+                {/* Notes */}
+                {session.notes && (
+                  <View style={styles.sessionNotesBox}>
+                    <Icon name="note-text-outline" type="material-community" size={14} color="#64748b" />
+                    <Text style={styles.sessionNotesText}>{session.notes}</Text>
+                  </View>
+                )}
               </View>
             )) : <View style={styles.emptyState}><Icon name="database-off" type="material-community" size={50} color="#cbd5e1" /><Text style={styles.emptyText}>لا توجد جلسات مسجلة</Text></View>}
           </ScrollView>
@@ -509,14 +594,26 @@ const styles = StyleSheet.create({
     borderRightColor: '#204a42',
     boxShadow: '0px 2px 4px rgba(0,0,0,0.05)'
   },
-  sessionHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  sessionDateBox: { flexDirection: 'row', alignItems: 'center' },
-  sessionDate: { fontSize: 13, color: '#64748b', marginLeft: 5 },
-  sessionId: { fontSize: 14, fontWeight: '800' },
-  sessionContent: { flexDirection: 'row-reverse', justifyContent: 'space-between' },
-  sessionMetric: { flex: 1, alignItems: 'flex-end' },
-  metricLabel: { fontSize: 11, color: '#94a3b8' },
-  metricValue: { fontSize: 14, fontWeight: 'bold' },
+  sessionHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 15, alignItems: 'center' },
+  sessionDateBox: { flexDirection: 'row-reverse', alignItems: 'center' },
+  sessionDate: { fontSize: 13, color: '#64748b', marginRight: 5 },
+  sessionId: { fontSize: 14, fontWeight: '800', color: '#1e293b' },
+  sessionTimeRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', backgroundColor: '#f8fafc', padding: 10, borderRadius: 12, alignItems: 'center', marginBottom: 15 },
+  sessionTimeBox: { alignItems: 'center' },
+  sessionTimeText: { fontSize: 15, fontWeight: 'bold', color: '#1e293b', marginVertical: 2 },
+  sessionTimeLabel: { fontSize: 11, color: '#64748b' },
+  sessionMetricsGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 10, marginBottom: 15 },
+  sessionMetricBox: { width: '48%', backgroundColor: '#fff', padding: 10, borderRadius: 12, borderWidth: 1, borderColor: '#f1f5f9', alignItems: 'center' },
+  metricLabel: { fontSize: 11, color: '#64748b', marginVertical: 4 },
+  metricValue: { fontSize: 14, fontWeight: 'bold', color: '#1e293b' },
+  sessionFluidRow: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#f0f9ff', padding: 10, borderRadius: 10, marginBottom: 10 },
+  sessionFluidText: { fontSize: 13, color: '#0369a1', marginRight: 8 },
+  sessionScheduleRow: { flexDirection: 'row-reverse', alignItems: 'center', paddingVertical: 8, borderTopWidth: 1, borderColor: '#f1f5f9' },
+  sessionScheduleText: { fontSize: 12, color: '#475569', marginRight: 8 },
+  sessionNurseRow: { flexDirection: 'row-reverse', alignItems: 'center', paddingVertical: 8, borderTopWidth: 1, borderColor: '#f1f5f9' },
+  sessionNurseText: { fontSize: 12, color: '#475569', marginRight: 8 },
+  sessionNotesBox: { flexDirection: 'row-reverse', backgroundColor: '#fef2f2', padding: 10, borderRadius: 10, marginTop: 5 },
+  sessionNotesText: { fontSize: 13, color: '#991b1b', marginRight: 8, flex: 1, textAlign: 'right' },
   emptyState: { alignItems: 'center', marginTop: 50 },
   emptyText: { color: "#94a3b8", textAlign: "center", marginTop: 10 },
   prescriptionCard: { 

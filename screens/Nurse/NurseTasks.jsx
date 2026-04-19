@@ -92,7 +92,7 @@ const NurseTasks = ({ route, navigation }) => {
         bloodPressureAfter: bpAfter,
         fluidRemoved: Number(fluidRemoved),
         status: status,
-        notes: notes || "لا توجد ملاحظات إضافية" // إرسال الملاحظات المكتوبة
+        notes: notes || "لا توجد ملاحظات إضافية"
       };
 
       await api.post(

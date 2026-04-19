@@ -215,25 +215,7 @@ const PatinetInfo = ({ route, navigation }) => {
         </View>
       </Animated.View>
 
-      {/* ── قائمة تنقل سريعة (chips) ── */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.chipsRow}
-        style={styles.chipsScroll}
-      >
-        {[
-          { label: "الشخصية",   icon: "account-outline",            color: "#204a42" },
-          { label: "التواصل",   icon: "phone-outline",              color: "#0369a1" },
-          { label: "الطبي",     icon: "medical-bag",                color: "#dc2626" },
-          { label: "التدخين",   icon: "smoking",                    color: isSmoker ? "#ef4444" : "#059669" },
-        ].map((chip, i) => (
-          <View key={i} style={[styles.chip, { borderColor: chip.color + "50", backgroundColor: chip.color + "10" }]}>
-            <Icon name={chip.icon} type="material-community" size={15} color={chip.color} />
-            <Text style={[styles.chipText, { color: chip.color }]}>{chip.label}</Text>
-          </View>
-        ))}
-      </ScrollView>
+
 
       {/* ── المحتوى ── */}
       <Animated.ScrollView
@@ -395,19 +377,7 @@ const styles = StyleSheet.create({
   qStatLabel: { color: "#94a3b8", fontSize: 10, fontWeight: "600" },
   qDivider:   { width: 1, height: 32, backgroundColor: "rgba(255,255,255,0.15)" },
 
-  // ── Chips ──
-  chipsScroll:  { marginTop: 16, maxHeight: 44 },
-  chipsRow:     { paddingHorizontal: 16, gap: 8, flexDirection: "row-reverse", alignItems: "center" },
-  chip: {
-    flexDirection: "row-reverse",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  chipText: { fontSize: 12, fontWeight: "700" },
+
 
   // ── المحتوى ──
   scrollContent: { padding: 16, paddingBottom: 40 },
