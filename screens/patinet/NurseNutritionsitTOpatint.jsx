@@ -354,21 +354,69 @@ const StaffPatientView = ({ route, navigation }) => {
                 <Text style={styles.statsBtnText}>إحصائيات</Text>
               </TouchableOpacity>
             </View>
-            {sessions.length > 0 ? sessions.map((session, index) => (
-              <View key={index} style={styles.sessionCard}>
-                <View style={styles.sessionHeader}>
-                  <View style={styles.sessionDateBox}>
-                    <Icon name="calendar-range" type="material-community" size={16} color="#64748b" />
-                    <Text style={styles.sessionDate}>{formatDate(session.date)}</Text>
+            {sessions.length > 0 ? sessions.map((session, index) => {
+              const statusConfig = {
+                COMPLETED: { label: "مكتملة", bg: "#dcfce7", text: "#166534", icon: "check-circle-outline", borderColor: "#059669" },
+                IN_PROGRESS: { label: "جارية", bg: "#fef3c7", text: "#92400e", icon: "progress-clock", borderColor: "#f59e0b" },
+                SCHEDULED: { label: "مجدولة", bg: "#dbeafe", text: "#1e40af", icon: "calendar-clock", borderColor: "#3b82f6" },
+              };
+              const sc = statusConfig[session.status] || { label: session.status, bg: "#f1f5f9", text: "#64748b", icon: "help-circle-outline", borderColor: "#94a3b8" };
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={[styles.sessionCard, { borderRightColor: sc.borderColor }]}
+                  onPress={() => navigation.navigate("PatientSessionDetailView", {
+                    sessionId: session.session_id || session.id,
+                    patientId: patient?.patient_id,
+                  })}
+                  activeOpacity={0.75}
+                >
+                  {/* Card Header */}
+                  <View style={styles.sessionHeader}>
+                    <View style={styles.sessionDateBox}>
+                      <Icon name="calendar-range" type="material-community" size={15} color="#64748b" />
+                      <Text style={styles.sessionDate}>{formatDate(session.date)}</Text>
+                    </View>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                      <View style={[styles.sessionStatusBadge, { backgroundColor: sc.bg }]}>
+                        <Icon name={sc.icon} type="material-community" size={12} color={sc.text} />
+                        <Text style={[styles.sessionStatusText, { color: sc.text }]}>{sc.label}</Text>
+                      </View>
+                      <Text style={styles.sessionId}>#{session.session_id || session.id}</Text>
+                    </View>
                   </View>
-                  <Text style={styles.sessionId}>#{session.id}</Text>
-                </View>
-                <View style={styles.sessionContent}>
-                  <View style={styles.sessionMetric}><Text style={styles.metricLabel}>ضغط الدم</Text><Text style={styles.metricValue}>{session.blood_pressure_before} ← {session.blood_pressure_after}</Text></View>
-                  <View style={styles.sessionMetric}><Text style={styles.metricLabel}>الوزن</Text><Text style={styles.metricValue}>{session.weight_before}kg ← {session.weight_after}kg</Text></View>
-                </View>
-              </View>
-            )) : <View style={styles.emptyState}><Icon name="database-off" type="material-community" size={50} color="#cbd5e1" /><Text style={styles.emptyText}>لا توجد جلسات مسجلة</Text></View>}
+
+                  {/* Card Metrics */}
+                  <View style={styles.sessionMetricsRow}>
+                    <View style={styles.sessionMetricBox}>
+                      <Icon name="heart-pulse" type="material-community" size={14} color="#ef4444" />
+                      <Text style={styles.metricLabel}>ضغط الدم قبل</Text>
+                      <Text style={[styles.metricValue, { fontSize: 13 }]}>{session.blood_pressure_before || "—"}</Text>
+                    </View>
+                    <View style={styles.sessionMetricDivider} />
+                    <View style={styles.sessionMetricBox}>
+                      <Icon name="heart-outline" type="material-community" size={14} color="#f97316" />
+                      <Text style={styles.metricLabel}>ضغط الدم بعد</Text>
+                      <Text style={[styles.metricValue, { fontSize: 13 }]}>{session.blood_pressure_after || "—"}</Text>
+                    </View>
+                    <View style={styles.sessionMetricDivider} />
+                    <View style={styles.sessionMetricBox}>
+                      <Icon name="scale" type="material-community" size={14} color="#3b82f6" />
+                      <Text style={styles.metricLabel}>الوزن</Text>
+                      <Text style={[styles.metricValue, { fontSize: 13 }]}>
+                        {session.weight_before != null ? `${session.weight_before} kg` : "—"}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Tap hint */}
+                  <View style={styles.sessionTapHint}>
+                    <Icon name="chevron-left" type="material-community" size={16} color="#94a3b8" />
+                    <Text style={styles.sessionTapHintText}>اضغط لعرض كل تفاصيل الجلسة</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            }) : <View style={styles.emptyState}><Icon name="database-off" type="material-community" size={50} color="#cbd5e1" /><Text style={styles.emptyText}>لا توجد جلسات مسجلة</Text></View>}
           </ScrollView>
         )}
 
@@ -515,15 +563,22 @@ const styles = StyleSheet.create({
   mealContent: { fontSize: 14, color: '#334155', textAlign: 'right', marginTop: 2 },
   notesBox: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#f1f5f9', padding: 8, borderRadius: 8, marginTop: 5 },
   notesText: { fontSize: 12, color: '#64748b', marginRight: 8, flex: 1, textAlign: 'right' },
-  sessionCard: { backgroundColor: "#fff", borderRadius: 20, padding: 15, marginBottom: 15, elevation: 2, borderRightWidth: 6, borderRightColor: '#204a42' },
-  sessionHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  sessionDateBox: { flexDirection: 'row', alignItems: 'center' },
+  sessionCard: { backgroundColor: "#fff", borderRadius: 20, padding: 15, marginBottom: 15, elevation: 3, borderRightWidth: 6, borderRightColor: '#204a42' },
+  sessionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  sessionDateBox: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   sessionDate: { fontSize: 13, color: '#64748b', marginLeft: 5 },
-  sessionId: { fontSize: 14, fontWeight: '800' },
+  sessionId: { fontSize: 14, fontWeight: '800', color: '#1e293b' },
+  sessionStatusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8, gap: 3 },
+  sessionStatusText: { fontSize: 11, fontWeight: 'bold' },
+  sessionMetricsRow: { flexDirection: 'row-reverse', justifyContent: 'space-around', backgroundColor: '#f8fafc', borderRadius: 12, padding: 10, marginBottom: 10 },
+  sessionMetricBox: { flex: 1, alignItems: 'center', gap: 3 },
+  sessionMetricDivider: { width: 1, backgroundColor: '#e2e8f0' },
   sessionContent: { flexDirection: 'row-reverse', justifyContent: 'space-between' },
   sessionMetric: { flex: 1, alignItems: 'flex-end' },
+  sessionTapHint: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-end' },
+  sessionTapHintText: { fontSize: 11, color: '#94a3b8', marginRight: 2 },
   metricLabel: { fontSize: 11, color: '#94a3b8' },
-  metricValue: { fontSize: 14, fontWeight: 'bold' },
+  metricValue: { fontSize: 14, fontWeight: 'bold', color: '#1e293b' },
   emptyState: { alignItems: 'center', marginTop: 50 },
   emptyText: { color: "#94a3b8", textAlign: "center", marginTop: 10 },
   prescriptionCard: { backgroundColor: "#fff", borderRadius: 15, padding: 15, marginBottom: 15, elevation: 3, borderRightWidth: 5, borderRightColor: '#059669' },
