@@ -15,12 +15,10 @@ const NurseTasks = ({ route, navigation }) => {
   const [isStarted, setIsStarted] = useState(false);
 
   // بيانات البداية
-  const [weightBefore, setWeightBefore] = useState("");
   const [bpBefore, setBpBefore] = useState("");
   const [startTime, setStartTime] = useState("");
 
   // بيانات النهاية والحالة والملاحظات
-  const [weightAfter, setWeightAfter] = useState("");
   const [bpAfter, setBpAfter] = useState("");
   const [fluidRemoved, setFluidRemoved] = useState("");
   const [status, setStatus] = useState("COMPLETED");
@@ -33,9 +31,6 @@ const NurseTasks = ({ route, navigation }) => {
         const savedSession = await AsyncStorage.getItem(`active_session_${patientId}`);
         if (savedSession) {
           const data = JSON.parse(savedSession);
-          setWeightBefore(data.weightBefore);
-          setBpBefore(data.bpBefore);
-          setStartTime(data.startTime);
           if(data.scheduleId) setScheduleId(data.scheduleId.toString()); 
           setIsStarted(true);
         }
@@ -47,13 +42,12 @@ const NurseTasks = ({ route, navigation }) => {
   }, [patientId]);
 
   const handleStartSessionLocally = async () => {
-    if (!weightBefore || !bpBefore || !scheduleId) {
-      Alert.alert("تنبيه", "يرجى إدخال الوزن والضغط ورقم الموعد");
+    if (!bpBefore || !scheduleId) {
+      Alert.alert("تنبيه", "يرجى إدخال الضغط ورقم الموعد");
       return;
     }
 
     const sessionData = {
-      weightBefore,
       bpBefore,
       scheduleId: Number(scheduleId),
       startTime: new Date().toISOString(),
@@ -69,7 +63,7 @@ const NurseTasks = ({ route, navigation }) => {
   };
 
   const handleFinalSubmit = async () => {
-    if (!weightAfter || !bpAfter || !fluidRemoved) {
+    if (!bpAfter || !fluidRemoved) {
       Alert.alert("تنبيه", "يرجى إكمال بيانات نهاية الجلسة");
       return;
     }
@@ -86,8 +80,8 @@ const NurseTasks = ({ route, navigation }) => {
         date: new Date().toISOString().split('T')[0],
         startTime: startTime,
         endTime: new Date().toISOString(),
-        weightBefore: Number(weightBefore),
-        weightAfter: Number(weightAfter),
+        weightBefore: 0,
+        weightAfter: 0,
         bloodPressureBefore: bpBefore,
         bloodPressureAfter: bpAfter,
         fluidRemoved: Number(fluidRemoved),
@@ -140,8 +134,6 @@ const NurseTasks = ({ route, navigation }) => {
               <MaterialCommunityIcons name="play-circle" size={24} color="#2563eb" />
               <Text style={styles.cardTitle}>ما قبل الجلسة</Text>
             </View>
-            <Text style={styles.label}>الوزن قبل (kg)</Text>
-            <TextInput style={styles.input} value={weightBefore} onChangeText={setWeightBefore} keyboardType="numeric" placeholder="75.0" />
             <Text style={styles.label}>الضغط قبل</Text>
             <TextInput style={styles.input} value={bpBefore} onChangeText={setBpBefore} placeholder="120/80" />
             <TouchableOpacity style={styles.primaryButton} onPress={handleStartSessionLocally}>
@@ -169,9 +161,6 @@ const NurseTasks = ({ route, navigation }) => {
                 </TouchableOpacity>
               ))}
             </View>
-
-            <Text style={styles.label}>الوزن بعد (kg)</Text>
-            <TextInput style={styles.input} value={weightAfter} onChangeText={setWeightAfter} keyboardType="numeric" placeholder="72.5" />
 
             <Text style={styles.label}>الضغط بعد</Text>
             <TextInput style={styles.input} value={bpAfter} onChangeText={setBpAfter} placeholder="115/75" />

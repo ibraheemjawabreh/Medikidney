@@ -105,13 +105,12 @@ const PatientState = ({ route }) => {
           date:               todayISO,
           startTime:          now.toISOString(),
           status:             "PENDING",
-          // القيم الأولية كـ null - سيملأها الممرض لاحقاً من التابات
-          weightBefore:       null,
-          weightAfter:        null,
-          fluidRemoved:       null,
-          bloodPressureBefore: null,
-          bloodPressureAfter:  null,
-          notes:              null,
+          weightBefore:       1,
+          weightAfter:        1,
+          fluidRemoved:       0,
+          bloodPressureBefore: "120/80",
+          bloodPressureAfter: "120/80",
+          notes:              "None"
         }
       );
 

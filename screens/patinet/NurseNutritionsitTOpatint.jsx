@@ -399,14 +399,6 @@ const StaffPatientView = ({ route, navigation }) => {
                       <Text style={styles.metricLabel}>ضغط الدم بعد</Text>
                       <Text style={[styles.metricValue, { fontSize: 13 }]}>{session.blood_pressure_after || "—"}</Text>
                     </View>
-                    <View style={styles.sessionMetricDivider} />
-                    <View style={styles.sessionMetricBox}>
-                      <Icon name="scale" type="material-community" size={14} color="#3b82f6" />
-                      <Text style={styles.metricLabel}>الوزن</Text>
-                      <Text style={[styles.metricValue, { fontSize: 13 }]}>
-                        {session.weight_before != null ? `${session.weight_before} kg` : "—"}
-                      </Text>
-                    </View>
                   </View>
 
                   {/* Tap hint */}
