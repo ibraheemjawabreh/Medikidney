@@ -306,14 +306,25 @@ const PatientProfile = ({ navigation }) => {
                 SCHEDULED: { label: "مجدولة", bg: "#dbeafe", text: "#1e40af", icon: "calendar-clock", borderColor: "#3b82f6" },
               };
               const sc = statusConfig[session.status] || { label: session.status, bg: "#f1f5f9", text: "#64748b", icon: "help-circle-outline", borderColor: "#94a3b8" };
+              const isActive = session.status === 'IN_PROGRESS' || session.status === 'PENDING';
               return (
                 <TouchableOpacity
                   key={index}
-                  style={[styles.sessionCard, { borderRightColor: sc.borderColor }]}
-                  onPress={() => navigation.navigate("PatientSessionDetailView", {
-                    sessionId: session.session_id || session.id,
-                    patientId: patient?.patient_id,
-                  })}
+                  style={[styles.sessionCard, { borderRightColor: sc.borderColor }, isActive && styles.sessionCardActive]}
+                  onPress={() => {
+                    if (isActive) {
+                      navigation.navigate('PatientSessionScreen', {
+                        sessionId: session.session_id || session.id,
+                        patientName: patient?.full_name,
+                        startTime: session.start_time,
+                      });
+                    } else {
+                      navigation.navigate('PatientSessionDetailView', {
+                        sessionId: session.session_id || session.id,
+                        patientId: patient?.patient_id,
+                      });
+                    }
+                  }}
                   activeOpacity={0.75}
                 >
                   <View style={styles.sessionHeader}>
@@ -351,8 +362,17 @@ const PatientProfile = ({ navigation }) => {
                     </View>
                   </View>
                   <View style={styles.sessionTapHint}>
-                    <Icon name="chevron-left" type="material-community" size={16} color="#94a3b8" />
-                    <Text style={styles.sessionTapHintText}>اضغط لعرض كل تفاصيل الجلسة</Text>
+                    {isActive ? (
+                      <View style={styles.activeSessionBanner}>
+                        <View style={styles.activeDot} />
+                        <Text style={styles.activeSessionText}>جلسة جارية — اضغط للدخول والوزن</Text>
+                      </View>
+                    ) : (
+                      <>
+                        <Icon name="chevron-left" type="material-community" size={16} color="#94a3b8" />
+                        <Text style={styles.sessionTapHintText}>اضغط لعرض كل تفاصيل الجلسة</Text>
+                      </>
+                    )}
                   </View>
                 </TouchableOpacity>
               );
@@ -564,6 +584,10 @@ const styles = StyleSheet.create({
   sessionMetric: { flex: 1, alignItems: 'flex-end' },
   sessionTapHint: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-end' },
   sessionTapHintText: { fontSize: 11, color: '#94a3b8', marginRight: 2 },
+  sessionCardActive: { borderWidth: 2, borderColor: '#f59e0b', backgroundColor: '#fffbeb' },
+  activeSessionBanner: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6, backgroundColor: '#fef3c7', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
+  activeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#f59e0b' },
+  activeSessionText: { fontSize: 12, fontWeight: '700', color: '#92400e' },
   metricLabel: { fontSize: 11, color: '#94a3b8' },
   metricValue: { fontSize: 14, fontWeight: 'bold', color: '#1e293b' },
   emptyState: { alignItems: 'center', marginTop: 50 },

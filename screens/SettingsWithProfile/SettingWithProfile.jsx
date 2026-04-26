@@ -14,22 +14,17 @@ const [loading, setLoading] = useState(true); // حالة التحميل
   }, []);
 
   const getProfile = async () => {
-  try {
-    setLoading(true);
-    const response = await api.get("/users/profile");
-    
-    setUserData(response.data);
-  } catch (error) {
-    // 2. إذا كان الخطأ 403 (باسورد مؤقتة)، لا تظهر خطأ في الكونسول، فقط وجهه للتغيير
-    if (error.response && error.response.status === 403) {
-      console.log("الحساب يحتاج تغيير كلمة مرور");
-    } else {
-      console.log("Profile Error:", error.message);
+    try {
+      setLoading(true);
+      const response = await api.get("/users/profile");
+      setUserData(response.data);
+    } catch (error) {
+      console.log("Profile Fetch Error Details:", error.response?.data || error.message);
+      Alert.alert("خطأ", "لا تملك الصلاحية للوصول لبيانات الملف الشخصي، أو أن هناك خطأ في الخادم.");
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};;
+  };
 
   const handleLogout = async () => {
     try {

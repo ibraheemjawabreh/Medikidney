@@ -19,7 +19,7 @@ const ChangePasswordFirstTime = ({ navigation, route }) => {
     await AsyncStorage.setItem("role", userRole);
     
     const role = userRole?.toUpperCase();
-    if (role === "PATIENT") navigation.replace("Patinet");
+    if (role === "PATIENT") navigation.replace("PatinetPages");
     else if (role === "NURSE") navigation.replace("NurseHome");
     else if (role === "NUTRITIONIST") navigation.replace("NutritionistHome");
     else navigation.replace("Login");
@@ -40,7 +40,10 @@ const ChangePasswordFirstTime = ({ navigation, route }) => {
       setLoading(true);
       const response = await api.patch(
         "/auth/set-initial-password",
-        { newPassword, confirmPassword },
+        { 
+          newPassword: newPassword, 
+          confirmPassword: confirmPassword
+        },
         { headers: { Authorization: `Bearer ${tempToken}` } }
       );
 
@@ -49,6 +52,9 @@ const ChangePasswordFirstTime = ({ navigation, route }) => {
         await navigateToHome(response.data.access_token || tempToken);
       }
     } catch (err) {
+      console.log("====== ERROR FROM BACKEND ======");
+      console.log(JSON.stringify(err.response?.data, null, 2));
+      console.log("================================");
       const msg = err.response?.data?.message || "حدث خطأ أثناء التفعيل";
       Alert.alert("فشل التفعيل", Array.isArray(msg) ? msg[0] : msg);
     } finally {
@@ -65,9 +71,11 @@ const ChangePasswordFirstTime = ({ navigation, route }) => {
         {},
         { headers: { Authorization: `Bearer ${tempToken}` } }
       );
-      await navigateToHome(tempToken);
+      // يجب حفظ التوكن الجديد العائد من السيرفر وإلا سيبقى التوكن القديم يطلب التغيير!
+      await navigateToHome(response.data.access_token || tempToken);
     } catch (err) {
-      Alert.alert("تنبيه", "لا يمكن التخطي حالياً، يرجى تعيين كلمة مرور");
+      console.log("Skip Error:", err.response?.data);
+      Alert.alert("تنبيه", err.response?.data?.message || "لا يمكن التخطي حالياً، يرجى تعيين كلمة مرور");
     } finally {
       setSkipLoading(false);
     }

@@ -14,7 +14,8 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem('token');
-    if (token) {
+    // لا تقم بالكتابة فوق الهيدر إذا كان مرسلاً يدوياً (مثل حالة tempToken)
+    if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;

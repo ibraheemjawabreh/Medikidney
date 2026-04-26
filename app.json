@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "project",
-    "slug": "project",
+    "name": "medikidney_App",
+    "slug": "medikidney_App",
     "version": "1.0.0",
+    "scheme": "medikidney",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -21,7 +22,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.project"
+      "package": "com.majed.medikidney"
     },
     "web": {
       "favicon": "./assets/favicon.png"

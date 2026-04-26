@@ -3,10 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TextInput, StyleSheet,
-  Alert, Pressable, ActivityIndicator,
+  Alert, Pressable, ActivityIndicator, Platform,
 } from 'react-native';
 import api from "../../services/api";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+
+// ── Validate Weight ─────────────────────────────────────────────────────────
+const validateWeight = (val, fieldName, required = true) => {
+  if (!val || val.trim() === '') {
+    return required ? `${fieldName} مطلوب` : null;
+  }
+  const num = parseFloat(val);
+  if (isNaN(num)) return `${fieldName} يجب أن يكون رقماً صحيحاً`;
+  if (num < 20 || num > 300) return `${fieldName} يجب أن يكون بين 20 و 300 كغ`;
+  return null;
+};
 
 // ── تنسيق الوقت بشكل واضح ────────────────────────────────────────────────────
 const formatDateTime = (dateStr) => {
@@ -174,7 +185,6 @@ const VitalSignsTab = ({ route }) => {
     systolic: '', diastolic: '', pulse: '', temperature: '', oxygen: '',
   });
 
-  // ── جلب القراءات ─────────────────────────────────────────────
   const fetchVitals = async () => {
     if (!sessionId) return;
     try {
@@ -182,7 +192,6 @@ const VitalSignsTab = ({ route }) => {
         `/dialysis-sessions/${sessionId}/details/vital-signs`
       );
       const list = Array.isArray(data) ? data : data?.data || [];
-      if (list.length > 0) console.log("📋 Vital Sign sample object:", JSON.stringify(list[0]));
       // الأحدث أولاً
       setVitals([...list].reverse());
     } catch {
@@ -192,7 +201,9 @@ const VitalSignsTab = ({ route }) => {
     }
   };
 
-  useEffect(() => { fetchVitals(); }, [sessionId]);
+  useEffect(() => {
+    fetchVitals();
+  }, [sessionId]);
 
   // ── حفظ قراءة جديدة ──────────────────────────────────────────
   const handleSave = async () => {
@@ -261,6 +272,10 @@ const VitalSignsTab = ({ route }) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+
+      {/* ══════════════════════════════════════════════════════════════
+          شريط العلامات الحيوية
+      ══════════════════════════════════════════════════════════════ */}
 
       {/* ── شريط العنوان + زر الإضافة ── */}
       <View style={styles.topBar}>
@@ -433,6 +448,7 @@ const VitalSignsTab = ({ route }) => {
 };
 
 export default VitalSignsTab;
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f3f4f6' },

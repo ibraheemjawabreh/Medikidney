@@ -22,24 +22,22 @@ const LoginScreen = ({ navigation }) => {
         { abortEarly: false }
       );
       seterrors({});
-      
+
       const response = await api.post("/auth/login", { username, password });
       const data = response.data;
-      
-      // فحص هل يحتاج المستخدم لتغيير كلمة المرور لأول مرة
+
       if (data.user && data.user.mustChangePassword === true) {
         console.log("المستخدم يحتاج لتفعيل الحساب لأول مرة");
-        
-        navigation.replace("ChangePasswordFirstTime", { 
-          tempToken: data.access_token, 
-          userRole: data.user.role 
+
+        navigation.replace("ChangePasswordFirstTime", {
+          tempToken: data.access_token,
+          userRole: data.user.role
         });
-        return; 
+        return;
       }
 
       await AsyncStorage.setItem("token", data.access_token);
       await AsyncStorage.setItem("role", data.user.role);
-      // حفظ معرف الممرض أو المستخدم لنستعمله لاحقاً
       if (data.user.id) {
         await AsyncStorage.setItem("userId", String(data.user.id));
       } else if (data.user.userId) {
@@ -47,7 +45,7 @@ const LoginScreen = ({ navigation }) => {
       }
 
       const userRole = data.user.role;
-      if (userRole === "PATIENT") navigation.replace("Patinet");
+      if (userRole === "PATIENT") navigation.replace("PatinetPages");
       else if (userRole === "NURSE") navigation.replace("NurseHome");
       else if (userRole === "NUTRITIONIST") navigation.replace("NutritionistHome");
 
@@ -121,7 +119,7 @@ const LoginScreen = ({ navigation }) => {
   );
 };
 
-// ... (نفس الستايل الخاص بك لم يتغير)
+
 
 export default LoginScreen;
 
@@ -147,17 +145,17 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     marginBottom: 35,
-    alignItems: 'flex-end', 
+    alignItems: 'flex-end',
   },
   welcomeText: {
     fontSize: 32,
     fontWeight: "900",
-    color: "#0f172a", 
+    color: "#0f172a",
     textAlign: 'right',
   },
   subtitleText: {
     fontSize: 15,
-    color: "#64748b", 
+    color: "#64748b",
     fontWeight: "500",
     textAlign: 'right',
     marginTop: 5,
@@ -174,8 +172,8 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   inputContainer: {
-    backgroundColor: "#f8fafc", 
-    borderBottomWidth: 0, 
+    backgroundColor: "#f8fafc",
+    borderBottomWidth: 0,
     borderWidth: 1,
     borderColor: "#e2e8f0",
     borderRadius: 16,
@@ -183,17 +181,17 @@ const styles = StyleSheet.create({
     height: 55,
   },
   inputStyle: {
-    textAlign: 'left', 
+    textAlign: 'left',
     fontSize: 16,
     fontWeight: "bold",
     color: "#1e293b",
   },
   forgotBtn: {
-    alignSelf: 'flex-start', 
+    alignSelf: 'flex-start',
     marginBottom: 25,
   },
   forgotText: {
-    color: "#059669", 
+    color: "#059669",
     fontWeight: "bold",
     fontSize: 14,
   },
@@ -206,7 +204,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   loginButton: {
-    backgroundColor: "#0f172a", 
+    backgroundColor: "#0f172a",
     height: 60,
     borderRadius: 16,
   },

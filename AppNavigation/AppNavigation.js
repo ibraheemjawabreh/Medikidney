@@ -32,6 +32,7 @@ import NurseStack from '../screens/Nurse/nurseStack'
 import PatientSessionStatistics from '../screens/patinet/PatientSessionStatistics'
 import PatinetInfo from '../screens/patinet/patientInformation'
 import PatientSessionDetailView from '../screens/patinet/PatientSessionDetailView'
+import PatientSessionScreen from '../screens/patinet/PatientSessionScreen'
 
 
 
@@ -42,7 +43,7 @@ const AppNavigator = () => {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="SearchPatient" component={SearchPatinet} />
-      <Stack.Screen name="Patinet" component={PatinetPages} />
+      <Stack.Screen name="PatinetPages" component={PatinetPages} />
       <Stack.Screen name="NurseHome" component={NursePages} />
       <Stack.Screen name="NutritionistHome" component={NutritionistPages} />
       <Stack.Screen name="ChangePassword" component={ChangePassword} />
@@ -55,22 +56,23 @@ const AppNavigator = () => {
       <Stack.Screen name="ResetPassword" component={ResetPassword} />
       <Stack.Screen name="NutritionistTable" component={NutritionistTable} />
       <Stack.Screen name="PatientProfile" component={PatientProfile} />
-      <Stack.Screen name="StaffPatientView" component={StaffPatientView} options={{ headerShown: false }}  />
-      <Stack.Screen name='ShowSessions' component={ShowSessions} /> 
-      <Stack.Screen name='DailySchedules' component={DailySchedules} /> 
-      <Stack.Screen name='SelectPatient' component={SelectPatient} /> 
-      <Stack.Screen name='PatientState' component={PatientState} /> 
+      <Stack.Screen name="StaffPatientView" component={StaffPatientView} options={{ headerShown: false }} />
+      <Stack.Screen name='ShowSessions' component={ShowSessions} />
+      <Stack.Screen name='DailySchedules' component={DailySchedules} />
+      <Stack.Screen name='SelectPatient' component={SelectPatient} />
+      <Stack.Screen name='PatientState' component={PatientState} />
       <Stack.Screen name="ChangePasswordFirstTime" component={ChangePasswordFirstTime} />
-      <Stack.Screen name='MedicationsTab' component={MedicationsTab} /> 
-      <Stack.Screen name='NotesTab' component={NotesTab} /> 
-      <Stack.Screen name='SessionDetails' component={SessionDetails} /> 
-      <Stack.Screen name='SettingsTab' component={SettingsTab} /> 
-      <Stack.Screen name='SymptomsTab' component={SymptomsTab} /> 
-      <Stack.Screen name='VitalSignsTab' component={VitalSignsTab} /> 
+      <Stack.Screen name='MedicationsTab' component={MedicationsTab} />
+      <Stack.Screen name='NotesTab' component={NotesTab} />
+      <Stack.Screen name='SessionDetails' component={SessionDetails} />
+      <Stack.Screen name='SettingsTab' component={SettingsTab} />
+      <Stack.Screen name='SymptomsTab' component={SymptomsTab} />
+      <Stack.Screen name='VitalSignsTab' component={VitalSignsTab} />
       {/* <Stack.Screen name='NurseStack' component={NurseStack} />  */}
       <Stack.Screen name='PatientSessionStatistics' component={PatientSessionStatistics} />
       <Stack.Screen name='PatinetInfo' component={PatinetInfo} />
       <Stack.Screen name='PatientSessionDetailView' component={PatientSessionDetailView} />
+      <Stack.Screen name='PatientSessionScreen' component={PatientSessionScreen} options={{ gestureEnabled: false }} />
 
 
 

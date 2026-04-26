@@ -1,7 +1,8 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
-  ActivityIndicator, RefreshControl, Alert
+  ActivityIndicator, RefreshControl, Alert,
+  Modal, TextInput, KeyboardAvoidingView, Platform,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -16,6 +17,13 @@ const PatientState = ({ route }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [myPatients, setMyPatients] = useState([]);
   const [myNurseId, setMyNurseId]   = useState(null);
+
+  // ─── Modal الوزن قبل الجلسة ───────────────────────────────────
+  const [weightModalVisible, setWeightModalVisible] = useState(false);
+  const [pendingPatient,     setPendingPatient]     = useState(null);
+  const [weightInput,        setWeightInput]        = useState('');
+  const [weightInputError,   setWeightInputError]   = useState('');
+  const [isSavingSession,    setIsSavingSession]    = useState(false);
 
   // ─── جلب حالة المرضى المختارين ────────────────────────────
   const fetchStatus = async (isRefresh = false) => {
@@ -36,6 +44,7 @@ const PatientState = ({ route }) => {
       const filtered = allPatients.filter(p => p.assignedNurseId === nurseId);
       
       setMyPatients(filtered);
+      return filtered;
     } catch (error) {
       console.error("Error fetching patient status:", error);
     } finally {
@@ -86,51 +95,80 @@ const PatientState = ({ route }) => {
     );
   };
 
-  // ─── إنشاء جلسة غسيل جديدة ───────────────────────────────
-  const handleStartSession = async (patient) => {
+  // ─── الخطوة 1: افتح modal إدخال الوزن ────────────────────────
+  const handleStartSession = (patient) => {
+    setPendingPatient(patient);
+    setWeightInput('');
+    setWeightInputError('');
+    setWeightModalVisible(true);
+  };
+
+  // ─── الخطوة 2: تأكيد الوزن وإنشاء الجلسة ────────────────────
+  const handleConfirmWeight = async () => {
+    // Validation
+    const num = parseFloat(weightInput);
+    if (!weightInput.trim()) {
+      setWeightInputError('الوزن مطلوب قبل بدء الجلسة');
+      return;
+    }
+    if (isNaN(num) || num < 20 || num > 300) {
+      setWeightInputError('يجب أن يكون الوزن رقماً بين 20 و 300 كغ');
+      return;
+    }
+    setWeightInputError('');
+
     try {
-      setLoading(true);
+      setIsSavingSession(true);
       const now = new Date();
 
-      // نبني تاريخ اليوم كـ ISO كامل (منتصف الليل UTC) كما يتوقعه الباك-إند
       const todayISO = new Date(
         Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
-      ).toISOString(); // → "2026-04-19T00:00:00.000Z"
+      ).toISOString();
 
       const createRes = await api.post(
         "/dialysis-sessions",
         {
-          patientId:          patient.patientId,
-          scheduleId:         patient.scheduleId,
-          date:               todayISO,
-          startTime:          now.toISOString(),
-          status:             "PENDING",
-          weightBefore:       1,
-          weightAfter:        1,
-          fluidRemoved:       0,
+          patientId:           pendingPatient.patientId,
+          scheduleId:          pendingPatient.scheduleId,
+          date:                todayISO,
+          startTime:           now.toISOString(),
+          status:              "PENDING",
+          weightBefore:        num,
+          fluidRemoved:        0,
           bloodPressureBefore: "120/80",
-          bloodPressureAfter: "120/80",
-          notes:              "None"
+          bloodPressureAfter:  "120/80",
+          notes:               "None"
         }
       );
 
-      const newSessionId = createRes.data?.sessionId || createRes.data?.id;
+      // جلب البيانات المحدثة للحصول على الـ sessionId الدقيق
+      const updatedList = await fetchStatus();
+      const updatedPatient = updatedList?.find(p => p.patientId === pendingPatient.patientId);
 
-      void fetchStatus();
-      // الدخول فوراً على تفاصيل الجلسة بعد ئم إنشائها
-      navigation.navigate("SessionDetails", { 
-        patient: { ...patient, sessionId: newSessionId, sessionStatus: 'PENDING' } 
-      });
+      setWeightModalVisible(false);
+
+      if (updatedPatient && updatedPatient.sessionId) {
+        navigation.navigate("SessionDetails", { patient: updatedPatient });
+      } else {
+        // Fallback في حال لم يجده
+        const fallbackId = createRes.data?.sessionId || createRes.data?.id;
+        navigation.navigate("SessionDetails", {
+          patient: { ...pendingPatient, sessionId: fallbackId, sessionStatus: 'PENDING' }
+        });
+      }
 
     } catch (error) {
       const msg = error.response?.data?.message;
       if (typeof msg === "string" && (msg.includes("موجود") || msg.includes("exist"))) {
+        setWeightModalVisible(false);
         void fetchStatus();
       } else {
-        Alert.alert("خطأ", Array.isArray(msg) ? msg.join(" ") : (msg ?? "فشل بدء الجلسة"));
+        setWeightInputError(
+          Array.isArray(msg) ? msg.join(' ') : (msg ?? 'فشل بدء الجلسة')
+        );
       }
     } finally {
-      setLoading(false);
+      setIsSavingSession(false);
     }
   };
 
@@ -148,6 +186,74 @@ const PatientState = ({ route }) => {
 
   return (
     <View style={styles.container}>
+
+      {/* ══════ Modal إدخال الوزن قبل الجلسة ══════════════════════════ */}
+      <Modal
+        visible={weightModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setWeightModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={mStyles.overlay}
+        >
+          <View style={mStyles.sheet}>
+            {/* العنوان */}
+            <View style={mStyles.sheetHeader}>
+              <MaterialCommunityIcons name="scale" size={28} color="#3b82f6" />
+              <Text style={mStyles.sheetTitle}>وزن المريض قبل الجلسة</Text>
+            </View>
+            {pendingPatient && (
+              <Text style={mStyles.sheetPatient}>{pendingPatient.patientName}</Text>
+            )}
+
+            {/* حقل الإدخال */}
+            <View style={[mStyles.inputRow, weightInputError ? mStyles.inputErr : null]}>
+              <MaterialCommunityIcons name="scale" size={20} color="#3b82f6" />
+              <TextInput
+                style={mStyles.input}
+                placeholder="مثال: 74.5"
+                placeholderTextColor="#9ca3af"
+                keyboardType="decimal-pad"
+                value={weightInput}
+                onChangeText={t => { setWeightInput(t); setWeightInputError(''); }}
+                autoFocus
+              />
+              <Text style={mStyles.unit}>kg</Text>
+            </View>
+            {weightInputError ? (
+              <Text style={mStyles.errText}>{weightInputError}</Text>
+            ) : null}
+
+            {/* الأزرار */}
+            <View style={mStyles.btnRow}>
+              <Pressable
+                style={mStyles.cancelBtn}
+                onPress={() => setWeightModalVisible(false)}
+                disabled={isSavingSession}
+              >
+                <Text style={mStyles.cancelBtnText}>إلغاء</Text>
+              </Pressable>
+
+              <Pressable
+                style={[mStyles.confirmBtn, isSavingSession && { backgroundColor: '#6ee7b7' }]}
+                onPress={handleConfirmWeight}
+                disabled={isSavingSession}
+              >
+                {isSavingSession
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <>
+                      <MaterialCommunityIcons name="play-circle" size={20} color="#fff" />
+                      <Text style={mStyles.confirmBtnText}>بدء الجلسة</Text>
+                    </>
+                }
+              </Pressable>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
       {/* ── Header ──────────────────────────────────────── */}
       <View style={styles.header}>
         <Pressable onPress={() => navigation.navigate("NurseHome")} style={styles.backBtn}>
@@ -161,6 +267,7 @@ const PatientState = ({ route }) => {
           <MaterialCommunityIcons name="pencil-outline" size={22} color="#065f46" />
         </Pressable>
       </View>
+
 
       {/* ── قائمة المرضى ─────────────────────────────── */}
       <ScrollView
@@ -374,4 +481,105 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   doneText: { color: "#059669", fontWeight: "700", fontSize: 14 },
+});
+
+const mStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  sheet: {
+    backgroundColor: '#fff',
+    width: '100%',
+    borderRadius: 24,
+    padding: 24,
+    elevation: 10,
+  },
+  sheetHeader: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  sheetTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1e293b',
+  },
+  sheetPatient: {
+    fontSize: 16,
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  inputRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 56,
+    gap: 10,
+  },
+  inputErr: {
+    borderColor: '#ef4444',
+  },
+  input: {
+    flex: 1,
+    textAlign: 'right',
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1e293b',
+  },
+  unit: {
+    color: '#94a3b8',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  errText: {
+    color: '#ef4444',
+    fontSize: 13,
+    textAlign: 'right',
+    marginTop: 8,
+    fontWeight: '600',
+  },
+  btnRow: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    marginTop: 24,
+    gap: 12,
+  },
+  cancelBtn: {
+    flex: 1,
+    backgroundColor: '#f1f5f9',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  cancelBtnText: {
+    color: '#64748b',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  confirmBtn: {
+    flex: 2,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#3b82f6',
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  confirmBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '800',
+  },
 });
