@@ -361,9 +361,9 @@ const PatientSessionStatistics = ({ route, navigation }) => {
 
         {/* تنبيه للأخصائي */}
         <View style={styles.nutritionTip}>
-          <Icon name="food-apple" type="material-community" size={20} color="#204a42" />
           <Text style={styles.nutritionTipText}>
-            هذه الإحصائيات تساعد أخصائي التغذية في وضع خطة غذائية مناسبة بناءً على مسار قراءات المريض عبر الجلسات.
+       هذه الاحصائيا للكادر الطبي للمساعدة على متابعة حالة المريض بشكل أفضل   
+       
           </Text>
         </View>
 

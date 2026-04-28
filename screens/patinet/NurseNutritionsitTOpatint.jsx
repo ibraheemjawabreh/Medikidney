@@ -15,6 +15,7 @@ import { Tab, Button, Icon, Divider } from "@rneui/base";
 import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import { Platform } from "react-native";
 
 const { width } = Dimensions.get("window");
 
@@ -225,40 +226,49 @@ const StaffPatientView = ({ route, navigation }) => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#204a42" />
 
-      {/* Header Section */}
-      <View style={styles.headerContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" type="material-community" size={28} color="#fff" />
-        </TouchableOpacity>
+    <View style={styles.modernHeader}>
+  <View style={styles.headerCircleOne} />
+  <View style={styles.headerCircleTwo} />
 
-        {/* زر معلومات المريض */}
-        <TouchableOpacity
-          style={styles.infoButton}
-          onPress={() => navigation.navigate('PatinetInfo', { patientId })}
-        >
-          <Icon name="card-account-details-outline" type="material-community" size={24} color="#fff" />
-        </TouchableOpacity>
+  <View style={styles.topBar}>
+    <TouchableOpacity
+      style={styles.glassIconButton}
+      onPress={() => navigation.goBack()}
+      activeOpacity={0.85}
+    >
+      <Icon name="chevron-right" type="material-community" size={32} color="#fff" />
+    </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => navigation.navigate('PatinetInfo', { patientId })}
-          activeOpacity={0.85}
-        >
-          <View style={styles.avatarCircle}>
-            <Icon name="account-circle" type="material-community" size={80} color="#cbd5e1" />
-          </View>
-        </TouchableOpacity>
+    <TouchableOpacity
+      style={styles.glassIconButton}
+      onPress={() => navigation.navigate("PatinetInfo", { patientId })}
+      activeOpacity={0.85}
+    >
+      <Icon name="account-edit-outline" type="material-community" size={26} color="#fff" />
+    </TouchableOpacity>
+  </View>
 
-        <Text style={styles.patientName}>{patient?.full_name}</Text>
-        <View style={styles.idBadge}><Text style={styles.idText}>رقم المريض: {patient?.patient_id}</Text></View>
-
-        <View style={styles.quickStats}>
-          <View style={styles.statBox}><Text style={styles.statLabel}>فصيلة الدم</Text><Text style={styles.statValue}>{patient?.blood_type || "N/A"}</Text></View>
-          <Divider orientation="vertical" width={1} color="rgba(255,255,255,0.2)" />
-          <View style={styles.statBox}><Text style={styles.statLabel}>الجنس</Text><Text style={styles.statValue}>{patient?.gender === 'Male' ? 'ذكر' : 'أنثى'}</Text></View>
-          <Divider orientation="vertical" width={1} color="rgba(255,255,255,0.2)" />
-          <View style={styles.statBox}><Text style={styles.statLabel}>الهوية</Text><Text style={[styles.statValue, { fontSize: 13 }]}>{patient?.national_id || "---"}</Text></View>
+  <View style={styles.patientHeaderRow}>
+    <TouchableOpacity
+      onPress={() => navigation.navigate("PatinetInfo", { patientId })}
+      activeOpacity={0.9}
+    >
+      <View style={styles.avatarRing}>
+        <View style={styles.avatarContainer}>
+          <Icon name="account" type="material-community" size={68} color="#204a42" />
         </View>
       </View>
+    </TouchableOpacity>
+
+    <View style={styles.patientHeaderInfo}>
+      <Text style={styles.patientNameText}>{patient?.full_name || "اسم المريض"}</Text>
+
+    
+    </View>
+  </View>
+</View>
+
+
 
       <Tab value={tabIndex} onChange={setTabIndex} indicatorStyle={styles.tabIndicator} containerStyle={styles.tabBar} variant="default">
         <Tab.Item title="التغذية" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="food-apple" type="material-community" size={22} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />} />
@@ -506,20 +516,191 @@ const StaffPatientView = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8fafc" },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: '#fff' },
-  loadingText: { marginTop: 12, color: '#64748b' },
-  headerContainer: { backgroundColor: "#204a42", paddingTop: 50, paddingBottom: 25, alignItems: "center", borderBottomRightRadius: 30, borderBottomLeftRadius: 30, elevation: 10, position: 'relative' },
-  backButton: { position: 'absolute', left: 20, top: 50, zIndex: 10, padding: 5 },
-  infoButton: { position: 'absolute', right: 20, top: 50, zIndex: 10, padding: 5, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 12 },
-  avatarCircle: { width: 90, height: 90, borderRadius: 45, backgroundColor: "rgba(255,255,255,0.1)", justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#059669" },
-  patientName: { color: "#fff", fontSize: 22, fontWeight: "900", marginTop: 10 },
-  idBadge: { backgroundColor: "#1e293b", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 10, marginTop: 8 },
-  idText: { color: "#94a3b8", fontSize: 13, fontWeight: "bold" },
-  quickStats: { flexDirection: "row-reverse", width: "90%", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: 15, marginTop: 20, padding: 15, justifyContent: "space-around" },
-  statBox: { alignItems: "center", flex: 1 },
-  statLabel: { color: "#94a3b8", fontSize: 11, marginBottom: 4 },
-  statValue: { color: "#fff", fontSize: 15, fontWeight: "bold" },
+  container: {
+    flex: 1,
+    backgroundColor: "#87898b56",
+  },
+ modernHeader: {
+  height: 235,
+  backgroundColor: "#204a42",
+  borderBottomLeftRadius: 40,
+  borderBottomRightRadius: 40,
+  paddingHorizontal: 20,
+  paddingTop: Platform.OS === "ios" ? 58 : 34,
+  overflow: "hidden",
+  position: "relative",
+  elevation: 14,
+  shadowColor: "#204a42",
+  shadowOffset: { width: 0, height: 10 },
+  shadowOpacity: 0.35,
+  shadowRadius: 18,
+},
+
+topBar: {
+  flexDirection: "row-reverse",
+  justifyContent: "space-between",
+  alignItems: "center",
+  zIndex: 5,
+},
+
+patientHeaderRow: {
+  marginTop: 22,
+  flexDirection: "row-reverse",
+  alignItems: "center",
+  justifyContent: "flex-start",
+  zIndex: 5,
+},
+
+patientHeaderInfo: {
+  flex: 1,
+  alignItems: "flex-end",
+  marginRight: 14,
+},
+
+patientNameText: {
+  fontSize: 22,
+  fontWeight: "900",
+  color: "#ffffff",
+  textAlign: "right",
+},
+
+fileBadge: {
+  flexDirection: "row-reverse",
+  alignItems: "center",
+  alignSelf: "flex-end",
+  marginTop: 9,
+  paddingHorizontal: 14,
+  paddingVertical: 6,
+  borderRadius: 15,
+  backgroundColor: "rgba(15, 23, 42, 0.38)",
+  borderWidth: 1,
+  borderColor: "rgba(255,255,255,0.12)",
+},
+
+fileBadgeText: {
+  color: "#d1fae5",
+  fontSize: 13,
+  fontWeight: "800",
+  marginRight: 6,
+},
+
+avatarRing: {
+  width: 102,
+  height: 102,
+  borderRadius: 51,
+  backgroundColor: "rgba(255,255,255,0.18)",
+  justifyContent: "center",
+  alignItems: "center",
+  borderWidth: 1,
+  borderColor: "rgba(255,255,255,0.25)",
+},
+
+avatarContainer: {
+  width: 86,
+  height: 86,
+  borderRadius: 43,
+  backgroundColor: "#ffffff",
+  justifyContent: "center",
+  alignItems: "center",
+  borderWidth: 4,
+  borderColor: "#d1fae5",
+  elevation: 10,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.22,
+  shadowRadius: 10,
+},
+
+headerInfoCard: {
+  marginHorizontal: 20,
+  marginTop: -32,
+  marginBottom: 18,
+  backgroundColor: "#ffffff",
+  borderRadius: 24,
+  paddingVertical: 14,
+  paddingHorizontal: 14,
+  elevation: 10,
+  shadowColor: "#204a42",
+  shadowOffset: { width: 0, height: 8 },
+  shadowOpacity: 0.16,
+  shadowRadius: 14,
+  borderWidth: 1,
+  borderColor: "#e2e8f0",
+  zIndex: 20,
+},
+
+infoMiniBox: {
+  flexDirection: "row-reverse",
+  alignItems: "center",
+  backgroundColor: "#f8fafc",
+  borderRadius: 16,
+  paddingVertical: 11,
+  paddingHorizontal: 12,
+  marginBottom: 9,
+  borderWidth: 1,
+  borderColor: "#e2e8f0",
+},
+
+infoIconCircle: {
+  width: 38,
+  height: 38,
+  borderRadius: 19,
+  backgroundColor: "#ecfdf5",
+  justifyContent: "center",
+  alignItems: "center",
+  marginLeft: 10,
+},
+
+infoTextBox: {
+  flex: 1,
+  alignItems: "flex-end",
+},
+
+infoMiniLabel: {
+  fontSize: 12,
+  color: "#94a3b8",
+  fontWeight: "700",
+  textAlign: "right",
+},
+
+infoMiniValue: {
+  fontSize: 15,
+  color: "#204a42",
+  fontWeight: "900",
+  marginTop: 2,
+  textAlign: "right",
+},
+
+headerCircleOne: {
+  position: "absolute",
+  width: 190,
+  height: 190,
+  borderRadius: 95,
+  backgroundColor: "rgba(5, 150, 105, 0.28)",
+  top: -75,
+  right: -55,
+},
+
+headerCircleTwo: {
+  position: "absolute",
+  width: 135,
+  height: 135,
+  borderRadius: 70,
+  backgroundColor: "rgba(255, 255, 255, 0.08)",
+  bottom: -45,
+  left: -35,
+},
+
+glassIconButton: {
+  width: 48,
+  height: 48,
+  borderRadius: 17,
+  backgroundColor: "rgba(255,255,255,0.15)",
+  justifyContent: "center",
+  alignItems: "center",
+  borderWidth: 1,
+  borderColor: "rgba(255,255,255,0.22)",
+},
   tabBar: { backgroundColor: "#fff", elevation: 2, borderBottomWidth: 1, borderColor: '#e2e8f0' },
   tabIndicator: { backgroundColor: "#204a42", height: 3, borderRadius: 3 },
   tabTitle: { fontSize: 11, fontWeight: "bold", marginTop: 3, textAlign: 'center' },

@@ -343,27 +343,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
               <Divider style={styles.rowDivider} />
             </>
           )}
-          <View style={styles.twoCol}>
-            <InfoRow label="الوزن قبل" value={session?.weight_before != null ? `${session.weight_before} kg` : "—"} />
-            <InfoRow label="الوزن بعد" value={session?.weight_after != null ? `${session.weight_after} kg` : "—"} />
-          </View>
-          <Divider style={styles.rowDivider} />
-          <View style={styles.twoCol}>
-            <InfoRow label="ضغط الدم قبل" value={session?.blood_pressure_before || "—"} />
-            <InfoRow label="ضغط الدم بعد" value={session?.blood_pressure_after || "—"} />
-          </View>
-          {session?.fluid_removed != null && (
-            <>
-              <Divider style={styles.rowDivider} />
-              <InfoRow label="السوائل المُزالة" value={`${session.fluid_removed} L`} highlight />
-            </>
-          )}
-          {session?.notes && (
-            <View style={styles.notesBox}>
-              <Icon name="note-text-outline" type="material-community" size={16} color="#64748b" />
-              <Text style={styles.notesText}>{session.notes}</Text>
-            </View>
-          )}
+       
         </View>
 
         {/* ── Vital Signs ── */}
