@@ -23,6 +23,7 @@ const NurseTasks = ({ route, navigation }) => {
   const [fluidRemoved, setFluidRemoved] = useState("");
   const [status, setStatus] = useState("COMPLETED");
   const [notes, setNotes] = useState(""); // حقل الملاحظات الجديد
+  const [weightAfter, setWeightAfter] = useState(""); // الوزن بعد الجلسة
   const [scheduleId, setScheduleId] = useState(route.params?.scheduleId?.toString() || "");
 
   useEffect(() => {
@@ -63,8 +64,8 @@ const NurseTasks = ({ route, navigation }) => {
   };
 
   const handleFinalSubmit = async () => {
-    if (!bpAfter || !fluidRemoved) {
-      Alert.alert("تنبيه", "يرجى إكمال بيانات نهاية الجلسة");
+    if (!bpAfter || !fluidRemoved || !weightAfter) {
+      Alert.alert("تنبيه", "يرجى إكمال بيانات نهاية الجلسة (الضغط والسوائل والوزن)");
       return;
     }
 
@@ -81,7 +82,7 @@ const NurseTasks = ({ route, navigation }) => {
         startTime: startTime,
         endTime: new Date().toISOString(),
         weightBefore: 0,
-        weightAfter: 0,
+        weightAfter: Number(weightAfter),
         bloodPressureBefore: bpBefore,
         bloodPressureAfter: bpAfter,
         fluidRemoved: Number(fluidRemoved),
@@ -110,9 +111,9 @@ const NurseTasks = ({ route, navigation }) => {
       { text: "نعم، مسح", onPress: async () => {
           await AsyncStorage.removeItem(`active_session_${patientId}`);
           setIsStarted(false);
-          setWeightBefore("");
           setBpBefore("");
           setNotes("");
+          setWeightAfter("");
       }}
     ]);
   };
@@ -167,6 +168,9 @@ const NurseTasks = ({ route, navigation }) => {
 
             <Text style={styles.label}>السوائل المسحوبة (L)</Text>
             <TextInput style={styles.input} value={fluidRemoved} onChangeText={setFluidRemoved} keyboardType="numeric" placeholder="2.5" />
+
+            <Text style={styles.label}>الوزن بعد الجلسة (كغ)</Text>
+            <TextInput style={styles.input} value={weightAfter} onChangeText={setWeightAfter} keyboardType="decimal-pad" placeholder="70.5" />
 
             {/* حقل الملاحظات الجديد */}
             <Text style={styles.label}>ملاحظات التمريض</Text>

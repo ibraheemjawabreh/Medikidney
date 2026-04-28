@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Alert, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import VitalSignsTab from './VitalSignsTab';
 import MedicationsTab from './MedicationsTab';
@@ -24,6 +24,7 @@ const SessionDetails = ({ route, navigation }) => {
 
   const currentStepData = steps.find(s => s.id === step);
   const [isFinishing, setIsFinishing] = useState(false);
+  const [weightAfter, setWeightAfter] = useState("");
 
   React.useEffect(() => {
     const loadStep = async () => {
@@ -49,14 +50,22 @@ const SessionDetails = ({ route, navigation }) => {
   };
 
   const handleFinishSession = async () => {
+    if (!weightAfter.trim()) {
+      Alert.alert("تنبيه", "يرجى إدخال الوزن بعد الجلسة قبل الإنهاء");
+      return;
+    }
+
     try {
       setIsFinishing(true);
       await api.patch(
         `/dialysis-sessions/${sessionId}/status`,
-        { status: "COMPLETED" }
+        { 
+          weightAfter: Number(weightAfter)
+        }
       );
       // مسح الخطوة المحفوظة لأن الجلسة انتهت
       await AsyncStorage.removeItem(`step_${sessionId}`);
+      Alert.alert("نجاح ✅", "تم إنهاء الجلسة بنجاح");
       // بعد نجاح التحديث نغلق الصفحة
       navigation.goBack();
     } catch (error) {
@@ -96,6 +105,18 @@ const SessionDetails = ({ route, navigation }) => {
 
       {/* أزرار التحكم في المراحل */}
       <View style={styles.footer}>
+        {step === 4 && (
+          <View style={styles.weightInputContainer}>
+            <Text style={styles.weightLabel}>الوزن بعد الجلسة (كغ)</Text>
+            <TextInput 
+              style={styles.weightInput} 
+              value={weightAfter} 
+              onChangeText={setWeightAfter}
+              placeholder="أدخل الوزن بالكيلوجرام"
+              keyboardType="decimal-pad"
+            />
+          </View>
+        )}
         {step > 1 ? (
           <Pressable style={styles.backBtn} onPress={() => changeStep(step - 1)}>
             <Text style={styles.backBtnText}>السابق</Text>
@@ -127,6 +148,9 @@ const styles = StyleSheet.create({
   inactiveDot: { backgroundColor: '#064e3b' },
   stepTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
   footer: { flexDirection: 'row-reverse', padding: 20, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#E5E7EB', justifyContent: 'space-between' },
+  weightInputContainer: { width: '100%', marginBottom: 15, paddingHorizontal: 20 },
+  weightLabel: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', marginBottom: 8, textAlign: 'right' },
+  weightInput: { borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 12, fontSize: 16, backgroundColor: '#f8fafc', textAlign: 'right' },
   nextBtn: { backgroundColor: '#2563eb', flexDirection: 'row-reverse', paddingVertical: 12, paddingHorizontal: 25, borderRadius: 10, alignItems: 'center' },
   nextBtnText: { color: '#fff', fontWeight: 'bold', marginLeft: 8 },
   backBtn: { paddingVertical: 12, paddingHorizontal: 25, borderRadius: 10, borderWidth: 1, borderColor: '#D1D5DB' },
