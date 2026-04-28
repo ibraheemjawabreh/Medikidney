@@ -1,11 +1,11 @@
-import React from 'react'; 
+import React from 'react';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
 
 import PatientProfile from "./PatinetProfile";
 import WeightInput from "./Weightinput";
-import ProfileSettingsScreen from "../SettingsWithProfile/SettingWithProfile"; 
+import ProfileSettingsScreen from "../SettingsWithProfile/SettingWithProfile";
 
 const Tab = createBottomTabNavigator();
 
@@ -16,7 +16,7 @@ const PatinetPages = () => {
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarStyle: styles.tabBar,
-          tabBarActiveTintColor: "#382120", 
+          tabBarActiveTintColor: "#382120",
           tabBarInactiveTintColor: "#9CA3AF",
           tabBarLabelStyle: styles.tabLabel,
           tabBarIcon: ({ color, focused }) => {
@@ -51,12 +51,12 @@ export default PatinetPages;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
+    flex: 1,
     backgroundColor: "#F9FAFB",
     width: '100%'
   },
   tabBar: {
-    height: 75, 
+    height: 75,
     paddingBottom: 12,
     paddingTop: 8,
     backgroundColor: "#FFFFFF",
