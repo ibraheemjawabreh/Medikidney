@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { I18nManager } from 'react-native';
 import AppNavigator from './AppNavigation/AppNavigation'; 
+
 
 export default function App() {
   return (

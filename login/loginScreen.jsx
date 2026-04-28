@@ -4,8 +4,8 @@ import { Text, View, StyleSheet, Image, TouchableOpacity, ScrollView, KeyboardAv
 import LoginValidation from "./loginValidation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
 import api from "../services/api";
+
 
 const LoginScreen = ({ navigation }) => {
   const [username, setusername] = useState("");
@@ -65,26 +65,30 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
-  return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+
+return (
+  <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+    <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+
+      <View style={styles.card}>
         <View style={styles.logoContainer}>
-          <Image source={require("../assets/logo.jpeg")} style={styles.logo} resizeMode="contain" />
+          <View style={styles.logoBackground}>
+            <Image source={require("../assets/logo.jpeg")} style={styles.logo} resizeMode="contain" />
+          </View>
         </View>
 
         <View style={styles.titleContainer}>
-          <Text style={styles.welcomeText}>أهلاً بك مجدداً</Text>
           <Text style={styles.subtitleText}>سجل دخولك للوصول إلى MediKidney</Text>
         </View>
 
         <View style={styles.formContainer}>
           <Text style={styles.label}>اسم المستخدم</Text>
           <Input
-            placeholder="username"
+            placeholder="اسم المستخدم"
             value={username}
             onChangeText={setusername}
             errorMessage={errors.username}
-            leftIcon={<MaterialCommunityIcons name="account-outline" size={22} color="#94a3b8" />}
+            leftIcon={<MaterialCommunityIcons name="account-outline" size={22} color="#059669" />}
             inputContainerStyle={styles.inputContainer}
             inputStyle={styles.inputStyle}
           />
@@ -96,10 +100,14 @@ const LoginScreen = ({ navigation }) => {
             value={password}
             onChangeText={setpassword}
             errorMessage={errors.password}
-            leftIcon={<MaterialCommunityIcons name="lock-outline" size={22} color="#94a3b8" />}
+            leftIcon={<MaterialCommunityIcons name="lock-outline" size={22} color="#059669" />}
             rightIcon={
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <MaterialCommunityIcons name={showPassword ? "eye-off-outline" : "eye-outline"} size={22} color="#94a3b8" />
+                <MaterialCommunityIcons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={22}
+                  color="#059669"
+                />
               </TouchableOpacity>
             }
             inputContainerStyle={styles.inputContainer}
@@ -112,11 +120,14 @@ const LoginScreen = ({ navigation }) => {
             onPress={handleLogin}
             buttonStyle={styles.loginButton}
             containerStyle={styles.loginButtonContainer}
+            titleStyle={styles.loginButtonTitle}
           />
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
+      </View>
+
+    </ScrollView>
+  </KeyboardAvoidingView>
+);
 };
 
 
@@ -128,89 +139,138 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#ecfdf5",
   },
+
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingHorizontal: 25,
+    paddingHorizontal: 24,
     paddingVertical: 40,
   },
+
+  card: {
+    width: "100%",
+    backgroundColor: "#ffffff",
+    borderRadius: 32,
+    paddingHorizontal: 24,
+    paddingTop: 34,
+    paddingBottom: 30,
+    borderWidth: 1,
+    borderColor: "#d1fae5",
+    shadowColor: "#059669",
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    elevation: 14,
+  },
+
   logoContainer: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 24,
   },
+
+  logoBackground: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: "#ecfdf5",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 3,
+    borderColor: "#d1fae5",
+    shadowColor: "#059669",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 10,
+  },
+
   logo: {
-    width: 120,
-    height: 120,
-    borderRadius: 25,
+    width: 210,
+    height: 210,
+    borderRadius: 65,
   },
+
   titleContainer: {
-    marginBottom: 35,
-    alignItems: 'flex-end',
+    marginBottom: 30,
+    alignItems: "center",
   },
+
   welcomeText: {
-    fontSize: 32,
+    fontSize: 31,
     fontWeight: "900",
     color: "#0f172a",
-    textAlign: 'right',
+    textAlign: "center",
   },
+
   subtitleText: {
     fontSize: 15,
-    color: "#64748b",
-    fontWeight: "500",
-    textAlign: 'right',
-    marginTop: 5,
+    color: "#222325",
+    fontWeight: "600",
+    textAlign: "center",
+    marginTop: 8,
+    
   },
+
   formContainer: {
-    width: '100%',
+    width: "100%",
   },
+
   label: {
     fontSize: 14,
     fontWeight: "900",
     color: "#334155",
     marginBottom: 8,
-    textAlign: 'right',
-    marginRight: 5,
+    textAlign: "right",
+    marginRight: 6,
   },
+
   inputContainer: {
     backgroundColor: "#f8fafc",
     borderBottomWidth: 0,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    borderRadius: 16,
-    paddingHorizontal: 15,
-    height: 55,
+    borderWidth: 1.5,
+    borderColor: "#d1fae5",
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    height: 58,
   },
+
   inputStyle: {
-    textAlign: 'left',
+    textAlign: "left",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#1e293b",
   },
-  forgotBtn: {
-    alignSelf: 'flex-start',
-    marginBottom: 25,
-  },
-  forgotText: {
-    color: "#059669",
-    fontWeight: "bold",
-    fontSize: 14,
-  },
+
   loginButtonContainer: {
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+    marginTop: 10,
+    borderRadius: 18,
+    shadowColor: "#0f172a",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 8,
   },
+
   loginButton: {
     backgroundColor: "#0f172a",
     height: 60,
-    borderRadius: 16,
+    borderRadius: 18,
   },
+
   loginButtonTitle: {
     fontSize: 18,
     fontWeight: "900",
     color: "#ffffff",
+  },
+
+  forgotBtn: {
+    alignSelf: "flex-start",
+    marginBottom: 25,
+  },
+
+  forgotText: {
+    color: "#059669",
+    fontWeight: "bold",
+    fontSize: 14,
   },
 });

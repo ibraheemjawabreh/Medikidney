@@ -177,8 +177,13 @@ const SelectPatient = () => {
       <ScrollView contentContainerStyle={styles.scroll}>
         {loading ? (
           <ActivityIndicator size="large" color="#059669" style={{ marginTop: 60 }} />
+        ) : !currentShift?.patients || currentShift.patients.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <MaterialCommunityIcons name="file-document-outline" size={60} color="#cbd5e1" />
+            <Text style={styles.emptyText}>لا توجد مرضى في هذا الشفت</Text>
+          </View>
         ) : (
-          currentShift?.patients?.map(patient => {
+          currentShift.patients.map(patient => {
             const isSelected = selectedIds.includes(patient.patientId);
             const isConfirmed = confirmedIds.includes(patient.patientId);
             const isTakenByOther = patient.assignedNurseId !== null && patient.assignedNurseId !== myNurseId;
@@ -265,7 +270,35 @@ const styles = StyleSheet.create({
   activeCountBadge: { backgroundColor: "#065f46" },
   countText: { fontSize: 11, fontWeight: "bold", color: "#fff" },
   scroll: { padding: 16, paddingBottom: 120 },
-  card: { backgroundColor: "#fff", borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1.5, borderColor: "#F3F4F6", flexDirection: "row-reverse", alignItems: "center", gap: 12 },
+  emptyContainer: { 
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center", 
+    marginTop: 100,
+    gap: 16
+  },
+  emptyText: { 
+    fontSize: 18, 
+    color: "#94a3b8", 
+    fontWeight: "600",
+    textAlign: "center"
+  },
+  card: { 
+    backgroundColor: "#fff", 
+    borderRadius: 16, 
+    padding: 16, 
+    marginBottom: 10, 
+    borderWidth: 1.5, 
+    borderColor: "#F3F4F6", 
+    flexDirection: "row-reverse", 
+    alignItems: "center", 
+    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   cardSelected: { borderColor: "#059669", backgroundColor: "#F0FDF4" },
   cardConfirmed: { borderColor: "#34d399", borderStyle: 'dashed' },
   cardDisabled: { backgroundColor: "#f8fafc", opacity: 0.6 },

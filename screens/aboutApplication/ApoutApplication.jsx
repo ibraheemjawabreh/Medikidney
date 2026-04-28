@@ -1,15 +1,23 @@
+import { Button } from "@rneui/base";
 import React from "react";
-import { View, Text, StyleSheet, Image, ScrollView, StatusBar } from "react-native";
-
-const AboutApp = () => {
+import { View, Text, StyleSheet, Image, ScrollView, StatusBar, TouchableOpacity } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+const AboutApp = ({navigation}) => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <StatusBar barStyle="dark-content" backgroundColor="#ecfdf5" />
       
-      {/* قسم اللوجو والعنوان */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+        activeOpacity={0.8}
+      >
+        <MaterialCommunityIcons name="arrow-left" size={26} color="#0f172a" />
+      </TouchableOpacity>
+      
       <View style={styles.logoContainer}>
         <View style={styles.imageWrapper}>
-           <Image
+          <Image
             source={require("../../assets/logo.jpeg")}
             style={styles.logo}
             resizeMode="cover"
@@ -22,7 +30,6 @@ const AboutApp = () => {
         </View>
       </View>
 
-      {/* بطاقة النبذة */}
       <View style={styles.card}>
         <View style={styles.titleRow}>
           <Text style={styles.sectionTitle}>نبذة عن التطبيق</Text>
@@ -38,7 +45,6 @@ const AboutApp = () => {
         </Text>
       </View>
 
-      {/* بطاقة الأهداف */}
       <View style={styles.card}>
         <View style={styles.titleRow}>
           <Text style={styles.sectionTitle}>أهداف النظام</Text>
@@ -74,16 +80,17 @@ export default AboutApp;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ecfdf5", // الخلفية الخضراء الفاتحة من صفحة الدخول
+    backgroundColor: "#ecfdf5", 
   },
   scrollContent: {
     padding: 25,
     paddingTop: 50,
   },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
+ logoContainer: {
+  alignItems: "center",
+  marginBottom: 40,
+  position: "relative",
+},
   imageWrapper: {
     backgroundColor: '#fff',
     padding: 5,
@@ -95,14 +102,14 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   logo: {
-    width: 110,
-    height: 110,
+    width: 250,
+    height: 250,
     borderRadius: 25,
   },
   appName: {
     fontSize: 32,
     fontWeight: "900",
-    color: "#0f172a", // اللون الزيتي الداكن
+    color: "#0f172a", 
     marginTop: 15,
   },
   badge: {
@@ -116,7 +123,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: "#059669", // اللون الأخضر الأساسي
+    color: "#059669", 
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -186,5 +193,24 @@ const styles = StyleSheet.create({
     color: "#94a3b8",
     fontSize: 13,
     fontWeight: '500',
+  },
+  backButton: {
+    position: "absolute",
+    left: 25,
+    top: 55,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: "#ffffff",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#d1fae5",
+    shadowColor: "#059669",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 10,
   },
 });
