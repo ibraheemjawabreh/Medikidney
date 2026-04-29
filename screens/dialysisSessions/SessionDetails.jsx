@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Alert, ActivityIndicator } from 'react-native';
+import {
+  View, Text, StyleSheet, Pressable, ScrollView, TextInput,
+  Alert, ActivityIndicator, Modal, KeyboardAvoidingView, Platform,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import VitalSignsTab from './VitalSignsTab';
 import MedicationsTab from './MedicationsTab';
@@ -12,7 +15,7 @@ const SessionDetails = ({ route, navigation }) => {
   const { patient } = route.params;
   const sessionId = patient.sessionId;
 
-  // الحالة لتحديد المرحلة الحالية (1 إلى 5)
+  // الحالة لتحديد المرحلة الحالية (1 إلى 4)
   const [step, setStep] = useState(1);
 
   const steps = [
@@ -24,7 +27,12 @@ const SessionDetails = ({ route, navigation }) => {
 
   const currentStepData = steps.find(s => s.id === step);
   const [isFinishing, setIsFinishing] = useState(false);
-  const [weightAfter, setWeightAfter] = useState("");
+
+  // ─── Modal إنهاء الجلسة ───────────────────────────────────
+  const [endModalVisible, setEndModalVisible] = useState(false);
+  const [endModalPhase, setEndModalPhase] = useState('choice'); // 'choice' | 'weight_input'
+  const [weightAfter, setWeightAfter] = useState('');
+  const [weightInputError, setWeightInputError] = useState('');
 
   React.useEffect(() => {
     const loadStep = async () => {
@@ -49,28 +57,66 @@ const SessionDetails = ({ route, navigation }) => {
     }
   };
 
-  const handleFinishSession = async () => {
+  // ─── فتح Modal إنهاء الجلسة ───────────────────────────────
+  const handleOpenEndModal = () => {
+    setEndModalPhase('choice');
+    setWeightAfter('');
+    setWeightInputError('');
+    setEndModalVisible(true);
+  };
+
+  // ─── إنهاء الجلسة مع الوزن ────────────────────────────────
+  const handleFinishWithWeight = async () => {
+    // Validation
+    const num = parseFloat(weightAfter);
     if (!weightAfter.trim()) {
-      Alert.alert("تنبيه", "يرجى إدخال الوزن بعد الجلسة قبل الإنهاء");
+      setWeightInputError('الوزن مطلوب');
       return;
     }
+    if (isNaN(num) || num < 20 || num > 300) {
+      setWeightInputError('يجب أن يكون الوزن رقماً بين 20 و 300 كغ');
+      return;
+    }
+    setWeightInputError('');
 
     try {
       setIsFinishing(true);
       await api.patch(
         `/dialysis-sessions/${sessionId}/status`,
-        { 
-          weightAfter: Number(weightAfter)
-        }
+        { status: "COMPLETED", weightAfter: num }
       );
       // مسح الخطوة المحفوظة لأن الجلسة انتهت
       await AsyncStorage.removeItem(`step_${sessionId}`);
-      Alert.alert("نجاح ✅", "تم إنهاء الجلسة بنجاح");
-      // بعد نجاح التحديث نغلق الصفحة
+      setEndModalVisible(false);
+      Alert.alert("نجاح ✅", "تم إنهاء الجلسة وحفظ الوزن بنجاح");
       navigation.goBack();
     } catch (error) {
       console.log('Error finishing session:', error.response?.data || error.message);
-      alert('فشل في إنهاء الجلسة، يرجى المحاولة مرة أخرى.');
+      setWeightInputError('فشل في إنهاء الجلسة، يرجى المحاولة مرة أخرى.');
+    } finally {
+      setIsFinishing(false);
+    }
+  };
+
+  // ─── إنهاء الجلسة بدون وزن (تخطي) ────────────────────────
+  const handleFinishSkipWeight = async () => {
+    try {
+      setIsFinishing(true);
+      await api.patch(
+        `/dialysis-sessions/${sessionId}/status`,
+        { status: "COMPLETED" }
+      );
+      // مسح الخطوة المحفوظة لأن الجلسة انتهت
+      await AsyncStorage.removeItem(`step_${sessionId}`);
+      setEndModalVisible(false);
+      Alert.alert(
+        "تم إنهاء الجلسة ✅",
+        "تم إنهاء الجلسة بنجاح.\nسيُطلب من المريض إدخال وزنه بعد الجلسة."
+      );
+      navigation.goBack();
+    } catch (error) {
+      console.log('Error finishing session:', error.response?.data || error.message);
+      Alert.alert('خطأ', 'فشل في إنهاء الجلسة، يرجى المحاولة مرة أخرى.');
     } finally {
       setIsFinishing(false);
     }
@@ -78,6 +124,148 @@ const SessionDetails = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+
+      {/* ══════ Modal إنهاء الجلسة ══════════════════════════════ */}
+      <Modal
+        visible={endModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => !isFinishing && setEndModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={modalStyles.overlay}
+        >
+          <View style={modalStyles.sheet}>
+
+            {/* ── مرحلة الاختيار ── */}
+            {endModalPhase === 'choice' && (
+              <>
+                {/* الأيقونة والعنوان */}
+                <View style={modalStyles.headerIcon}>
+                  <View style={modalStyles.iconCircle}>
+                    <MaterialCommunityIcons name="check-circle-outline" size={40} color="#059669" />
+                  </View>
+                </View>
+                <Text style={modalStyles.title}>إنهاء جلسة الغسيل</Text>
+                <Text style={modalStyles.subtitle}>
+                  هل تريد إدخال وزن المريض بعد الجلسة الآن؟
+                </Text>
+
+                {/* زر إدخال الوزن */}
+                <Pressable
+                  style={modalStyles.optionBtn}
+                  onPress={() => setEndModalPhase('weight_input')}
+                >
+                  <View style={modalStyles.optionIconBox}>
+                    <MaterialCommunityIcons name="scale" size={24} color="#3b82f6" />
+                  </View>
+                  <View style={modalStyles.optionTextBox}>
+                    <Text style={modalStyles.optionTitle}>إدخال الوزن بعد الجلسة</Text>
+                    <Text style={modalStyles.optionDesc}>أدخل وزن المريض الآن وأنهِ الجلسة</Text>
+                  </View>
+                  <MaterialCommunityIcons name="chevron-left" size={22} color="#94a3b8" />
+                </Pressable>
+
+                {/* زر التخطي */}
+                <Pressable
+                  style={[modalStyles.optionBtn, { borderColor: '#fef3c7' }]}
+                  onPress={() => {
+                    Alert.alert(
+                      "تأكيد التخطي",
+                      "سيُطلب من المريض إدخال وزنه بعد الجلسة بنفسه.\n\nهل أنت متأكد؟",
+                      [
+                        { text: "تراجع", style: "cancel" },
+                        { text: "تخطي وإنهاء", onPress: handleFinishSkipWeight, style: "destructive" },
+                      ]
+                    );
+                  }}
+                  disabled={isFinishing}
+                >
+                  <View style={[modalStyles.optionIconBox, { backgroundColor: '#fffbeb' }]}>
+                    <MaterialCommunityIcons name="account-arrow-right" size={24} color="#f59e0b" />
+                  </View>
+                  <View style={modalStyles.optionTextBox}>
+                    <Text style={modalStyles.optionTitle}>تخطي (سيُدخله المريض)</Text>
+                    <Text style={modalStyles.optionDesc}>المريض سيُلزم بإدخال الوزن لاحقاً</Text>
+                  </View>
+                  <MaterialCommunityIcons name="chevron-left" size={22} color="#94a3b8" />
+                </Pressable>
+
+                {/* زر الإلغاء */}
+                <Pressable
+                  style={modalStyles.cancelBtn}
+                  onPress={() => setEndModalVisible(false)}
+                  disabled={isFinishing}
+                >
+                  <Text style={modalStyles.cancelBtnText}>تراجع</Text>
+                </Pressable>
+              </>
+            )}
+
+            {/* ── مرحلة إدخال الوزن ── */}
+            {endModalPhase === 'weight_input' && (
+              <>
+                <View style={modalStyles.headerIcon}>
+                  <View style={[modalStyles.iconCircle, { backgroundColor: '#eff6ff' }]}>
+                    <MaterialCommunityIcons name="scale" size={36} color="#3b82f6" />
+                  </View>
+                </View>
+                <Text style={modalStyles.title}>وزن المريض بعد الجلسة</Text>
+                {patient?.patientName && (
+                  <Text style={modalStyles.patientName}>{patient.patientName}</Text>
+                )}
+
+                {/* حقل الإدخال */}
+                <View style={[modalStyles.inputRow, weightInputError ? modalStyles.inputErr : null]}>
+                  <MaterialCommunityIcons name="scale" size={20} color="#3b82f6" />
+                  <TextInput
+                    style={modalStyles.input}
+                    placeholder="مثال: 72.5"
+                    placeholderTextColor="#9ca3af"
+                    keyboardType="decimal-pad"
+                    value={weightAfter}
+                    onChangeText={t => { setWeightAfter(t); setWeightInputError(''); }}
+                    autoFocus
+                  />
+                  <Text style={modalStyles.unit}>kg</Text>
+                </View>
+                {weightInputError ? (
+                  <Text style={modalStyles.errText}>{weightInputError}</Text>
+                ) : null}
+
+                {/* الأزرار */}
+                <View style={modalStyles.btnRow}>
+                  <Pressable
+                    style={modalStyles.backChoiceBtn}
+                    onPress={() => { setEndModalPhase('choice'); setWeightInputError(''); }}
+                    disabled={isFinishing}
+                  >
+                    <MaterialCommunityIcons name="arrow-right" size={18} color="#64748b" />
+                    <Text style={modalStyles.backChoiceBtnText}>رجوع</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={[modalStyles.confirmBtn, isFinishing && { backgroundColor: '#6ee7b7' }]}
+                    onPress={handleFinishWithWeight}
+                    disabled={isFinishing}
+                  >
+                    {isFinishing
+                      ? <ActivityIndicator color="#fff" size="small" />
+                      : <>
+                          <MaterialCommunityIcons name="check-circle" size={20} color="#fff" />
+                          <Text style={modalStyles.confirmBtnText}>حفظ وإنهاء</Text>
+                        </>
+                    }
+                  </Pressable>
+                </View>
+              </>
+            )}
+
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
       {/* Header مع مؤشر التقدم */}
       <View style={styles.header}>
         <View style={{ flexDirection: 'row-reverse', width: '100%', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
@@ -103,36 +291,35 @@ const SessionDetails = ({ route, navigation }) => {
         {currentStepData.component}
       </View>
 
-      {/* أزرار التحكم في المراحل */}
-      <View style={styles.footer}>
+      {/* أزرار التحكم في المراحل + زر إنهاء الجلسة */}
+      <View style={styles.footerWrapper}>
+        {/* زر إنهاء الجلسة - يظهر فقط في المرحلة الأخيرة (الأعراض) */}
         {step === 4 && (
-          <View style={styles.weightInputContainer}>
-            <Text style={styles.weightLabel}>الوزن بعد الجلسة (كغ)</Text>
-            <TextInput 
-              style={styles.weightInput} 
-              value={weightAfter} 
-              onChangeText={setWeightAfter}
-              placeholder="أدخل الوزن بالكيلوجرام"
-              keyboardType="decimal-pad"
-            />
-          </View>
-        )}
-        {step > 1 ? (
-          <Pressable style={styles.backBtn} onPress={() => changeStep(step - 1)}>
-            <Text style={styles.backBtnText}>السابق</Text>
+          <Pressable
+            style={styles.endSessionBtn}
+            onPress={handleOpenEndModal}
+            disabled={isFinishing}
+          >
+            <MaterialCommunityIcons name="stop-circle-outline" size={20} color="#fff" />
+            <Text style={styles.endSessionBtnText}>إنهاء الجلسة</Text>
           </Pressable>
-        ) : <View style={{ flex: 1 }} />}
+        )}
 
-        {step < 4 ? (
-          <Pressable style={styles.nextBtn} onPress={() => changeStep(step + 1)}>
-            <Text style={styles.nextBtnText}>التالي</Text>
-            <MaterialCommunityIcons name="arrow-left" size={20} color="#fff" />
-          </Pressable>
-        ) : (
-          <Pressable style={[styles.nextBtn, { backgroundColor: '#059669', opacity: isFinishing ? 0.7 : 1 }]} onPress={handleFinishSession} disabled={isFinishing}>
-            <Text style={styles.nextBtnText}>{isFinishing ? "جاري الإنهاء..." : "إنهاء وإغلاق"}</Text>
-          </Pressable>
-        )}
+        {/* أزرار التنقل بين المراحل */}
+        <View style={styles.footer}>
+          {step > 1 ? (
+            <Pressable style={styles.backBtn} onPress={() => changeStep(step - 1)}>
+              <Text style={styles.backBtnText}>السابق</Text>
+            </Pressable>
+          ) : <View style={{ flex: 1 }} />}
+
+          {step < 4 ? (
+            <Pressable style={styles.nextBtn} onPress={() => changeStep(step + 1)}>
+              <Text style={styles.nextBtnText}>التالي</Text>
+              <MaterialCommunityIcons name="arrow-left" size={20} color="#fff" />
+            </Pressable>
+          ) : <View style={{ flex: 1 }} />}
+        </View>
       </View>
     </View>
   );
@@ -147,14 +334,222 @@ const styles = StyleSheet.create({
   activeDot: { backgroundColor: '#34D399' },
   inactiveDot: { backgroundColor: '#064e3b' },
   stepTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
-  footer: { flexDirection: 'row-reverse', padding: 20, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#E5E7EB', justifyContent: 'space-between' },
-  weightInputContainer: { width: '100%', marginBottom: 15, paddingHorizontal: 20 },
-  weightLabel: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', marginBottom: 8, textAlign: 'right' },
-  weightInput: { borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 12, fontSize: 16, backgroundColor: '#f8fafc', textAlign: 'right' },
+
+  footerWrapper: {
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingBottom: 8,
+  },
+  endSessionBtn: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#dc2626',
+    marginHorizontal: 20,
+    marginTop: 12,
+    marginBottom: 8,
+    paddingVertical: 13,
+    borderRadius: 12,
+    elevation: 3,
+    shadowColor: '#dc2626',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  endSessionBtnText: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  footer: {
+    flexDirection: 'row-reverse',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    justifyContent: 'space-between',
+  },
   nextBtn: { backgroundColor: '#2563eb', flexDirection: 'row-reverse', paddingVertical: 12, paddingHorizontal: 25, borderRadius: 10, alignItems: 'center' },
   nextBtnText: { color: '#fff', fontWeight: 'bold', marginLeft: 8 },
   backBtn: { paddingVertical: 12, paddingHorizontal: 25, borderRadius: 10, borderWidth: 1, borderColor: '#D1D5DB' },
   backBtnText: { color: '#4B5563', fontWeight: 'bold' },
+});
+
+const modalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  sheet: {
+    backgroundColor: '#fff',
+    width: '100%',
+    borderRadius: 24,
+    padding: 24,
+    elevation: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+  },
+
+  // Header
+  headerIcon: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  iconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#f0fdf4',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#1e293b',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  patientName: {
+    fontSize: 15,
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+
+  // Option buttons
+  optionBtn: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: '#e2e8f0',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    gap: 12,
+  },
+  optionIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: '#eff6ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  optionTextBox: {
+    flex: 1,
+  },
+  optionTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1e293b',
+    textAlign: 'right',
+    marginBottom: 3,
+  },
+  optionDesc: {
+    fontSize: 12,
+    color: '#94a3b8',
+    textAlign: 'right',
+  },
+
+  // Cancel
+  cancelBtn: {
+    alignItems: 'center',
+    paddingVertical: 14,
+    marginTop: 4,
+  },
+  cancelBtnText: {
+    color: '#94a3b8',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+
+  // Weight input phase
+  inputRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 58,
+    gap: 10,
+    marginTop: 8,
+  },
+  inputErr: {
+    borderColor: '#ef4444',
+  },
+  input: {
+    flex: 1,
+    textAlign: 'right',
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1e293b',
+  },
+  unit: {
+    color: '#94a3b8',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  errText: {
+    color: '#ef4444',
+    fontSize: 13,
+    textAlign: 'right',
+    marginTop: 8,
+    fontWeight: '600',
+  },
+
+  // Buttons
+  btnRow: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    marginTop: 24,
+    gap: 12,
+  },
+  backChoiceBtn: {
+    flex: 1,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#f1f5f9',
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  backChoiceBtnText: {
+    color: '#64748b',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  confirmBtn: {
+    flex: 2,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#059669',
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  confirmBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '800',
+  },
 });
 
 export default SessionDetails;

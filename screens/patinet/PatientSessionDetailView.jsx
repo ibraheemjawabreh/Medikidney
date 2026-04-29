@@ -329,7 +329,10 @@ const PatientSessionDetailView = ({ route, navigation }) => {
           <Divider style={styles.rowDivider} />
           <View style={styles.twoCol}>
             <InfoRow label="وقت البدء" value={formatTime(session?.start_time)} />
-            <InfoRow label="وقت الانتهاء" value={formatTime(session?.end_time)} />
+            <InfoRow
+              label="وقت الانتهاء"
+              value={formatTime(session?.end_time || (session?.status === 'COMPLETED' ? session?.updated_at : null))}
+            />
           </View>
           <Divider style={styles.rowDivider} />
           {schedule && (
@@ -341,6 +344,50 @@ const PatientSessionDetailView = ({ route, navigation }) => {
               <Divider style={styles.rowDivider} />
               <InfoRow label="رقم الجهاز" value={`جهاز #${schedule.machine_number}`} />
               <Divider style={styles.rowDivider} />
+            </>
+          )}
+
+          {/* ── الوزن قبل وبعد الجلسة ── */}
+          {(session?.weight_before != null || session?.weight_after != null) && (
+            <>
+              <View style={styles.weightRow}>
+                <View style={styles.weightBox}>
+                  <View style={[styles.weightIconCircle, { backgroundColor: '#eff6ff' }]}>
+                    <Icon name="scale" type="material-community" size={20} color="#3b82f6" />
+                  </View>
+                  <Text style={styles.weightLabel}>الوزن قبل</Text>
+                  <Text style={[styles.weightValue, { color: '#3b82f6' }]}>
+                    {session?.weight_before != null ? `${session.weight_before} kg` : '—'}
+                  </Text>
+                </View>
+
+                <View style={styles.weightArrow}>
+                  <Icon name="arrow-left" type="material-community" size={20} color="#94a3b8" />
+                </View>
+
+                <View style={styles.weightBox}>
+                  <View style={[styles.weightIconCircle, { backgroundColor: '#f0fdf4' }]}>
+                    <Icon name="scale" type="material-community" size={20} color="#059669" />
+                  </View>
+                  <Text style={styles.weightLabel}>الوزن بعد</Text>
+                  <Text style={[styles.weightValue, { color: '#059669' }]}>
+                    {session?.weight_after != null ? `${session.weight_after} kg` : '—'}
+                  </Text>
+                </View>
+              </View>
+
+              {/* كمية السوائل المزالة */}
+              {session?.weight_before != null && session?.weight_after != null && (
+                <View style={styles.fluidRemovedRow}>
+                  <Icon name="water-outline" type="material-community" size={16} color="#06b6d4" />
+                  <Text style={styles.fluidRemovedText}>
+                    كمية السوائل المُزالة (تقريبي): {' '}
+                    <Text style={styles.fluidRemovedValue}>
+                      {Math.abs(session.weight_before - session.weight_after).toFixed(1)} لتر
+                    </Text>
+                  </Text>
+                </View>
+              )}
             </>
           )}
        
@@ -622,6 +669,62 @@ const styles = StyleSheet.create({
   // Empty state
   emptySmall: { alignItems: "center", paddingVertical: 20 },
   emptySmallText: { color: "#94a3b8", fontSize: 13, marginTop: 8 },
+
+  // Weight display
+  weightRow: {
+    flexDirection: "row-reverse",
+    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+    borderRadius: 14,
+    padding: 16,
+    marginTop: 8,
+  },
+  weightBox: {
+    alignItems: "center",
+    flex: 1,
+    gap: 6,
+  },
+  weightIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  weightLabel: {
+    fontSize: 11,
+    color: "#94a3b8",
+    fontWeight: "600",
+  },
+  weightValue: {
+    fontSize: 20,
+    fontWeight: "900",
+  },
+  weightArrow: {
+    paddingHorizontal: 8,
+  },
+  fluidRemovedRow: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#ecfeff",
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 8,
+  },
+  fluidRemovedText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#0e7490",
+    textAlign: "right",
+    fontWeight: "600",
+  },
+  fluidRemovedValue: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#06b6d4",
+  },
 });
 
 export default PatientSessionDetailView;

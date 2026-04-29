@@ -72,7 +72,11 @@ export const useNotifications = (navigation) => {
       // احفظه محلياً
       await AsyncStorage.setItem('deviceToken', deviceToken.data);
     } catch (error) {
-      console.error('❌ خطأ في تسجيل الإشعارات:', error);
+      if (error.message.includes('FirebaseApp is not initialized')) {
+        console.warn('⚠️ تنبيه: لم يتم تهيئة Firebase بعد. الإشعارات لن تعمل على أندرويد حتى تضيف ملف google-services.json.');
+      } else {
+        console.error('❌ خطأ في تسجيل الإشعارات:', error);
+      }
     }
   };
 

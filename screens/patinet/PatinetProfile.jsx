@@ -10,10 +10,15 @@ import {
   TouchableOpacity,
   Linking,
   Alert,
+  TextInput,
+  Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Tab, TabView, Button, Icon, Divider } from "@rneui/base";
 import api from "../../services/api";
 import { useFocusEffect } from "@react-navigation/native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 
@@ -28,6 +33,12 @@ const PatientProfile = ({ navigation }) => {
   const [medicalTests, setMedicalTests] = useState([]);
   const [radiology, setRadiology] = useState([]);
   const [myAppointments, setMyAppointments] = useState([]);
+
+  // ─── حالة إدخال الوزن بعد الجلسة (lock) ───────────────────
+  const [pendingWeightSession, setPendingWeightSession] = useState(null);
+  const [weightAfterInput, setWeightAfterInput] = useState('');
+  const [weightAfterError, setWeightAfterError] = useState('');
+  const [isSavingWeight, setIsSavingWeight] = useState(false);
 
   const fetchPatientData = useCallback(async () => {
     try {
@@ -92,9 +103,58 @@ const PatientProfile = ({ navigation }) => {
   const fetchSessions = async (id) => {
     try {
       const response = await api.get(`/dialysis-sessions?patientId=${id}`);
-      setSessions(Array.isArray(response.data) ? response.data : []);
+      console.log("Sessions response data:", response.data);
+      const sessionsList = Array.isArray(response.data) ? response.data : [];
+      console.log("Sessions list length:", sessionsList.length);
+      setSessions(sessionsList);
+
+      // ── التحقق: هل في جلسة مكتملة بدون وزن بعد؟ ──
+      const needsWeight = sessionsList.find(
+        s => s.status === 'COMPLETED' && s.weight_after == null
+      );
+      if (needsWeight) {
+        setPendingWeightSession(needsWeight);
+      } else {
+        setPendingWeightSession(null);
+      }
     } catch (e) {
+      console.log("fetchSessions Error:", e);
+      Alert.alert("خطأ في جلب الجلسات", e.message);
       setSessions([]);
+    }
+  };
+
+  // ── حفظ الوزن بعد الجلسة (من المريض) ─────────────────────────
+  const handleSaveWeightAfter = async () => {
+    const num = parseFloat(weightAfterInput);
+    if (!weightAfterInput.trim()) {
+      setWeightAfterError('الوزن مطلوب');
+      return;
+    }
+    if (isNaN(num) || num < 20 || num > 300) {
+      setWeightAfterError('يجب أن يكون الوزن رقماً بين 20 و 300 كغ');
+      return;
+    }
+    setWeightAfterError('');
+
+    try {
+      setIsSavingWeight(true);
+      const sid = pendingWeightSession.session_id || pendingWeightSession.id;
+      await api.patch(`/dialysis-sessions/${sid}/status`, {
+        weightAfter: num,
+      });
+      Alert.alert('تم ✅', 'تم حفظ وزنك بعد الجلسة بنجاح!');
+      setPendingWeightSession(null);
+      setWeightAfterInput('');
+      // إعادة جلب الجلسات
+      if (patient?.patient_id) {
+        fetchSessions(patient.patient_id);
+      }
+    } catch (err) {
+      console.log('Save weight err:', err.response?.data);
+      setWeightAfterError('فشل حفظ الوزن. يرجى المحاولة مرة أخرى.');
+    } finally {
+      setIsSavingWeight(false);
     }
   };
 
@@ -260,6 +320,95 @@ const PatientProfile = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#204a42" />
+
+      {/* ══════ شاشة إدخال الوزن بعد الجلسة (lock) ══════════════ */}
+      {pendingWeightSession && (
+        <Modal
+          visible={true}
+          transparent
+          animationType="slide"
+          onRequestClose={() => {
+            Alert.alert('⚠️ تنبيه', 'يجب إدخال وزنك بعد الجلسة قبل المتابعة.');
+          }}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={weightLockStyles.overlay}
+          >
+            <View style={weightLockStyles.sheet}>
+              {/* الأيقونة */}
+              <View style={weightLockStyles.iconWrap}>
+                <View style={weightLockStyles.iconCircle}>
+                  <MaterialCommunityIcons name="scale" size={40} color="#f59e0b" />
+                </View>
+              </View>
+
+              <Text style={weightLockStyles.title}>أدخل وزنك بعد الجلسة</Text>
+              <Text style={weightLockStyles.subtitle}>
+                يجب إدخال وزنك بعد الجلسة الأخيرة قبل تصفح الجلسات
+              </Text>
+
+              {/* معلومات الجلسة */}
+              <View style={weightLockStyles.sessionInfo}>
+                <Text style={weightLockStyles.sessionInfoText}>
+                  جلسة #{pendingWeightSession.session_id || pendingWeightSession.id}
+                  {' — '}
+                  {new Date(pendingWeightSession.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}
+                </Text>
+                {pendingWeightSession.weight_before != null && (
+                  <Text style={weightLockStyles.weightBeforeText}>
+                    وزنك قبل الجلسة: <Text style={{ fontWeight: '800', color: '#3b82f6' }}>{pendingWeightSession.weight_before} kg</Text>
+                  </Text>
+                )}
+              </View>
+
+              {/* حقل الإدخال */}
+              <View style={[weightLockStyles.inputRow, weightAfterError ? weightLockStyles.inputErr : null]}>
+                <MaterialCommunityIcons name="scale" size={22} color="#3b82f6" />
+                <TextInput
+                  style={weightLockStyles.input}
+                  placeholder="مثال: 72.5"
+                  placeholderTextColor="#9ca3af"
+                  keyboardType="decimal-pad"
+                  value={weightAfterInput}
+                  onChangeText={t => { setWeightAfterInput(t); setWeightAfterError(''); }}
+                  autoFocus
+                />
+                <Text style={weightLockStyles.unit}>kg</Text>
+              </View>
+              {weightAfterError ? (
+                <Text style={weightLockStyles.errText}>{weightAfterError}</Text>
+              ) : null}
+
+              {/* حساب الفرق */}
+              {pendingWeightSession.weight_before != null && weightAfterInput && !isNaN(parseFloat(weightAfterInput)) && (
+                <View style={weightLockStyles.diffRow}>
+                  <Text style={weightLockStyles.diffLabel}>كمية السوائل المزالة (تقريبي)</Text>
+                  <Text style={weightLockStyles.diffVal}>
+                    {Math.abs(pendingWeightSession.weight_before - parseFloat(weightAfterInput)).toFixed(1)} لتر
+                  </Text>
+                </View>
+              )}
+
+              {/* زر الحفظ */}
+              <TouchableOpacity
+                style={[weightLockStyles.saveBtn, isSavingWeight && { backgroundColor: '#6ee7b7' }]}
+                onPress={handleSaveWeightAfter}
+                disabled={isSavingWeight}
+                activeOpacity={0.8}
+              >
+                {isSavingWeight
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <>
+                      <MaterialCommunityIcons name="content-save-check" size={20} color="#fff" />
+                      <Text style={weightLockStyles.saveBtnText}>تأكيد وحفظ الوزن</Text>
+                    </>
+                }
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
+        </Modal>
+      )}
 
       <View style={styles.modernHeader}>
         <View style={styles.headerCircleOne} />
@@ -463,9 +612,7 @@ const PatientProfile = ({ navigation }) => {
                         {session.blood_pressure_before || "—"}
                       </Text>
                     </View>
-
                     <View style={styles.sessionMetricDivider} />
-
                     <View style={styles.sessionMetricBox}>
                       <Icon name="heart-outline" type="material-community" size={14} color="#f97316" />
                       <Text style={styles.metricLabel}>ضغط الدم بعد</Text>
@@ -473,14 +620,22 @@ const PatientProfile = ({ navigation }) => {
                         {session.blood_pressure_after || "—"}
                       </Text>
                     </View>
+                  </View>
 
-                    <View style={styles.sessionMetricDivider} />
-
+                  <View style={styles.sessionMetricsRow}>
                     <View style={styles.sessionMetricBox}>
                       <Icon name="scale" type="material-community" size={14} color="#3b82f6" />
-                      <Text style={styles.metricLabel}>الوزن</Text>
-                      <Text style={[styles.metricValue, { fontSize: 13 }]}>
+                      <Text style={styles.metricLabel}>الوزن قبل</Text>
+                      <Text style={[styles.metricValue, { fontSize: 13, color: '#3b82f6' }]}>
                         {session.weight_before != null ? `${session.weight_before} kg` : "—"}
+                      </Text>
+                    </View>
+                    <View style={styles.sessionMetricDivider} />
+                    <View style={styles.sessionMetricBox}>
+                      <Icon name="scale" type="material-community" size={14} color="#059669" />
+                      <Text style={styles.metricLabel}>الوزن بعد</Text>
+                      <Text style={[styles.metricValue, { fontSize: 13, color: '#059669' }]}>
+                        {session.weight_after != null ? `${session.weight_after} kg` : "—"}
                       </Text>
                     </View>
                   </View>
@@ -489,7 +644,7 @@ const PatientProfile = ({ navigation }) => {
                     {isActive ? (
                       <View style={styles.activeSessionBanner}>
                         <View style={styles.activeDot} />
-                        <Text style={styles.activeSessionText}>جلسة جارية — اضغط للدخول والوزن</Text>
+                        <Text style={styles.activeSessionText}>جلسة جارية — اضغط للدخول</Text>
                       </View>
                     ) : (
                       <>
@@ -1372,5 +1527,132 @@ const styles = StyleSheet.create({
     backgroundColor: "#f1f5f9",
     borderRadius: 20,
     marginTop: 10,
+  },
+});
+
+// ── styles لشاشة إدخال الوزن (lock) ──────────────────────────────────────
+const weightLockStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15,23,42,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  sheet: {
+    backgroundColor: '#fff',
+    width: '100%',
+    borderRadius: 24,
+    padding: 24,
+    elevation: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+  },
+  iconWrap: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  iconCircle: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: '#fffbeb',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: '#fef3c7',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#1e293b',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  sessionInfo: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    alignItems: 'center',
+    gap: 6,
+  },
+  sessionInfoText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  weightBeforeText: {
+    fontSize: 13,
+    color: '#64748b',
+  },
+  inputRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 58,
+    gap: 10,
+  },
+  inputErr: {
+    borderColor: '#ef4444',
+  },
+  input: {
+    flex: 1,
+    textAlign: 'right',
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1e293b',
+  },
+  unit: {
+    color: '#94a3b8',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  errText: {
+    color: '#ef4444',
+    fontSize: 13,
+    textAlign: 'right',
+    marginTop: 8,
+    fontWeight: '600',
+  },
+  diffRow: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f0fdf4',
+    padding: 12,
+    borderRadius: 12,
+    marginTop: 12,
+  },
+  diffLabel: { fontSize: 12, color: '#166534' },
+  diffVal: { fontSize: 18, fontWeight: '800', color: '#059669' },
+  saveBtn: {
+    backgroundColor: '#059669',
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    padding: 16,
+    borderRadius: 14,
+    marginTop: 20,
+    elevation: 3,
+  },
+  saveBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '800',
   },
 });

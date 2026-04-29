@@ -62,7 +62,20 @@ const PatientSessionScreen = ({ route, navigation }) => {
 
       // إذا كانت الجلسة منتهية بالفعل
       if (data?.status === 'COMPLETED') {
-        setPhase('DONE');
+        // التحقق: هل الممرض أدخل الوزن بعد الجلسة؟
+        if (data?.weight_after != null) {
+          // ✅ الممرض أدخل الوزن → المريض لا يحتاج يدخل شي
+          setPhase('DONE');
+        } else {
+          // ⚠️ الممرض تخطى الوزن → المريض مُلزم بإدخال الوزن
+          // نتحقق أولاً إذا المريض سبق وأدخل الوزن
+          const alreadyEntered = await AsyncStorage.getItem(`weight_entered_${sessionId}`);
+          if (alreadyEntered) {
+            setPhase('DONE');
+          } else {
+            setPhase('WEIGHT_INPUT');
+          }
+        }
       }
     } catch (err) {
       console.log('fetchSession err:', err.message);
@@ -135,9 +148,16 @@ const PatientSessionScreen = ({ route, navigation }) => {
 
     try {
       setIsSaving(true);
-      await api.patch(`/dialysis-sessions/${sessionId}`, {
-        weightAfter: parseFloat(weightAfter),
-      });
+
+      // تحديد البيانات حسب حالة الجلسة
+      const body = {};
+      if (sessionData?.status !== 'COMPLETED') {
+        // المريض ينهي الجلسة بنفسه (الممرض ما أنهاها)
+        body.status = 'COMPLETED';
+      }
+      body.weightAfter = parseFloat(weightAfter);
+
+      await api.patch(`/dialysis-sessions/${sessionId}/status`, body);
 
       // حفظ في AsyncStorage أن المريض أدخل وزنه
       await AsyncStorage.setItem(`weight_entered_${sessionId}`, '1');
@@ -304,24 +324,15 @@ const PatientSessionScreen = ({ route, navigation }) => {
       <View style={styles.infoCard}>
         <MaterialCommunityIcons name="information-outline" size={20} color="#94a3b8" />
         <Text style={styles.infoText}>
-          جلستك جارية. عند انتهاء الجلسة، سيُطلب منك إدخال وزنك.
+          جلستك جارية الآن. الممرض سينهي الجلسة عند الانتهاء.
         </Text>
       </View>
 
-      {/* زر إنهاء الجلسة */}
+      {/* زر العودة */}
       <View style={styles.sessionFooter}>
-        <Pressable style={styles.endBtn} onPress={() => {
-          Alert.alert(
-            'إنهاء الجلسة',
-            'هل تريد إنهاء جلسة الغسيل وإدخال وزنك؟',
-            [
-              { text: 'تراجع', style: 'cancel' },
-              { text: 'إنهاء وإدخال الوزن', onPress: handleSessionEnd },
-            ]
-          );
-        }}>
-          <MaterialCommunityIcons name="stop-circle-outline" size={24} color="#fff" />
-          <Text style={styles.endBtnText}>انتهت جلستي</Text>
+        <Pressable style={[styles.endBtn, { backgroundColor: '#334155' }]} onPress={() => navigation.goBack()}>
+          <MaterialCommunityIcons name="arrow-right" size={24} color="#fff" />
+          <Text style={styles.endBtnText}>العودة</Text>
         </Pressable>
       </View>
     </View>
