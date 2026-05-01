@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { useEffect, useRef } from 'react';
 import api from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 
 // اضبط سلوك الإشعار
 Notifications.setNotificationHandler({
@@ -54,9 +55,12 @@ export const useNotifications = (navigation) => {
         return;
       }
 
-      // احصل على الـ device token
-      const deviceToken = await Notifications.getDevicePushTokenAsync();
-      console.log('✅ Device Token:', deviceToken.data);
+      // احصل على الـ Expo Push token
+      const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+      const deviceToken = await Notifications.getExpoPushTokenAsync({
+        projectId: projectId || '9c15bffd-9306-4543-9140-8af9d629a22c' // Fallback to app.json projectId
+      });
+      console.log('✅ Expo Push Token:', deviceToken.data);
 
       // أرسله للـ backend
       try {
@@ -82,7 +86,7 @@ export const useNotifications = (navigation) => {
 
   const handleNotificationPress = (notificationType, relatedId, navigation) => {
     // انقل المستخدم للصفحة المناسبة حسب نوع الإشعار
-    if (!navigation) return;
+    if (!navigation || !navigation.isReady()) return;
 
     switch (notificationType) {
       case 'TEST_RESULT':
