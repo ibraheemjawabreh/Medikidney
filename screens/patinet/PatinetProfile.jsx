@@ -69,6 +69,44 @@ const PatientProfile = ({ navigation }) => {
     }
   }, []);
 
+  const ultrafiltrationAverage = useMemo(() => {
+    if (!sessions || sessions.length === 0) return null;
+    
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const recentSessions = sessions.filter(session => {
+      if (session.status !== "COMPLETED") return false;
+      const sessionDate = new Date(session.date);
+      return sessionDate >= thirtyDaysAgo;
+    });
+
+    if (recentSessions.length === 0) return null;
+
+    let totalUF = 0;
+    let count = 0;
+
+    recentSessions.forEach(session => {
+      let ufValue = parseFloat(session.fluid_removed);
+      
+      if (isNaN(ufValue) || ufValue <= 0) {
+        const settingsWithUF = session.dialysisSettings?.filter(s => s.ultrafiltration_rate != null) || [];
+        if (settingsWithUF.length > 0) {
+          const rate = parseFloat(settingsWithUF[settingsWithUF.length - 1].ultrafiltration_rate);
+          // If rate is large (e.g. 500 ml/h), assume it needs converting to liters for average consistency
+          ufValue = rate > 50 ? rate / 1000 : rate;
+        }
+      }
+
+      if (!isNaN(ufValue) && ufValue > 0) {
+        totalUF += ufValue;
+        count++;
+      }
+    });
+
+    return count > 0 ? (totalUF / count).toFixed(2) : null;
+  }, [sessions]);
+
   useFocusEffect(useCallback(() => { fetchPatientData(); }, [fetchPatientData]));
 
   const fetchMyAppointments = async () => {
@@ -544,6 +582,22 @@ const PatientProfile = ({ navigation }) => {
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
             <Text style={styles.sectionHeading}>{t.patientProfile.tabs.sessions}</Text>
 
+            {ultrafiltrationAverage !== null && (
+              <View style={styles.ufStatsCard}>
+                <View style={styles.ufIconBox}>
+                  <Icon name="water-percent" type="material-community" size={28} color="#0284c7" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.ufStatsTitle}>متوسط الترشيح الفائق</Text>
+                  <Text style={styles.ufStatsDesc}>لآخر 30 يوماً</Text>
+                </View>
+                <View style={styles.ufValueBox}>
+                  <Text style={styles.ufStatsValue}>{ultrafiltrationAverage}</Text>
+                  <Text style={styles.ufStatsUnit}>لتر</Text>
+                </View>
+              </View>
+            )}
+
             {sessions.length > 0 ? sessions.map((session, index) => {
               const statusConfig = {
                 COMPLETED: { label: "مكتملة", bg: "#dcfce7", text: "#166534", icon: "check-circle-outline", borderColor: "#059669" },
@@ -823,33 +877,58 @@ const PatientProfile = ({ navigation }) => {
 
             <View style={{ marginTop: 25 }}>
               <Text style={[styles.sectionHeading, { fontSize: 18, marginBottom: 15 }]}>
-                {t.appointments.myAppointments}
+                {t.appointments?.completedTitle || 'سجل المواعيد المكتملة'}
               </Text>
 
-              {myAppointments.length > 0 ? myAppointments.map((appt, index) => (
-                <View key={appt.appointment_id || index} style={styles.apptCardSimple}>
-                  <View style={styles.apptCardIcon}>
-                    <Icon name="calendar-clock" type="material-community" color="#059669" size={28} />
-                  </View>
-
-                  <View style={styles.apptCardInfo}>
-                    <Text style={styles.apptCardDoc}>د. {appt.doctor?.full_name}</Text>
-
-                    <View style={styles.apptCardRow}>
-                      <Icon name="calendar" type="material-community" size={14} color="#64748b" />
-                      <Text style={styles.apptCardDetail}>{appt.appt_date}</Text>
-
-                      <View style={{ width: 10 }} />
-
-                      <Icon name="clock-outline" type="material-community" size={14} color="#64748b" />
-                      <Text style={styles.apptCardDetail}>{formatTime(appt.appt_time)}</Text>
+              {myAppointments.filter(a => a.status === 'COMPLETED').length > 0 ? (
+                myAppointments.filter(a => a.status === 'COMPLETED').map((appt, index) => (
+                  <TouchableOpacity 
+                    key={appt.appointment_id || index} 
+                    style={styles.completedApptCard}
+                    activeOpacity={0.7}
+                    onPress={() => navigation.navigate('ConsultationDetails', { consultation: appt })}
+                  >
+                    <View style={styles.completedApptHeader}>
+                      <View style={styles.completedApptDocRow}>
+                        <View style={styles.completedApptAvatar}>
+                          <Icon name="stethoscope" type="material-community" size={20} color="#059669" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.completedApptDocName}>
+                            د. {appt.doctor?.full_name || '—'}
+                          </Text>
+                          <Text style={styles.completedApptType}>
+                            {appt.appointment_type === 'CLINIC_REVIEW' ? (t.appointments.clinicReview || 'مراجعة عيادة') : appt.appointment_type}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.completedApptBadge}>
+                        <Icon name="check-circle" type="material-community" size={14} color="#059669" />
+                        <Text style={styles.completedApptBadgeText}>{t.patientProfile?.status?.completed || 'مكتملة'}</Text>
+                      </View>
                     </View>
-                  </View>
-                </View>
-              )) : (
+
+                    <View style={styles.completedApptDateRow}>
+                      <View style={styles.completedApptDateItem}>
+                        <Icon name="calendar" type="material-community" size={15} color="#64748b" />
+                        <Text style={styles.completedApptDateText}>{appt.appt_date}</Text>
+                      </View>
+                      <View style={styles.completedApptDateItem}>
+                        <Icon name="clock-outline" type="material-community" size={15} color="#64748b" />
+                        <Text style={styles.completedApptDateText}>{formatTime(appt.appt_time)}</Text>
+                      </View>
+                    </View>
+                    
+                    <View style={styles.cardFooter}>
+                      <Text style={styles.viewDetailsText}>عرض التفاصيل الكاملة</Text>
+                      <Icon name="chevron-left" type="material-community" size={18} color="#059669" />
+                    </View>
+                  </TouchableOpacity>
+                ))
+              ) : (
                 <View style={styles.emptyApptBox}>
-                  <Icon name="calendar-blank" type="material-community" size={40} color="#cbd5e1" />
-                  <Text style={styles.emptyText}>{t.patientProfile.noAppointments}</Text>
+                  <Icon name="clipboard-check-outline" type="material-community" size={40} color="#cbd5e1" />
+                  <Text style={styles.emptyText}>{t.appointments?.noCompleted || 'لا توجد مواعيد مكتملة'}</Text>
                 </View>
               )}
             </View>
@@ -1523,6 +1602,154 @@ const styles = StyleSheet.create({
     backgroundColor: "#f1f5f9",
     borderRadius: 20,
     marginTop: 10,
+  },
+
+  // ── Ultrafiltration Stats Card ──
+  ufStatsCard: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    backgroundColor: '#f0f9ff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#bae6fd',
+  },
+  ufIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#e0f2fe',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 12,
+  },
+  ufStatsTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#0369a1',
+    textAlign: 'right',
+  },
+  ufStatsDesc: {
+    fontSize: 12,
+    color: '#0ea5e9',
+    textAlign: 'right',
+    marginTop: 2,
+  },
+  ufValueBox: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  ufStatsValue: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#0284c7',
+  },
+  ufStatsUnit: {
+    fontSize: 11,
+    color: '#7dd3fc',
+    fontWeight: 'bold',
+  },
+
+  // ── Completed Appointment Cards ──
+  completedApptCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 14,
+    borderRightWidth: 4,
+    borderRightColor: '#059669',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    width: '100%',
+  },
+  completedApptHeader: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  completedApptDocRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  completedApptAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#ecfdf5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  completedApptDocName: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1e293b',
+    textAlign: 'right',
+  },
+  completedApptType: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '600',
+    textAlign: 'right',
+    marginTop: 2,
+  },
+  completedApptBadge: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#ecfdf5',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  completedApptBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#059669',
+  },
+  completedApptDateRow: {
+    flexDirection: 'row-reverse',
+    flexWrap: 'wrap',
+    gap: 14,
+  },
+  completedApptDateItem: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 5,
+  },
+  completedApptDateText: {
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  cardFooter: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+    paddingTop: 10,
+    marginTop: 12,
+    gap: 4,
+  },
+  viewDetailsText: {
+    fontSize: 13,
+    color: '#059669',
+    fontWeight: '700',
   },
 });
 

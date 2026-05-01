@@ -17,6 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { Platform } from "react-native";
 import { useLanguage } from "../../context/LanguageContext";
+import SessionTimer from '../../components/SessionTimer';
 
 const { width } = Dimensions.get("window");
 
@@ -32,6 +33,7 @@ const StaffPatientView = ({ route, navigation }) => {
   const [medicalTests, setMedicalTests] = useState([]);
   const [radiology, setRadiology] = useState([]);
   const [userRole, setUserRole] = useState("");
+  const [consultations, setConsultations] = useState([]);
 
   const { patientId } = route.params || {};
 
@@ -69,6 +71,17 @@ const StaffPatientView = ({ route, navigation }) => {
       const response = await api.get(`/dialysis-sessions?patientId=${id}`);
       setSessions(Array.isArray(response.data) ? response.data : []);
     } catch (e) { setSessions([]); }
+  };
+
+  const fetchConsultations = async (id) => {
+    try {
+      const response = await api.get(`/clinic-consultations?patientId=${id}`);
+      console.log('Consultations data:', response.data);
+      setConsultations(Array.isArray(response.data) ? response.data : []);
+    } catch (e) { 
+      console.log('Consultations error:', e);
+      setConsultations([]); 
+    }
   };
 
   const fetchPrescriptions = async (id) => {
@@ -122,7 +135,8 @@ const StaffPatientView = ({ route, navigation }) => {
           fetchSessions(realId),
           fetchPrescriptions(realId),
           fetchMedicalTests(realId),
-          fetchRadiology(realId)
+          fetchRadiology(realId),
+          fetchConsultations(realId)
         ]);
       }
     } catch (error) {
@@ -412,6 +426,11 @@ const StaffPatientView = ({ route, navigation }) => {
                     </View>
                   </View>
 
+                  {/* تايمر للجلسة الجارية */}
+                  {(session.status === 'IN_PROGRESS' || session.status === 'PENDING') && (
+                    <SessionTimer session={session} />
+                  )}
+
                   {/* Tap hint */}
                   <View style={styles.sessionTapHint}>
                     <Icon name="chevron-left" type="material-community" size={16} color="#94a3b8" />
@@ -504,12 +523,61 @@ const StaffPatientView = ({ route, navigation }) => {
           </View>
         )}
 
-        {/* TAB 3: Notes */}
+        {/* TAB 3: استشارات العيادة المكتملة */}
         {tabIndex === 3 && (
-          <View style={styles.emptyState}>
-            <Icon name="note-text-outline" type="material-community" size={60} color="#cbd5e1" />
-            <Text style={styles.emptyText}>{t.staffPatientView.comingSoon}</Text>
-          </View>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding} style={{ flex: 1 }}>
+            <Text style={styles.sectionHeading}>{t.appointments?.completedTitle || 'سجل استشارات العيادة'}</Text>
+
+            {consultations.filter(a => a.status === 'COMPLETED').length > 0 ? (
+              consultations.filter(a => a.status === 'COMPLETED').map((appt, index) => (
+                <TouchableOpacity 
+                  key={appt.appointment_id || index} 
+                  style={styles.consultCard}
+                  activeOpacity={0.7}
+                  onPress={() => navigation.navigate('ConsultationDetails', { consultation: appt })}
+                >
+                  <View style={styles.consultHeader}>
+                    <View style={styles.consultDocRow}>
+                      <View style={styles.consultAvatar}>
+                        <Icon name="stethoscope" type="material-community" size={20} color="#059669" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.consultDocName}>د. {appt.doctor?.full_name || '—'}</Text>
+                        <Text style={styles.consultType}>
+                          {appt.appointment_type === 'CLINIC_REVIEW' ? (t.appointments?.clinicReview || 'مراجعة عيادة') : appt.appointment_type}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.consultBadge}>
+                      <Icon name="check-circle" type="material-community" size={14} color="#059669" />
+                      <Text style={styles.consultBadgeText}>{t.patientProfile?.status?.completed || 'مكتملة'}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.consultDateRow}>
+                    <View style={styles.consultDateItem}>
+                      <Icon name="calendar" type="material-community" size={15} color="#64748b" />
+                      <Text style={styles.consultDateText}>{appt.appt_date}</Text>
+                    </View>
+                    <View style={styles.consultDateItem}>
+                      <Icon name="clock-outline" type="material-community" size={15} color="#64748b" />
+                      <Text style={styles.consultDateText}>{formatTime(appt.appt_time)}</Text>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.cardFooter}>
+                    <Text style={styles.viewDetailsText}>عرض التفاصيل الكاملة</Text>
+                    <Icon name="chevron-left" type="material-community" size={18} color="#059669" />
+                  </View>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <View style={styles.emptyState}>
+                <Icon name="clipboard-check-outline" type="material-community" size={60} color="#cbd5e1" />
+                <Text style={styles.emptyText}>{t.appointments?.noCompleted || 'لا توجد استشارات مكتملة'}</Text>
+              </View>
+            )}
+          </ScrollView>
         )}
       </View>
     </View>
@@ -774,7 +842,125 @@ const styles = StyleSheet.create({
   boldLabel: { fontWeight: 'bold', color: '#1e293b' },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, alignSelf: 'flex-end', marginTop: 4 },
   statusText: { fontSize: 11, fontWeight: 'bold' },
-  downloadBtn: { backgroundColor: '#204a42', borderRadius: 10, marginTop: 10, height: 48 }
+  downloadBtn: { backgroundColor: '#204a42', borderRadius: 10, marginTop: 10, height: 48 },
+
+  // ── Completed Consultations Cards ──
+  consultCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 14,
+    borderRightWidth: 4,
+    borderRightColor: '#059669',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    width: '100%',
+  },
+  consultHeader: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  consultDocRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  consultAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#ecfdf5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  consultDocName: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1e293b',
+    textAlign: 'right',
+  },
+  consultType: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '600',
+    textAlign: 'right',
+    marginTop: 2,
+  },
+  consultBadge: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#ecfdf5',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  consultBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#059669',
+  },
+  consultDateRow: {
+    flexDirection: 'row-reverse',
+    flexWrap: 'wrap',
+    gap: 14,
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  consultDateItem: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 5,
+  },
+  consultDateText: {
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  consultSection: {
+    marginTop: 10,
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    padding: 12,
+  },
+  consultSectionHeader: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  consultSectionTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  consultSectionText: {
+    fontSize: 14,
+    color: '#334155',
+    lineHeight: 22,
+    textAlign: 'right',
+    fontWeight: '500',
+  },
+  consultNoDetails: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 8,
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
+  consultNoDetailsText: {
+    fontSize: 13,
+    color: '#94a3b8',
+    fontWeight: '600',
+  },
 });
 
 export default StaffPatientView;

@@ -25,7 +25,7 @@ const SettingsTab = ({ route }) => {
   const FIELDS = [
     { key: 'bloodFlowRate', label: t.deviceSettings.fields.bloodFlow, placeholder: '200', unit: 'ml/min', icon: 'water-pump', color: '#ef4444', hint: 'Blood Flow Rate — BFR' },
     { key: 'dialysateFlow', label: t.deviceSettings.fields.dialysateFlow, placeholder: '500', unit: 'ml/min', icon: 'beaker-outline', color: '#3b82f6', hint: 'Dialysate Flow — DF' },
-    { key: 'ultrafiltrationRate', label: t.deviceSettings.fields.filtration, placeholder: '300', unit: 'ml/hr', icon: 'filter-variant', color: '#8b5cf6', hint: 'Ultrafiltration Rate — UFR' },
+    { key: 'ultrafiltrationRate', label: 'كمية السوائل المسحوبة', placeholder: 'مثال: 2.5', unit: 'لتر/مل', icon: 'water-percent', color: '#0ea5e9', hint: 'Fluid Removed / Ultrafiltration' },
   ];
   const sessionId = route?.params?.sessionId;
 
@@ -35,6 +35,55 @@ const SettingsTab = ({ route }) => {
   const [form, setForm] = useState({
     bloodFlowRate: '', dialysateFlow: '', ultrafiltrationRate: '',
   });
+  const [prevWeightAfter, setPrevWeightAfter] = useState('—');
+  const [monthlyAverageUF, setMonthlyAverageUF] = useState(null);
+
+  const fetchSessionData = async () => {
+    if (!sessionId) return;
+    try {
+      const sessionRes = await api.get(`/dialysis-sessions/${sessionId}`);
+      const currentSession = sessionRes.data;
+      
+      const patientId = currentSession.patient_id;
+      if (!patientId) return;
+
+      const allSessionsRes = await api.get(`/dialysis-sessions?patientId=${patientId}`);
+      const allSessions = Array.isArray(allSessionsRes.data) ? allSessionsRes.data : [];
+      
+      const pastSessions = allSessions
+        .filter(s => new Date(s.date) < new Date(currentSession.date) && s.status === 'COMPLETED')
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+      if (pastSessions.length > 0 && pastSessions[0].weight_after) {
+          setPrevWeightAfter(String(pastSessions[0].weight_after));
+      }
+
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const recentSessions = allSessions.filter(s => s.status === 'COMPLETED' && new Date(s.date) >= thirtyDaysAgo);
+      
+      if (recentSessions.length > 0) {
+          let totalUF = 0;
+          let count = 0;
+          recentSessions.forEach(s => {
+            let ufValue = parseFloat(s.fluid_removed);
+            if (isNaN(ufValue) || ufValue <= 0) {
+                const settingsWithUF = s.dialysisSettings?.filter(set => set.ultrafiltration_rate != null) || [];
+                if (settingsWithUF.length > 0) {
+                  const rate = parseFloat(settingsWithUF[settingsWithUF.length - 1].ultrafiltration_rate);
+                  ufValue = rate > 50 ? rate / 1000 : rate;
+                }
+            }
+            if (!isNaN(ufValue) && ufValue > 0) {
+                totalUF += ufValue;
+                count++;
+            }
+          });
+          setMonthlyAverageUF(count > 0 ? (totalUF / count).toFixed(2) : '0.00');
+      }
+    } catch (err) {
+      console.log("Error fetching supplementary session data:", err);
+    }
+  };
 
   const fetchLatest = async () => {
     if (!sessionId) return;
@@ -64,7 +113,10 @@ const SettingsTab = ({ route }) => {
     }
   };
 
-  useEffect(() => { fetchLatest(); }, [sessionId]);
+  useEffect(() => { 
+    fetchLatest(); 
+    fetchSessionData();
+  }, [sessionId]);
 
   const handleSave = async () => {
     const { bloodFlowRate, dialysateFlow, ultrafiltrationRate } = form;
@@ -171,28 +223,75 @@ const SettingsTab = ({ route }) => {
 
       <View style={styles.formCard}>
         <Text style={styles.formTitle}>{saved ? t.deviceSettings.update : t.deviceSettings.addNew}</Text>
-        {FIELDS.map(f => (
-          <View key={f.key} style={styles.fieldWrap}>
-            <View style={styles.fieldLabelRow}>
-              <Text style={styles.fieldHint}>{f.hint}</Text>
-              <View style={styles.fieldLabelLeft}>
-                <MaterialCommunityIcons name={f.icon} size={16} color={f.color} />
-                <Text style={styles.fieldLabel}>{f.label}</Text>
+        {FIELDS.map(f => {
+          if (f.key === 'ultrafiltrationRate') {
+            return (
+              <View key={f.key} style={styles.fieldWrap}>
+                <View style={styles.fieldLabelRow}>
+                  <Text style={styles.fieldHint}>{f.hint}</Text>
+                  <View style={styles.fieldLabelLeft}>
+                    <MaterialCommunityIcons name={f.icon} size={16} color={f.color} />
+                    <Text style={styles.fieldLabel}>{f.label}</Text>
+                  </View>
+                </View>
+
+                <View style={{ flexDirection: 'row-reverse', gap: 10 }}>
+                  <View style={[styles.inputBox, { flex: 1, backgroundColor: '#f1f5f9', borderColor: '#e2e8f0', justifyContent: 'center' }]}>
+                    <View style={{ alignItems: 'center' }}>
+                      <Text style={{ fontSize: 10, color: '#64748b', marginBottom: 2, fontWeight: '700' }}>الوزن بعد الجلسة السابقة</Text>
+                      <View style={{ flexDirection: 'row-reverse', alignItems: 'flex-end', gap: 4 }}>
+                        <Text style={[styles.input, { color: '#334155', flex: 0, textAlign: 'center' }]}>{prevWeightAfter}</Text>
+                        <Text style={styles.unitLabel}>كجم</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={[styles.inputBox, { flex: 1 }, form[f.key] ? { borderColor: f.color } : {}]}>
+                    <Text style={styles.unitLabel}>{f.unit}</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder={f.placeholder}
+                      placeholderTextColor="#9ca3af"
+                      keyboardType="numeric"
+                      value={form[f.key]}
+                      onChangeText={t => setField(f.key, t)}
+                    />
+                  </View>
+                </View>
+
+                {monthlyAverageUF !== null && (
+                  <View style={styles.monthlyAvgBox}>
+                    <MaterialCommunityIcons name="calculator-variant-outline" size={16} color="#0284c7" />
+                    <Text style={styles.monthlyAvgText}>معدل السحب لآخر شهر: {monthlyAverageUF} لتر</Text>
+                  </View>
+                )}
+              </View>
+            );
+          }
+
+          return (
+            <View key={f.key} style={styles.fieldWrap}>
+              <View style={styles.fieldLabelRow}>
+                <Text style={styles.fieldHint}>{f.hint}</Text>
+                <View style={styles.fieldLabelLeft}>
+                  <MaterialCommunityIcons name={f.icon} size={16} color={f.color} />
+                  <Text style={styles.fieldLabel}>{f.label}</Text>
+                </View>
+              </View>
+              <View style={[styles.inputBox, form[f.key] ? { borderColor: f.color } : {}]}>
+                <Text style={styles.unitLabel}>{f.unit}</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder={f.placeholder}
+                  placeholderTextColor="#9ca3af"
+                  keyboardType="numeric"
+                  value={form[f.key]}
+                  onChangeText={t => setField(f.key, t)}
+                />
               </View>
             </View>
-            <View style={[styles.inputBox, form[f.key] ? { borderColor: f.color } : {}]}>
-              <Text style={styles.unitLabel}>{f.unit}</Text>
-              <TextInput
-                style={styles.input}
-                placeholder={f.placeholder}
-                placeholderTextColor="#9ca3af"
-                keyboardType="numeric"
-                value={form[f.key]}
-                onChangeText={t => setField(f.key, t)}
-              />
-            </View>
-          </View>
-        ))}
+          );
+        })}
 
         <Pressable
           style={[styles.saveBtn, isSubmitting && { backgroundColor: '#6ee7b7' }]}
@@ -246,4 +345,21 @@ const styles = StyleSheet.create({
   unitLabel: { color: '#9ca3af', fontSize: 12, fontWeight: '700', marginLeft: 4 },
   saveBtn: { backgroundColor: '#059669', borderRadius: 12, height: 52, flexDirection: 'row-reverse', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 8 },
   saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+  monthlyAvgBox: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    backgroundColor: '#f0f9ff',
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 10,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: '#bae6fd',
+  },
+  monthlyAvgText: {
+    fontSize: 12,
+    color: '#0284c7',
+    fontWeight: '700'
+  },
 });
+

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Pressable, ScrollView, TextInput,
   Alert, ActivityIndicator, Modal, KeyboardAvoidingView, Platform,
@@ -11,6 +11,7 @@ import SymptomsTab from './SymptomsTab';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
+import SessionTimer from '../../components/SessionTimer';
 
 const SessionDetails = ({ route, navigation }) => {
   const { patient } = route.params;
@@ -28,6 +29,21 @@ const SessionDetails = ({ route, navigation }) => {
 
   const currentStepData = steps.find(s => s.id === step);
   const [isFinishing, setIsFinishing] = useState(false);
+
+  // ─── جلب بيانات الجلسة للتايمر ─────────────────────────────
+  const [sessionData, setSessionData] = useState(null);
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const { data } = await api.get(`/dialysis-sessions/${sessionId}`);
+        setSessionData(data);
+      } catch (e) {
+        console.log('Fetch session error:', e.message);
+      }
+    };
+    fetchSession();
+  }, [sessionId]);
 
   // ─── Modal إنهاء الجلسة ───────────────────────────────────
   const [endModalVisible, setEndModalVisible] = useState(false);
@@ -87,6 +103,7 @@ const SessionDetails = ({ route, navigation }) => {
         { status: "COMPLETED", weightAfter: num }
       );
       await AsyncStorage.removeItem(`step_${sessionId}`);
+      await SessionTimer.clearTimer(sessionId);
       setEndModalVisible(false);
       Alert.alert(t.success, t.sessionDetails.sessionEndSuccess);
       navigation.goBack();
@@ -106,8 +123,9 @@ const SessionDetails = ({ route, navigation }) => {
         `/dialysis-sessions/${sessionId}/status`,
         { status: "COMPLETED" }
       );
-      // مسح الخطوة المحفوظة لأن الجلسة انتهت
+      // مسح الخطوة والتايمر لأن الجلسة انتهت
       await AsyncStorage.removeItem(`step_${sessionId}`);
+      await SessionTimer.clearTimer(sessionId);
       setEndModalVisible(false);
       Alert.alert(
         t.sessionDetails.endSession,
@@ -264,24 +282,32 @@ const SessionDetails = ({ route, navigation }) => {
         </KeyboardAvoidingView>
       </Modal>
 
-      {/* Header مع مؤشر التقدم */}
+      {/* Header مع التايمر */}
       <View style={styles.header}>
-        <View style={{ flexDirection: 'row-reverse', width: '100%', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+        <View style={{ flexDirection: 'row-reverse', width: '100%', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <Pressable onPress={() => navigation.goBack()} style={{ padding: 5, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 10 }}>
             <MaterialCommunityIcons name="arrow-right" size={24} color="#fff" />
           </Pressable>
           <Text style={styles.patientName}>{patient.patientName}</Text>
           <View style={{ width: 34 }} />
         </View>
+
+        {/* ── تايمر العد التنازلي ── */}
+        {sessionData && <SessionTimer session={sessionData} size="large" />}
+      </View>
+
+      {/* ── مؤشر المراحل (تحت الهيدر) ── */}
+      <View style={styles.stepBar}>
         <View style={styles.stepIndicatorContainer}>
           {steps.map((s) => (
-            <View
+            <Pressable
               key={s.id}
+              onPress={() => changeStep(s.id)}
               style={[styles.stepDot, step >= s.id ? styles.activeDot : styles.inactiveDot]}
             />
           ))}
         </View>
-        <Text style={styles.stepTitle}>{t.sessionDetails.step} {step}: {currentStepData.title}</Text>
+        <Text style={styles.stepTitleBelow}>{t.sessionDetails.step} {step}: {currentStepData.title}</Text>
       </View>
 
       {/* عرض الصفحة الحالية */}
@@ -326,12 +352,31 @@ const SessionDetails = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9FAFB' },
   header: { backgroundColor: '#065f46', padding: 20, paddingTop: 50, alignItems: 'center' },
-  patientName: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginBottom: 10 },
-  stepIndicatorContainer: { flexDirection: 'row-reverse', gap: 8, marginBottom: 10 },
-  stepDot: { width: 30, height: 6, borderRadius: 3 },
-  activeDot: { backgroundColor: '#34D399' },
-  inactiveDot: { backgroundColor: '#064e3b' },
-  stepTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  patientName: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginBottom: 0 },
+
+  // ── Step bar (below header) ──
+  stepBar: {
+    backgroundColor: '#fff',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  stepIndicatorContainer: { flexDirection: 'row-reverse', gap: 8, marginBottom: 6 },
+  stepDot: { width: 40, height: 6, borderRadius: 3 },
+  activeDot: { backgroundColor: '#059669' },
+  inactiveDot: { backgroundColor: '#e2e8f0' },
+  stepTitleBelow: {
+    color: '#1e293b',
+    fontSize: 15,
+    fontWeight: '800',
+  },
 
   footerWrapper: {
     backgroundColor: '#fff',

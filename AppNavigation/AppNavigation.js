@@ -34,6 +34,7 @@ import PatinetInfo from '../screens/patinet/patientInformation'
 import PatientSessionDetailView from '../screens/patinet/PatientSessionDetailView'
 import PatientSessionScreen from '../screens/patinet/PatientSessionScreen'
 import NotificationsScreen from '../screens/notifications/NotificationsScreen'
+import ConsultationDetails from '../screens/patinet/ConsultationDetails'
 
 
 
@@ -75,6 +76,7 @@ const AppNavigator = () => {
       <Stack.Screen name='PatientSessionDetailView' component={PatientSessionDetailView} />
       <Stack.Screen name='PatientSessionScreen' component={PatientSessionScreen} options={{ gestureEnabled: false }} />
       <Stack.Screen name='Notifications' component={NotificationsScreen} />
+      <Stack.Screen name='ConsultationDetails' component={ConsultationDetails} options={{ headerShown: false }} />
 
 
 
