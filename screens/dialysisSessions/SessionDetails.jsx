@@ -10,19 +10,20 @@ import SettingsTab from './SettingsTab';
 import SymptomsTab from './SymptomsTab';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import api from '../../services/api';
+import { useLanguage } from '../../context/LanguageContext';
 
 const SessionDetails = ({ route, navigation }) => {
   const { patient } = route.params;
   const sessionId = patient.sessionId;
+  const { t } = useLanguage();
 
-  // الحالة لتحديد المرحلة الحالية (1 إلى 4)
   const [step, setStep] = useState(1);
 
   const steps = [
-    { id: 1, title: "العلامات الحيوية", component: <VitalSignsTab route={{ params: { sessionId } }} /> },
-    { id: 2, title: "إعدادات الجهاز", component: <SettingsTab route={{ params: { sessionId } }} /> },
-    { id: 3, title: "الأدوية", component: <MedicationsTab route={{ params: { sessionId } }} /> },
-    { id: 4, title: "الأعراض والملاحظات", component: <SymptomsTab route={{ params: { sessionId } }} /> },
+    { id: 1, title: t.sessionDetails.steps.vitals, component: <VitalSignsTab route={{ params: { sessionId } }} /> },
+    { id: 2, title: t.sessionDetails.steps.settings, component: <SettingsTab route={{ params: { sessionId } }} /> },
+    { id: 3, title: t.sessionDetails.steps.medications, component: <MedicationsTab route={{ params: { sessionId } }} /> },
+    { id: 4, title: t.sessionDetails.steps.symptoms, component: <SymptomsTab route={{ params: { sessionId } }} /> },
   ];
 
   const currentStepData = steps.find(s => s.id === step);
@@ -70,11 +71,11 @@ const SessionDetails = ({ route, navigation }) => {
     // Validation
     const num = parseFloat(weightAfter);
     if (!weightAfter.trim()) {
-      setWeightInputError('الوزن مطلوب');
+      setWeightInputError(t.sessionDetails.weightRequired);
       return;
     }
     if (isNaN(num) || num < 20 || num > 300) {
-      setWeightInputError('يجب أن يكون الوزن رقماً بين 20 و 300 كغ');
+      setWeightInputError(t.sessionDetails.weightInvalid);
       return;
     }
     setWeightInputError('');
@@ -85,14 +86,13 @@ const SessionDetails = ({ route, navigation }) => {
         `/dialysis-sessions/${sessionId}/status`,
         { status: "COMPLETED", weightAfter: num }
       );
-      // مسح الخطوة المحفوظة لأن الجلسة انتهت
       await AsyncStorage.removeItem(`step_${sessionId}`);
       setEndModalVisible(false);
-      Alert.alert("نجاح ✅", "تم إنهاء الجلسة وحفظ الوزن بنجاح");
+      Alert.alert(t.success, t.sessionDetails.sessionEndSuccess);
       navigation.goBack();
     } catch (error) {
       console.log('Error finishing session:', error.response?.data || error.message);
-      setWeightInputError('فشل في إنهاء الجلسة، يرجى المحاولة مرة أخرى.');
+      setWeightInputError(t.sessionDetails.weightSaveFailed);
     } finally {
       setIsFinishing(false);
     }
@@ -110,13 +110,13 @@ const SessionDetails = ({ route, navigation }) => {
       await AsyncStorage.removeItem(`step_${sessionId}`);
       setEndModalVisible(false);
       Alert.alert(
-        "تم إنهاء الجلسة ✅",
-        "تم إنهاء الجلسة بنجاح.\nسيُطلب من المريض إدخال وزنه بعد الجلسة."
+        t.sessionDetails.endSession,
+        t.sessionDetails.sessionEndSkipSuccess
       );
       navigation.goBack();
     } catch (error) {
       console.log('Error finishing session:', error.response?.data || error.message);
-      Alert.alert('خطأ', 'فشل في إنهاء الجلسة، يرجى المحاولة مرة أخرى.');
+      Alert.alert(t.error, t.sessionDetails.sessionEndError);
     } finally {
       setIsFinishing(false);
     }
@@ -147,10 +147,8 @@ const SessionDetails = ({ route, navigation }) => {
                     <MaterialCommunityIcons name="check-circle-outline" size={40} color="#059669" />
                   </View>
                 </View>
-                <Text style={modalStyles.title}>إنهاء جلسة الغسيل</Text>
-                <Text style={modalStyles.subtitle}>
-                  هل تريد إدخال وزن المريض بعد الجلسة الآن؟
-                </Text>
+                <Text style={modalStyles.title}>{t.sessionDetails.endSessionTitle}</Text>
+                <Text style={modalStyles.subtitle}>{t.sessionDetails.endSessionSubtitle}</Text>
 
                 {/* زر إدخال الوزن */}
                 <Pressable
@@ -161,8 +159,8 @@ const SessionDetails = ({ route, navigation }) => {
                     <MaterialCommunityIcons name="scale" size={24} color="#3b82f6" />
                   </View>
                   <View style={modalStyles.optionTextBox}>
-                    <Text style={modalStyles.optionTitle}>إدخال الوزن بعد الجلسة</Text>
-                    <Text style={modalStyles.optionDesc}>أدخل وزن المريض الآن وأنهِ الجلسة</Text>
+                    <Text style={modalStyles.optionTitle}>{t.sessionDetails.enterWeightOption}</Text>
+                    <Text style={modalStyles.optionDesc}>{t.sessionDetails.enterWeightDesc}</Text>
                   </View>
                   <MaterialCommunityIcons name="chevron-left" size={22} color="#94a3b8" />
                 </Pressable>
@@ -172,11 +170,11 @@ const SessionDetails = ({ route, navigation }) => {
                   style={[modalStyles.optionBtn, { borderColor: '#fef3c7' }]}
                   onPress={() => {
                     Alert.alert(
-                      "تأكيد التخطي",
-                      "سيُطلب من المريض إدخال وزنه بعد الجلسة بنفسه.\n\nهل أنت متأكد؟",
+                      t.sessionDetails.skipConfirmTitle,
+                      t.sessionDetails.skipConfirmMsg,
                       [
-                        { text: "تراجع", style: "cancel" },
-                        { text: "تخطي وإنهاء", onPress: handleFinishSkipWeight, style: "destructive" },
+                        { text: t.sessionDetails.goBack, style: "cancel" },
+                        { text: t.sessionDetails.skipAndEnd, onPress: handleFinishSkipWeight, style: "destructive" },
                       ]
                     );
                   }}
@@ -186,8 +184,8 @@ const SessionDetails = ({ route, navigation }) => {
                     <MaterialCommunityIcons name="account-arrow-right" size={24} color="#f59e0b" />
                   </View>
                   <View style={modalStyles.optionTextBox}>
-                    <Text style={modalStyles.optionTitle}>تخطي (سيُدخله المريض)</Text>
-                    <Text style={modalStyles.optionDesc}>المريض سيُلزم بإدخال الوزن لاحقاً</Text>
+                    <Text style={modalStyles.optionTitle}>{t.sessionDetails.skipWeightOption}</Text>
+                    <Text style={modalStyles.optionDesc}>{t.sessionDetails.skipWeightDesc}</Text>
                   </View>
                   <MaterialCommunityIcons name="chevron-left" size={22} color="#94a3b8" />
                 </Pressable>
@@ -198,7 +196,7 @@ const SessionDetails = ({ route, navigation }) => {
                   onPress={() => setEndModalVisible(false)}
                   disabled={isFinishing}
                 >
-                  <Text style={modalStyles.cancelBtnText}>تراجع</Text>
+                  <Text style={modalStyles.cancelBtnText}>{t.sessionDetails.goBack}</Text>
                 </Pressable>
               </>
             )}
@@ -211,7 +209,7 @@ const SessionDetails = ({ route, navigation }) => {
                     <MaterialCommunityIcons name="scale" size={36} color="#3b82f6" />
                   </View>
                 </View>
-                <Text style={modalStyles.title}>وزن المريض بعد الجلسة</Text>
+                <Text style={modalStyles.title}>{t.sessionDetails.weightTitle}</Text>
                 {patient?.patientName && (
                   <Text style={modalStyles.patientName}>{patient.patientName}</Text>
                 )}
@@ -242,7 +240,7 @@ const SessionDetails = ({ route, navigation }) => {
                     disabled={isFinishing}
                   >
                     <MaterialCommunityIcons name="arrow-right" size={18} color="#64748b" />
-                    <Text style={modalStyles.backChoiceBtnText}>رجوع</Text>
+                    <Text style={modalStyles.backChoiceBtnText}>{t.back}</Text>
                   </Pressable>
 
                   <Pressable
@@ -254,7 +252,7 @@ const SessionDetails = ({ route, navigation }) => {
                       ? <ActivityIndicator color="#fff" size="small" />
                       : <>
                           <MaterialCommunityIcons name="check-circle" size={20} color="#fff" />
-                          <Text style={modalStyles.confirmBtnText}>حفظ وإنهاء</Text>
+                          <Text style={modalStyles.confirmBtnText}>{t.sessionDetails.saveAndEnd}</Text>
                         </>
                     }
                   </Pressable>
@@ -283,7 +281,7 @@ const SessionDetails = ({ route, navigation }) => {
             />
           ))}
         </View>
-        <Text style={styles.stepTitle}>المرحلة {step}: {currentStepData.title}</Text>
+        <Text style={styles.stepTitle}>{t.sessionDetails.step} {step}: {currentStepData.title}</Text>
       </View>
 
       {/* عرض الصفحة الحالية */}
@@ -301,7 +299,7 @@ const SessionDetails = ({ route, navigation }) => {
             disabled={isFinishing}
           >
             <MaterialCommunityIcons name="stop-circle-outline" size={20} color="#fff" />
-            <Text style={styles.endSessionBtnText}>إنهاء الجلسة</Text>
+            <Text style={styles.endSessionBtnText}>{t.sessionDetails.endSession}</Text>
           </Pressable>
         )}
 
@@ -309,13 +307,13 @@ const SessionDetails = ({ route, navigation }) => {
         <View style={styles.footer}>
           {step > 1 ? (
             <Pressable style={styles.backBtn} onPress={() => changeStep(step - 1)}>
-              <Text style={styles.backBtnText}>السابق</Text>
+              <Text style={styles.backBtnText}>{t.sessionDetails.previous}</Text>
             </Pressable>
           ) : <View style={{ flex: 1 }} />}
 
           {step < 4 ? (
             <Pressable style={styles.nextBtn} onPress={() => changeStep(step + 1)}>
-              <Text style={styles.nextBtnText}>التالي</Text>
+              <Text style={styles.nextBtnText}>{t.sessionDetails.next}</Text>
               <MaterialCommunityIcons name="arrow-left" size={20} color="#fff" />
             </Pressable>
           ) : <View style={{ flex: 1 }} />}

@@ -11,42 +11,14 @@ import {
 import { Icon, Divider } from "@rneui/base";
 import api from "../../services/api";
 import { useFocusEffect } from "@react-navigation/native";
+import { useLanguage } from '../../context/LanguageContext';
 
-// ── Translation Maps ──────────────────────────────────────────────────────────
-const symptomTranslations = {
-  CHEST_PAIN: "ألم في الصدر",
-  LOW_BP: "انخفاض ضغط الدم",
-  CRAMPS: "تشنجات",
-  NAUSEA: "غثيان",
-  HEADACHE: "صداع",
-  DIZZINESS: "دوخة",
-  VOMITING: "قيء",
-  SHORTNESS_OF_BREATH: "ضيق تنفس",
-  FATIGUE: "إرهاق",
-  ITCHING: "حكة",
-  OTHER: "أخرى",
-};
-
-const severityTranslations = {
-  MILD: "خفيف",
-  MODERATE: "متوسط",
-  SEVERE: "شديد",
-};
+// Removed hardcoded translations, now using useLanguage()
 
 const severityColors = {
-  MILD: { bg: "#dcfce7", text: "#166534" },
-  MODERATE: { bg: "#fef3c7", text: "#92400e" },
-  SEVERE: { bg: "#fee2e2", text: "#991b1b" },
-};
-
-const weekdayTranslations = {
-  SUNDAY: "الأحد",
-  MONDAY: "الاثنين",
-  TUESDAY: "الثلاثاء",
-  WEDNESDAY: "الأربعاء",
-  THURSDAY: "الخميس",
-  FRIDAY: "الجمعة",
-  SATURDAY: "السبت",
+  LOW: { bg: "#dcfce7", text: "#166534" },
+  MEDIUM: { bg: "#fef3c7", text: "#92400e" },
+  HIGH: { bg: "#fee2e2", text: "#991b1b" },
 };
 
 // ── Helper Components ─────────────────────────────────────────────────────────
@@ -76,6 +48,7 @@ const MetricChip = ({ label, value, icon, color }) => (
 
 // ── Main Screen ───────────────────────────────────────────────────────────────
 const PatientSessionDetailView = ({ route, navigation }) => {
+  const { t } = useLanguage();
   const { sessionId, patientId } = route.params || {};
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -142,7 +115,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
         nurseData = s.nurse || null;
         scheduleData = s.schedule || null;
       } else {
-        throw new Error("فشل في جلب بيانات الجلسة الأساسية");
+        throw new Error(t.patientSessionDetail.fetchError);
       }
 
       // Vital signs
@@ -215,7 +188,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
       });
     } catch (e) {
       console.log("Session detail error:", e.message);
-      setError("فشل في تحميل بيانات الجلسة");
+      setError(t.patientSessionDetail.fetchError);
     } finally {
       setLoading(false);
     }
@@ -225,7 +198,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
 
   const formatDate = (d) => {
     if (!d) return "—";
-    return new Date(d).toLocaleDateString("ar-EG", {
+    return new Date(d).toLocaleDateString(t.cancel === 'إلغاء' ? "ar-EG" : "en-US", {
       weekday: "long",
       day: "numeric",
       month: "long",
@@ -233,16 +206,24 @@ const PatientSessionDetailView = ({ route, navigation }) => {
     });
   };
 
-  const formatTime = (t) => {
-    if (!t) return "—";
-    return new Date(t).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
+  const formatTime = (timeStr) => {
+    if (!timeStr) return "—";
+    let dateObj = new Date(timeStr);
+    if (isNaN(dateObj.getTime())) {
+      let [h, m] = timeStr.split(":");
+      let hh = parseInt(h);
+      const isArabic = t.cancel === 'إلغاء';
+      const ampm = hh >= 12 ? (isArabic ? 'م' : 'PM') : (isArabic ? 'ص' : 'AM');
+      return `${hh % 12 || 12}:${m} ${ampm}`;
+    }
+    return dateObj.toLocaleTimeString(t.cancel === 'إلغاء' ? "ar-EG" : "en-US", { hour: "2-digit", minute: "2-digit" });
   };
 
   if (loading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#204a42" />
-        <Text style={styles.loadingText}>جاري تحميل بيانات الجلسة...</Text>
+        <Text style={styles.loadingText}>{t.patientSessionDetail.loading}</Text>
       </View>
     );
   }
@@ -251,9 +232,9 @@ const PatientSessionDetailView = ({ route, navigation }) => {
     return (
       <View style={styles.center}>
         <Icon name="alert-circle-outline" type="material-community" size={60} color="#ef4444" />
-        <Text style={styles.errorText}>{error || "لا توجد بيانات"}</Text>
+        <Text style={styles.errorText}>{error || t.patientSessionDetail.noData}</Text>
         <TouchableOpacity style={styles.retryBtn} onPress={fetchSession}>
-          <Text style={{ color: "#fff", fontWeight: "bold" }}>إعادة المحاولة</Text>
+          <Text style={{ color: "#fff", fontWeight: "bold" }}>{t.patientSessionDetail.retry}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -262,9 +243,9 @@ const PatientSessionDetailView = ({ route, navigation }) => {
   const { session, patient, nurse, schedule, vitalSigns, medications, dialysisSettings, symptoms } = data;
 
   const statusConfig = {
-    COMPLETED: { label: "مكتملة", bg: "#dcfce7", text: "#166534", icon: "check-circle" },
-    IN_PROGRESS: { label: "جارية", bg: "#fef3c7", text: "#92400e", icon: "clock-outline" },
-    SCHEDULED: { label: "مجدولة", bg: "#dbeafe", text: "#1e40af", icon: "calendar-clock" },
+    COMPLETED: { label: t.patientProfile.status.completed, bg: "#dcfce7", text: "#166534", icon: "check-circle" },
+    IN_PROGRESS: { label: t.patientProfile.status.pending, bg: "#fef3c7", text: "#92400e", icon: "clock-outline" },
+    SCHEDULED: { label: t.patientProfile.status.scheduled || "مجدولة", bg: "#dbeafe", text: "#1e40af", icon: "calendar-clock" },
   };
   const statusStyle = statusConfig[session?.status] || { label: session?.status, bg: "#f1f5f9", text: "#64748b", icon: "help-circle-outline" };
 
@@ -278,7 +259,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
           <Icon name="arrow-left" type="material-community" size={28} color="#fff" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>تفاصيل الجلسة</Text>
+          <Text style={styles.headerTitle}>{t.patientSessionDetail.title}</Text>
           <Text style={styles.headerSub}>#{session?.session_id}</Text>
         </View>
         <View style={[styles.statusBadgeHeader, { backgroundColor: statusStyle.bg }]}>
@@ -291,13 +272,13 @@ const PatientSessionDetailView = ({ route, navigation }) => {
 
         {/* ── Patient & Nurse Info ── */}
         <View style={styles.card}>
-          <SectionHeader icon="account-circle-outline" title="معلومات المريض والممرض" color="#204a42" />
+          <SectionHeader icon="account-circle-outline" title={t.patientSessionDetail.patientNurseInfo} color="#204a42" />
           <View style={styles.personRow}>
             <View style={styles.personBox}>
               <View style={[styles.personAvatar, { backgroundColor: "#204a4218" }]}>
                 <Icon name="account" type="material-community" size={28} color="#204a42" />
               </View>
-              <Text style={styles.personRole}>المريض</Text>
+              <Text style={styles.personRole}>{t.patientSessionDetail.patient}</Text>
               <Text style={styles.personName}>{patient?.full_name || "—"}</Text>
               {patient?.blood_type && (
                 <View style={styles.bloodBadge}>
@@ -310,27 +291,27 @@ const PatientSessionDetailView = ({ route, navigation }) => {
               <View style={[styles.personAvatar, { backgroundColor: "#05966918" }]}>
                 <Icon name="stethoscope" type="material-community" size={28} color="#059669" />
               </View>
-              <Text style={styles.personRole}>الممرض</Text>
+              <Text style={styles.personRole}>{t.patientSessionDetail.nurse}</Text>
               <Text style={styles.personName}>{nurse?.full_name || "—"}</Text>
             </View>
           </View>
           {patient?.allergies && (
             <View style={styles.allergyRow}>
               <Icon name="alert-rhombus-outline" type="material-community" size={16} color="#dc2626" />
-              <Text style={styles.allergyText}>حساسية: {patient.allergies}</Text>
+              <Text style={styles.allergyText}>{t.patientSessionDetail.allergy} {patient.allergies}</Text>
             </View>
           )}
         </View>
 
         {/* ── Session Overview ── */}
         <View style={styles.card}>
-          <SectionHeader icon="calendar-clock" title="معلومات الجلسة" color="#3b82f6" />
-          <InfoRow label="التاريخ" value={formatDate(session?.date)} />
+          <SectionHeader icon="calendar-clock" title={t.patientSessionDetail.sessionInfo} color="#3b82f6" />
+          <InfoRow label={t.patientSessionDetail.date} value={formatDate(session?.date)} />
           <Divider style={styles.rowDivider} />
           <View style={styles.twoCol}>
-            <InfoRow label="وقت البدء" value={formatTime(session?.start_time)} />
+            <InfoRow label={t.patientSessionDetail.startTime} value={formatTime(session?.start_time)} />
             <InfoRow
-              label="وقت الانتهاء"
+              label={t.patientSessionDetail.endTime}
               value={formatTime(session?.end_time || (session?.status === 'COMPLETED' ? session?.updated_at : null))}
             />
           </View>
@@ -338,11 +319,11 @@ const PatientSessionDetailView = ({ route, navigation }) => {
           {schedule && (
             <>
               <View style={styles.twoCol}>
-                <InfoRow label="اليوم" value={weekdayTranslations[schedule.weekday] || schedule.weekday} />
-                <InfoRow label="رقم الشفت" value={`الشفت ${schedule.shift_number}`} />
+                <InfoRow label={t.patientSessionDetail.day} value={t.days[schedule.weekday] || schedule.weekday} />
+                <InfoRow label={t.patientSessionDetail.shiftNumber} value={`${t.patientSessionDetail.shiftPrefix} ${schedule.shift_number}`} />
               </View>
               <Divider style={styles.rowDivider} />
-              <InfoRow label="رقم الجهاز" value={`جهاز #${schedule.machine_number}`} />
+              <InfoRow label={t.patientSessionDetail.machineNumber} value={`${t.patientSessionDetail.machinePrefix}${schedule.machine_number}`} />
               <Divider style={styles.rowDivider} />
             </>
           )}
@@ -355,7 +336,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
                   <View style={[styles.weightIconCircle, { backgroundColor: '#eff6ff' }]}>
                     <Icon name="scale" type="material-community" size={20} color="#3b82f6" />
                   </View>
-                  <Text style={styles.weightLabel}>الوزن قبل</Text>
+                  <Text style={styles.weightLabel}>{t.patientSessionDetail.weightBefore}</Text>
                   <Text style={[styles.weightValue, { color: '#3b82f6' }]}>
                     {session?.weight_before != null ? `${session.weight_before} kg` : '—'}
                   </Text>
@@ -369,7 +350,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
                   <View style={[styles.weightIconCircle, { backgroundColor: '#f0fdf4' }]}>
                     <Icon name="scale" type="material-community" size={20} color="#059669" />
                   </View>
-                  <Text style={styles.weightLabel}>الوزن بعد</Text>
+                  <Text style={styles.weightLabel}>{t.patientSessionDetail.weightAfter}</Text>
                   <Text style={[styles.weightValue, { color: '#059669' }]}>
                     {session?.weight_after != null ? `${session.weight_after} kg` : '—'}
                   </Text>
@@ -381,7 +362,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
                 <View style={styles.fluidRemovedRow}>
                   <Icon name="water-outline" type="material-community" size={16} color="#06b6d4" />
                   <Text style={styles.fluidRemovedText}>
-                    كمية السوائل المُزالة (تقريبي): {' '}
+                    {t.patientSessionDetail.fluidRemoved} {' '}
                     <Text style={styles.fluidRemovedValue}>
                       {Math.abs(session.weight_before - session.weight_after).toFixed(1)} لتر
                     </Text>
@@ -395,7 +376,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
 
         {/* ── Vital Signs ── */}
         <View style={styles.card}>
-          <SectionHeader icon="heart-pulse" title="العلامات الحيوية" color="#ef4444" />
+          <SectionHeader icon="heart-pulse" title={t.patientSessionDetail.vitalSigns} color="#ef4444" />
           {vitalSigns && vitalSigns.length > 0 ? (
             vitalSigns.map((v, idx) => (
               <View key={v.vital_id || idx}>
@@ -407,12 +388,12 @@ const PatientSessionDetailView = ({ route, navigation }) => {
                   {v.nurse?.full_name || ""}
                 </Text>
                 <View style={styles.vitalsGrid}>
-                  <MetricChip label="الانقباضي" value={v.systolic ? `${v.systolic}` : "—"} icon="heart-pulse" color="#ef4444" />
-                  <MetricChip label="الانبساطي" value={v.diastolic ? `${v.diastolic}` : "—"} icon="heart-outline" color="#f97316" />
-                  <MetricChip label="النبض" value={v.pulse ? `${v.pulse} bpm` : "—"} icon="pulse" color="#8b5cf6" />
-                  <MetricChip label="الحرارة" value={v.temperature ? `${v.temperature}°C` : "—"} icon="thermometer" color="#f59e0b" />
+                  <MetricChip label={t.patientSessionDetail.systolic} value={v.systolic ? `${v.systolic}` : "—"} icon="heart-pulse" color="#ef4444" />
+                  <MetricChip label={t.patientSessionDetail.diastolic} value={v.diastolic ? `${v.diastolic}` : "—"} icon="heart-outline" color="#f97316" />
+                  <MetricChip label={t.patientSessionDetail.pulse} value={v.pulse ? `${v.pulse} bpm` : "—"} icon="pulse" color="#8b5cf6" />
+                  <MetricChip label={t.patientSessionDetail.temperature} value={v.temperature ? `${v.temperature}°C` : "—"} icon="thermometer" color="#f59e0b" />
                   {v.oxygen_saturation != null && (
-                    <MetricChip label="الأكسجين" value={`${v.oxygen_saturation}%`} icon="lungs" color="#3b82f6" />
+                    <MetricChip label={t.patientSessionDetail.oxygen} value={`${v.oxygen_saturation}%`} icon="lungs" color="#3b82f6" />
                   )}
                 </View>
               </View>
@@ -420,14 +401,14 @@ const PatientSessionDetailView = ({ route, navigation }) => {
           ) : (
             <View style={styles.emptySmall}>
               <Icon name="heart-off-outline" type="material-community" size={36} color="#cbd5e1" />
-              <Text style={styles.emptySmallText}>لا توجد علامات حيوية مسجلة</Text>
+              <Text style={styles.emptySmallText}>{t.patientSessionDetail.noVitals}</Text>
             </View>
           )}
         </View>
 
         {/* ── Dialysis Machine Settings ── */}
         <View style={styles.card}>
-          <SectionHeader icon="cog-outline" title="إعدادات جهاز الغسيل" color="#06b6d4" />
+          <SectionHeader icon="cog-outline" title={t.patientSessionDetail.machineSettings} color="#06b6d4" />
           {dialysisSettings && dialysisSettings.length > 0 ? (
             dialysisSettings.map((s, idx) => (
               <View key={s.setting_id || idx}>
@@ -436,23 +417,23 @@ const PatientSessionDetailView = ({ route, navigation }) => {
                   {formatTime(s.recorded_at)}{"  ·  "}{s.nurse?.full_name || ""}
                 </Text>
                 <View style={styles.vitalsGrid}>
-                  <MetricChip label="تدفق الدم" value={`${s.blood_flow_rate} ml/min`} icon="water-pump" color="#06b6d4" />
-                  <MetricChip label="تدفق المحلول" value={`${s.dialysate_flow} ml/h`} icon="beaker-outline" color="#0891b2" />
-                  <MetricChip label="معدل التصفية" value={`${s.ultrafiltration_rate} ml/h`} icon="filter-outline" color="#0e7490" />
+                  <MetricChip label={t.patientSessionDetail.bloodFlow} value={`${s.blood_flow_rate} ml/min`} icon="water-pump" color="#06b6d4" />
+                  <MetricChip label={t.patientSessionDetail.dialysateFlow} value={`${s.dialysate_flow} ml/h`} icon="beaker-outline" color="#0891b2" />
+                  <MetricChip label={t.patientSessionDetail.ufRate} value={`${s.ultrafiltration_rate} ml/h`} icon="filter-outline" color="#0e7490" />
                 </View>
               </View>
             ))
           ) : (
             <View style={styles.emptySmall}>
               <Icon name="cog-off-outline" type="material-community" size={36} color="#cbd5e1" />
-              <Text style={styles.emptySmallText}>لا توجد إعدادات مسجلة</Text>
+              <Text style={styles.emptySmallText}>{t.patientSessionDetail.noSettings}</Text>
             </View>
           )}
         </View>
 
         {/* ── Medications ── */}
         <View style={styles.card}>
-          <SectionHeader icon="pill" title="الأدوية المعطاة" color="#059669" />
+          <SectionHeader icon="pill" title={t.patientSessionDetail.medications} color="#059669" />
           {medications && medications.length > 0 ? (
             medications.map((med, idx) => (
               <View key={med.med_id || idx}>
@@ -478,7 +459,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
           ) : (
             <View style={styles.emptySmall}>
               <Icon name="pill-off" type="material-community" size={36} color="#cbd5e1" />
-              <Text style={styles.emptySmallText}>لا توجد أدوية مسجلة</Text>
+              <Text style={styles.emptySmallText}>{t.patientSessionDetail.noMedications}</Text>
             </View>
           )}
         </View>
@@ -486,11 +467,11 @@ const PatientSessionDetailView = ({ route, navigation }) => {
         {/* ── Symptoms ── */}
         <View style={styles.card}>
           <View style={styles.sectionHeaderRow}>
-            <SectionHeader icon="alert-circle-outline" title="الأعراض" color="#f59e0b" />
+            <SectionHeader icon="alert-circle-outline" title={t.patientSessionDetail.symptoms} color="#f59e0b" />
             {symptoms?.total > 0 && (
               <View style={[styles.countBadge, { backgroundColor: "#fef3c7" }]}>
                 <Text style={[styles.countBadgeText, { color: "#92400e" }]}>
-                  {symptoms.total} عارض
+                  {symptoms.total} {t.patientSessionDetail.symptomCount}
                 </Text>
               </View>
             )}
@@ -506,7 +487,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
                     return (
                       <View key={type} style={styles.breakdownChip}>
                         <Text style={styles.breakdownType}>
-                          {symptomTranslations[type] || type}
+                          {t.symptomsDict[type] || type}
                         </Text>
                         <Text style={styles.breakdownCount}>{totalOfType}×</Text>
                       </View>
@@ -522,14 +503,14 @@ const PatientSessionDetailView = ({ route, navigation }) => {
                   <View key={sym.symptom_id || idx} style={styles.symptomRow}>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.symptomType}>
-                        {symptomTranslations[sym.symptom_type] || sym.symptom_type}
+                        {t.symptomsDict[sym.symptom_type] || sym.symptom_type}
                       </Text>
                       {sym.notes && <Text style={styles.symptomNotes}>{sym.notes}</Text>}
                       <Text style={styles.symptomTime}>{formatTime(sym.occurred_at)}</Text>
                     </View>
                     <View style={[styles.severityBadge, { backgroundColor: sev.bg }]}>
                       <Text style={[styles.severityText, { color: sev.text }]}>
-                        {severityTranslations[sym.severity] || sym.severity}
+                        {t.severity[sym.severity] || sym.severity}
                       </Text>
                     </View>
                   </View>
@@ -539,7 +520,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
           ) : (
             <View style={styles.emptySmall}>
               <Icon name="emoticon-happy-outline" type="material-community" size={36} color="#cbd5e1" />
-              <Text style={styles.emptySmallText}>لا توجد أعراض مسجلة في هذه الجلسة</Text>
+              <Text style={styles.emptySmallText}>{t.patientSessionDetail.noSymptoms}</Text>
             </View>
           )}
         </View>

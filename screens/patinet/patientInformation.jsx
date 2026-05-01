@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import { Icon, Divider } from "@rneui/base";
 import api from "../../services/api";
+import { useLanguage } from '../../context/LanguageContext';
 
 // تفعيل LayoutAnimation على Android
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -33,7 +34,7 @@ const InfoRow = ({ label, value, icon, color = "#059669", isLast = false }) => (
       <View style={styles.infoTextWrap}>
         <Text style={styles.infoLabel}>{label}</Text>
         <Text style={styles.infoValue} numberOfLines={3}>
-          {value || "غير محدد"}
+          {value || (label === "العمر" ? "" : "غير محدد")}
         </Text>
       </View>
     </View>
@@ -90,6 +91,7 @@ const StatusBadge = ({ value, trueLabel, falseLabel, trueColor, falseColor }) =>
 
 // ─── المكوّن الرئيسي ──────────────────────────────────────────────────────────
 const PatinetInfo = ({ route, navigation }) => {
+  const { t } = useLanguage();
   const { patientId } = route.params || {};
 
   const [loading, setLoading] = useState(true);
@@ -104,8 +106,8 @@ const PatinetInfo = ({ route, navigation }) => {
   });
 
   const formatDate = (date) => {
-    if (!date) return "غير محدد";
-    return new Date(date).toLocaleDateString("ar-EG", {
+    if (!date) return t.unknown;
+    return new Date(date).toLocaleDateString(t.vitalSigns.now === 'الآن' ? "ar-EG" : "en-US", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -133,7 +135,7 @@ const PatinetInfo = ({ route, navigation }) => {
         setPatient(patientId ? data : data.patient);
       } catch (err) {
         console.log("Fetch error:", err.message);
-        Alert.alert("خطأ", "فشل في جلب بيانات المريض");
+        Alert.alert(t.error, t.patientInfo.fetchError);
         navigation.goBack();
       } finally {
         setLoading(false);
@@ -148,7 +150,7 @@ const PatinetInfo = ({ route, navigation }) => {
       <View style={styles.loadingBox}>
         <StatusBar barStyle="light-content" backgroundColor="#204a42" />
         <ActivityIndicator size="large" color="#059669" />
-        <Text style={styles.loadingText}>جاري تحميل البيانات...</Text>
+        <Text style={styles.loadingText}>{t.patientInfo.loading}</Text>
       </View>
     );
   }
@@ -170,7 +172,7 @@ const PatinetInfo = ({ route, navigation }) => {
         </TouchableOpacity>
 
         {/* عنوان الصفحة */}
-        <Text style={styles.headerPageTitle}>ملف المريض</Text>
+        <Text style={styles.headerPageTitle}>{t.patientInfo.title}</Text>
 
         {/* الأفاتار + الاسم */}
         <View style={styles.avatarSection}>
@@ -190,8 +192,8 @@ const PatinetInfo = ({ route, navigation }) => {
           <View style={styles.nameSection}>
             <Text style={styles.headerName}>{patient.full_name}</Text>
             <Text style={styles.headerSub}>
-              {patient.gender === "Male" ? "ذكر" : "أنثى"}
-              {age ? `  ·  ${age} سنة` : ""}
+              {patient.gender === "Male" ? t.patientInfo.genderMale : t.patientInfo.genderFemale}
+              {age ? `  ·  ${t.patientInfo.age.replace('{n}', age)}` : ""}
             </Text>
           </View>
         </View>
@@ -200,17 +202,17 @@ const PatinetInfo = ({ route, navigation }) => {
         <View style={styles.quickStats}>
           <View style={styles.qStat}>
             <Text style={styles.qStatVal}>#{patient.patient_id}</Text>
-            <Text style={styles.qStatLabel}>رقم المريض</Text>
+            <Text style={styles.qStatLabel}>{t.patientInfo.patientId}</Text>
           </View>
           <View style={styles.qDivider} />
           <View style={styles.qStat}>
             <Text style={styles.qStatVal}>{patient.blood_type || "—"}</Text>
-            <Text style={styles.qStatLabel}>فصيلة الدم</Text>
+            <Text style={styles.qStatLabel}>{t.patientInfo.bloodType}</Text>
           </View>
           <View style={styles.qDivider} />
           <View style={styles.qStat}>
             <Text style={styles.qStatVal} numberOfLines={1}>{patient.national_id || "—"}</Text>
-            <Text style={styles.qStatLabel}>رقم الهوية</Text>
+            <Text style={styles.qStatLabel}>{t.patientInfo.nationalId}</Text>
           </View>
         </View>
       </Animated.View>
@@ -228,44 +230,44 @@ const PatinetInfo = ({ route, navigation }) => {
         scrollEventThrottle={16}
       >
         {/* ── البيانات الشخصية ── */}
-        <SectionCard title="البيانات الشخصية" icon="account-details-outline" accentColor="#204a42" defaultOpen={true}>
-          <InfoRow label="الاسم الكامل"   value={patient.full_name}    icon="account"                     color="#204a42" />
-          <InfoRow label="رقم الهوية"      value={patient.national_id}  icon="card-account-details-outline" color="#3b82f6" />
+        <SectionCard title={t.patientInfo.personalData} icon="account-details-outline" accentColor="#204a42" defaultOpen={true}>
+          <InfoRow label={t.patientInfo.fullName}   value={patient.full_name}    icon="account"                     color="#204a42" />
+          <InfoRow label={t.patientInfo.nationalId} value={patient.national_id}  icon="card-account-details-outline" color="#3b82f6" />
           <InfoRow
-            label="تاريخ الميلاد"
+            label={t.patientInfo.dob}
             value={formatDate(patient.date_of_birth || patient.birth_date)}
             icon="calendar-range"
             color="#f59e0b"
           />
           <InfoRow
-            label="العمر"
-            value={age ? `${age} سنة` : null}
+            label={t.patientInfo.ageLabel}
+            value={age ? t.patientInfo.age.replace('{n}', age) : null}
             icon="account-clock-outline"
             color="#8b5cf6"
           />
           <InfoRow
-            label="الجنس"
-            value={patient.gender === "Male" ? "ذكر" : "أنثى"}
+            label={t.patientInfo.gender}
+            value={patient.gender === "Male" ? t.patientInfo.genderMale : t.patientInfo.genderFemale}
             icon="gender-male-female"
             color="#8b5cf6"
           />
-          <InfoRow label="العنوان" value={patient.address} icon="map-marker-outline" color="#059669" isLast />
+          <InfoRow label={t.patientInfo.address} value={patient.address} icon="map-marker-outline" color="#059669" isLast />
         </SectionCard>
 
         {/* ── معلومات التواصل ── */}
-        <SectionCard title="معلومات التواصل" icon="phone-outline" accentColor="#0369a1" defaultOpen={true}>
-          <InfoRow label="رقم الهاتف"       value={patient.phone_number || patient.phone} icon="phone"       color="#0369a1" />
-          <InfoRow label="رقم الطوارئ"      value={patient.emergency_contact}              icon="phone-alert" color="#ef4444" />
-          <InfoRow label="البريد الإلكتروني" value={patient.email}                         icon="email-outline" color="#6366f1" isLast />
+        <SectionCard title={t.patientInfo.contactInfo} icon="phone-outline" accentColor="#0369a1" defaultOpen={true}>
+          <InfoRow label={t.patientInfo.phone}       value={patient.phone_number || patient.phone} icon="phone"       color="#0369a1" />
+          <InfoRow label={t.patientInfo.emergencyPhone} value={patient.emergency_contact}              icon="phone-alert" color="#ef4444" />
+          <InfoRow label={t.patientInfo.email} value={patient.email}                         icon="email-outline" color="#6366f1" isLast />
         </SectionCard>
 
         {/* ── التاريخ الطبي ── */}
-        <SectionCard title="التاريخ الطبي" icon="medical-bag" accentColor="#dc2626" defaultOpen={true}>
-          <InfoRow label="فصيلة الدم"      value={patient.blood_type}        icon="water-plus"           color="#ef4444" />
-          <InfoRow label="الأمراض المزمنة" value={patient.chronic_diseases}   icon="heart-pulse"          color="#f59e0b" />
-          <InfoRow label="الحساسية"         value={patient.allergies}          icon="allergy"              color="#f59e0b" />
-          <InfoRow label="ملاحظات طبية"    value={patient.medical_history_notes} icon="file-document-outline" color="#64748b" />
-          <InfoRow label="ملاحظات عامة"    value={patient.notes}              icon="note-text-outline"    color="#64748b" />
+        <SectionCard title={t.patientInfo.medicalHistory} icon="medical-bag" accentColor="#dc2626" defaultOpen={true}>
+          <InfoRow label={t.patientInfo.bloodType}      value={patient.blood_type}        icon="water-plus"           color="#ef4444" />
+          <InfoRow label={t.patientInfo.chronicDiseases} value={patient.chronic_diseases}   icon="heart-pulse"          color="#f59e0b" />
+          <InfoRow label={t.patientInfo.allergies}         value={patient.allergies}          icon="allergy"              color="#f59e0b" />
+          <InfoRow label={t.patientInfo.medicalNotes}    value={patient.medical_history_notes} icon="file-document-outline" color="#64748b" />
+          <InfoRow label={t.patientInfo.generalNotes}    value={patient.notes}              icon="note-text-outline"    color="#64748b" />
 
           {/* حالة التدخين — تُعرض كبادج */}
           <View style={styles.infoRow}>
@@ -273,11 +275,11 @@ const PatinetInfo = ({ route, navigation }) => {
               <Icon name="smoking" type="material-community" size={19} color={isSmoker ? "#ef4444" : "#059669"} />
             </View>
             <View style={styles.infoTextWrap}>
-              <Text style={styles.infoLabel}>حالة التدخين</Text>
+              <Text style={styles.infoLabel}>{t.patientInfo.smokingStatus}</Text>
               <StatusBadge
                 value={patient.smoking_status}
-                trueLabel="مدخن"
-                falseLabel="غير مدخن"
+                trueLabel={t.patientInfo.smoker}
+                falseLabel={t.patientInfo.nonSmoker}
                 trueColor="#ef4444"
                 falseColor="#059669"
               />

@@ -16,10 +16,12 @@ import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { Platform } from "react-native";
+import { useLanguage } from "../../context/LanguageContext";
 
 const { width } = Dimensions.get("window");
 
 const StaffPatientView = ({ route, navigation }) => {
+  const { t } = useLanguage();
   const [tabIndex, setTabIndex] = useState(0);
   const [subTabIndex, setSubTabIndex] = useState(0);
   const [patient, setPatient] = useState(null);
@@ -103,7 +105,7 @@ const StaffPatientView = ({ route, navigation }) => {
 
       // ... تكملة كود جلب بيانات المريض
       if (!patientId) {
-        Alert.alert("خطأ", "لم يتم تمرير رقم المريض");
+        Alert.alert(t.patientProfile.errorTitle || "Error", t.staffPatientView.errorNoPatientId);
         navigation.goBack();
         return;
       }
@@ -125,7 +127,7 @@ const StaffPatientView = ({ route, navigation }) => {
       }
     } catch (error) {
       console.log("Error:", error.message);
-      Alert.alert("خطأ", "فشل في تحديث بيانات الملف الشخصي");
+      Alert.alert(t.patientProfile.errorTitle || "Error", t.staffPatientView.errorUpdateProfile);
     } finally {
       setLoading(false);
     }
@@ -134,12 +136,12 @@ const StaffPatientView = ({ route, navigation }) => {
   useFocusEffect(useCallback(() => { fetchPatientData(); }, [fetchPatientData]));
 
   const formatDate = (date) => {
-    if (!date) return "قيد الانتظار";
-    return new Date(date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' });
+    if (!date) return t.staffPatientView.pendingDispense || "قيد الانتظار";
+    return new Date(date).toLocaleDateString(t.vitalSigns.now === 'الآن' ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   const handleDownload = async (id, type) => {
-    if (!id) { Alert.alert("تنبيه", "الملف غير متوفر حالياً"); return; }
+    if (!id) { Alert.alert(t.patientSessionScreen.alertTitle || "تنبيه", t.staffPatientView.fileNotAvailable); return; }
     try {
       const endpoint = type === 'lab'
         ? `/medical-tests/${id}/result-url`
@@ -148,17 +150,17 @@ const StaffPatientView = ({ route, navigation }) => {
       const response = await api.get(endpoint);
       const fullUrl = response.data?.url || response.data;
 
-      if (!fullUrl) { Alert.alert("خطأ", "فشل في جلب رابط الملف"); return; }
+      if (!fullUrl) { Alert.alert(t.patientProfile.errorTitle || "خطأ", t.staffPatientView.fileLinkError); return; }
 
       const supported = await Linking.canOpenURL(fullUrl);
       if (supported) {
         await Linking.openURL(fullUrl);
       } else {
-        Alert.alert("خطأ", "لا يمكن فتح هذا النوع من الروابط.");
+        Alert.alert(t.patientProfile.errorTitle || "خطأ", t.staffPatientView.linkOpenError);
       }
     } catch (e) {
       console.log("Download Error:", e.message);
-      Alert.alert("خطأ", "حدثت مشكلة أثناء محاولة فتح الملف.");
+      Alert.alert(t.patientProfile.errorTitle || "خطأ", t.staffPatientView.fileOpenProblem);
     }
   };
 
@@ -168,7 +170,7 @@ const StaffPatientView = ({ route, navigation }) => {
       <Icon name={icon} type="material-community" size={22} color={color} />
       <View style={{ marginRight: 12, flex: 1 }}>
         <Text style={styles.infoLabel}>{label}</Text>
-        <Text style={styles.infoTextValue}>{value || "غير محدد"}</Text>
+        <Text style={styles.infoTextValue}>{value || t.staffPatientView.notSpecified}</Text>
       </View>
     </View>
   );
@@ -180,7 +182,7 @@ const StaffPatientView = ({ route, navigation }) => {
       </View>
       <View style={{ marginRight: 12, flex: 1 }}>
         <Text style={[styles.mealLabel, { color: color }]}>{label}</Text>
-        <Text style={styles.mealContent}>{content || "لم يتم تحديد وجبة"}</Text>
+        <Text style={styles.mealContent}>{content || t.staffPatientView.noMealDefined}</Text>
       </View>
     </View>
   );
@@ -195,16 +197,16 @@ const StaffPatientView = ({ route, navigation }) => {
         <Text style={styles.reportDate}>{formatDate(date)}</Text>
       </View>
       <View style={styles.reportContent}>
-        <Text style={styles.reportDetail}><Text style={styles.boldLabel}>الطبيب:</Text> د. {doctor || "غير محدد"}</Text>
-        <Text style={styles.reportDetail}><Text style={styles.boldLabel}>الوصف:</Text> {description || "لا يوجد وصف"}</Text>
+        <Text style={styles.reportDetail}><Text style={styles.boldLabel}>{t.staffPatientView.doctor}</Text> د. {doctor || t.staffPatientView.notSpecified}</Text>
+        <Text style={styles.reportDetail}><Text style={styles.boldLabel}>{t.staffPatientView.description}</Text> {description || t.staffPatientView.noDesc}</Text>
         <View style={[styles.statusBadge, { backgroundColor: (status === 'PENDING' || status === 'pending') ? '#fef3c7' : '#dcfce7' }]}>
           <Text style={[styles.statusText, { color: (status === 'PENDING' || status === 'pending') ? '#92400e' : '#166534' }]}>
-            {(status === 'PENDING' || status === 'pending') ? 'قيد الانتظار' : 'مكتمل'}
+            {(status === 'PENDING' || status === 'pending') ? t.patientProfile.status.pending : t.patientProfile.status.completed}
           </Text>
         </View>
       </View>
       <Button
-        title="معاينة الملف"
+        title={t.staffPatientView.previewFile}
         icon={<Icon name="file-pdf-box" type="material-community" color="white" size={20} containerStyle={{ marginLeft: 5 }} />}
         buttonStyle={styles.downloadBtn}
         onPress={() => handleDownload(id, type)}
@@ -217,7 +219,7 @@ const StaffPatientView = ({ route, navigation }) => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#059669" />
-        <Text style={styles.loadingText}>جاري تحديث البيانات...</Text>
+        <Text style={styles.loadingText}>{t.staffPatientView.updatingData}</Text>
       </View>
     );
   }
@@ -261,8 +263,7 @@ const StaffPatientView = ({ route, navigation }) => {
           </TouchableOpacity>
 
           <View style={styles.patientHeaderInfo}>
-            <Text style={styles.patientNameText}>{patient?.full_name || "اسم المريض"}</Text>
-
+            <Text style={styles.patientNameText}>{patient?.full_name || t.staffPatientView.patientNameFallback}</Text>
 
           </View>
         </View>
@@ -271,10 +272,10 @@ const StaffPatientView = ({ route, navigation }) => {
 
 
       <Tab value={tabIndex} onChange={setTabIndex} indicatorStyle={styles.tabIndicator} containerStyle={styles.tabBar} variant="default">
-        <Tab.Item title="التغذية" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="food-apple" type="material-community" size={22} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />} />
-        <Tab.Item title="الجلسات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="clock-outline" type="material-community" size={22} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />} />
-        <Tab.Item title="الفحوصات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="clipboard-pulse" type="material-community" size={22} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />} />
-        <Tab.Item title="الملاحظات" titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="note-edit-outline" type="material-community" size={22} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />} />
+        <Tab.Item title={t.staffPatientView.tabs.nutrition} titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="food-apple" type="material-community" size={22} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />} />
+        <Tab.Item title={t.staffPatientView.tabs.sessions} titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="clock-outline" type="material-community" size={22} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />} />
+        <Tab.Item title={t.staffPatientView.tabs.tests} titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="clipboard-pulse" type="material-community" size={22} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />} />
+        <Tab.Item title={t.staffPatientView.tabs.notes} titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="note-edit-outline" type="material-community" size={22} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />} />
       </Tab>
 
       {/* ── Tab Content ── */}
@@ -283,13 +284,13 @@ const StaffPatientView = ({ route, navigation }) => {
         {tabIndex === 0 && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding} style={{ flex: 1 }}>
             <View style={styles.sectionHeaderRow}>
-              <Text style={styles.sectionHeading}>البرنامج الغذائي</Text>
+              <Text style={styles.sectionHeading}>{t.staffPatientView.nutritionPlan}</Text>
               {canEditNutrition && (
                 <TouchableOpacity
                   onPress={() => navigation.navigate("NutritionistTable", { patientId: patient?.patient_id })}
                   style={styles.editBtn}>
                   <Icon name="pencil-outline" type="material-community" size={16} color="#fff" />
-                  <Text style={styles.editBtnText}>تعديل</Text>
+                  <Text style={styles.editBtnText}>{t.staffPatientView.edit}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -297,27 +298,27 @@ const StaffPatientView = ({ route, navigation }) => {
             {nutritionPlan ? (
               <View style={styles.nutritionCard}>
                 <View style={styles.planHeader}>
-                  <Text style={styles.planTitle}>{nutritionPlan.title || "الخطة الحالية"}</Text>
+                  <Text style={styles.planTitle}>{nutritionPlan.title || t.staffPatientView.currentPlan}</Text>
                   <Icon name="calendar-check" type="material-community" color="#fff" size={20} />
                 </View>
                 <View style={styles.planBody}>
                   <View style={styles.dateInfoContainer}>
-                    <View style={styles.dateSubBox}><Text style={styles.dateLabelText}>من تاريخ:</Text><Text style={styles.dateValueText}>{formatDate(nutritionPlan.startDate || nutritionPlan.start_date)}</Text></View>
+                    <View style={styles.dateSubBox}><Text style={styles.dateLabelText}>{t.staffPatientView.fromDate}</Text><Text style={styles.dateValueText}>{formatDate(nutritionPlan.startDate || nutritionPlan.start_date)}</Text></View>
                     <Icon name="arrow-left-thin" type="material-community" size={20} color="#cbd5e1" />
-                    <View style={styles.dateSubBox}><Text style={styles.dateLabelText}>إلى تاريخ:</Text><Text style={styles.dateValueText}>{formatDate(nutritionPlan.endDate || nutritionPlan.end_date)}</Text></View>
+                    <View style={styles.dateSubBox}><Text style={styles.dateLabelText}>{t.staffPatientView.toDate}</Text><Text style={styles.dateValueText}>{formatDate(nutritionPlan.endDate || nutritionPlan.end_date)}</Text></View>
                   </View>
 
                   <View style={styles.descriptionSection}>
-                    <Text style={styles.descTitle}>وصف البرنامج:</Text>
-                    <Text style={styles.descContent}>{nutritionPlan.description || "لا يوجد وصف"}</Text>
+                    <Text style={styles.descTitle}>{t.staffPatientView.programDesc}</Text>
+                    <Text style={styles.descContent}>{nutritionPlan.description || t.staffPatientView.noDesc}</Text>
                   </View>
 
                   <Divider style={{ marginVertical: 15 }} />
 
-                  <Text style={[styles.sectionHeading, { fontSize: 16, marginBottom: 10 }]}>توزيع الوجبات اليومية:</Text>
-                  <MealItem label="الفطور" content={nutritionPlan.breakfast} icon="coffee-outline" color="#f59e0b" />
-                  <MealItem label="الغداء" content={nutritionPlan.lunch} icon="food-turkey" color="#ef4444" />
-                  <MealItem label="العشاء" content={nutritionPlan.dinner} icon="weather-night" color="#3b82f6" />
+                  <Text style={[styles.sectionHeading, { fontSize: 16, marginBottom: 10 }]}>{t.staffPatientView.dailyMeals}</Text>
+                  <MealItem label={t.staffPatientView.breakfast} content={nutritionPlan.breakfast} icon="coffee-outline" color="#f59e0b" />
+                  <MealItem label={t.staffPatientView.lunch} content={nutritionPlan.lunch} icon="food-turkey" color="#ef4444" />
+                  <MealItem label={t.staffPatientView.dinner} content={nutritionPlan.dinner} icon="weather-night" color="#3b82f6" />
 
                   {(nutritionPlan.meal_notes || nutritionPlan.mealNotes) && (
                     <View style={styles.notesBox}>
@@ -328,17 +329,17 @@ const StaffPatientView = ({ route, navigation }) => {
 
                   <Divider style={{ marginVertical: 15 }} />
 
-                  <InfoItem label="المسموحات" value={nutritionPlan.allowed_items || nutritionPlan.allowedItems} icon="check-decagram" color="#059669" />
-                  <InfoItem label="الممنوعات" value={nutritionPlan.forbidden_items || nutritionPlan.forbiddenItems} icon="alert-octagon" color="#ef4444" />
+                  <InfoItem label={t.staffPatientView.allowedItems} value={nutritionPlan.allowed_items || nutritionPlan.allowedItems} icon="check-decagram" color="#059669" />
+                  <InfoItem label={t.staffPatientView.forbiddenItems} value={nutritionPlan.forbidden_items || nutritionPlan.forbiddenItems} icon="alert-octagon" color="#ef4444" />
                 </View>
               </View>
             ) : (
               <View style={styles.emptyState}>
                 <Icon name="food-off-outline" type="material-community" size={60} color="#cbd5e1" />
-                <Text style={styles.emptyText}>لا يوجد برنامج غذائي حالي</Text>
+                <Text style={styles.emptyText}>{t.staffPatientView.noNutritionPlan}</Text>
                 {canEditNutrition && (
                   <Button
-                    title="إنشاء برنامج"
+                    title={t.staffPatientView.createProgram}
                     onPress={() => navigation.navigate("NutritionistTable", { patientId: patient?.patient_id })}
                     buttonStyle={[styles.editBtn, { marginTop: 15, paddingHorizontal: 20 }]}
                   />
@@ -352,7 +353,7 @@ const StaffPatientView = ({ route, navigation }) => {
         {tabIndex === 1 && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding} style={{ flex: 1 }}>
             <View style={styles.sectionHeaderRow}>
-              <Text style={styles.sectionHeading}>سجل جلسات الغسيل</Text>
+              <Text style={styles.sectionHeading}>{t.staffPatientView.sessionsLog}</Text>
               <TouchableOpacity
                 style={styles.statsBtn}
                 onPress={() => navigation.navigate("PatientSessionStatistics", {
@@ -361,14 +362,14 @@ const StaffPatientView = ({ route, navigation }) => {
                 })}
               >
                 <Icon name="chart-line" type="material-community" size={16} color="#fff" />
-                <Text style={styles.statsBtnText}>إحصائيات</Text>
+                <Text style={styles.statsBtnText}>{t.staffPatientView.statistics}</Text>
               </TouchableOpacity>
             </View>
             {sessions.length > 0 ? sessions.map((session, index) => {
               const statusConfig = {
-                COMPLETED: { label: "مكتملة", bg: "#dcfce7", text: "#166534", icon: "check-circle-outline", borderColor: "#059669" },
-                IN_PROGRESS: { label: "جارية", bg: "#fef3c7", text: "#92400e", icon: "progress-clock", borderColor: "#f59e0b" },
-                SCHEDULED: { label: "مجدولة", bg: "#dbeafe", text: "#1e40af", icon: "calendar-clock", borderColor: "#3b82f6" },
+                COMPLETED: { label: t.patientProfile.status.completed, bg: "#dcfce7", text: "#166534", icon: "check-circle-outline", borderColor: "#059669" },
+                IN_PROGRESS: { label: t.patientProfile.status.pending, bg: "#fef3c7", text: "#92400e", icon: "progress-clock", borderColor: "#f59e0b" },
+                SCHEDULED: { label: t.patientProfile.status.scheduled || "مجدولة", bg: "#dbeafe", text: "#1e40af", icon: "calendar-clock", borderColor: "#3b82f6" },
               };
               const sc = statusConfig[session.status] || { label: session.status, bg: "#f1f5f9", text: "#64748b", icon: "help-circle-outline", borderColor: "#94a3b8" };
               return (
@@ -400,13 +401,13 @@ const StaffPatientView = ({ route, navigation }) => {
                   <View style={styles.sessionMetricsRow}>
                     <View style={styles.sessionMetricBox}>
                       <Icon name="heart-pulse" type="material-community" size={14} color="#ef4444" />
-                      <Text style={styles.metricLabel}>ضغط الدم قبل</Text>
+                      <Text style={styles.metricLabel}>{t.staffPatientView.bpBefore}</Text>
                       <Text style={[styles.metricValue, { fontSize: 13 }]}>{session.blood_pressure_before || "—"}</Text>
                     </View>
                     <View style={styles.sessionMetricDivider} />
                     <View style={styles.sessionMetricBox}>
                       <Icon name="heart-outline" type="material-community" size={14} color="#f97316" />
-                      <Text style={styles.metricLabel}>ضغط الدم بعد</Text>
+                      <Text style={styles.metricLabel}>{t.staffPatientView.bpAfter}</Text>
                       <Text style={[styles.metricValue, { fontSize: 13 }]}>{session.blood_pressure_after || "—"}</Text>
                     </View>
                   </View>
@@ -414,11 +415,11 @@ const StaffPatientView = ({ route, navigation }) => {
                   {/* Tap hint */}
                   <View style={styles.sessionTapHint}>
                     <Icon name="chevron-left" type="material-community" size={16} color="#94a3b8" />
-                    <Text style={styles.sessionTapHintText}>اضغط لعرض كل تفاصيل الجلسة</Text>
+                    <Text style={styles.sessionTapHintText}>{t.staffPatientView.tapDetailsHint}</Text>
                   </View>
                 </TouchableOpacity>
               );
-            }) : <View style={styles.emptyState}><Icon name="database-off" type="material-community" size={50} color="#cbd5e1" /><Text style={styles.emptyText}>لا توجد جلسات مسجلة</Text></View>}
+            }) : <View style={styles.emptyState}><Icon name="database-off" type="material-community" size={50} color="#cbd5e1" /><Text style={styles.emptyText}>{t.staffPatientView.noSessions}</Text></View>}
           </ScrollView>
         )}
 
@@ -427,15 +428,15 @@ const StaffPatientView = ({ route, navigation }) => {
         {tabIndex === 2 && (
           <View style={{ flex: 1 }}>
             <View style={styles.subTabContainer}>
-              <TouchableOpacity onPress={() => setSubTabIndex(0)} style={[styles.subTabItem, subTabIndex === 0 && styles.subTabActive]}><Text style={[styles.subTabText, subTabIndex === 0 && styles.subTextActive]}>الأدوية</Text></TouchableOpacity>
-              <TouchableOpacity onPress={() => setSubTabIndex(1)} style={[styles.subTabItem, subTabIndex === 1 && styles.subTabActive]}><Text style={[styles.subTabText, subTabIndex === 1 && styles.subTextActive]}>المختبر</Text></TouchableOpacity>
-              <TouchableOpacity onPress={() => setSubTabIndex(2)} style={[styles.subTabItem, subTabIndex === 2 && styles.subTabActive]}><Text style={[styles.subTabText, subTabIndex === 2 && styles.subTextActive]}>الأشعة</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => setSubTabIndex(0)} style={[styles.subTabItem, subTabIndex === 0 && styles.subTabActive]}><Text style={[styles.subTabText, subTabIndex === 0 && styles.subTextActive]}>{t.staffPatientView.subTabs.medications}</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => setSubTabIndex(1)} style={[styles.subTabItem, subTabIndex === 1 && styles.subTabActive]}><Text style={[styles.subTabText, subTabIndex === 1 && styles.subTextActive]}>{t.staffPatientView.subTabs.lab}</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => setSubTabIndex(2)} style={[styles.subTabItem, subTabIndex === 2 && styles.subTabActive]}><Text style={[styles.subTabText, subTabIndex === 2 && styles.subTextActive]}>{t.staffPatientView.subTabs.radiology}</Text></TouchableOpacity>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
               {subTabIndex === 0 && (
                 <View>
-                  <Text style={styles.sectionHeading}>الوصفات الطبية</Text>
+                  <Text style={styles.sectionHeading}>{t.staffPatientView.prescriptions}</Text>
                   {prescriptions.length > 0 ? prescriptions.map((item, idx) => (
                     <View key={idx} style={styles.prescriptionCard}>
                       <View style={styles.prescriptionHeader}>
@@ -443,7 +444,7 @@ const StaffPatientView = ({ route, navigation }) => {
                           <Text style={styles.prescriptionDoctor}>د. {item.doctor?.full_name}</Text>
                           <View style={[styles.statusBadge, { backgroundColor: item.dispense_status === 'DISPENSED' ? '#dcfce7' : '#fee2e2' }]}>
                             <Text style={[styles.statusText, { color: item.dispense_status === 'DISPENSED' ? '#166534' : '#991b1b' }]}>
-                              {item.dispense_status === 'DISPENSED' ? 'تم الصرف' : 'بانتظار الصرف'}
+                              {item.dispense_status === 'DISPENSED' ? t.staffPatientView.dispensed : t.staffPatientView.pendingDispense}
                             </Text>
                           </View>
                         </View>
@@ -455,11 +456,11 @@ const StaffPatientView = ({ route, navigation }) => {
                           <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' }}>
                             <View style={styles.drugNameRow}>
                               <Icon name="pill" type="material-community" size={20} color={drug.is_active ? "#204a42" : "#94a3b8"} />
-                              <Text style={[styles.drugName, { color: drug.is_active ? '#204a42' : '#94a3b8' }]}>{drug.drug_name} {!drug.is_active && "(ملغي)"}</Text>
+                              <Text style={[styles.drugName, { color: drug.is_active ? '#204a42' : '#94a3b8' }]}>{drug.drug_name} {!drug.is_active && `(${t.staffPatientView.canceled})`}</Text>
                             </View>
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                               <Text style={{ fontSize: 11, color: drug.status ? '#059669' : '#f59e0b', marginRight: 4 }}>
-                                {drug.status ? 'صُرِف' : 'لم يُصرف'}
+                                {drug.status ? t.staffPatientView.drugDispensed : t.staffPatientView.drugNotDispensed}
                               </Text>
                               <Icon name={drug.status ? "check-circle" : "clock-outline"} type="material-community" size={18} color={drug.status ? "#059669" : "#f59e0b"} />
                             </View>
@@ -468,7 +469,7 @@ const StaffPatientView = ({ route, navigation }) => {
                         </View>
                       ))}
                     </View>
-                  )) : <View style={styles.emptyState}><Icon name="pill-off" type="material-community" size={60} color="#cbd5e1" /><Text style={styles.emptyText}>لا توجد أدوية</Text></View>}
+                  )) : <View style={styles.emptyState}><Icon name="pill-off" type="material-community" size={60} color="#cbd5e1" /><Text style={styles.emptyText}>{t.staffPatientView.noMedications}</Text></View>}
                 </View>
               )}
               {subTabIndex === 1 && medicalTests.map((test, idx) => (
@@ -507,7 +508,7 @@ const StaffPatientView = ({ route, navigation }) => {
         {tabIndex === 3 && (
           <View style={styles.emptyState}>
             <Icon name="note-text-outline" type="material-community" size={60} color="#cbd5e1" />
-            <Text style={styles.emptyText}>قريباً</Text>
+            <Text style={styles.emptyText}>{t.staffPatientView.comingSoon}</Text>
           </View>
         )}
       </View>

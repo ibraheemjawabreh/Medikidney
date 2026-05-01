@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
+import { useLanguage } from '../../context/LanguageContext';
 
 import PatientProfile from "./PatinetProfile";
 import WeightInput from "./Weightinput";
@@ -10,6 +11,8 @@ import ProfileSettingsScreen from "../SettingsWithProfile/SettingWithProfile";
 const Tab = createBottomTabNavigator();
 
 const PatinetPages = () => {
+  const { t } = useLanguage();
+
   return (
     <View style={styles.container}>
       <Tab.Navigator
@@ -21,26 +24,24 @@ const PatinetPages = () => {
           tabBarLabelStyle: styles.tabLabel,
           tabBarIcon: ({ color, focused }) => {
             let iconName;
-
             if (route.name === "Profile") {
               iconName = focused ? "person" : "person-outline";
             } else if (route.name === "Settings") {
               iconName = focused ? "settings" : "settings-outline";
             }
-
             return <Ionicons name={iconName} size={24} color={color} />;
           },
         })}
       >
         <Tab.Screen
-          name="Settings"
-          component={ProfileSettingsScreen}
-          options={{ title: "الإعدادات" }}
-        />
-        <Tab.Screen
           name="Profile"
           component={PatientProfile}
-          options={{ title: "ملفي" }}
+          options={{ title: t.patientTabs.profile }}
+        />
+        <Tab.Screen
+          name="Settings"
+          component={ProfileSettingsScreen}
+          options={{ title: t.patientTabs.settings }}
         />
       </Tab.Navigator>
     </View>
@@ -68,7 +69,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 20,
     borderTopWidth: 0,
-    boxShadow: '0px -2px 8px rgba(0,0,0,0.1)'
   },
   tabLabel: {
     fontSize: 12,

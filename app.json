@@ -5,11 +5,11 @@
     "version": "1.0.0",
     "scheme": "medikidney",
     "orientation": "portrait",
-    "icon": "./assets/logo.jpeg",
+    "icon": "./assets/project-logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/project-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

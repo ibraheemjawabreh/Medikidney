@@ -1,5 +1,3 @@
-// screens/Nurse/dialysisSessions/VitalSignsTab.jsx
-
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TextInput, StyleSheet,
@@ -7,6 +5,7 @@ import {
 } from 'react-native';
 import api from "../../services/api";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useLanguage } from '../../context/LanguageContext';
 
 // ── Validate Weight ─────────────────────────────────────────────────────────
 const validateWeight = (val, fieldName, required = true) => {
@@ -20,38 +19,40 @@ const validateWeight = (val, fieldName, required = true) => {
 };
 
 // ── تنسيق الوقت بشكل واضح ────────────────────────────────────────────────────
-const formatDateTime = (dateStr) => {
-  if (!dateStr) return { time: "غير محدد", ago: "" };
+const formatDateTime = (dateStr, t) => {
+  if (!dateStr) return { time: t.unknown, ago: "" };
   const date = new Date(dateStr);
   const now  = new Date();
 
-  const time = date.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+  // تنسيق الوقت مع مراعاة اللغة المختارة
+  const locale = t.vitalSigns.now === 'الآن' ? 'ar-SA' : 'en-US';
+  const time = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
   const diffMs  = now - date;
   const diffMin = Math.floor(diffMs / 60000);
 
   let ago = "";
-  if      (diffMin < 1)   ago = "الآن";
-  else if (diffMin < 60)  ago = `منذ ${diffMin} دقيقة`;
-  else if (diffMin < 120) ago = "منذ ساعة تقريباً";
-  else if (diffMin < 1440) ago = `منذ ${Math.floor(diffMin / 60)} ساعات`;
-  else ago = `منذ ${Math.floor(diffMin / 1440)} يوم`;
+  if      (diffMin < 1)   ago = t.vitalSigns.now;
+  else if (diffMin < 60)  ago = t.vitalSigns.minutesAgo.replace('{n}', diffMin);
+  else if (diffMin < 120) ago = t.vitalSigns.hourAgo;
+  else if (diffMin < 1440) ago = t.vitalSigns.hoursAgo.replace('{n}', Math.floor(diffMin / 60));
+  else ago = t.vitalSigns.dayAgo.replace('{n}', Math.floor(diffMin / 1440));
 
   return { time, ago };
 };
 
 // ── تحديد حالة الضغط ─────────────────────────────────────────────────────────
-const getBpStatus = (sys, dia) => {
-  if (sys > 140 || dia > 90) return { label: "مرتفع",  color: "#ef4444", bg: "#fef2f2" };
-  if (sys < 90  || dia < 60) return { label: "منخفض",  color: "#f59e0b", bg: "#fffbeb" };
-  return                             { label: "طبيعي",  color: "#059669", bg: "#f0fdf4" };
+const getBpStatus = (sys, dia, t) => {
+  if (sys > 140 || dia > 90) return { label: t.vitalSigns.status.high,  color: "#ef4444", bg: "#fef2f2" };
+  if (sys < 90  || dia < 60) return { label: t.vitalSigns.status.low,  color: "#f59e0b", bg: "#fffbeb" };
+  return                             { label: t.vitalSigns.status.normal,  color: "#059669", bg: "#f0fdf4" };
 };
 
 // ── بطاقة قراءة واحدة ────────────────────────────────────────────────────────
-const VitalCard = ({ item, index, totalCount, onDelete }) => {
+const VitalCard = ({ item, index, totalCount, onDelete, t }) => {
   const vitalId        = item.vital_id || item.id;
-  const { time, ago }  = formatDateTime(item.recorded_at || item.createdAt);
-  const bpStatus       = getBpStatus(item.systolic, item.diastolic);
+  const { time, ago }  = formatDateTime(item.recorded_at || item.createdAt, t);
+  const bpStatus       = getBpStatus(item.systolic, item.diastolic, t);
   const readingNumber  = totalCount - index; // رقم القراءة (الأحدث = الأكبر)
 
   return (
@@ -175,6 +176,7 @@ const cardStyles = StyleSheet.create({
 
 // ── المكوّن الرئيسي ───────────────────────────────────────────────────────────
 const VitalSignsTab = ({ route }) => {
+  const { t } = useLanguage();
   const sessionId = route?.params?.sessionId;
 
   const [loading,      setLoading]      = useState(false);
@@ -209,7 +211,7 @@ const VitalSignsTab = ({ route }) => {
   const handleSave = async () => {
     const { systolic, diastolic, pulse, temperature } = form;
     if (!systolic || !diastolic || !pulse || !temperature)
-      return Alert.alert("تنبيه", "يرجى تعبئة الضغط والنبض والحرارة على الأقل.");
+      return Alert.alert(t.error, t.vitalSigns.fillRequired);
 
     try {
       setIsSubmitting(true);
@@ -223,13 +225,13 @@ const VitalSignsTab = ({ route }) => {
           oxygenSaturation: form.oxygen ? Number(form.oxygen) : null,
         }
       );
-      Alert.alert("تم ✅", "تم حفظ القراءة بنجاح");
+      Alert.alert(t.success, t.vitalSigns.saveSuccess);
       setForm({ systolic: '', diastolic: '', pulse: '', temperature: '', oxygen: '' });
       setShowForm(false);
       fetchVitals();
     } catch (err) {
       console.log("Save error:", err.response?.data);
-      Alert.alert("خطأ", "فشل الحفظ، تأكد من القيم المدخلة.");
+      Alert.alert(t.error, t.vitalSigns.saveFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -241,14 +243,14 @@ const VitalSignsTab = ({ route }) => {
     if (isNaN(numericId)) return;
 
     const confirmed = Platform.OS === 'web'
-      ? window.confirm("هل تريد حذف هذه القراءة نهائياً؟")
+      ? window.confirm(t.vitalSigns.deleteConfirmMsg)
       : await new Promise(resolve => {
           Alert.alert(
-            "تأكيد الحذف",
-            "هل تريد حذف هذه القراءة نهائياً؟",
+            t.vitalSigns.deleteConfirmTitle,
+            t.vitalSigns.deleteConfirmMsg,
             [
-              { text: "إلغاء", onPress: () => resolve(false), style: "cancel" },
-              { text: "حذف",   onPress: () => resolve(true) },
+              { text: t.cancel, onPress: () => resolve(false), style: "cancel" },
+              { text: t.vitalSigns.deleteConfirmTitle.replace('تأكيد ', ''),   onPress: () => resolve(true), style: "destructive" },
             ],
             { cancelable: true, onDismiss: () => resolve(false) }
           );
@@ -263,7 +265,7 @@ const VitalSignsTab = ({ route }) => {
       setVitals(prev => prev.filter(v => (v.vital_id || v.id) !== numericId));
     } catch (err) {
       console.log("Delete vital err:", err.response?.data || err.message);
-      Platform.OS === 'web' ? alert("لم ينجح الحذف") : Alert.alert("خطأ", "لم ينجح الحذف.");
+      Platform.OS === 'web' ? alert(t.vitalSigns.deleteFailed) : Alert.alert(t.error, t.vitalSigns.deleteFailed);
     }
   };
 
@@ -288,16 +290,16 @@ const VitalSignsTab = ({ route }) => {
             size={18} color="#fff"
           />
           <Text style={styles.addBtnText}>
-            {showForm ? "إلغاء" : "قراءة جديدة"}
+            {showForm ? t.cancel : t.vitalSigns.newReading}
           </Text>
         </Pressable>
-        <Text style={styles.pageTitle}>العلامات الحيوية</Text>
+        <Text style={styles.pageTitle}>{t.vitalSigns.title}</Text>
       </View>
 
       {/* ── آخر قراءة (ملخص سريع) ── */}
       {vitals.length > 0 && !showForm && (
         <View style={styles.latestCard}>
-          <Text style={styles.latestLabel}>آخر قراءة</Text>
+          <Text style={styles.latestLabel}>{t.vitalSigns.latestReading}</Text>
           <View style={styles.latestRow}>
             <View style={styles.latestItem}>
               <Text style={styles.latestVal}>
@@ -328,7 +330,7 @@ const VitalSignsTab = ({ route }) => {
             )}
           </View>
           <Text style={styles.latestTime}>
-            {formatDateTime(vitals[0].recorded_at || vitals[0].createdAt).ago}
+            {formatDateTime(vitals[0].recorded_at || vitals[0].createdAt, t).ago}
           </Text>
         </View>
       )}
@@ -336,10 +338,10 @@ const VitalSignsTab = ({ route }) => {
       {/* ── فورم الإدخال ── */}
       {showForm && (
         <View style={styles.formCard}>
-          <Text style={styles.formTitle}>تسجيل قراءة جديدة</Text>
+          <Text style={styles.formTitle}>{t.vitalSigns.recordReading}</Text>
 
           {/* ضغط الدم */}
-          <Text style={styles.fieldLabel}>ضغط الدم (mmHg) *</Text>
+          <Text style={styles.fieldLabel}>{t.vitalSigns.bloodPressure}</Text>
           <View style={styles.bpRow}>
             <View style={[styles.inputBox, { flex: 1 }]}>
               <Text style={styles.bpTag}>SYS</Text>
@@ -365,7 +367,7 @@ const VitalSignsTab = ({ route }) => {
           {/* نبض + حرارة */}
           <View style={styles.twoCol}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.fieldLabel}>النبض (bpm) *</Text>
+              <Text style={styles.fieldLabel}>{t.vitalSigns.pulse}</Text>
               <View style={styles.inputBox}>
                 <MaterialCommunityIcons name="pulse" size={16} color="#f59e0b" style={{ marginLeft: 4 }} />
                 <TextInput
@@ -378,7 +380,7 @@ const VitalSignsTab = ({ route }) => {
             </View>
             <View style={{ width: 12 }} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.fieldLabel}>الحرارة (°C) *</Text>
+              <Text style={styles.fieldLabel}>{t.vitalSigns.temperature}</Text>
               <View style={styles.inputBox}>
                 <MaterialCommunityIcons name="thermometer" size={16} color="#8b5cf6" style={{ marginLeft: 4 }} />
                 <TextInput
@@ -392,7 +394,7 @@ const VitalSignsTab = ({ route }) => {
           </View>
 
           {/* أكسجين */}
-          <Text style={styles.fieldLabel}>نسبة الأكسجين % (اختياري)</Text>
+          <Text style={styles.fieldLabel}>{t.vitalSigns.oxygen}</Text>
           <View style={styles.inputBox}>
             <MaterialCommunityIcons name="water-percent" size={16} color="#0ea5e9" style={{ marginLeft: 4 }} />
             <TextInput
@@ -410,7 +412,7 @@ const VitalSignsTab = ({ route }) => {
           >
             {isSubmitting
               ? <ActivityIndicator color="#fff" size="small" />
-              : <Text style={styles.saveBtnText}>حفظ القراءة</Text>
+              : <Text style={styles.saveBtnText}>{t.vitalSigns.saveReading}</Text>
             }
           </Pressable>
         </View>
@@ -422,13 +424,13 @@ const VitalSignsTab = ({ route }) => {
       ) : vitals.length === 0 ? (
         <View style={styles.emptyBox}>
           <MaterialCommunityIcons name="heart-pulse" size={48} color="#d1d5db" />
-          <Text style={styles.emptyText}>لا توجد قراءات بعد</Text>
-          <Text style={styles.emptySub}>اضغط "قراءة جديدة" للبدء</Text>
+          <Text style={styles.emptyText}>{t.vitalSigns.noReadings}</Text>
+          <Text style={styles.emptySub}>{t.vitalSigns.noReadingsSub}</Text>
         </View>
       ) : (
         <>
           <Text style={styles.historyLabel}>
-            السجل الكامل ({vitals.length} قراءة)
+            {t.vitalSigns.fullRecord} ({vitals.length} {t.vitalSigns.readings})
           </Text>
           {vitals.map((item, i) => (
             <VitalCard
@@ -437,6 +439,7 @@ const VitalSignsTab = ({ route }) => {
               index={i}
               totalCount={vitals.length}
               onDelete={handleDelete}
+              t={t}
             />
           ))}
         </>

@@ -7,8 +7,10 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../services/api";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useLanguage } from '../../context/LanguageContext';
 
 const SelectPatient = () => {
+  const { t } = useLanguage();
   const navigation = useNavigation();
 
   const [loading, setLoading]           = useState(false);
@@ -51,7 +53,7 @@ const SelectPatient = () => {
       }
 
     } catch (e) {
-      Alert.alert("خطأ", "فشل جلب البيانات");
+      Alert.alert(t.error, t.selectPatient.fetchError);
     } finally {
       setLoading(false);
     }
@@ -64,13 +66,13 @@ const SelectPatient = () => {
     // إذا كان المريض مخصصاً لأي شخص (أنا أو غيري) -> لا يمكن التعديل هنا
     if (patient.assignedNurseId !== null) {
       const msg = patient.assignedNurseId === myNurseId
-        ? "هذا المريض مضاف لقائمتك بالفعل. يمكنك إزالته من شاشة 'حالة الغسيل' عبر سلة المهملات."
-        : `هذا المريض محجوز مع الممرض: ${patient.assignedNurseName}`;
-      return Alert.alert("غير متاح", msg);
+        ? t.selectPatient.alreadyAdded
+        : `${t.selectPatient.takenByNurse} ${patient.assignedNurseName}`;
+      return Alert.alert(t.selectPatient.notAvailable, msg);
     }
 
     if (patient.sessionStatus === "COMPLETED") {
-      return Alert.alert("تنبيه", "أتم المريض جلسته");
+      return Alert.alert(t.error, t.selectPatient.sessionDone);
     }
 
     setSelectedIds(prev =>
@@ -112,7 +114,7 @@ const SelectPatient = () => {
       navigation.navigate("PatientState", { selectedPatientIds: selectedIds });
 
     } catch (err) {
-      Alert.alert("خطأ", "فشل عملية الحجز");
+      Alert.alert(t.error, t.selectPatient.bookingError);
     } finally {
       setProceeding(false);
     }
@@ -121,7 +123,7 @@ const SelectPatient = () => {
   // ─── زر حالة الغسيل ─────────────────────────────────────
   const goToStatus = () => {
     if (confirmedIds.length === 0) {
-      return Alert.alert("تنبيه", "يجب تأكيد اختيار المرضى أولاً عبر زر المتابعة");
+      return Alert.alert(t.error, t.selectPatient.confirmFirst);
     }
     navigation.navigate("PatientState", { selectedPatientIds: confirmedIds });
   };
@@ -132,7 +134,7 @@ const SelectPatient = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>جلسات اليوم</Text>
+          <Text style={styles.headerTitle}>{t.selectPatient.title}</Text>
 
           {/* زر حالة الغسيل - يعتمد فقط على confirmedIds */}
           <Pressable
@@ -151,7 +153,7 @@ const SelectPatient = () => {
               styles.stateBtnText,
               confirmedIds.length === 0 && styles.stateBtnTextDisabled
             ]}>
-              حالة الغسيل {confirmedIds.length > 0 ? `(${confirmedIds.length})` : ""}
+              {t.selectPatient.dialysisStatus} {confirmedIds.length > 0 ? `(${confirmedIds.length})` : ""}
             </Text>
           </Pressable>
         </View>
@@ -164,7 +166,7 @@ const SelectPatient = () => {
               style={[styles.tab, activeShift === s.shiftNumber && styles.activeTab]}
             >
               <Text style={[styles.tabText, activeShift === s.shiftNumber && styles.activeTabText]}>
-                شفت {s.shiftNumber}
+                {t.selectPatient.shift} {s.shiftNumber}
               </Text>
               <View style={[styles.countBadge, activeShift === s.shiftNumber && styles.activeCountBadge]}>
                 <Text style={styles.countText}>{s.patientCount}</Text>
@@ -180,7 +182,7 @@ const SelectPatient = () => {
         ) : !currentShift?.patients || currentShift.patients.length === 0 ? (
           <View style={styles.emptyContainer}>
             <MaterialCommunityIcons name="file-document-outline" size={60} color="#cbd5e1" />
-            <Text style={styles.emptyText}>لا توجد مرضى في هذا الشفت</Text>
+            <Text style={styles.emptyText}>{t.selectPatient.noPatients}</Text>
           </View>
         ) : (
           currentShift.patients.map(patient => {
@@ -218,10 +220,10 @@ const SelectPatient = () => {
                     {patient.patientName}
                   </Text>
                   <Text style={styles.sub}>
-                    {isDone ? "اكتملت الجلسة" :
-                     isConfirmed ? "✓ مؤكد في قائمتك" :
-                     isTakenByOther ? `مع الممرض: ${patient.assignedNurseName}` :
-                     `جهاز: ${patient.machineNumber}`}
+                    {isDone ? t.selectPatient.sessionComplete :
+                     isConfirmed ? t.selectPatient.confirmedInList :
+                     isTakenByOther ? `${t.selectPatient.withNurse} ${patient.assignedNurseName}` :
+                     `${t.selectPatient.machine} ${patient.machineNumber}`}
                   </Text>
                 </View>
               </Pressable>
@@ -240,7 +242,7 @@ const SelectPatient = () => {
             {proceeding ? <ActivityIndicator color="#fff" /> : (
               <>
                 <MaterialCommunityIcons name="check-all" size={22} color="#fff" />
-                <Text style={styles.proceedText}>متابعة وإضافة للقائمة</Text>
+                <Text style={styles.proceedText}>{t.selectPatient.proceed}</Text>
               </>
             )}
           </Pressable>

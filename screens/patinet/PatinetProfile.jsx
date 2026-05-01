@@ -19,10 +19,12 @@ import { Tab, TabView, Button, Icon, Divider } from "@rneui/base";
 import api from "../../services/api";
 import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useLanguage } from '../../context/LanguageContext';
 
 const { width } = Dimensions.get("window");
 
 const PatientProfile = ({ navigation }) => {
+  const { t } = useLanguage();
   const [tabIndex, setTabIndex] = useState(0);
   const [subTabIndex, setSubTabIndex] = useState(0);
   const [patient, setPatient] = useState(null);
@@ -61,7 +63,7 @@ const PatientProfile = ({ navigation }) => {
       }
     } catch (error) {
       console.log("Fetch Error:", error.message);
-      Alert.alert("تنبيه", "حدث خطأ أثناء تحديث البيانات.");
+      Alert.alert(t.error, t.patientProfile.fetchError);
     } finally {
       setLoading(false);
     }
@@ -79,11 +81,11 @@ const PatientProfile = ({ navigation }) => {
     }
   };
 
-  const formatTime = (t) => {
-    if (!t) return "";
-    let [h, m] = t.split(":");
+  const formatTime = (timeStr) => {
+    if (!timeStr) return "";
+    let [h, m] = timeStr.split(":");
     let hh = parseInt(h);
-    return `${hh % 12 || 12}:${m} ${hh >= 12 ? "م" : "ص"}`;
+    return `${hh % 12 || 12}:${m} ${hh >= 12 ? t.time.pm : t.time.am}`;
   };
 
   const fetchNutritionPlan = async (id) => {
@@ -119,7 +121,7 @@ const PatientProfile = ({ navigation }) => {
       }
     } catch (e) {
       console.log("fetchSessions Error:", e);
-      Alert.alert("خطأ في جلب الجلسات", e.message);
+      Alert.alert(t.error, e.message);
       setSessions([]);
     }
   };
@@ -128,11 +130,11 @@ const PatientProfile = ({ navigation }) => {
   const handleSaveWeightAfter = async () => {
     const num = parseFloat(weightAfterInput);
     if (!weightAfterInput.trim()) {
-      setWeightAfterError('الوزن مطلوب');
+      setWeightAfterError(t.patientProfile.weightRequired);
       return;
     }
     if (isNaN(num) || num < 20 || num > 300) {
-      setWeightAfterError('يجب أن يكون الوزن رقماً بين 20 و 300 كغ');
+      setWeightAfterError(t.patientProfile.weightInvalid);
       return;
     }
     setWeightAfterError('');
@@ -143,7 +145,7 @@ const PatientProfile = ({ navigation }) => {
       await api.patch(`/dialysis-sessions/${sid}/status`, {
         weightAfter: num,
       });
-      Alert.alert('تم ✅', 'تم حفظ وزنك بعد الجلسة بنجاح!');
+      Alert.alert(t.success, t.patientProfile.weightSaved);
       setPendingWeightSession(null);
       setWeightAfterInput('');
       // إعادة جلب الجلسات
@@ -152,7 +154,7 @@ const PatientProfile = ({ navigation }) => {
       }
     } catch (err) {
       console.log('Save weight err:', err.response?.data);
-      setWeightAfterError('فشل حفظ الوزن. يرجى المحاولة مرة أخرى.');
+      setWeightAfterError(t.patientProfile.weightSaveFailed);
     } finally {
       setIsSavingWeight(false);
     }
@@ -186,8 +188,8 @@ const PatientProfile = ({ navigation }) => {
   };
 
   const formatDate = (date) => {
-    if (!date) return "قيد الانتظار";
-    return new Date(date).toLocaleDateString("ar-EG", {
+    if (!date) return t.patientProfile.status.pending;
+    return new Date(date).toLocaleDateString(t.vitalSigns.now === 'الآن' ? "ar-EG" : "en-US", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -210,7 +212,7 @@ const PatientProfile = ({ navigation }) => {
       const fullUrl = response.data.url;
 
       if (!fullUrl) {
-        Alert.alert("خطأ", "فشل في جلب رابط الملف");
+        Alert.alert(t.error, t.failed);
         return;
       }
 
@@ -218,11 +220,11 @@ const PatientProfile = ({ navigation }) => {
       if (supported) {
         await Linking.openURL(fullUrl);
       } else {
-        Alert.alert("خطأ", "لا يمكن فتح هذا النوع من الروابط على جهازك.");
+        Alert.alert(t.error, t.failed);
       }
     } catch (e) {
       console.log("Download Error:", e.message);
-      Alert.alert("خطأ", "حدث مشكلة أثناء محاولة فتح الملف.");
+      Alert.alert(t.error, t.failed);
     }
   };
 
@@ -231,7 +233,7 @@ const PatientProfile = ({ navigation }) => {
       <Icon name={icon} type="material-community" size={22} color={color} />
       <View style={{ marginRight: 12, flex: 1 }}>
         <Text style={styles.infoLabel}>{label}</Text>
-        <Text style={styles.infoTextValue}>{value || "غير محدد"}</Text>
+        <Text style={styles.infoTextValue}>{value || t.unknown}</Text>
       </View>
     </View>
   );
@@ -243,7 +245,7 @@ const PatientProfile = ({ navigation }) => {
       </View>
       <View style={{ marginRight: 12, flex: 1 }}>
         <Text style={[styles.mealLabel, { color }]}>{label}</Text>
-        <Text style={styles.mealContent}>{content || "لم يتم تحديد وجبة"}</Text>
+        <Text style={styles.mealContent}>{content || t.patientProfile.noMeal}</Text>
       </View>
     </View>
   );
@@ -260,11 +262,11 @@ const PatientProfile = ({ navigation }) => {
 
       <View style={styles.reportContent}>
         <Text style={styles.reportDetail}>
-          <Text style={styles.boldLabel}>الطبيب:</Text> د. {doctor || "غير محدد"}
+          <Text style={styles.boldLabel}>{t.patientProfile.doctor}:</Text> د. {doctor || t.unknown}
         </Text>
 
         <Text style={styles.reportDetail}>
-          <Text style={styles.boldLabel}>الوصف:</Text> {description || "لا يوجد وصف"}
+          <Text style={styles.boldLabel}>{t.patientProfile.description}:</Text> {description || t.unknown}
         </Text>
 
         <View
@@ -285,13 +287,13 @@ const PatientProfile = ({ navigation }) => {
               },
             ]}
           >
-            {status === "PENDING" || status === "pending" ? "قيد الانتظار" : "مكتمل"}
+            {status === "PENDING" || status === "pending" ? t.patientProfile.status.pending : t.patientProfile.status.completed}
           </Text>
         </View>
       </View>
 
       <Button
-        title="معاينة الملف"
+        title={t.patientProfile.previewFile}
         icon={
           <Icon
             name="file-pdf-box"
@@ -312,7 +314,7 @@ const PatientProfile = ({ navigation }) => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#059669" />
-        <Text style={styles.loadingText}>جاري تحديث البيانات...</Text>
+        <Text style={styles.loadingText}>{t.patientProfile.loading}</Text>
       </View>
     );
   }
@@ -343,9 +345,9 @@ const PatientProfile = ({ navigation }) => {
                 </View>
               </View>
 
-              <Text style={weightLockStyles.title}>أدخل وزنك بعد الجلسة</Text>
+              <Text style={weightLockStyles.title}>{t.patientProfile.weightAfterTitle}</Text>
               <Text style={weightLockStyles.subtitle}>
-                يجب إدخال وزنك بعد الجلسة الأخيرة قبل تصفح الجلسات
+                {t.patientProfile.weightAfterSubtitle}
               </Text>
 
               {/* معلومات الجلسة */}
@@ -357,7 +359,7 @@ const PatientProfile = ({ navigation }) => {
                 </Text>
                 {pendingWeightSession.weight_before != null && (
                   <Text style={weightLockStyles.weightBeforeText}>
-                    وزنك قبل الجلسة: <Text style={{ fontWeight: '800', color: '#3b82f6' }}>{pendingWeightSession.weight_before} kg</Text>
+                    {t.patientProfile.weightBefore}: <Text style={{ fontWeight: '800', color: '#3b82f6' }}>{pendingWeightSession.weight_before} kg</Text>
                   </Text>
                 )}
               </View>
@@ -383,7 +385,7 @@ const PatientProfile = ({ navigation }) => {
               {/* حساب الفرق */}
               {pendingWeightSession.weight_before != null && weightAfterInput && !isNaN(parseFloat(weightAfterInput)) && (
                 <View style={weightLockStyles.diffRow}>
-                  <Text style={weightLockStyles.diffLabel}>كمية السوائل المزالة (تقريبي)</Text>
+                  <Text style={weightLockStyles.diffLabel}>{t.patientProfile.fluidRemoved}</Text>
                   <Text style={weightLockStyles.diffVal}>
                     {Math.abs(pendingWeightSession.weight_before - parseFloat(weightAfterInput)).toFixed(1)} لتر
                   </Text>
@@ -401,7 +403,7 @@ const PatientProfile = ({ navigation }) => {
                   ? <ActivityIndicator color="#fff" size="small" />
                   : <>
                       <MaterialCommunityIcons name="content-save-check" size={20} color="#fff" />
-                      <Text style={weightLockStyles.saveBtnText}>تأكيد وحفظ الوزن</Text>
+                      <Text style={weightLockStyles.saveBtnText}>{t.patientProfile.saveWeight}</Text>
                     </>
                 }
               </TouchableOpacity>
@@ -415,13 +417,7 @@ const PatientProfile = ({ navigation }) => {
         <View style={styles.headerCircleTwo} />
 
         <View style={styles.topBar}>
-          <TouchableOpacity
-            style={styles.glassIconButton}
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.85}
-          >
-            <Icon name="chevron-right" type="material-community" size={32} color="#fff" />
-          </TouchableOpacity>
+          <View />
 
           <TouchableOpacity
             style={styles.glassIconButton}
@@ -446,7 +442,7 @@ const PatientProfile = ({ navigation }) => {
 
           <View style={styles.patientHeaderInfo}>
             <Text style={styles.patientNameText}>
-              {patient?.full_name || "اسم المريض"}
+              {patient?.full_name || t.unknown}
             </Text>
           </View>
         </View>
@@ -460,25 +456,25 @@ const PatientProfile = ({ navigation }) => {
         variant="default"
       >
         <Tab.Item
-          title="التغذية"
+          title={t.patientProfile.tabs.nutrition}
           titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
           titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }}
           icon={<Icon name="food-apple" type="material-community" size={22} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />}
         />
         <Tab.Item
-          title="الجلسات"
+          title={t.patientProfile.tabs.sessions}
           titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
           titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }}
           icon={<Icon name="clock-outline" type="material-community" size={22} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />}
         />
         <Tab.Item
-          title="الفحوصات"
+          title={t.patientProfile.tabs.tests}
           titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
           titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }}
           icon={<Icon name="clipboard-pulse" type="material-community" size={22} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />}
         />
         <Tab.Item
-          title="المواعيد"
+          title={t.patientProfile.tabs.appointments}
           titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
           titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }}
           icon={<Icon name="calendar-clock" type="material-community" size={22} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />}
@@ -488,12 +484,12 @@ const PatientProfile = ({ navigation }) => {
       <TabView value={tabIndex} onChange={setTabIndex}>
         <TabView.Item style={styles.tabViewContent}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
-            <Text style={styles.sectionHeading}>البرنامج الغذائي</Text>
+            <Text style={styles.sectionHeading}>{t.patientProfile.tabs.nutrition}</Text>
 
             {nutritionPlan ? (
               <View style={styles.nutritionCard}>
                 <View style={styles.planHeader}>
-                  <Text style={styles.planTitle}>{nutritionPlan.title || "الخطة الحالية"}</Text>
+                  <Text style={styles.planTitle}>{nutritionPlan.title || t.unknown}</Text>
                   <Icon name="calendar-check" type="material-community" color="#fff" size={20} />
                 </View>
 
@@ -525,9 +521,9 @@ const PatientProfile = ({ navigation }) => {
 
                   <Divider style={{ marginVertical: 15 }} />
 
-                  <MealItem label="الفطور" content={nutritionPlan.breakfast} icon="coffee-outline" color="#f59e0b" />
-                  <MealItem label="الغداء" content={nutritionPlan.lunch} icon="food-turkey" color="#ef4444" />
-                  <MealItem label="العشاء" content={nutritionPlan.dinner} icon="weather-night" color="#3b82f6" />
+                  <MealItem label={t.patientProfile.meals.breakfast} content={nutritionPlan.breakfast} icon="coffee-outline" color="#f59e0b" />
+                  <MealItem label={t.patientProfile.meals.lunch} content={nutritionPlan.lunch} icon="food-turkey" color="#ef4444" />
+                  <MealItem label={t.patientProfile.meals.dinner} content={nutritionPlan.dinner} icon="weather-night" color="#3b82f6" />
 
                   <Divider style={{ marginVertical: 15 }} />
 
@@ -538,7 +534,7 @@ const PatientProfile = ({ navigation }) => {
             ) : (
               <View style={styles.emptyState}>
                 <Icon name="food-off-outline" type="material-community" size={60} color="#cbd5e1" />
-                <Text style={styles.emptyText}>لا يوجد برنامج غذائي حالي</Text>
+                <Text style={styles.emptyText}>{t.patientProfile.noNutritionPlan}</Text>
               </View>
             )}
           </ScrollView>
@@ -546,7 +542,7 @@ const PatientProfile = ({ navigation }) => {
 
         <TabView.Item style={styles.tabViewContent}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
-            <Text style={styles.sectionHeading}>سجل جلسات الغسيل</Text>
+            <Text style={styles.sectionHeading}>{t.patientProfile.tabs.sessions}</Text>
 
             {sessions.length > 0 ? sessions.map((session, index) => {
               const statusConfig = {
@@ -644,12 +640,12 @@ const PatientProfile = ({ navigation }) => {
                     {isActive ? (
                       <View style={styles.activeSessionBanner}>
                         <View style={styles.activeDot} />
-                        <Text style={styles.activeSessionText}>جلسة جارية — اضغط للدخول</Text>
+                        <Text style={styles.activeSessionText}>{t.patientProfile.status.pending} — {t.patientProfile.status.pending}</Text>
                       </View>
                     ) : (
                       <>
-                        <Icon name="chevron-left" type="material-community" size={16} color="#94a3b8" />
-                        <Text style={styles.sessionTapHintText}>اضغط لعرض كل تفاصيل الجلسة</Text>
+                        <Icon name={t.vitalSigns.now === 'الآن' ? "chevron-left" : "chevron-right"} type="material-community" size={16} color="#94a3b8" />
+                        <Text style={styles.sessionTapHintText}>{t.patientProfile.previewFile}</Text>
                       </>
                     )}
                   </View>
@@ -658,7 +654,7 @@ const PatientProfile = ({ navigation }) => {
             }) : (
               <View style={styles.emptyState}>
                 <Icon name="database-off" type="material-community" size={50} color="#cbd5e1" />
-                <Text style={styles.emptyText}>لا توجد جلسات مسجلة</Text>
+                <Text style={styles.emptyText}>{t.patientProfile.noSessions}</Text>
               </View>
             )}
           </ScrollView>
@@ -672,7 +668,7 @@ const PatientProfile = ({ navigation }) => {
                 style={[styles.subTabItem, subTabIndex === 0 && styles.subTabActive]}
               >
                 <Text style={[styles.subTabText, subTabIndex === 0 && styles.subTextActive]}>
-                  الأدوية
+                  {t.medications.title}
                 </Text>
               </TouchableOpacity>
 
@@ -698,7 +694,7 @@ const PatientProfile = ({ navigation }) => {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
               {subTabIndex === 0 && (
                 <View>
-                  <Text style={styles.sectionHeading}>الوصفات الطبية</Text>
+                  <Text style={styles.sectionHeading}>{t.medications.title}</Text>
 
                   {prescriptions.length > 0 ? prescriptions.map((item, idx) => (
                     <View key={idx} style={styles.prescriptionCard}>
@@ -726,7 +722,7 @@ const PatientProfile = ({ navigation }) => {
                                 },
                               ]}
                             >
-                              {item.dispense_status === "DISPENSED" ? "تم الصرف" : "بانتظار الصرف"}
+                              {item.dispense_status === "DISPENSED" ? t.patientProfile.status.completed : t.patientProfile.status.pending}
                             </Text>
                           </View>
                         </View>
@@ -773,7 +769,7 @@ const PatientProfile = ({ navigation }) => {
                   )) : (
                     <View style={styles.emptyState}>
                       <Icon name="pill-off" type="material-community" size={60} color="#cbd5e1" />
-                      <Text style={styles.emptyText}>لا توجد أدوية</Text>
+                      <Text style={styles.emptyText}>{t.medications.noMeds}</Text>
                     </View>
                   )}
                 </View>
@@ -814,7 +810,7 @@ const PatientProfile = ({ navigation }) => {
 
         <TabView.Item style={styles.tabViewContent}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
-            <Text style={styles.sectionHeading}>إدارة المواعيد</Text>
+            <Text style={styles.sectionHeading}>{t.appointments.title}</Text>
 
             <TouchableOpacity
               style={styles.bookingPrimaryBtn}
@@ -822,12 +818,12 @@ const PatientProfile = ({ navigation }) => {
               activeOpacity={0.8}
             >
               <Icon name="calendar-plus" type="material-community" color="white" size={24} />
-              <Text style={styles.bookingPrimaryBtnText}>إنشاء وإدارة المواعيد</Text>
+              <Text style={styles.bookingPrimaryBtnText}>{t.appointments.title}</Text>
             </TouchableOpacity>
 
             <View style={{ marginTop: 25 }}>
               <Text style={[styles.sectionHeading, { fontSize: 18, marginBottom: 15 }]}>
-                مواعيدك المحجوزة
+                {t.appointments.myAppointments}
               </Text>
 
               {myAppointments.length > 0 ? myAppointments.map((appt, index) => (
@@ -853,7 +849,7 @@ const PatientProfile = ({ navigation }) => {
               )) : (
                 <View style={styles.emptyApptBox}>
                   <Icon name="calendar-blank" type="material-community" size={40} color="#cbd5e1" />
-                  <Text style={styles.emptyText}>لا توجد مواعيد نشطة حالياً</Text>
+                  <Text style={styles.emptyText}>{t.patientProfile.noAppointments}</Text>
                 </View>
               )}
             </View>

@@ -3,8 +3,10 @@ import { useState } from "react";
 import { View, StyleSheet, Text, FlatList, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
 import api from "../../services/api";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useLanguage } from '../../context/LanguageContext';
 
 const SearchPatient = ({ navigation }) => {
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [patients, setPatients] = useState([]); // سميتها جمع لأنها قائمة
@@ -20,7 +22,7 @@ const SearchPatient = ({ navigation }) => {
       setPatients(response.data);
     } catch (err) {
       console.log("Search Error:", err);
-      setError("حدث خطأ أثناء البحث");
+      setError(t.searchPatient.fetchError || "حدث خطأ أثناء البحث");
     } finally {
       setIsLoading(false);
     }
@@ -45,14 +47,14 @@ const SearchPatient = ({ navigation }) => {
         
         {/* Header Section */}
         <View style={styles.headerSection}>
-          <Text style={styles.headerTitle}>البحث عن مريض</Text>
-          <Text style={styles.headerSubtitle}>ابحث عن ملف المريض بالاسم أو الرقم الطبي</Text>
+          <Text style={styles.headerTitle}>{t.searchPatient.title}</Text>
+          <Text style={styles.headerSubtitle}>{t.searchPatient.placeholder}</Text>
         </View>
 
         {/* Search Card */}
         <View style={styles.searchCard}>
           <Input
-            placeholder="اكتب اسم المريض هنا..."
+            placeholder={t.searchPatient.placeholder}
             value={search}
             onChangeText={handleChangeSearch}
             errorMessage={error}
@@ -64,7 +66,7 @@ const SearchPatient = ({ navigation }) => {
           />
 
           <Button
-            title="بدء البحث"
+            title={t.nurseTabs.search || "بحث"}
             loading={isLoading}
             onPress={() => handleSearch(search)}
             buttonStyle={styles.mainButton}
@@ -91,7 +93,7 @@ const SearchPatient = ({ navigation }) => {
                 > 
                   <View style={styles.patientInfo}>
                     <Text style={styles.patientName}>{item.name}</Text>
-                    <Text style={styles.patientId}>الرقم الطبي: #{item.id}</Text>
+                    <Text style={styles.patientId}>#{item.id}</Text>
                   </View>
                   <View style={styles.avatarCircle}>
                     <MaterialCommunityIcons name="account-circle" size={35} color="#059669" />
@@ -103,7 +105,7 @@ const SearchPatient = ({ navigation }) => {
         ) : search.length > 2 && !isLoading ? (
           <View style={styles.emptyState}>
              <MaterialCommunityIcons name="account-search-outline" size={60} color="#cbd5e1" />
-             <Text style={styles.emptyText}>لم نجد مريضاً بهذا الاسم</Text>
+             <Text style={styles.emptyText}>{t.searchPatient.noResults}</Text>
           </View>
         ) : null}
 

@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Pressable, Text, Alert, ActivityIndicator } from 'react-native';
 import api from '../../services/api';
+import { useLanguage } from '../../context/LanguageContext';
 
 const NotesTab = ({ route }) => {
+  const { t } = useLanguage();
   const { sessionId } = route.params;
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSaveNote = async () => {
-    if (!note.trim()) return Alert.alert("تنبيه", "يرجى كتابة ملاحظة أولاً");
+    if (!note.trim()) return Alert.alert(t.error, t.notes.required);
     try {
       setLoading(true);
       await api.patch(
         `/dialysis-sessions/${sessionId}`,
         { notes: note }
       );
-      Alert.alert("تم الحفظ", "تم حفظ الملاحظة بنجاح");
+      Alert.alert(t.success, t.notes.saveSuccess);
     } catch (error) {
-      Alert.alert("خطأ", "فشل حفظ الملاحظة");
+      Alert.alert(t.error, t.notes.saveFailed);
     } finally {
       setLoading(false);
     }
@@ -29,13 +31,13 @@ const NotesTab = ({ route }) => {
         style={styles.textArea}
         multiline
         numberOfLines={10}
-        placeholder="اكتب ملاحظاتك هنا..."
+        placeholder={t.notes.placeholder}
         textAlignVertical="top"
         value={note}
         onChangeText={setNote}
       />
       <Pressable style={styles.btn} onPress={handleSaveNote} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>حفظ الملاحظة</Text>}
+        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>{t.notes.saveBtn}</Text>}
       </Pressable>
     </View>
   );

@@ -7,21 +7,24 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import api from "../../services/api";
+import { useLanguage } from '../../context/LanguageContext';
 
-const SYMPTOMS_LIST = [
-  { id: 'LOW_BP', label: 'هبوط ضغط', icon: 'arrow-down-bold-circle-outline', color: '#ef4444' },
-  { id: 'CRAMPS', label: 'تشنجات عضليّة', icon: 'lightning-bolt-outline', color: '#f59e0b' },
-  { id: 'NAUSEA', label: 'غثيان / إقياء', icon: 'emoticon-confused-outline', color: '#10b981' },
-  { id: 'HEADACHE', label: 'صداع', icon: 'head-flash-outline', color: '#3b82f6' },
-  { id: 'CHEST_PAIN', label: 'ألم في الصدر', icon: 'heart-pulse', color: '#ec4899' },
-  { id: 'DIZZINESS', label: 'دوخة / دوار', icon: 'rotate-3d-variant', color: '#8b5cf6' },
-  { id: 'ITCHING', label: 'حكة جلدية', icon: 'hand-back-right-outline', color: '#06b6d4' },
-  { id: 'MUSCLE_PAIN', label: 'ألم عضلات', icon: 'arm-flex-outline', color: '#f97316' },
-  { id: 'OTHER', label: 'أخرى / ملاحظة', icon: 'dots-horizontal-circle-outline', color: '#6b7280' },
+const SYMPTOMS_LIST = (t) => [
+  { id: 'LOW_BP', label: t.symptoms.list.LOW_BP, icon: 'arrow-down-bold-circle-outline', color: '#ef4444' },
+  { id: 'CRAMPS', label: t.symptoms.list.CRAMPS, icon: 'lightning-bolt-outline', color: '#f59e0b' },
+  { id: 'NAUSEA', label: t.symptoms.list.NAUSEA, icon: 'emoticon-confused-outline', color: '#10b981' },
+  { id: 'HEADACHE', label: t.symptoms.list.HEADACHE, icon: 'head-flash-outline', color: '#3b82f6' },
+  { id: 'CHEST_PAIN', label: t.symptoms.list.CHEST_PAIN, icon: 'heart-pulse', color: '#ec4899' },
+  { id: 'DIZZINESS', label: t.symptoms.list.DIZZINESS, icon: 'rotate-3d-variant', color: '#8b5cf6' },
+  { id: 'ITCHING', label: t.symptoms.list.ITCHING, icon: 'hand-back-right-outline', color: '#06b6d4' },
+  { id: 'MUSCLE_PAIN', label: t.symptoms.list.MUSCLE_PAIN, icon: 'arm-flex-outline', color: '#f97316' },
+  { id: 'OTHER', label: t.symptoms.list.OTHER, icon: 'dots-horizontal-circle-outline', color: '#6b7280' },
 ];
 
 const SymptomsTab = ({ route }) => {
   const { sessionId } = route.params;
+  const { t } = useLanguage();
+  const symptomsList = SYMPTOMS_LIST(t);
 
   const [selectedIds, setSelectedIds] = useState([]);
   const [note, setNote] = useState('');
@@ -62,7 +65,7 @@ const SymptomsTab = ({ route }) => {
   // ── حفظ الكل (الأعراض والملاحظات) ──────────────────────────
   const handleSaveAll = async () => {
   if (selectedIds.length === 0 && !note.trim()) {
-    return Alert.alert("تنبيه", "يرجى اختيار عرض واحد على الأقل أو كتابة ملاحظة.");
+    return Alert.alert(t.error, t.symptoms.required);
   }
 
   try {
@@ -93,7 +96,7 @@ const SymptomsTab = ({ route }) => {
 
     await Promise.all(promises);
 
-    Alert.alert("تم الحفظ ✅", "تم تسجيل البيانات بنجاح");
+    Alert.alert(t.symptoms.saveSuccessTitle, t.symptoms.saveSuccess);
     setSelectedIds([]);
     setNote('');
     fetchData(); 
@@ -101,7 +104,7 @@ const SymptomsTab = ({ route }) => {
   } catch (err) {
     // طباعة الخطأ القادم من السيرفر للتأكد
     console.log("Detailed Error:", err.response?.data);
-    Alert.alert("خطأ", "تأكد من اختيار قيم صحيحة");
+    Alert.alert(t.error, t.symptoms.saveFailed);
   } finally {
     setIsSubmitting(false);
   }
@@ -117,7 +120,7 @@ const SymptomsTab = ({ route }) => {
       );
       fetchData();
     } catch (err) {
-      Alert.alert("خطأ", "فشل الحذف");
+      Alert.alert(t.error, t.symptoms.deleteFailed);
     }
   };
 
@@ -129,9 +132,9 @@ const SymptomsTab = ({ route }) => {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       
       {/* ── قسم الاختيارات ── */}
-      <Text style={styles.sectionTitle}>الأعراض الظاهرة الآن</Text>
+      <Text style={styles.sectionTitle}>{t.symptoms.title}</Text>
       <View style={styles.grid}>
-        {SYMPTOMS_LIST.map((item) => {
+        {symptomsList.map((item) => {
           const isSelected = selectedIds.includes(item.id);
           return (
             <Pressable
@@ -156,13 +159,13 @@ const SymptomsTab = ({ route }) => {
       </View>
 
       {/* ── قسم الملاحظات ── */}
-      <Text style={[styles.sectionTitle, { marginTop: 25 }]}>ملاحظات الممرض</Text>
+      <Text style={[styles.sectionTitle, { marginTop: 25 }]}>{t.symptoms.nurseNotes}</Text>
       <View style={styles.noteBox}>
         <TextInput
           style={styles.textArea}
           multiline
           numberOfLines={4}
-          placeholder="اكتب أي ملاحظات إضافية هنا حول حالة المريض..."
+          placeholder={t.symptoms.notesPlaceholder}
           placeholderTextColor="#9ca3af"
           value={note}
           onChangeText={setNote}
@@ -180,7 +183,7 @@ const SymptomsTab = ({ route }) => {
         ) : (
           <>
             <MaterialCommunityIcons name="content-save-check" size={20} color="#fff" />
-            <Text style={styles.saveBtnText}>حفظ الأعراض والملاحظات</Text>
+            <Text style={styles.saveBtnText}>{t.symptoms.saveBtn}</Text>
           </>
         )}
       </Pressable>
@@ -188,14 +191,14 @@ const SymptomsTab = ({ route }) => {
       {/* ── سجل الأعراض الحالية ── */}
 {history.length > 0 && (
   <View style={styles.historySection}>
-    <Text style={styles.historyTitle}>الأعراض والملحوظات المسجلة ({history.length})</Text>
+    <Text style={styles.historyTitle}>{t.symptoms.historyTitle} ({history.length})</Text>
     {history.map((h, i) => {
   // 1. التأكد من جلب النوع الصحيح (السيرفر غالباً يرسلها symptomType)
   const typeKey = h.symptomType || h.symptom_type;
   const noteContent = h.notes || h.note || "";
   
   // 2. البحث في المصفوفة المحلية
-  const symptomInfo = SYMPTOMS_LIST.find(s => s.id === typeKey);
+  const symptomInfo = symptomsList.find(s => s.id === typeKey);
   
   return (
     <View key={i} style={styles.historyRow}>
@@ -205,8 +208,8 @@ const SymptomsTab = ({ route }) => {
       
       <Text style={styles.historyText}>
         {typeKey === 'OTHER' 
-          ? `📝 ملاحظة: ${noteContent}` 
-          : `- ${symptomInfo?.label || typeKey || 'عرض غير معروف'} ${noteContent ? `(${noteContent})` : ''}`
+          ? `${t.symptoms.noteLabel} ${noteContent}` 
+          : `- ${symptomInfo?.label || typeKey || t.symptoms.unknownSymptom} ${noteContent ? `(${noteContent})` : ''}`
         }
       </Text>
     </View>

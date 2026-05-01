@@ -6,16 +6,13 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import api from "../../services/api";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
-
-
-const DaysMap = {
-  SUNDAY: "الأحد", MONDAY: "الاثنين", TUESDAY: "الثلاثاء",
-  WEDNESDAY: "الأربعاء", THURSDAY: "الخميس", FRIDAY: "الجمعة", SATURDAY: "السبت"
-};
+import { useNavigation } from "@react-navigation/native";
+import { useLanguage } from "../../context/LanguageContext";
 
 const AppointmentScreen = () => {
-  // --- States ---
+  const navigation = useNavigation();
+  const { t } = useLanguage();
+
   const [doctors, setDoctors] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [schedules, setSchedules] = useState([]);
@@ -23,18 +20,14 @@ const AppointmentScreen = () => {
   const [slots, setSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [reason, setReason] = useState("");
-  const [myAppointments, setMyAppointments] = useState([]); // المواعيد المحجوزة حالياً للمريض
+  const [myAppointments, setMyAppointments] = useState([]);
 
-  // --- UI States ---
   const [loading, setLoading] = useState(false);
   const [isWakingUp, setIsWakingUp] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-
-
-  // --- Helpers ---
   const formatDate = (date) => date.toISOString().split('T')[0];
 
   const getNextDate = (dayName) => {
@@ -45,28 +38,21 @@ const AppointmentScreen = () => {
     return formatDate(d);
   };
 
-  const formatTime = (t) => {
-    if (!t) return "";
-    let [h, m] = t.split(":");
+  const formatTime = (time) => {
+    if (!time) return "";
+    let [h, m] = time.split(":");
     let hh = parseInt(h);
-    return `${hh % 12 || 12}:${m} ${hh >= 12 ? "م" : "ص"}`;
+    return `${hh % 12 || 12}:${m} ${hh >= 12 ? t.time.pm : t.time.am}`;
   };
 
-  // --- API Logic ---
-
-
-  // 1. تشغيل النظام وجلب البيانات الأولية
   const initData = async () => {
     try {
-
-      // جلب الأطباء وجلب مواعيد المريض الحالية في نفس الوقت
       const [docsRes, myApptsRes] = await Promise.all([
         api.get('/reports/booking-doctors'),
-        api.get('/clinic-consultations') // نفترض أن هذا المسار يعيد مواعيد المريض المسجل
+        api.get('/clinic-consultations')
       ]);
 
       setDoctors(Array.isArray(docsRes.data) ? docsRes.data : []);
-      // فلترة المواعيد القادمة فقط (غير الملغاة)
       const activeAppts = (myApptsRes.data || []).filter(a => a.status !== 'CANCELLED');
       setMyAppointments(activeAppts);
 
@@ -82,39 +68,32 @@ const AppointmentScreen = () => {
     initData();
   }, []);
 
-  // 2. آلية الحذف (إلغاء الموعد)
-const handleCancelAppointment = (apptId) => {
-    // التأكد من وجود ID قبل البدء
+  const handleCancelAppointment = (apptId) => {
     if (!apptId) {
-      return Alert.alert("خطأ", "لم يتم العثور على معرف الموعد");
+      return Alert.alert(t.error, t.appointments.apptIdNotFound);
     }
 
     Alert.alert(
-      "إلغاء الموعد",
-      "هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟",
+      t.appointments.cancelTitle,
+      t.appointments.cancelMsg,
       [
-        { text: "تراجع", style: "cancel" },
+        { text: t.appointments.cancelBack, style: "cancel" },
         {
-          text: "تأكيد الإلغاء",
+          text: t.appointments.cancelConfirm,
           style: "destructive",
           onPress: async () => {
             try {
               setLoading(true);
-              
-              // محاولة الحذف باستخدام api الموحد
               const response = await api.delete(`/clinic-consultations/${apptId}`);
-
               if (response.status === 200 || response.status === 204) {
-                Alert.alert("تم ✅", "تم إلغاء الموعد بنجاح");
-                initData(); // تحديث القائمة العلوية
-                if (selectedDay) handleDaySelect(selectedDay); // تحديث الخانات المتاحة
+                Alert.alert(t.success, t.appointments.cancelSuccess);
+                initData();
+                if (selectedDay) handleDaySelect(selectedDay);
               }
             } catch (err) {
-              // هذا السطر سيطبع لك السبب الحقيقي في الـ Terminal (Console)
               console.error("Delete Error Detail:", err.response?.data || err.message);
-              
-              const errorMsg = err.response?.data?.message || "السيرفر رفض عملية الحذف";
-              Alert.alert("فشل الإلغاء", errorMsg);
+              const errMsg = err.response?.data?.message || t.appointments.cancelFailed;
+              Alert.alert(t.failed, errMsg);
             } finally {
               setLoading(false);
             }
@@ -124,7 +103,6 @@ const handleCancelAppointment = (apptId) => {
     );
   };
 
-  // 3. عند اختيار طبيب
   const handleDoctorChange = async (docId) => {
     setSelectedDoctor(docId);
     setSchedules([]);
@@ -140,13 +118,12 @@ const handleCancelAppointment = (apptId) => {
       const res = await api.get('/doctor-schedule', { params: { doctorId: docId } });
       setSchedules(res.data || []);
     } catch (e) {
-      Alert.alert("تنبيه", "لا يوجد جدول لهذا الطبيب");
+      Alert.alert(t.error, t.appointments.noSchedule);
     } finally {
       setLoading(false);
     }
   };
 
-  // 4. عند اختيار يوم
   const handleDaySelect = async (day) => {
     setSelectedDay(day);
     setSlots([]);
@@ -157,35 +134,37 @@ const handleCancelAppointment = (apptId) => {
       setLoading(true);
       const date = getNextDate(day.weekday);
       const res = await api.get('/clinic-consultations/availability', {
-        params: {
-          doctorId: selectedDoctor,
-          date: date
-        }
+        params: { doctorId: selectedDoctor, date }
       });
 
       const { availableSlots = [], bookedSlots = [], bookingAllowed, bookingRestrictionReason } = res.data;
-      
+
       const all = [
-        ...availableSlots.map(t => ({ time: t, booked: false })),
-        ...bookedSlots.map(t => ({ time: t, booked: true }))
+        ...availableSlots.map(tm => ({ time: tm, booked: false })),
+        ...bookedSlots.map(tm => ({ time: tm, booked: true }))
       ].sort((a, b) => a.time.localeCompare(b.time));
 
       setSlots(all);
       if (!bookingAllowed) setErrorMsg(bookingRestrictionReason);
     } catch (e) {
-      setErrorMsg("حدث خطأ أثناء جلب المواعيد");
+      setErrorMsg(t.appointments.fetchError);
     } finally {
       setLoading(false);
     }
   };
 
-  // 5. تنفيذ الحجز الجديد
   const confirmBooking = async () => {
-    if (!reason.trim()) return Alert.alert("تنبيه", "اكتب سبب الزيارة");
-    
+    if (!reason.trim()) return Alert.alert(t.error, t.appointments.reasonRequired);
+
+    const date = getNextDate(selectedDay.weekday);
+
+    const hasApptSameDay = myAppointments.some(appt => appt.appt_date === date);
+    if (hasApptSameDay) {
+      return Alert.alert(t.appointments.sorry, t.appointments.sameDayError);
+    }
+
     try {
       setBookingLoading(true);
-      const date = getNextDate(selectedDay.weekday);
       await api.post('/clinic-consultations/book', {
         doctorId: Number(selectedDoctor),
         apptDate: date,
@@ -193,14 +172,21 @@ const handleCancelAppointment = (apptId) => {
         visitReason: reason
       });
 
-      Alert.alert("نجاح ✅", "تم حجز موعدك بنجاح", [
-        { text: "ممتاز", onPress: () => {
-            initData(); // لتحديث قائمة "مواعيدي"
-            handleDaySelect(selectedDay); 
-        }}
+      Alert.alert(t.success, t.appointments.bookSuccess, [
+        {
+          text: t.appointments.bookSuccessBtn, onPress: () => {
+            initData();
+            handleDaySelect(selectedDay);
+          }
+        }
       ]);
     } catch (err) {
-      Alert.alert("فشل", "الموعد قد يكون حجز للتو، جرب غيره");
+      const errMsg = err.response?.data?.message || err.response?.data?.error || "";
+      if (err.response?.status === 400 && (errMsg.includes("already") || errMsg.includes("same day") || errMsg.includes("موعد") || errMsg.includes("مسبق"))) {
+        Alert.alert(t.appointments.sorry, t.appointments.sameDayError);
+      } else {
+        Alert.alert(t.failed, errMsg || t.appointments.bookFailed);
+      }
     } finally {
       setBookingLoading(false);
     }
@@ -209,71 +195,76 @@ const handleCancelAppointment = (apptId) => {
   if (isWakingUp) return (
     <View style={styles.center}>
       <ActivityIndicator size="large" color="#059669" />
-      <Text style={styles.loadingText}>جاري تجهيز النظام...</Text>
+      <Text style={styles.loadingText}>{t.appointments.systemLoading}</Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#065f46" />
-      
+
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>إدارة المواعيد</Text>
-        <Text style={styles.headerSub}>مشروع MediKidney الطبي</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ width: 40 }} />
+          <View style={{ alignItems: 'center' }}>
+            <Text style={styles.headerTitle}>{t.appointments.title}</Text>
+            <Text style={styles.headerSub}>{t.appointments.headerSub}</Text>
+          </View>
+          <Pressable onPress={() => navigation.goBack()} style={{ padding: 5 }}>
+            <MaterialCommunityIcons name="arrow-right" size={28} color="#fff" />
+          </Pressable>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
         <Animated.View style={{ opacity: fadeAnim }}>
 
-          {/* قسم مواعيدي الحالية (الحذف) */}
           {myAppointments.length > 0 && (
             <View style={styles.myApptsSection}>
-              <Text style={styles.label}>مواعيدك القادمة</Text>
+              <Text style={styles.label}>{t.appointments.myAppointments}</Text>
               {myAppointments.map((appt) => (
                 <View key={appt.appointment_id} style={styles.myApptCard}>
-                   <Pressable 
+                  <Pressable
                     onPress={() => handleCancelAppointment(appt.appointment_id)}
                     style={styles.deleteBtn}
-                   >
-                     <MaterialCommunityIcons name="trash-can-outline" size={22} color="#EF4444" />
-                   </Pressable>
-                   <View style={{flex: 1, alignItems: 'flex-end'}}>
-                      <Text style={styles.docName}>د. {appt.doctor?.full_name}</Text>
-                      <Text style={styles.apptDateText}>{appt.appt_date} | {formatTime(appt.appt_time)}</Text>
-                   </View>
+                  >
+                    <MaterialCommunityIcons name="trash-can-outline" size={22} color="#EF4444" />
+                  </Pressable>
+                  <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                    <Text style={styles.docName}>{t.appointments.dr} {appt.doctor?.full_name}</Text>
+                    <Text style={styles.apptDateText}>{appt.appt_date} | {formatTime(appt.appt_time)}</Text>
+                  </View>
                 </View>
               ))}
             </View>
           )}
-          
+
           <View style={styles.divider} />
 
-          {/* الخطوة 1: اختيار الطبيب (الحجز) */}
           <View style={styles.card}>
-            <Text style={styles.label}>1. احجز موعداً جديداً</Text>
+            <Text style={styles.label}>{t.appointments.step1}</Text>
             <View style={styles.pickerBox}>
               <Picker
                 selectedValue={selectedDoctor}
                 onValueChange={handleDoctorChange}
                 style={styles.picker}
               >
-                <Picker.Item label="اختر الطبيب..." value="" />
-                {doctors.map(d => <Picker.Item key={d.doctor_id} label={`د. ${d.full_name}`} value={d.doctor_id.toString()} />)}
+                <Picker.Item label={t.appointments.selectDoctor} value="" />
+                {doctors.map(d => <Picker.Item key={d.doctor_id} label={`${t.appointments.dr} ${d.full_name}`} value={d.doctor_id.toString()} />)}
               </Picker>
             </View>
             <TextInput
               style={styles.input}
-              placeholder="سبب الزيارة (مطلوب للحجز)"
+              placeholder={t.appointments.visitReason}
               value={reason}
               onChangeText={setReason}
               multiline
             />
           </View>
 
-          {/* الخطوة 2: أيام الدوام */}
           {schedules.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.label}>2. اختر اليوم المتاح</Text>
+              <Text style={styles.label}>{t.appointments.step2}</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.daysContainer}>
                 {schedules.map((s, idx) => (
                   <Pressable
@@ -282,7 +273,7 @@ const handleCancelAppointment = (apptId) => {
                     style={[styles.dayCard, selectedDay?.schedule_id === s.schedule_id && styles.activeDay]}
                   >
                     <Text style={[styles.dayText, selectedDay?.schedule_id === s.schedule_id && styles.activeText]}>
-                      {DaysMap[s.weekday]}
+                      {t.days[s.weekday] || s.weekday}
                     </Text>
                     <Text style={styles.smallTime}>{formatTime(s.startTime)}</Text>
                   </Pressable>
@@ -291,12 +282,11 @@ const handleCancelAppointment = (apptId) => {
             </View>
           )}
 
-          {/* الخطوة 3: المواعيد المتاحة */}
           {loading ? (
             <ActivityIndicator style={{ marginTop: 20 }} color="#059669" />
           ) : slots.length > 0 ? (
             <View style={styles.section}>
-              <Text style={styles.label}>3. اختر الوقت المناسب</Text>
+              <Text style={styles.label}>{t.appointments.step3}</Text>
               <View style={styles.grid}>
                 {slots.map((s, i) => (
                   <Pressable
@@ -312,7 +302,7 @@ const handleCancelAppointment = (apptId) => {
                     <Text style={[styles.slotText, selectedSlot === s.time && styles.activeText, s.booked && styles.bookedText]}>
                       {formatTime(s.time)}
                     </Text>
-                    {s.booked && <Text style={styles.bookedLabel}>محجوز</Text>}
+                    {s.booked && <Text style={styles.bookedLabel}>{t.appointments.booked}</Text>}
                   </Pressable>
                 ))}
               </View>
@@ -324,15 +314,14 @@ const handleCancelAppointment = (apptId) => {
         </Animated.View>
       </ScrollView>
 
-      {/* زر التأكيد العائم */}
       {selectedSlot && (
         <View style={styles.footer}>
-          <Pressable 
-            onPress={confirmBooking} 
+          <Pressable
+            onPress={confirmBooking}
             disabled={bookingLoading}
             style={styles.confirmBtn}
           >
-            {bookingLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>تأكيد الحجز الآن</Text>}
+            {bookingLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>{t.appointments.confirmBtn}</Text>}
           </Pressable>
         </View>
       )}
@@ -347,15 +336,13 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, color: "#fff", fontWeight: "bold", textAlign: "center" },
   headerSub: { color: "#A7F3D0", textAlign: "center", fontSize: 12 },
   scroll: { padding: 16, paddingBottom: 120 },
-  
-  // تصفيف مواعيدي الحالية
   myApptsSection: { marginBottom: 10 },
-  myApptCard: { 
-    flexDirection: 'row', 
-    backgroundColor: '#fff', 
-    padding: 15, 
-    borderRadius: 12, 
-    marginBottom: 8, 
+  myApptCard: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 8,
     alignItems: 'center',
     borderRightWidth: 4,
     borderRightColor: '#10B981',
@@ -365,7 +352,6 @@ const styles = StyleSheet.create({
   docName: { fontWeight: 'bold', color: '#1F2937', fontSize: 14 },
   apptDateText: { color: '#6B7280', fontSize: 12 },
   divider: { height: 1, backgroundColor: '#D1D5DB', marginVertical: 15 },
-
   card: { backgroundColor: "#fff", borderRadius: 15, padding: 15, elevation: 2 },
   label: { fontSize: 15, fontWeight: "bold", color: "#374151", marginBottom: 10, textAlign: "right" },
   pickerBox: { backgroundColor: "#F9FAFB", borderRadius: 10, borderWidth: 1, borderColor: "#E5E7EB", marginBottom: 10 },

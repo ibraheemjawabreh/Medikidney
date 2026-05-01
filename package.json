@@ -21,7 +21,6 @@
     "@rneui/themed": "^4.0.0-rc.7",
     "axios": "^1.13.5",
     "expo": "~55.0.18",
-    "expo-dev-client": "~55.0.28",
     "expo-device": "~55.0.15",
     "expo-font": "~55.0.6",
     "expo-image-picker": "~55.0.19",

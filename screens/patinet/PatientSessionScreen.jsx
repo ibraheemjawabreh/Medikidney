@@ -11,13 +11,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../services/api';
+import { useLanguage } from '../../context/LanguageContext';
 
 // ── Validation ────────────────────────────────────────────────────────────────
-const validateWeight = (val) => {
-  if (!val || val.trim() === '') return 'الوزن مطلوب';
+const validateWeight = (val, t) => {
+  if (!val || val.trim() === '') return t.patientSessionScreen.weightRequired;
   const num = parseFloat(val);
-  if (isNaN(num)) return 'يجب أن يكون رقماً صحيحاً';
-  if (num < 20 || num > 300) return 'يجب أن يكون بين 20 و 300 كغ';
+  if (isNaN(num)) return t.patientSessionScreen.invalidNumber;
+  if (num < 20 || num > 300) return t.patientSessionScreen.invalidRange;
   return null;
 };
 
@@ -35,6 +36,7 @@ const formatDuration = (seconds) => {
 
 // ── المكوّن الرئيسي ───────────────────────────────────────────────────────────
 const PatientSessionScreen = ({ route, navigation }) => {
+  const { t } = useLanguage();
   const { sessionId, patientName, startTime } = route.params || {};
 
   // ── حالة الجلسة ──
@@ -111,9 +113,9 @@ const PatientSessionScreen = ({ route, navigation }) => {
       if (phase === 'IN_SESSION') {
         Vibration.vibrate([500, 500, 500]);
         Alert.alert(
-          '⏰ تنبيه',
-          'مضت ساعتان على انتهاء الجلسة. يرجى إدخال وزنك بعد الجلسة.',
-          [{ text: 'حسناً', onPress: () => setPhase('WEIGHT_INPUT') }]
+          t.patientSessionScreen.alertTitle,
+          t.patientSessionScreen.alertMessage,
+          [{ text: t.patientSessionScreen.ok, onPress: () => setPhase('WEIGHT_INPUT') }]
         );
       }
     }, 7200 * 1000);
@@ -126,7 +128,7 @@ const PatientSessionScreen = ({ route, navigation }) => {
     if (phase !== 'WEIGHT_INPUT') return;
 
     const handler = BackHandler.addEventListener('hardwareBackPress', () => {
-      Alert.alert('⚠️ تنبيه', 'يجب إدخال وزنك بعد الجلسة قبل المغادرة.');
+      Alert.alert(t.patientSessionScreen.lockAlertTitle, t.patientSessionScreen.lockAlertMessage);
       return true; // يمنع الرجوع
     });
 
@@ -142,7 +144,7 @@ const PatientSessionScreen = ({ route, navigation }) => {
 
   // ── حفظ الوزن بعد الجلسة ──────────────────────────────────────────────────
   const handleSaveWeight = async () => {
-    const err = validateWeight(weightAfter);
+    const err = validateWeight(weightAfter, t);
     if (err) { setWeightError(err); return; }
     setWeightError(null);
 
@@ -163,10 +165,10 @@ const PatientSessionScreen = ({ route, navigation }) => {
       await AsyncStorage.setItem(`weight_entered_${sessionId}`, '1');
 
       setPhase('DONE');
-      Alert.alert('تم ✅', 'تم حفظ وزنك بعد الجلسة. شكراً!');
+      Alert.alert(t.patientSessionScreen.saveSuccessTitle, t.patientSessionScreen.saveSuccessMessage);
     } catch (err) {
       console.log('Save weight err:', err.response?.data);
-      Alert.alert('خطأ', 'فشل حفظ الوزن. يرجى المحاولة مرة أخرى.');
+      Alert.alert(t.patientSessionScreen.saveErrorTitle, t.patientSessionScreen.saveErrorMessage);
     } finally {
       setIsSaving(false);
     }
@@ -188,25 +190,25 @@ const PatientSessionScreen = ({ route, navigation }) => {
         <StatusBar barStyle="light-content" backgroundColor="#059669" />
         <View style={styles.doneCard}>
           <MaterialCommunityIcons name="check-decagram" size={80} color="#059669" />
-          <Text style={styles.doneTitle}>اكتملت الجلسة بنجاح 🎉</Text>
-          <Text style={styles.doneSub}>تم تسجيل جميع بياناتك. رائع!</Text>
+          <Text style={styles.doneTitle}>{t.patientSessionScreen.doneTitle}</Text>
+          <Text style={styles.doneSub}>{t.patientSessionScreen.doneSub}</Text>
           {sessionData?.weight_before != null && (
             <View style={styles.doneSummary}>
               <View style={styles.doneSummaryRow}>
                 <Text style={styles.doneSummaryVal}>{sessionData.weight_before} kg</Text>
-                <Text style={styles.doneSummaryLabel}>الوزن قبل</Text>
+                <Text style={styles.doneSummaryLabel}>{t.patientSessionScreen.weightBefore}</Text>
               </View>
               <MaterialCommunityIcons name="arrow-left" size={20} color="#94a3b8" />
               <View style={styles.doneSummaryRow}>
                 <Text style={[styles.doneSummaryVal, { color: '#059669' }]}>
                   {(sessionData?.weight_after ?? weightAfter) || '—'} kg
                 </Text>
-                <Text style={styles.doneSummaryLabel}>الوزن بعد</Text>
+                <Text style={styles.doneSummaryLabel}>{t.patientSessionScreen.weightAfter}</Text>
               </View>
             </View>
           )}
           <Pressable style={styles.doneBtn} onPress={handleDone}>
-            <Text style={styles.doneBtnText}>العودة للرئيسية</Text>
+            <Text style={styles.doneBtnText}>{t.patientSessionScreen.returnHome}</Text>
           </Pressable>
         </View>
       </View>
@@ -222,28 +224,28 @@ const PatientSessionScreen = ({ route, navigation }) => {
         {/* الرأس */}
         <View style={styles.lockHeader}>
           <MaterialCommunityIcons name="lock" size={32} color="#f59e0b" />
-          <Text style={styles.lockTitle}>أدخل وزنك بعد الجلسة</Text>
+          <Text style={styles.lockTitle}>{t.patientSessionScreen.lockTitle}</Text>
           <Text style={styles.lockSub}>
-            لا يمكن المغادرة حتى يتم إدخال الوزن
+            {t.patientSessionScreen.lockSub}
           </Text>
         </View>
 
         {/* معلومات الوزن قبل */}
         {weightBefore != null && (
           <View style={styles.lockWeightBefore}>
-            <Text style={styles.lockWeightBeforeLabel}>وزنك قبل الجلسة</Text>
+            <Text style={styles.lockWeightBeforeLabel}>{t.patientSessionScreen.weightBeforeLabel}</Text>
             <Text style={styles.lockWeightBeforeVal}>{weightBefore} kg</Text>
           </View>
         )}
 
         {/* مربع الإدخال */}
         <View style={styles.lockInputCard}>
-          <Text style={styles.lockInputTitle}>وزنك الآن (كغ)</Text>
+          <Text style={styles.lockInputTitle}>{t.patientSessionScreen.weightNowLabel}</Text>
           <View style={[styles.lockInputRow, weightError && styles.lockInputErr]}>
             <MaterialCommunityIcons name="scale" size={24} color="#3b82f6" />
             <TextInput
               style={styles.lockInput}
-              placeholder="مثال: 73.0"
+              placeholder={t.patientSessionScreen.weightPlaceholder}
               placeholderTextColor="#94a3b8"
               keyboardType="decimal-pad"
               value={weightAfter}
@@ -262,7 +264,7 @@ const PatientSessionScreen = ({ route, navigation }) => {
           {/* حساب الفرق التقريبي */}
           {weightBefore != null && weightAfter && !isNaN(parseFloat(weightAfter)) && (
             <View style={styles.lockDiff}>
-              <Text style={styles.lockDiffLabel}>كمية السوائل المزالة (تقريبي)</Text>
+              <Text style={styles.lockDiffLabel}>{t.patientSessionScreen.fluidRemoved}</Text>
               <Text style={styles.lockDiffVal}>
                 {Math.abs(weightBefore - parseFloat(weightAfter)).toFixed(1)} لتر
               </Text>
@@ -278,7 +280,7 @@ const PatientSessionScreen = ({ route, navigation }) => {
               ? <ActivityIndicator color="#fff" size="small" />
               : <>
                   <MaterialCommunityIcons name="content-save-check" size={20} color="#fff" />
-                  <Text style={styles.lockSaveBtnText}>تأكيد وحفظ الوزن</Text>
+                  <Text style={styles.lockSaveBtnText}>{t.patientSessionScreen.saveBtn}</Text>
                 </>
             }
           </Pressable>
@@ -294,8 +296,8 @@ const PatientSessionScreen = ({ route, navigation }) => {
 
       {/* Header */}
       <View style={styles.sessionHeader}>
-        <Text style={styles.sessionPatient}>{patientName || 'جلسة الغسيل'}</Text>
-        <Text style={styles.sessionSub}>جلسة غسيل كلوي جارية</Text>
+        <Text style={styles.sessionPatient}>{patientName || t.patientSessionScreen.sessionTitle}</Text>
+        <Text style={styles.sessionSub}>{t.patientSessionScreen.sessionSub}</Text>
       </View>
 
       {/* التايمر */}
@@ -303,28 +305,26 @@ const PatientSessionScreen = ({ route, navigation }) => {
         <View style={styles.timerCircle}>
           <MaterialCommunityIcons name="water-sync" size={36} color="#34d399" style={{ marginBottom: 8 }} />
           <Text style={styles.timerText}>{formatDuration(elapsed)}</Text>
-          <Text style={styles.timerLabel}>وقت الجلسة</Text>
+          <Text style={styles.timerLabel}>{t.patientSessionScreen.sessionTimeLabel}</Text>
         </View>
 
         {/* نبضة متحركة */}
         <View style={styles.pulseRing} />
       </View>
 
-      {/* معلومات الوزن قبل */}
       {weightBefore != null && (
         <View style={styles.weightBeforeCard}>
           <MaterialCommunityIcons name="scale" size={20} color="#3b82f6" />
           <Text style={styles.weightBeforeText}>
-            وزنك قبل الجلسة: <Text style={{ fontWeight: '800', color: '#3b82f6' }}>{weightBefore} kg</Text>
+            {t.patientSessionScreen.weightBeforeLabel}: <Text style={{ fontWeight: '800', color: '#3b82f6' }}>{weightBefore} kg</Text>
           </Text>
         </View>
       )}
 
-      {/* رسالة للمريض */}
       <View style={styles.infoCard}>
         <MaterialCommunityIcons name="information-outline" size={20} color="#94a3b8" />
         <Text style={styles.infoText}>
-          جلستك جارية الآن. الممرض سينهي الجلسة عند الانتهاء.
+          {t.patientSessionScreen.infoText}
         </Text>
       </View>
 
@@ -332,7 +332,7 @@ const PatientSessionScreen = ({ route, navigation }) => {
       <View style={styles.sessionFooter}>
         <Pressable style={[styles.endBtn, { backgroundColor: '#334155' }]} onPress={() => navigation.goBack()}>
           <MaterialCommunityIcons name="arrow-right" size={24} color="#fff" />
-          <Text style={styles.endBtnText}>العودة</Text>
+          <Text style={styles.endBtnText}>{t.patientSessionScreen.returnBtn}</Text>
         </Pressable>
       </View>
     </View>

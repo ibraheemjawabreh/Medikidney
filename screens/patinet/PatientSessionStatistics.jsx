@@ -13,38 +13,11 @@ import {
 import { Icon, Divider } from "@rneui/base";
 import api from "../../services/api";
 import { useFocusEffect } from "@react-navigation/native";
+import { useLanguage } from "../../context/LanguageContext";
 
 const { width } = Dimensions.get("window");
 
-// ترجمة أنواع الأعراض
-const symptomTranslations = {
-  CHEST_PAIN: "ألم في الصدر",
-  LOW_BP: "انخفاض ضغط الدم",
-  CRAMPS: "تشنجات",
-  NAUSEA: "غثيان",
-  HEADACHE: "صداع",
-  DIZZINESS: "دوخة",
-  VOMITING: "قيء",
-  SHORTNESS_OF_BREATH: "ضيق تنفس",
-  FATIGUE: "إرهاق",
-  ITCHING: "حكة",
-};
-
-const severityTranslations = {
-  MILD: "خفيف",
-  MODERATE: "متوسط",
-  SEVERE: "شديد",
-};
-
-const weekdayTranslations = {
-  SUNDAY: "الأحد",
-  MONDAY: "الاثنين",
-  TUESDAY: "الثلاثاء",
-  WEDNESDAY: "الأربعاء",
-  THURSDAY: "الخميس",
-  FRIDAY: "الجمعة",
-  SATURDAY: "السبت",
-};
+// Removed translations since they are handled via useLanguage context
 
 // حساب اتجاه القيمة
 const getTrend = (values) => {
@@ -64,18 +37,18 @@ const TrendIcon = ({ trend, color }) => {
   return <Icon name="trending-flat" type="material" size={20} color="#64748b" />;
 };
 
-const TrendBadge = ({ trend, goodWhenDown = true }) => {
+const TrendBadge = ({ trend, goodWhenDown = true, t }) => {
   let label, bg, textColor;
   if (trend === "increasing") {
-    label = "متصاعدة";
+    label = t.patientSessionStats.trendIncreasing;
     bg = goodWhenDown ? "#fee2e2" : "#dcfce7";
     textColor = goodWhenDown ? "#991b1b" : "#166534";
   } else if (trend === "decreasing") {
-    label = "متناقصة";
+    label = t.patientSessionStats.trendDecreasing;
     bg = goodWhenDown ? "#dcfce7" : "#fee2e2";
     textColor = goodWhenDown ? "#166534" : "#991b1b";
   } else {
-    label = "مستقرة";
+    label = t.patientSessionStats.trendStable;
     bg = "#f1f5f9";
     textColor = "#475569";
   }
@@ -87,7 +60,7 @@ const TrendBadge = ({ trend, goodWhenDown = true }) => {
 };
 
 // بطاقة إحصائية واحدة
-const StatCard = ({ title, icon, iconColor, values, unit, goodWhenDown = true, formatVal }) => {
+const StatCard = ({ title, icon, iconColor, values, unit, goodWhenDown = true, formatVal, t }) => {
   const validValues = values.filter((v) => v !== null && v !== undefined && !isNaN(Number(v)));
   const trend = getTrend(validValues.map(Number));
   const avg = validValues.length ? (validValues.map(Number).reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : "—";
@@ -103,29 +76,29 @@ const StatCard = ({ title, icon, iconColor, values, unit, goodWhenDown = true, f
           <Icon name={icon} type="material-community" size={24} color={iconColor} />
           <Text style={styles.statCardTitle}>{title}</Text>
         </View>
-        <TrendBadge trend={trend} goodWhenDown={goodWhenDown} />
+        <TrendBadge trend={trend} goodWhenDown={goodWhenDown} t={t} />
       </View>
 
       <View style={styles.statCardBody}>
         <View style={styles.statMetricRow}>
           <View style={styles.statMetric}>
-            <Text style={styles.metricLabel}>آخر قراءة</Text>
+            <Text style={styles.metricLabel}>{t.patientSessionStats.lastReading}</Text>
             <Text style={[styles.metricValue, { color: iconColor }]}>
               {last !== null ? formatFn(last) : "—"}
             </Text>
           </View>
           <View style={styles.statMetric}>
-            <Text style={styles.metricLabel}>المتوسط</Text>
+            <Text style={styles.metricLabel}>{t.patientSessionStats.average}</Text>
             <Text style={styles.metricValue}>{validValues.length ? `${avg} ${unit}` : "—"}</Text>
           </View>
         </View>
         <View style={styles.statMetricRow}>
           <View style={styles.statMetric}>
-            <Text style={styles.metricLabel}>الأدنى</Text>
+            <Text style={styles.metricLabel}>{t.patientSessionStats.lowest}</Text>
             <Text style={[styles.metricValue, { color: "#059669" }]}>{validValues.length ? `${min} ${unit}` : "—"}</Text>
           </View>
           <View style={styles.statMetric}>
-            <Text style={styles.metricLabel}>الأعلى</Text>
+            <Text style={styles.metricLabel}>{t.patientSessionStats.highest}</Text>
             <Text style={[styles.metricValue, { color: "#ef4444" }]}>{validValues.length ? `${max} ${unit}` : "—"}</Text>
           </View>
         </View>
@@ -142,25 +115,27 @@ const StatCard = ({ title, icon, iconColor, values, unit, goodWhenDown = true, f
             );
           })}
         </View>
-        <Text style={styles.sparkLabel}>آخر {Math.min(validValues.length, 8)} جلسات</Text>
+        <Text style={styles.sparkLabel}>
+          {t.patientSessionStats.lastSessions.replace('{n}', Math.min(validValues.length, 8))}
+        </Text>
       </View>
     </View>
   );
 };
 
 // بطاقة الأعراض
-const SymptomsCard = ({ allSymptoms }) => {
+const SymptomsCard = ({ allSymptoms, t }) => {
   if (!allSymptoms || allSymptoms.length === 0) {
     return (
       <View style={styles.statCard}>
         <View style={styles.statCardHeader}>
           <View style={styles.statCardTitleRow}>
             <Icon name="alert-circle-outline" type="material-community" size={24} color="#f59e0b" />
-            <Text style={styles.statCardTitle}>الأعراض الشائعة</Text>
+            <Text style={styles.statCardTitle}>{t.patientSessionStats.commonSymptoms}</Text>
           </View>
         </View>
         <View style={styles.emptySmall}>
-          <Text style={styles.emptySmallText}>لا توجد أعراض مسجلة</Text>
+          <Text style={styles.emptySmallText}>{t.patientSessionStats.noSymptoms}</Text>
         </View>
       </View>
     );
@@ -180,10 +155,10 @@ const SymptomsCard = ({ allSymptoms }) => {
       <View style={styles.statCardHeader}>
         <View style={styles.statCardTitleRow}>
           <Icon name="alert-circle-outline" type="material-community" size={24} color="#f59e0b" />
-          <Text style={styles.statCardTitle}>الأعراض الشائعة</Text>
+          <Text style={styles.statCardTitle}>{t.patientSessionStats.commonSymptoms}</Text>
         </View>
         <View style={[styles.trendBadge, { backgroundColor: "#fef3c7" }]}>
-          <Text style={[styles.trendBadgeText, { color: "#92400e" }]}>{total} عارض</Text>
+          <Text style={[styles.trendBadgeText, { color: "#92400e" }]}>{total} {t.patientSessionStats.symptomCount}</Text>
         </View>
       </View>
       <View style={styles.statCardBody}>
@@ -192,8 +167,8 @@ const SymptomsCard = ({ allSymptoms }) => {
           return (
             <View key={i} style={{ marginBottom: 10 }}>
               <View style={{ flexDirection: "row-reverse", justifyContent: "space-between", marginBottom: 4 }}>
-                <Text style={styles.symptomName}>{symptomTranslations[type] || type}</Text>
-                <Text style={styles.symptomCount}>{count} مرة ({pct.toFixed(0)}%)</Text>
+                <Text style={styles.symptomName}>{t.symptomsDict[type] || type}</Text>
+                <Text style={styles.symptomCount}>{count}× ({pct.toFixed(0)}%)</Text>
               </View>
               <View style={styles.progressBg}>
                 <View style={[styles.progressFill, { width: `${pct}%`, backgroundColor: i === 0 ? "#ef4444" : i === 1 ? "#f59e0b" : "#3b82f6" }]} />
@@ -208,6 +183,7 @@ const SymptomsCard = ({ allSymptoms }) => {
 
 // --- Main Screen ---
 const PatientSessionStatistics = ({ route, navigation }) => {
+  const { t } = useLanguage();
   const { patientId, patientName } = route.params || {};
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState([]);
@@ -286,7 +262,7 @@ const PatientSessionStatistics = ({ route, navigation }) => {
       setAllWeights(weightsArr.sort((a, b) => new Date(a.date) - new Date(b.date)));
     } catch (e) {
       console.log("Stats error:", e.message);
-      Alert.alert("خطأ", "فشل في جلب الإحصائيات");
+      Alert.alert("Error", t.patientSessionStats.fetchError);
     } finally {
       setLoading(false);
     }
@@ -296,7 +272,7 @@ const PatientSessionStatistics = ({ route, navigation }) => {
 
   const formatDate = (d) => {
     if (!d) return "—";
-    return new Date(d).toLocaleDateString("ar-EG", { day: "numeric", month: "short" });
+    return new Date(d).toLocaleDateString(t.vitalSigns.now === 'الآن' ? "ar-EG" : "en-US", { day: "numeric", month: "short" });
   };
 
   // استخراج سلاسل البيانات مرتبة زمنياً
@@ -312,7 +288,7 @@ const PatientSessionStatistics = ({ route, navigation }) => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#059669" />
-        <Text style={styles.loadingText}>جاري تحميل الإحصائيات...</Text>
+        <Text style={styles.loadingText}>{t.patientSessionStats.loading}</Text>
       </View>
     );
   }
@@ -327,12 +303,12 @@ const PatientSessionStatistics = ({ route, navigation }) => {
           <Icon name="arrow-left" type="material-community" size={28} color="#fff" />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>إحصائيات الجلسات</Text>
-          <Text style={styles.headerSubtitle}>{patientName || "المريض"}</Text>
+          <Text style={styles.headerTitle}>{t.patientSessionStats.title}</Text>
+          <Text style={styles.headerSubtitle}>{patientName || "—"}</Text>
         </View>
         <View style={styles.sessionCountBadge}>
           <Text style={styles.sessionCountText}>{sessions.length}</Text>
-          <Text style={styles.sessionCountLabel}>جلسة</Text>
+          <Text style={styles.sessionCountLabel}>{t.patientSessionStats.sessionCountLabel}</Text>
         </View>
       </View>
 
@@ -341,19 +317,19 @@ const PatientSessionStatistics = ({ route, navigation }) => {
         <View style={styles.summaryItem}>
           <Icon name="heart-pulse" type="material-community" size={18} color="#ef4444" />
           <Text style={styles.summaryVal}>{allVitals.length}</Text>
-          <Text style={styles.summaryLabel}>قراءة حيوية</Text>
+          <Text style={styles.summaryLabel}>{t.patientSessionStats.vitalReadings}</Text>
         </View>
         <View style={styles.summaryDivider} />
         <View style={styles.summaryItem}>
           <Icon name="alert-circle" type="material-community" size={18} color="#f59e0b" />
           <Text style={styles.summaryVal}>{allSymptoms.length}</Text>
-          <Text style={styles.summaryLabel}>عارض</Text>
+          <Text style={styles.summaryLabel}>{t.patientSessionStats.symptomCount}</Text>
         </View>
         <View style={styles.summaryDivider} />
         <View style={styles.summaryItem}>
           <Icon name="scale" type="material-community" size={18} color="#3b82f6" />
           <Text style={styles.summaryVal}>{weightBeforeValues.length}</Text>
-          <Text style={styles.summaryLabel}>قياس وزن</Text>
+          <Text style={styles.summaryLabel}>{t.patientSessionStats.weightMeasurements}</Text>
         </View>
       </View>
 
@@ -362,108 +338,114 @@ const PatientSessionStatistics = ({ route, navigation }) => {
         {/* تنبيه للأخصائي */}
         <View style={styles.nutritionTip}>
           <Text style={styles.nutritionTipText}>
-       هذه الاحصائيا للكادر الطبي للمساعدة على متابعة حالة المريض بشكل أفضل   
-       
+            {t.patientSessionStats.nutritionTip}
           </Text>
         </View>
 
-        <Text style={styles.sectionTitle}>العلامات الحيوية</Text>
+        <Text style={styles.sectionTitle}>{t.patientSessionStats.vitalSigns}</Text>
 
         {allVitals.length === 0 ? (
           <View style={styles.emptyState}>
             <Icon name="heart-off-outline" type="material-community" size={50} color="#cbd5e1" />
-            <Text style={styles.emptyText}>لا توجد قراءات حيوية مسجلة</Text>
+            <Text style={styles.emptyText}>{t.patientSessionStats.noVitals}</Text>
           </View>
         ) : (
           <>
             {/* ضغط الدم الانقباضي */}
             <StatCard
-              title="ضغط الدم الانقباضي"
+              title={t.patientSessionStats.systolic}
               icon="heart-pulse"
               iconColor="#ef4444"
               values={systolicValues}
               unit="mmHg"
               goodWhenDown={true}
+              t={t}
             />
             {/* ضغط الدم الانبساطي */}
             <StatCard
-              title="ضغط الدم الانبساطي"
+              title={t.patientSessionStats.diastolic}
               icon="heart-outline"
               iconColor="#f97316"
               values={diastolicValues}
               unit="mmHg"
               goodWhenDown={true}
+              t={t}
             />
             {/* النبض */}
             <StatCard
-              title="النبض"
+              title={t.patientSessionStats.pulse}
               icon="pulse"
               iconColor="#8b5cf6"
               values={pulseValues}
               unit="bpm"
               goodWhenDown={false}
+              t={t}
             />
             {/* درجة الحرارة */}
             <StatCard
-              title="درجة الحرارة"
+              title={t.patientSessionStats.temperature}
               icon="thermometer"
               iconColor="#f59e0b"
               values={tempValues}
               unit="°C"
               goodWhenDown={false}
+              t={t}
             />
             {/* تشبع الأكسجين */}
             {o2Values.filter((v) => v !== null).length > 0 && (
               <StatCard
-                title="تشبع الأكسجين"
+                title={t.patientSessionStats.oxygen}
                 icon="lungs"
                 iconColor="#3b82f6"
                 values={o2Values}
                 unit="%"
                 goodWhenDown={false}
+                t={t}
               />
             )}
           </>
         )}
 
         <Divider style={{ marginVertical: 20 }} />
-        <Text style={styles.sectionTitle}>الوزن والسوائل</Text>
+        <Text style={styles.sectionTitle}>{t.patientSessionStats.weightAndFluids}</Text>
 
         {weightBeforeValues.length === 0 ? (
           <View style={styles.emptyState}>
             <Icon name="scale-off" type="material-community" size={50} color="#cbd5e1" />
-            <Text style={styles.emptyText}>لا توجد بيانات وزن</Text>
+            <Text style={styles.emptyText}>{t.patientSessionStats.noWeightData}</Text>
           </View>
         ) : (
           <>
             <StatCard
-              title="الوزن قبل الجلسة"
+              title={t.patientSessionStats.weightBeforeSession}
               icon="scale"
               iconColor="#3b82f6"
               values={weightBeforeValues}
               unit="kg"
               goodWhenDown={true}
+              t={t}
             />
             {fluidRemovedValues.length > 0 && (
               <StatCard
-                title="السوائل المُزالة"
+                title={t.patientSessionStats.fluidRemoved}
                 icon="water-minus"
                 iconColor="#06b6d4"
                 values={fluidRemovedValues}
                 unit="L"
                 goodWhenDown={false}
+                t={t}
               />
             )}
           </>
         )}
 
         <Divider style={{ marginVertical: 20 }} />
-        <Text style={styles.sectionTitle}>الأعراض</Text>
-        <SymptomsCard allSymptoms={allSymptoms} />
+        <Text style={styles.sectionTitle}>{t.patientSessionStats.symptoms}</Text>
+        <SymptomsCard allSymptoms={allSymptoms} t={t} />
 
         {/* آخر 5 جلسات */}
         <Divider style={{ marginVertical: 20 }} />
-        <Text style={styles.sectionTitle}>سجل الجلسات الأخيرة</Text>
+        <Text style={styles.sectionTitle}>{t.patientSessionStats.recentSessions}</Text>
         {sessions.slice(0, 5).map((s, i) => (
           <View key={i} style={styles.sessionRow}>
             <View style={{ alignItems: "flex-end" }}>
@@ -474,20 +456,20 @@ const PatientSessionStatistics = ({ route, navigation }) => {
                 <Text style={[styles.sessionStatusText, {
                   color: s.status === "COMPLETED" ? "#166534" : s.status === "IN_PROGRESS" ? "#92400e" : "#64748b"
                 }]}>
-                  {s.status === "COMPLETED" ? "مكتملة" : s.status === "IN_PROGRESS" ? "جارية" : s.status}
+                  {s.status === "COMPLETED" ? t.patientProfile.status.completed : s.status === "IN_PROGRESS" ? t.patientProfile.status.pending : s.status}
                 </Text>
               </View>
             </View>
             <View style={styles.sessionRowMetrics}>
               {s.blood_pressure_before && (
                 <Text style={styles.sessionRowMetric}>
-                  <Text style={{ color: "#64748b", fontSize: 11 }}>ضغط: </Text>
+                  <Text style={{ color: "#64748b", fontSize: 11 }}>{t.patientSessionStats.pressure} </Text>
                   {s.blood_pressure_before}
                 </Text>
               )}
               {s.weight_before !== null && s.weight_before !== undefined && (
                 <Text style={styles.sessionRowMetric}>
-                  <Text style={{ color: "#64748b", fontSize: 11 }}>وزن: </Text>
+                  <Text style={{ color: "#64748b", fontSize: 11 }}>{t.patientSessionStats.weight} </Text>
                   {s.weight_before}kg
                 </Text>
               )}

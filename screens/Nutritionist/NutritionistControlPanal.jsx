@@ -1,36 +1,33 @@
-import React from 'react'; 
+import React from 'react';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
+import { useLanguage } from '../../context/LanguageContext';
 
-import SearchPatient from "../patinet/searchPatinet"; 
+import SearchPatient from "../patinet/searchPatinet";
 import ProfileSettingsScreen from "../SettingsWithProfile/SettingWithProfile";
 
 const Tab = createBottomTabNavigator();
 
 const NutritionistPages = () => {
+  const { t } = useLanguage();
+
   return (
     <View style={styles.container}>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarStyle: styles.tabBar,
-          tabBarActiveTintColor: "#382120", 
+          tabBarActiveTintColor: "#382120",
           tabBarInactiveTintColor: "#9CA3AF",
           tabBarLabelStyle: styles.tabLabel,
           tabBarIcon: ({ color, focused }) => {
             let iconName;
-
-            if (route.name === "Profile") {
-              iconName = focused ? "person" : "person-outline";
-            } else if (route.name === "Weight") {
-              iconName = focused ? "stats-chart" : "stats-chart-outline";
-            } else if (route.name === "Search") {
+            if (route.name === "Search") {
               iconName = focused ? "search" : "search-outline";
             } else if (route.name === "Settings") {
               iconName = focused ? "settings" : "settings-outline";
             }
-
             return <Ionicons name={iconName} size={24} color={color} />;
           },
         })}
@@ -38,12 +35,12 @@ const NutritionistPages = () => {
         <Tab.Screen
           name="Search"
           component={SearchPatient}
-          options={{ title: "بحث" }}
+          options={{ title: t.nurseTabs.search }}
         />
         <Tab.Screen
           name="Settings"
           component={ProfileSettingsScreen}
-          options={{ title: "الإعدادات" }}
+          options={{ title: t.nutritionistTabs.settings }}
         />
       </Tab.Navigator>
     </View>
@@ -54,7 +51,7 @@ export default NutritionistPages;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
+    flex: 1,
     backgroundColor: "#F9FAFB",
     width: '100%'
   },
@@ -70,7 +67,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 15,
-    borderTopWidth: 0, 
+    borderTopWidth: 0,
   },
   tabLabel: {
     fontSize: 12,

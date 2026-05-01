@@ -1,5 +1,3 @@
-// screens/dialysisSessions/MedicationsTab.jsx
-
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TextInput, StyleSheet,
@@ -7,6 +5,7 @@ import {
 } from 'react-native';
 import api from "../../services/api";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useLanguage } from '../../context/LanguageContext';
 
 // ── الأدوية الشائعة (أزرار جاهزة) ────────────────────────────
 const PRESET_MEDS = [
@@ -17,20 +16,21 @@ const PRESET_MEDS = [
 ];
 
 // ── تنسيق الوقت ──────────────────────────────────────────────
-const formatTime = (dateStr) => {
+const formatTime = (dateStr, t) => {
   if (!dateStr) return "";
-  return new Date(dateStr).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+  const locale = t.vitalSigns.now === 'الآن' ? 'ar-SA' : 'en-US';
+  return new Date(dateStr).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 };
 
 // ── مساعد للتأكيد (ويب + Expo Go + Native) ──────────────────
-const confirmAction = async (msg) => {
+const confirmAction = async (msg, t) => {
   if (Platform.OS === 'web') {
     return window.confirm(msg);
   }
   return new Promise(resolve => {
-    Alert.alert("تأكيد", msg, [
-      { text: "إلغاء", onPress: () => resolve(false), style: "cancel" },
-      { text: "نعم",    onPress: () => resolve(true) },
+    Alert.alert(t.medications.deleteConfirm.split('?')[0] + '?', msg, [
+      { text: t.cancel, onPress: () => resolve(false), style: "cancel" },
+      { text: t.yes,    onPress: () => resolve(true) },
     ], { cancelable: true, onDismiss: () => resolve(false) });
   });
 };
@@ -45,6 +45,7 @@ const showAlert = (title, msg) => {
 
 // ══════════════════════════════════════════════════════════════════
 const MedicationsTab = ({ route }) => {
+  const { t } = useLanguage();
   const sessionId = route?.params?.sessionId;
 
   const [meds,           setMeds]           = useState([]);
@@ -87,14 +88,14 @@ const MedicationsTab = ({ route }) => {
           medicationName: medData.name,
           dosage:         Number(medData.dosage),
           unit:           medData.unit,
-          notes:          medData.notes || "تم الإعطاء بنجاح",
+          notes:          medData.notes || t.medications.saveSuccess,
         }
       );
-      showAlert("تم ✅", `تم تسجيل ${medData.label || medData.name}`);
+      showAlert(t.success, `${t.medications.saveSuccess} ${medData.label || medData.name}`);
       fetchMeds();
     } catch (err) {
       console.log("Post med err:", err.response?.data || err.message);
-      showAlert("خطأ", err.response?.data?.message || "فشل في تسجيل الدواء");
+      showAlert(t.error, err.response?.data?.message || t.medications.saveFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -105,7 +106,7 @@ const MedicationsTab = ({ route }) => {
     const numId = parseInt(medicationId, 10);
     if (isNaN(numId)) return;
 
-    const confirmed = await confirmAction("هل تريد حذف هذا الدواء من السجل؟");
+    const confirmed = await confirmAction(t.medications.deleteConfirm, t);
     if (!confirmed) return;
 
     try {
@@ -115,14 +116,14 @@ const MedicationsTab = ({ route }) => {
       setMeds(prev => prev.filter(m => parseInt(m.id || m.medicationId, 10) !== numId));
     } catch (err) {
       console.log("Delete med err:", err.response?.data || err.message);
-      showAlert("خطأ", "لم ينجح الحذف.");
+      showAlert(t.error, t.medications.deleteFailed);
     }
   };
 
   // ── إرسال الدواء المخصص ─────────────────────────────────────
   const handleCustomSubmit = () => {
     if (!customForm.name || !customForm.dosage) {
-      return showAlert("تنبيه", "يرجى إدخال اسم الدواء والجرعة على الأقل.");
+      return showAlert(t.error, t.medications.customRequired);
     }
     postMed(customForm);
     setCustomForm({ name: '', dosage: '', unit: 'mg', notes: '' });
@@ -141,15 +142,15 @@ const MedicationsTab = ({ route }) => {
           style={[styles.customBtn, showCustom && styles.customBtnActive]}
         >
           <MaterialCommunityIcons name={showCustom ? "close" : "plus"} size={18} color="#fff" />
-          <Text style={styles.customBtnText}>{showCustom ? "إلغاء" : "دواء مخصص"}</Text>
+          <Text style={styles.customBtnText}>{showCustom ? t.cancel : t.medications.customMed}</Text>
         </Pressable>
-        <Text style={styles.pageTitle}>الأدوية</Text>
+        <Text style={styles.pageTitle}>{t.medications.title}</Text>
       </View>
 
       {/* ── أزرار الأدوية الشائعة ── */}
       {!showCustom && (
         <View style={styles.presetSection}>
-          <Text style={styles.sectionLabel}>أدوية شائعة — اضغط لتحديد الجرعة</Text>
+          <Text style={styles.sectionLabel}>{t.medications.presetLabel}</Text>
           <View style={styles.presetGrid}>
             {PRESET_MEDS.map((med) => {
               const isActive = selectedPreset?.name === med.name;
@@ -180,11 +181,11 @@ const MedicationsTab = ({ route }) => {
                   <Text style={styles.presetDose}>{med.dosage} {med.unit}</Text>
                   {isActive ? (
                     <View style={[styles.presetChip, { backgroundColor: med.color }]}>
-                      <Text style={[styles.presetChipText, { color: '#fff' }]}>محدد ✓</Text>
+                      <Text style={[styles.presetChipText, { color: '#fff' }]}>{t.medications.selected}</Text>
                     </View>
                   ) : (
                     <View style={[styles.presetChip, { backgroundColor: med.color + '15' }]}>
-                      <Text style={[styles.presetChipText, { color: med.color }]}>اختيار</Text>
+                      <Text style={[styles.presetChipText, { color: med.color }]}>{t.medications.select}</Text>
                     </View>
                   )}
                 </Pressable>
@@ -196,10 +197,10 @@ const MedicationsTab = ({ route }) => {
           {selectedPreset && (
             <View style={[styles.formCard, { borderTopColor: selectedPreset.color }]}>
               <Text style={styles.formTitle}>
-                تحديد جرعة {selectedPreset.label}
+                {t.medications.dosageLabel} {selectedPreset.label}
               </Text>
 
-              <Text style={styles.fieldLabel}>الجرعة ({selectedPreset.unit}) *</Text>
+              <Text style={styles.fieldLabel}>{t.medications.dosageField} ({selectedPreset.unit}) *</Text>
               <View style={styles.inputBox}>
                 <MaterialCommunityIcons name={selectedPreset.icon} size={18} color={selectedPreset.color} style={{ marginLeft: 6 }} />
                 <TextInput
@@ -213,7 +214,7 @@ const MedicationsTab = ({ route }) => {
                 <Text style={styles.unitSuffix}>{selectedPreset.unit}</Text>
               </View>
 
-              <Text style={styles.fieldLabel}>ملاحظات (اختياري)</Text>
+              <Text style={styles.fieldLabel}>{t.medications.notesOptional}</Text>
               <View style={[styles.inputBox, { height: 60, alignItems: 'flex-start', paddingTop: 10 }]}>
                 <TextInput
                   style={[styles.inp, { textAlignVertical: 'top' }]}
@@ -228,7 +229,7 @@ const MedicationsTab = ({ route }) => {
               <Pressable
                 style={[styles.saveBtn, { backgroundColor: selectedPreset.color }, isSubmitting && { opacity: 0.6 }]}
                 onPress={() => {
-                  if (!presetDosage) return showAlert("تنبيه", "يرجى إدخال الجرعة.");
+                  if (!presetDosage) return showAlert(t.error, t.medications.dosageRequired);
                   postMed({
                     name: selectedPreset.name,
                     label: selectedPreset.label,
@@ -244,7 +245,7 @@ const MedicationsTab = ({ route }) => {
               >
                 {isSubmitting
                   ? <ActivityIndicator color="#fff" size="small" />
-                  : <Text style={styles.saveBtnText}>تسجيل {selectedPreset.label}</Text>
+                  : <Text style={styles.saveBtnText}>{t.medications.register} {selectedPreset.label}</Text>
                 }
               </Pressable>
             </View>
@@ -255,9 +256,9 @@ const MedicationsTab = ({ route }) => {
       {/* ── فورم الدواء المخصص ── */}
       {showCustom && (
         <View style={styles.formCard}>
-          <Text style={styles.formTitle}>تسجيل دواء مخصص</Text>
+          <Text style={styles.formTitle}>{t.medications.customTitle}</Text>
 
-          <Text style={styles.fieldLabel}>اسم الدواء *</Text>
+          <Text style={styles.fieldLabel}>{t.medications.medName}</Text>
           <View style={styles.inputBox}>
             <MaterialCommunityIcons name="pill" size={18} color="#059669" style={{ marginLeft: 6 }} />
             <TextInput
@@ -271,7 +272,7 @@ const MedicationsTab = ({ route }) => {
 
           <View style={styles.twoCol}>
             <View style={{ flex: 2 }}>
-              <Text style={styles.fieldLabel}>الجرعة *</Text>
+              <Text style={styles.fieldLabel}>{t.medications.dosage}</Text>
               <View style={styles.inputBox}>
                 <TextInput
                   style={styles.inp}
@@ -285,7 +286,7 @@ const MedicationsTab = ({ route }) => {
             </View>
             <View style={{ width: 10 }} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.fieldLabel}>الوحدة</Text>
+              <Text style={styles.fieldLabel}>{t.medications.unit}</Text>
               <View style={styles.inputBox}>
                 <TextInput
                   style={styles.inp}
@@ -298,7 +299,7 @@ const MedicationsTab = ({ route }) => {
             </View>
           </View>
 
-          <Text style={styles.fieldLabel}>ملاحظات (اختياري)</Text>
+          <Text style={styles.fieldLabel}>{t.medications.notesOptional}</Text>
           <View style={[styles.inputBox, { height: 70, alignItems: 'flex-start', paddingTop: 10 }]}>
             <TextInput
               style={[styles.inp, { textAlignVertical: 'top' }]}
@@ -317,7 +318,7 @@ const MedicationsTab = ({ route }) => {
           >
             {isSubmitting
               ? <ActivityIndicator color="#fff" size="small" />
-              : <Text style={styles.saveBtnText}>حفظ الدواء</Text>
+              : <Text style={styles.saveBtnText}>{t.medications.saveMed}</Text>
             }
           </Pressable>
         </View>
@@ -325,7 +326,7 @@ const MedicationsTab = ({ route }) => {
 
       {/* ── سجل الأدوية المعطاة ── */}
       <Text style={styles.historyLabel}>
-        الأدوية المسجلة ({meds.length})
+        {t.medications.registered} ({meds.length})
       </Text>
 
       {loading ? (
@@ -333,8 +334,8 @@ const MedicationsTab = ({ route }) => {
       ) : meds.length === 0 ? (
         <View style={styles.emptyBox}>
           <MaterialCommunityIcons name="pill-off" size={48} color="#d1d5db" />
-          <Text style={styles.emptyText}>لم يتم تسجيل أي أدوية بعد</Text>
-          <Text style={styles.emptySub}>اضغط على أحد الأدوية الشائعة أو أضف دواء مخصص</Text>
+          <Text style={styles.emptyText}>{t.medications.noMeds}</Text>
+          <Text style={styles.emptySub}>{t.medications.noMedsSub}</Text>
         </View>
       ) : (
         meds.map((med, index) => {
@@ -349,7 +350,7 @@ const MedicationsTab = ({ route }) => {
                   </View>
                   <View>
                     <Text style={styles.medName}>{med.medication_name || med.medicationName}</Text>
-                    <Text style={styles.medTime}>{formatTime(med.recorded_at || med.administered_at || med.createdAt || med.administeredAt)}</Text>
+                    <Text style={styles.medTime}>{formatTime(med.recorded_at || med.administered_at || med.createdAt || med.administeredAt, t)}</Text>
                   </View>
                 </View>
                 {/* الجرعة + حذف */}

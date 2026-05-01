@@ -8,36 +8,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from "../../services/api";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
-const FIELDS = [
-  {
-    key: 'bloodFlowRate',
-    label: 'تدفق الدم',
-    placeholder: '200',
-    unit: 'ml/min',
-    icon: 'water-pump',
-    color: '#ef4444',
-    hint: 'Blood Flow Rate — BFR',
-  },
-  {
-    key: 'dialysateFlow',
-    label: 'تدفق السائل',
-    placeholder: '500',
-    unit: 'ml/min',
-    icon: 'beaker-outline',
-    color: '#3b82f6',
-    hint: 'Dialysate Flow — DF',
-  },
-  {
-    key: 'ultrafiltrationRate',
-    label: 'معدل الترشيح',
-    placeholder: '300',
-    unit: 'ml/hr',
-    icon: 'filter-variant',
-    color: '#8b5cf6',
-    hint: 'Ultrafiltration Rate — UFR',
-  },
-];
+import { useLanguage } from '../../context/LanguageContext';
 
 const extractId = (obj) =>
   obj?.id || obj?.settingId || obj?.setting_id || obj?.setting_id;
@@ -50,6 +21,12 @@ const extractVal = (obj, key) => {
 };
 
 const SettingsTab = ({ route }) => {
+  const { t } = useLanguage();
+  const FIELDS = [
+    { key: 'bloodFlowRate', label: t.deviceSettings.fields.bloodFlow, placeholder: '200', unit: 'ml/min', icon: 'water-pump', color: '#ef4444', hint: 'Blood Flow Rate — BFR' },
+    { key: 'dialysateFlow', label: t.deviceSettings.fields.dialysateFlow, placeholder: '500', unit: 'ml/min', icon: 'beaker-outline', color: '#3b82f6', hint: 'Dialysate Flow — DF' },
+    { key: 'ultrafiltrationRate', label: t.deviceSettings.fields.filtration, placeholder: '300', unit: 'ml/hr', icon: 'filter-variant', color: '#8b5cf6', hint: 'Ultrafiltration Rate — UFR' },
+  ];
   const sessionId = route?.params?.sessionId;
 
   const [loading, setLoading] = useState(false);
@@ -92,7 +69,7 @@ const SettingsTab = ({ route }) => {
   const handleSave = async () => {
     const { bloodFlowRate, dialysateFlow, ultrafiltrationRate } = form;
     if (!bloodFlowRate || !dialysateFlow || !ultrafiltrationRate)
-      return Alert.alert("تنبيه", "يرجى تعبئة جميع الحقول.");
+      return Alert.alert(t.error, t.deviceSettings.fillAll);
 
     try {
       setIsSubmitting(true);
@@ -111,11 +88,11 @@ const SettingsTab = ({ route }) => {
       const newObj = res.data?.data || res.data || payload;
       setSaved(newObj);
       
-      Alert.alert("تم ✅", "تم حفظ الإعدادات بنجاح");
-      fetchLatest(); // تحديث احتياطي من السيرفر
+      Alert.alert(t.success, t.deviceSettings.saveSuccess);
+      fetchLatest();
     } catch (err) {
       console.log("Save error:", err.response?.data);
-      Alert.alert("خطأ", "فشل الحفظ، تأكد من القيم المدخلة.");
+      Alert.alert(t.error, t.deviceSettings.saveFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -123,12 +100,12 @@ const SettingsTab = ({ route }) => {
 
   const handleDelete = () => {
     const settingId = extractId(saved);
-    if (!settingId) return Alert.alert("خطأ", "لا يمكن حذف السجل الحالي (المعرف غير موجود).");
+    if (!settingId) return Alert.alert(t.error, t.deviceSettings.deleteIdError);
 
-    Alert.alert("تأكيد الحذف", "هل تريد حذف هذه الإعدادات؟", [
-      { text: "إلغاء", style: "cancel" },
+    Alert.alert(t.deviceSettings.deleteTitle, t.deviceSettings.deleteMsg, [
+      { text: t.cancel, style: "cancel" },
       {
-        text: "حذف", style: "destructive",
+        text: t.deviceSettings.deleteBtn, style: "destructive",
         onPress: async () => {
           try {
             setLoading(true);
@@ -138,7 +115,7 @@ const SettingsTab = ({ route }) => {
             setSaved(null);
             setForm({ bloodFlowRate: '', dialysateFlow: '', ultrafiltrationRate: '' });
           } catch (err) {
-            Alert.alert("خطأ", "تعذر الحذف.");
+            Alert.alert(t.error, t.deviceSettings.deleteFailed);
           } finally {
             setLoading(false);
           }
@@ -151,7 +128,7 @@ const SettingsTab = ({ route }) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.pageTitle}>إعدادات جهاز الغسيل</Text>
+      <Text style={styles.pageTitle}>{t.deviceSettings.title}</Text>
 
       {loading && !saved ? (
         <ActivityIndicator color="#059669" style={{ marginVertical: 30 }} />
@@ -160,11 +137,11 @@ const SettingsTab = ({ route }) => {
           <View style={styles.savedHeader}>
             <Pressable onPress={handleDelete} style={styles.deleteBtn}>
               <MaterialCommunityIcons name="trash-can-outline" size={18} color="#ef4444" />
-              <Text style={styles.deleteBtnText}>حذف</Text>
+              <Text style={styles.deleteBtnText}>{t.deviceSettings.delete}</Text>
             </Pressable>
             <View style={styles.activeBadge}>
               <View style={styles.activeDot} />
-              <Text style={styles.activeText}>الإعدادات الحالية</Text>
+              <Text style={styles.activeText}>{t.deviceSettings.currentSettings}</Text>
             </View>
           </View>
 
@@ -187,13 +164,13 @@ const SettingsTab = ({ route }) => {
       ) : (
         <View style={styles.emptyCard}>
           <MaterialCommunityIcons name="cog-off-outline" size={44} color="#d1d5db" />
-          <Text style={styles.emptyText}>لا توجد إعدادات مسجلة بعد</Text>
-          <Text style={styles.emptySub}>أدخل البيانات أدناه وسيتم حفظها</Text>
+          <Text style={styles.emptyText}>{t.deviceSettings.noSettings}</Text>
+          <Text style={styles.emptySub}>{t.deviceSettings.noSettingsSub}</Text>
         </View>
       )}
 
       <View style={styles.formCard}>
-        <Text style={styles.formTitle}>{saved ? "تحديث الإعدادات" : "إدخال إعدادات جديدة"}</Text>
+        <Text style={styles.formTitle}>{saved ? t.deviceSettings.update : t.deviceSettings.addNew}</Text>
         {FIELDS.map(f => (
           <View key={f.key} style={styles.fieldWrap}>
             <View style={styles.fieldLabelRow}>
@@ -225,7 +202,7 @@ const SettingsTab = ({ route }) => {
           {isSubmitting ? <ActivityIndicator color="#fff" size="small" /> : (
             <>
               <MaterialCommunityIcons name="check-circle-outline" size={20} color="#fff" />
-              <Text style={styles.saveBtnText}>{saved ? "تحديث الإعدادات" : "حفظ الإعدادات"}</Text>
+              <Text style={styles.saveBtnText}>{saved ? t.deviceSettings.update : t.deviceSettings.save}</Text>
             </>
           )}
         </Pressable>

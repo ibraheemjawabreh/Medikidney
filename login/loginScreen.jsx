@@ -5,7 +5,7 @@ import LoginValidation from "./loginValidation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import api from "../services/api";
-
+import { useLanguage } from "../context/LanguageContext";
 
 const LoginScreen = ({ navigation }) => {
   const [username, setusername] = useState("");
@@ -13,6 +13,7 @@ const LoginScreen = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, seterrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useLanguage();
 
   const handleLogin = async () => {
     try {
@@ -27,8 +28,6 @@ const LoginScreen = ({ navigation }) => {
       const data = response.data;
 
       if (data.user && data.user.mustChangePassword === true) {
-        console.log("المستخدم يحتاج لتفعيل الحساب لأول مرة");
-
         navigation.replace("ChangePasswordFirstTime", {
           tempToken: data.access_token,
           userRole: data.user.role
@@ -57,80 +56,77 @@ const LoginScreen = ({ navigation }) => {
         });
         seterrors(newErrors);
       } else {
-        const msg = err.response?.data?.message || "بيانات الدخول غير صحيحة أو وجد خطأ في الاتصال";
-        Alert.alert("خطأ", msg);
+        const msg = err.response?.data?.message || t.login.invalidCredentials;
+        Alert.alert(t.error, msg);
       }
     } finally {
       setIsLoading(false);
     }
   };
 
+  return (
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
 
-return (
-  <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-    <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        <View style={styles.card}>
+          <View style={styles.logoContainer}>
+            <View style={styles.logoBackground}>
+              <Image source={require("../assets/project-logo.png")} style={styles.logo} resizeMode="contain" />
+            </View>
+          </View>
 
-      <View style={styles.card}>
-        <View style={styles.logoContainer}>
-          <View style={styles.logoBackground}>
-            <Image source={require("../assets/logo.jpeg")} style={styles.logo} resizeMode="contain" />
+          <View style={styles.titleContainer}>
+            <Text style={styles.subtitleText}>{t.login.subtitle}</Text>
+          </View>
+
+          <View style={styles.formContainer}>
+            <Text style={styles.label}>{t.login.username}</Text>
+            <Input
+              placeholder={t.login.usernamePlaceholder}
+              value={username}
+              onChangeText={setusername}
+              errorMessage={errors.username}
+              leftIcon={<MaterialCommunityIcons name="account-outline" size={22} color="#059669" />}
+              inputContainerStyle={styles.inputContainer}
+              inputStyle={styles.inputStyle}
+            />
+
+            <Text style={styles.label}>{t.login.password}</Text>
+            <Input
+              placeholder="••••••••"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setpassword}
+              errorMessage={errors.password}
+              leftIcon={<MaterialCommunityIcons name="lock-outline" size={22} color="#059669" />}
+              rightIcon={
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <MaterialCommunityIcons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={22}
+                    color="#059669"
+                  />
+                </TouchableOpacity>
+              }
+              inputContainerStyle={styles.inputContainer}
+              inputStyle={styles.inputStyle}
+            />
+
+            <Button
+              title={isLoading ? t.login.loggingIn : t.login.loginBtn}
+              loading={isLoading}
+              onPress={handleLogin}
+              buttonStyle={styles.loginButton}
+              containerStyle={styles.loginButtonContainer}
+              titleStyle={styles.loginButtonTitle}
+            />
           </View>
         </View>
 
-        <View style={styles.titleContainer}>
-          <Text style={styles.subtitleText}>سجل دخولك للوصول إلى MediKidney</Text>
-        </View>
-
-        <View style={styles.formContainer}>
-          <Text style={styles.label}>اسم المستخدم</Text>
-          <Input
-            placeholder="اسم المستخدم"
-            value={username}
-            onChangeText={setusername}
-            errorMessage={errors.username}
-            leftIcon={<MaterialCommunityIcons name="account-outline" size={22} color="#059669" />}
-            inputContainerStyle={styles.inputContainer}
-            inputStyle={styles.inputStyle}
-          />
-
-          <Text style={styles.label}>كلمة المرور</Text>
-          <Input
-            placeholder="••••••••"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setpassword}
-            errorMessage={errors.password}
-            leftIcon={<MaterialCommunityIcons name="lock-outline" size={22} color="#059669" />}
-            rightIcon={
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <MaterialCommunityIcons
-                  name={showPassword ? "eye-off-outline" : "eye-outline"}
-                  size={22}
-                  color="#059669"
-                />
-              </TouchableOpacity>
-            }
-            inputContainerStyle={styles.inputContainer}
-            inputStyle={styles.inputStyle}
-          />
-
-          <Button
-            title={isLoading ? "جاري التحقق..." : "تسجيل الدخول"}
-            loading={isLoading}
-            onPress={handleLogin}
-            buttonStyle={styles.loginButton}
-            containerStyle={styles.loginButtonContainer}
-            titleStyle={styles.loginButtonTitle}
-          />
-        </View>
-      </View>
-
-    </ScrollView>
-  </KeyboardAvoidingView>
-);
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
 };
-
-
 
 export default LoginScreen;
 
@@ -139,14 +135,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#ecfdf5",
   },
-
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 40,
   },
-
   card: {
     width: "100%",
     backgroundColor: "#ffffff",
@@ -162,59 +156,33 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     elevation: 14,
   },
-
   logoContainer: {
     alignItems: "center",
     marginBottom: 24,
   },
-
   logoBackground: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: "#ecfdf5",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 3,
-    borderColor: "#d1fae5",
-    shadowColor: "#059669",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
-    elevation: 10,
   },
-
   logo: {
-    width: 210,
-    height: 210,
-    borderRadius: 65,
+    width: 250,
+    height: 250,
+    borderRadius: 75,
   },
-
   titleContainer: {
     marginBottom: 30,
     alignItems: "center",
   },
-
-  welcomeText: {
-    fontSize: 31,
-    fontWeight: "900",
-    color: "#0f172a",
-    textAlign: "center",
-  },
-
   subtitleText: {
     fontSize: 15,
     color: "#222325",
     fontWeight: "600",
     textAlign: "center",
     marginTop: 8,
-    
   },
-
   formContainer: {
     width: "100%",
   },
-
   label: {
     fontSize: 14,
     fontWeight: "900",
@@ -223,7 +191,6 @@ const styles = StyleSheet.create({
     textAlign: "right",
     marginRight: 6,
   },
-
   inputContainer: {
     backgroundColor: "#f8fafc",
     borderBottomWidth: 0,
@@ -233,14 +200,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     height: 58,
   },
-
   inputStyle: {
     textAlign: "left",
     fontSize: 16,
     fontWeight: "700",
     color: "#1e293b",
   },
-
   loginButtonContainer: {
     marginTop: 10,
     borderRadius: 18,
@@ -250,27 +215,14 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     elevation: 8,
   },
-
   loginButton: {
     backgroundColor: "#0f172a",
     height: 60,
     borderRadius: 18,
   },
-
   loginButtonTitle: {
     fontSize: 18,
     fontWeight: "900",
     color: "#ffffff",
-  },
-
-  forgotBtn: {
-    alignSelf: "flex-start",
-    marginBottom: 25,
-  },
-
-  forgotText: {
-    color: "#059669",
-    fontWeight: "bold",
-    fontSize: 14,
   },
 });

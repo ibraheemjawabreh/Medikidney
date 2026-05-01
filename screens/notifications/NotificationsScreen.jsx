@@ -12,8 +12,10 @@ import {
 import { Card, Button, Divider } from '@rneui/themed';
 import { MaterialIcons } from '@expo/vector-icons';
 import api from '../../services/api';
+import { useLanguage } from '../../context/LanguageContext';
 
 const NotificationsScreen = () => {
+  const { t } = useLanguage();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -30,8 +32,8 @@ const NotificationsScreen = () => {
       const response = await api.get('/notifications/unread');
       setNotifications(response.data || []);
     } catch (error) {
-      console.error('❌ خطأ في جلب الإشعارات:', error);
-      Alert.alert('خطأ', 'فشل جلب الإشعارات');
+      console.error('Fetch notifications error:', error);
+      Alert.alert(t.error, t.notifications.fetchError);
     } finally {
       setLoading(false);
     }
@@ -42,7 +44,7 @@ const NotificationsScreen = () => {
       const response = await api.get('/notifications/unread-count');
       setUnreadCount(response.data.unreadCount || 0);
     } catch (error) {
-      console.error('❌ خطأ في جلب عدد الإشعارات:', error);
+      console.error('Fetch unread count error:', error);
     }
   };
 
@@ -61,8 +63,8 @@ const NotificationsScreen = () => {
       );
       await fetchUnreadCount();
     } catch (error) {
-      console.error('❌ خطأ في تحديث الإشعار:', error);
-      Alert.alert('خطأ', 'فشل تحديث الإشعار');
+      console.error('Update notification error:', error);
+      Alert.alert(t.error, t.notifications.updateError);
     }
   };
 
@@ -71,10 +73,10 @@ const NotificationsScreen = () => {
       await api.patch('/notifications/mark-all-read');
       setNotifications([]);
       await fetchUnreadCount();
-      Alert.alert('نجح', 'تم تحديد جميع الإشعارات كمقروءة');
+      Alert.alert(t.success, t.notifications.markAllSuccess);
     } catch (error) {
-      console.error('❌ خطأ:', error);
-      Alert.alert('خطأ', 'فشل تحديد الإشعارات كمقروءة');
+      console.error('Mark all error:', error);
+      Alert.alert(t.error, t.notifications.markAllError);
     }
   };
 
@@ -86,8 +88,8 @@ const NotificationsScreen = () => {
       );
       await fetchUnreadCount();
     } catch (error) {
-      console.error('❌ خطأ في حذف الإشعار:', error);
-      Alert.alert('خطأ', 'فشل حذف الإشعار');
+      console.error('Delete notification error:', error);
+      Alert.alert(t.error, t.notifications.deleteError);
     }
   };
 
@@ -114,7 +116,7 @@ const NotificationsScreen = () => {
           <View style={styles.titleContainer}>
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.date}>
-              {new Date(item.created_at).toLocaleDateString('ar-SA', {
+              {new Date(item.created_at).toLocaleDateString(t.vitalSigns.now === 'الآن' ? 'ar-SA' : 'en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
@@ -135,7 +137,7 @@ const NotificationsScreen = () => {
             style={styles.readButton}
           >
             <MaterialIcons name="done-all" size={20} color="#382120" />
-            <Text style={styles.readButtonText}>قراءة</Text>
+            <Text style={styles.readButtonText}>{t.notifications.read}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -143,7 +145,7 @@ const NotificationsScreen = () => {
             style={styles.deleteButton}
           >
             <MaterialIcons name="delete" size={20} color="#d32f2f" />
-            <Text style={styles.deleteButtonText}>حذف</Text>
+            <Text style={styles.deleteButtonText}>{t.notifications.delete}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -154,7 +156,7 @@ const NotificationsScreen = () => {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#382120" />
-        <Text style={styles.loadingText}>جاري التحميل...</Text>
+        <Text style={styles.loadingText}>{t.loading}</Text>
       </View>
     );
   }
@@ -164,10 +166,10 @@ const NotificationsScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>الإشعارات</Text>
+          <Text style={styles.headerTitle}>{t.notifications.title}</Text>
           {unreadCount > 0 && (
             <Text style={styles.unreadText}>
-              {unreadCount} {unreadCount === 1 ? 'إشعار جديد' : 'إشعارات جديدة'}
+              {unreadCount} {unreadCount === 1 ? t.notifications.newNotification : t.notifications.newNotifications}
             </Text>
           )}
         </View>
@@ -176,7 +178,7 @@ const NotificationsScreen = () => {
             onPress={handleMarkAllAsRead}
             style={styles.markAllButton}
           >
-            <Text style={styles.markAllText}>تحديد الكل</Text>
+            <Text style={styles.markAllText}>{t.notifications.markAll}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -184,9 +186,9 @@ const NotificationsScreen = () => {
       {notifications.length === 0 ? (
         <View style={styles.emptyContainer}>
           <MaterialIcons name="notifications-none" size={60} color="#ccc" />
-          <Text style={styles.emptyText}>لا توجد إشعارات جديدة</Text>
+          <Text style={styles.emptyText}>{t.notifications.noNotifications}</Text>
           <Text style={styles.emptySubText}>
-            ستظهر الإشعارات هنا عند وصول معلومات جديدة
+            {t.notifications.emptySubtext}
           </Text>
         </View>
       ) : (

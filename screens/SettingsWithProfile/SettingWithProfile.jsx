@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, StatusBar, Switch } from 'react-native';
 import { Icon } from '@rneui/themed';
 import * as ImagePicker from 'expo-image-picker';
 import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLanguage } from '../../context/LanguageContext';
 
 const ProfileSettingsScreen = ({ navigation }) => {
   const [image, setImage] = useState(null);
   const [userData, setUserData] = useState(null);
-const [loading, setLoading] = useState(true); // حالة التحميل
+  const [loading, setLoading] = useState(true);
+  const { lang, t, toggleLanguage } = useLanguage();
+
   useEffect(() => {
     getProfile();
   }, []);
@@ -20,7 +23,7 @@ const [loading, setLoading] = useState(true); // حالة التحميل
       setUserData(response.data);
     } catch (error) {
       console.log("Profile Fetch Error Details:", error.response?.data || error.message);
-      Alert.alert("خطأ", "لا تملك الصلاحية للوصول لبيانات الملف الشخصي، أو أن هناك خطأ في الخادم.");
+      Alert.alert(t.error, t.settings.profileError);
     } finally {
       setLoading(false);
     }
@@ -34,17 +37,28 @@ const [loading, setLoading] = useState(true); // حالة التحميل
         routes: [{ name: 'Login' }],
       });
     } catch (error) {
-      Alert.alert("خطأ", "حدث خطأ أثناء محاولة تسجيل الخروج");
+      Alert.alert(t.error, t.settings.logoutError);
     }
   };
 
   const confirmLogout = () => {
     Alert.alert(
-      "تسجيل الخروج",
-      "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+      t.settings.logoutTitle,
+      t.settings.logoutMsg,
       [
-        { text: "إلغاء", style: "cancel" },
-        { text: "خروج", style: "destructive", onPress: handleLogout }
+        { text: t.cancel, style: "cancel" },
+        { text: t.settings.logoutConfirm, style: "destructive", onPress: handleLogout }
+      ]
+    );
+  };
+
+  const handleLanguageToggle = () => {
+    Alert.alert(
+      t.settings.languageTitle,
+      t.settings.languageMsg,
+      [
+        { text: t.cancel, style: 'cancel' },
+        { text: t.confirm, onPress: toggleLanguage },
       ]
     );
   };
@@ -59,9 +73,9 @@ const [loading, setLoading] = useState(true); // حالة التحميل
     if (!result.canceled) setImage(result.assets[0].uri);
   };
 
-  const SettingItem = ({ icon, title, onPress }) => (
+  const SettingItem = ({ icon, title, onPress, rightElement }) => (
     <TouchableOpacity style={styles.item} onPress={onPress}>
-      <Icon name="chevron-left" size={18} color="#94a3b8" />
+      {rightElement ? rightElement : <Icon name="chevron-left" size={18} color="#94a3b8" />}
       <View style={styles.itemContent}>
         <Text style={styles.itemText}>{title}</Text>
         <View style={styles.iconCircle}>
@@ -73,21 +87,21 @@ const [loading, setLoading] = useState(true); // حالة التحميل
 
   if (!userData) {
     return (
-      <View style={[styles.container, {justifyContent: 'center'}]}>
-        <Text style={{textAlign: 'center', color: '#64748b'}}>جاري التحميل...</Text>
+      <View style={[styles.container, { justifyContent: 'center' }]}>
+        <Text style={{ textAlign: 'center', color: '#64748b' }}>{t.loading}</Text>
       </View>
     );
   }
 
   const role = userData.role;
-  let data = role === "PATIENT" ? userData.patient : 
-             role === "NURSE" ? userData.nurse : 
-             userData.nutritionist;
+  let data = role === "PATIENT" ? userData.patient :
+    role === "NURSE" ? userData.nurse :
+      userData.nutritionist;
 
   return (
     <ScrollView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
-      
+
       <View style={styles.header}>
         <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
           {image ? (
@@ -109,32 +123,48 @@ const [loading, setLoading] = useState(true); // حالة التحميل
       </View>
 
       <View style={styles.list}>
-        <Text style={styles.sectionTitle}>الإعدادات العامة</Text>
-        
+        <Text style={styles.sectionTitle}>{t.settings.title}</Text>
+
         <SettingItem
           icon="lock"
-          title="تغيير كلمة المرور"
+          title={t.settings.changePassword}
           onPress={() => navigation.navigate("ChangePassword")}
         />
         <SettingItem
           icon="person"
-          title="تعديل بيانات الحساب"
+          title={t.settings.editAccount}
           onPress={() => {}}
         />
-        <SettingItem
-          icon="language"
-          title="لغة التطبيق"
-          onPress={() => {}}
-        />
+
+        {/* Language toggle item */}
+        <TouchableOpacity style={styles.item} onPress={handleLanguageToggle}>
+          <Switch
+            value={lang === 'en'}
+            onValueChange={handleLanguageToggle}
+            trackColor={{ false: '#d1d5db', true: '#059669' }}
+            thumbColor="#fff"
+            style={{ transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }] }}
+          />
+          <View style={styles.itemContent}>
+            <View>
+              <Text style={styles.itemText}>{t.settings.language}</Text>
+              <Text style={styles.langSubText}>{t.settings.currentLang}</Text>
+            </View>
+            <View style={styles.iconCircle}>
+              <Icon name="language" size={20} color="#059669" />
+            </View>
+          </View>
+        </TouchableOpacity>
+
         <SettingItem
           icon="info"
-          title="عن تطبيق MediKidney"
+          title={t.settings.aboutApp}
           onPress={() => navigation.navigate("AboutApp")}
         />
 
         <TouchableOpacity style={styles.logoutBtn} onPress={confirmLogout}>
-          <Icon name="logout" size={20} color="#fff" style={{marginRight: 10}} />
-          <Text style={styles.logoutText}>تسجيل الخروج</Text>
+          <Icon name="logout" size={20} color="#fff" style={{ marginRight: 10 }} />
+          <Text style={styles.logoutText}>{t.settings.logout}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -144,10 +174,10 @@ const [loading, setLoading] = useState(true); // حالة التحميل
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ecfdf5', // نفس خلفية تسجيل الدخول
+    backgroundColor: '#ecfdf5',
   },
   header: {
-    backgroundColor: '#204a42', // اللون الكحلي الداكن من زر تسجيل الدخول
+    backgroundColor: '#204a42',
     paddingTop: 60,
     paddingBottom: 40,
     alignItems: 'center',
@@ -166,7 +196,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#059669', // اللون الأخضر الطبي
+    borderColor: '#059669',
   },
   avatar: {
     width: 110,
@@ -240,9 +270,16 @@ const styles = StyleSheet.create({
   itemText: {
     marginRight: 12,
     fontSize: 15,
-    color: '#1e293b', // لون النص الداكن من تسجيل الدخول
+    color: '#1e293b',
     fontWeight: '600',
     textAlign: "right",
+  },
+  langSubText: {
+    marginRight: 12,
+    fontSize: 11,
+    color: '#059669',
+    textAlign: "right",
+    fontWeight: '500',
   },
   iconCircle: {
     width: 35,
@@ -254,7 +291,7 @@ const styles = StyleSheet.create({
   },
   logoutBtn: {
     marginTop: 20,
-    backgroundColor: '#ef4444', // أحمر واضح للخروج
+    backgroundColor: '#ef4444',
     padding: 16,
     borderRadius: 16,
     flexDirection: 'row',

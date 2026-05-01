@@ -3,8 +3,10 @@ import { Text, View, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platfo
 import { Button, Input } from "@rneui/themed";
 import api from "../../services/api";
 import ValidationChange from "./ValidationChangePassword";
+import { useLanguage } from '../../context/LanguageContext';
 
 const ChangePassword = ({ navigation }) => {
+  const { t } = useLanguage();
   const [oldPassword, setoldPassword] = useState("");
   const [newPassword, setnewPassword] = useState("");
   const [confirmPassword, setconfirmPassword] = useState("");
@@ -29,7 +31,7 @@ const ChangePassword = ({ navigation }) => {
       );
 
       if (response.status === 200 || response.status === 201) {
-        Alert.alert("نجاح ✅", "تم تغيير كلمة المرور بنجاح");
+        Alert.alert(t.success, t.changePasswordScreen.successMsg);
         
         // بعد التغيير بنجاح، نعود للصفحة السابقة (البروفايل مثلاً)
         navigation.goBack();
@@ -42,8 +44,8 @@ const ChangePassword = ({ navigation }) => {
         });
         seterrors(validationErrors);
       } else {
-        const serverMsg = err.response?.data?.message || "حدث خطأ ما";
-        Alert.alert("فشل العملية", Array.isArray(serverMsg) ? serverMsg[0] : serverMsg);
+        const serverMsg = err.response?.data?.message || t.changePasswordScreen.failedMsg;
+        Alert.alert(t.error, Array.isArray(serverMsg) ? serverMsg[0] : serverMsg);
       }
     } finally {
       setLoading(false);
@@ -54,14 +56,14 @@ const ChangePassword = ({ navigation }) => {
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.headerSection}>
-          <Text style={styles.header}>أمن الحساب</Text>
-          <Text style={styles.subtitle}>تأكد من اختيار كلمة مرور قوية لحماية بياناتك الطبية</Text>
+          <Text style={styles.header}>{t.changePasswordScreen.header}</Text>
+          <Text style={styles.subtitle}>{t.changePasswordScreen.subtitle}</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.label}>كلمة المرور الحالية</Text>
+          <Text style={styles.label}>{t.changePasswordScreen.oldPassword}</Text>
           <Input
-            placeholder="أدخل كلمة المرور الحالية"
+            placeholder={t.changePasswordScreen.oldPlaceholder}
             value={oldPassword}
             onChangeText={setoldPassword}
             errorMessage={errors.oldPassword}
@@ -70,9 +72,9 @@ const ChangePassword = ({ navigation }) => {
             inputContainerStyle={styles.inputContainer}
           />
 
-          <Text style={styles.label}>كلمة المرور الجديدة</Text>
+          <Text style={styles.label}>{t.changePasswordScreen.newPassword}</Text>
           <Input
-            placeholder="8 خانات على الأقل"
+            placeholder={t.changePasswordScreen.newPlaceholder}
             value={newPassword}
             onChangeText={setnewPassword}
             errorMessage={errors.newPassword}
@@ -81,9 +83,9 @@ const ChangePassword = ({ navigation }) => {
             inputContainerStyle={styles.inputContainer}
           />
 
-          <Text style={styles.label}>تأكيد الكلمة الجديدة</Text>
+          <Text style={styles.label}>{t.changePasswordScreen.confirmPassword}</Text>
           <Input
-            placeholder="أعد كتابة الكلمة الجديدة"
+            placeholder={t.changePasswordScreen.confirmPlaceholder}
             value={confirmPassword}
             onChangeText={setconfirmPassword}
             errorMessage={errors.confirmPassword}
@@ -93,7 +95,7 @@ const ChangePassword = ({ navigation }) => {
           />
 
           <Button
-            title="تحديث كلمة المرور"
+            title={t.changePasswordScreen.updateBtn}
             onPress={handleChangePassword}
             loading={loading}
             buttonStyle={styles.button}
@@ -101,7 +103,7 @@ const ChangePassword = ({ navigation }) => {
           />
           
           <Button
-            title="إلغاء"
+            title={t.changePasswordScreen.cancelBtn}
             type="clear"
             onPress={() => navigation.goBack()}
             titleStyle={{ color: "#ef4444" }}
