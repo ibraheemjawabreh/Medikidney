@@ -2,11 +2,11 @@ import { Button } from "@rneui/base";
 import React from "react";
 import { View, Text, StyleSheet, Image, ScrollView, StatusBar, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-const AboutApp = ({navigation}) => {
+const AboutApp = ({ navigation }) => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <StatusBar barStyle="dark-content" backgroundColor="#ecfdf5" />
-      
+
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.goBack()}
@@ -14,11 +14,11 @@ const AboutApp = ({navigation}) => {
       >
         <MaterialCommunityIcons name="arrow-left" size={26} color="#0f172a" />
       </TouchableOpacity>
-      
+
       <View style={styles.logoContainer}>
         <View style={styles.imageWrapper}>
           <Image
-            source={require("../../assets/logo.jpeg")}
+            source={require("../../assets/project-logo.png")}
             style={styles.logo}
             resizeMode="cover"
           />
@@ -80,26 +80,16 @@ export default AboutApp;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ecfdf5", 
+    backgroundColor: "#ecfdf5",
   },
   scrollContent: {
     padding: 25,
     paddingTop: 50,
   },
- logoContainer: {
-  alignItems: "center",
-  marginBottom: 40,
-  position: "relative",
-},
-  imageWrapper: {
-    backgroundColor: '#fff',
-    padding: 5,
-    borderRadius: 30,
-    elevation: 8,
-    shadowColor: "#059669",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+    position: "relative",
   },
   logo: {
     width: 250,
@@ -109,7 +99,7 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 32,
     fontWeight: "900",
-    color: "#0f172a", 
+    color: "#0f172a",
     marginTop: 15,
   },
   badge: {
@@ -123,7 +113,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: "#059669", 
+    color: "#059669",
     fontWeight: "bold",
     textAlign: "center",
   },

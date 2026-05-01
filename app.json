@@ -21,7 +21,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.majed.medikidney"
+      "package": "com.majed.medikidney",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,8 +33,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "9c15bffd-9306-4543-9140-8af9d629a22c"
+        "projectId": "db1d55b0-3193-4b75-b568-cc57c3faea0c"
       }
-    }
+    },
+    "owner": "ibraheemjaw"
   }
 }

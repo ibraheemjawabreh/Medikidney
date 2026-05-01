@@ -18,7 +18,7 @@ export const useNotifications = (navigation) => {
   const responseListener = useRef();
 
   useEffect(() => {
-    // سجل device token عند الفتح
+    // سجل device token مرة واحدة
     registerForPushNotifications();
 
     // استمع للإشعارات الواردة
@@ -38,7 +38,7 @@ export const useNotifications = (navigation) => {
       if (notificationListener.current) notificationListener.current.remove();
       if (responseListener.current) responseListener.current.remove();
     };
-  }, [navigation]);
+  }, []);
 
   const registerForPushNotifications = async () => {
     try {

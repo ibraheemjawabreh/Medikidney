@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "758989735030",
+    "project_id": "medikidney",
+    "storage_bucket": "medikidney.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:758989735030:android:fc7b2e58dc2358f22b8b57",
+        "android_client_info": {
+          "package_name": "com.majed.medikidney"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6UvQEkMssqEXHTURA2TPoC12JNJeBOYg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

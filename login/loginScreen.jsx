@@ -43,6 +43,21 @@ const LoginScreen = ({ navigation }) => {
         await AsyncStorage.setItem("userId", String(data.user.userId));
       }
 
+      try {
+        const deviceToken = await AsyncStorage.getItem("deviceToken");
+        if (deviceToken) {
+          await api.post('/notifications/register-device', {
+            deviceToken: deviceToken,
+            deviceName: 'medikidney-mobile',
+          }, {
+            headers: { Authorization: `Bearer ${data.access_token}` }
+          });
+          console.log("✅ Device token registered after login");
+        }
+      } catch (tokenErr) {
+        console.log("⚠️ Could not register device token after login:", tokenErr);
+      }
+
       const userRole = data.user.role;
       if (userRole === "PATIENT") navigation.replace("PatinetPages");
       else if (userRole === "NURSE") navigation.replace("NurseHome");
