@@ -32,7 +32,7 @@ const ChangePassword = ({ navigation }) => {
 
       if (response.status === 200 || response.status === 201) {
         Alert.alert(t.success, t.changePasswordScreen.successMsg);
-        
+
         // بعد التغيير بنجاح، نعود للصفحة السابقة (البروفايل مثلاً)
         navigation.goBack();
       }
@@ -101,7 +101,7 @@ const ChangePassword = ({ navigation }) => {
             buttonStyle={styles.button}
             containerStyle={styles.buttonContainer}
           />
-          
+
           <Button
             title={t.changePasswordScreen.cancelBtn}
             type="clear"
@@ -123,27 +123,27 @@ const styles = StyleSheet.create({
   headerSection: { marginBottom: 30, alignItems: 'center' },
   header: { fontSize: 28, fontWeight: "900", color: "#0f172a" },
   subtitle: { fontSize: 14, color: "#64748b", textAlign: "center", marginTop: 5, paddingHorizontal: 20 },
-  card: { 
-    backgroundColor: "#FFFFFF", 
-    borderRadius: 25, 
-    padding: 25, 
-    elevation: 5, 
-    shadowColor: "#000", 
-    shadowOffset: { width: 0, height: 4 }, 
-    shadowOpacity: 0.1, 
-    shadowRadius: 10, 
-    borderWidth: 1, 
-    borderColor: '#e2e8f0' 
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 25,
+    padding: 25,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0'
   },
   label: { fontSize: 14, fontWeight: "900", color: "#334155", marginBottom: 5, textAlign: 'right', marginRight: 10 },
-  inputContainer: { 
-    borderBottomWidth: 0, 
-    backgroundColor: "#f8fafc", 
-    borderRadius: 15, 
-    paddingHorizontal: 15, 
-    borderWidth: 1, 
-    borderColor: "#e2e8f0", 
-    height: 55 
+  inputContainer: {
+    borderBottomWidth: 0,
+    backgroundColor: "#f8fafc",
+    borderRadius: 15,
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    height: 55
   },
   buttonContainer: { borderRadius: 15, marginTop: 10 },
   button: { backgroundColor: "#0f172a", borderRadius: 15, paddingVertical: 15 },

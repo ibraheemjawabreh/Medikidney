@@ -49,7 +49,7 @@ const ConsultationDetails = ({ route, navigation }) => {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        
+
         {/* Main Card */}
         <View style={styles.mainCard}>
           <View style={styles.docRow}>
@@ -141,7 +141,7 @@ export default ConsultationDetails;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#ecfdf5',
   },
   centerContainer: {
     flex: 1,

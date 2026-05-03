@@ -13,17 +13,17 @@ const PatientState = ({ route }) => {
   const navigation = useNavigation();
   const { selectedPatientIds = [] } = route.params ?? {};
 
-  const [loading, setLoading]       = useState(false);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [myPatients, setMyPatients] = useState([]);
-  const [myNurseId, setMyNurseId]   = useState(null);
+  const [myNurseId, setMyNurseId] = useState(null);
 
   // ─── Modal الوزن قبل الجلسة ───────────────────────────────────
   const [weightModalVisible, setWeightModalVisible] = useState(false);
-  const [pendingPatient,     setPendingPatient]     = useState(null);
-  const [weightInput,        setWeightInput]        = useState('');
-  const [weightInputError,   setWeightInputError]   = useState('');
-  const [isSavingSession,    setIsSavingSession]    = useState(false);
+  const [pendingPatient, setPendingPatient] = useState(null);
+  const [weightInput, setWeightInput] = useState('');
+  const [weightInputError, setWeightInputError] = useState('');
+  const [isSavingSession, setIsSavingSession] = useState(false);
 
   // ─── جلب حالة المرضى المختارين ────────────────────────────
   const fetchStatus = async (isRefresh = false) => {
@@ -38,11 +38,11 @@ const PatientState = ({ route }) => {
       setMyNurseId(nurseId);
 
       const allPatients = (scheduleRes.data.shifts ?? []).flatMap(s => s.patients);
-      
+
       // الفلترة الصحيحة: فقط المرضى المحجوزين لهذا الممرض حالياً
       // نستخدم nurseId المستخرج مباشرة من البروفايل لضمان الدقة
       const filtered = allPatients.filter(p => p.assignedNurseId === nurseId);
-      
+
       setMyPatients(filtered);
       return filtered;
     } catch (error) {
@@ -128,16 +128,16 @@ const PatientState = ({ route }) => {
       const createRes = await api.post(
         "/dialysis-sessions",
         {
-          patientId:           pendingPatient.patientId,
-          scheduleId:          pendingPatient.scheduleId,
-          date:                todayISO,
-          startTime:           now.toISOString(),
-          status:              "PENDING",
-          weightBefore:        num,
-          fluidRemoved:        0,
+          patientId: pendingPatient.patientId,
+          scheduleId: pendingPatient.scheduleId,
+          date: todayISO,
+          startTime: now.toISOString(),
+          status: "PENDING",
+          weightBefore: num,
+          fluidRemoved: 0,
           bloodPressureBefore: "120/80",
-          bloodPressureAfter:  "120/80",
-          notes:               "None"
+          bloodPressureAfter: "120/80",
+          notes: "None"
         }
       );
 
@@ -176,7 +176,7 @@ const PatientState = ({ route }) => {
   const getStatusInfo = (status) => {
     switch (status) {
       case "COMPLETED": return { label: "مكتملة", color: "#059669", icon: "check-circle", bg: "#f0fdf4" };
-      case "PENDING": 
+      case "PENDING":
       case "IN_PROGRESS": return { label: "تم البدء (جاري الغسيل)", color: "#2563eb", icon: "sync", bg: "#eff6ff" };
       case "CANCELLED": return { label: "ملغية", color: "#ef4444", icon: "close-circle", bg: "#fef2f2" };
       case "MISSED": return { label: "غائب", color: "#6b7280", icon: "account-off", bg: "#f9fafb" };
@@ -244,9 +244,9 @@ const PatientState = ({ route }) => {
                 {isSavingSession
                   ? <ActivityIndicator color="#fff" size="small" />
                   : <>
-                      <MaterialCommunityIcons name="play-circle" size={20} color="#fff" />
-                      <Text style={mStyles.confirmBtnText}>بدء الجلسة</Text>
-                    </>
+                    <MaterialCommunityIcons name="play-circle" size={20} color="#fff" />
+                    <Text style={mStyles.confirmBtnText}>بدء الجلسة</Text>
+                  </>
                 }
               </Pressable>
             </View>
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F3F4F6" },
 
   header: {
-    backgroundColor: "#fff",
+    backgroundColor: "#ecfdf5",
     paddingTop: 52,
     paddingBottom: 14,
     paddingHorizontal: 20,

@@ -78,9 +78,11 @@ const StaffPatientView = ({ route, navigation }) => {
       const response = await api.get(`/clinic-consultations?patientId=${id}`);
       console.log('Consultations data:', response.data);
       setConsultations(Array.isArray(response.data) ? response.data : []);
-    } catch (e) { 
-      console.log('Consultations error:', e);
-      setConsultations([]); 
+    } catch (e) {
+      if (e.response?.status !== 403) {
+        console.log('Consultations fetch error:', e.message);
+      }
+      setConsultations([]);
     }
   };
 
@@ -530,8 +532,8 @@ const StaffPatientView = ({ route, navigation }) => {
 
             {consultations.filter(a => a.status === 'COMPLETED').length > 0 ? (
               consultations.filter(a => a.status === 'COMPLETED').map((appt, index) => (
-                <TouchableOpacity 
-                  key={appt.appointment_id || index} 
+                <TouchableOpacity
+                  key={appt.appointment_id || index}
                   style={styles.consultCard}
                   activeOpacity={0.7}
                   onPress={() => navigation.navigate('ConsultationDetails', { consultation: appt })}
@@ -564,7 +566,7 @@ const StaffPatientView = ({ route, navigation }) => {
                       <Text style={styles.consultDateText}>{formatTime(appt.appt_time)}</Text>
                     </View>
                   </View>
-                  
+
                   <View style={styles.cardFooter}>
                     <Text style={styles.viewDetailsText}>عرض التفاصيل الكاملة</Text>
                     <Icon name="chevron-left" type="material-community" size={18} color="#059669" />
@@ -587,7 +589,7 @@ const StaffPatientView = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#87898b56",
+    backgroundColor: "#ecfdf5",
   },
   modernHeader: {
     height: 235,

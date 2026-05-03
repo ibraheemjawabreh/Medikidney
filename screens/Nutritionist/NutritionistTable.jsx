@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { 
-  View, TextInput, TouchableOpacity, Text, Alert, ScrollView, 
-  ActivityIndicator, StyleSheet, StatusBar, KeyboardAvoidingView, 
-  Platform, TouchableWithoutFeedback, Keyboard 
+import {
+  View, TextInput, TouchableOpacity, Text, Alert, ScrollView,
+  ActivityIndicator, StyleSheet, StatusBar, KeyboardAvoidingView,
+  Platform, TouchableWithoutFeedback, Keyboard
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../services/api";
@@ -21,10 +21,10 @@ const NutritionistTable = ({ route, navigation }) => {
   const [lunch, setLunch] = useState("");
   const [dinner, setDinner] = useState("");
   const [mealNotes, setMealNotes] = useState(""); // استعادة حالة الملاحظات
-  
+
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
-  
+
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
 
@@ -51,7 +51,7 @@ const NutritionistTable = ({ route, navigation }) => {
         setLunch(plan.lunch || "");
         setDinner(plan.dinner || "");
         setMealNotes(plan.meal_notes || plan.mealNotes || ""); // تعبئة الملاحظات من السيرفر
-        
+
         if (plan.startDate || plan.start_date) setStartDate(new Date(plan.startDate || plan.start_date));
         if (plan.endDate || plan.end_date) setEndDate(new Date(plan.endDate || plan.end_date));
       }
@@ -61,7 +61,7 @@ const NutritionistTable = ({ route, navigation }) => {
   const handleSave = async () => {
     try {
       const nutritionistId = await AsyncStorage.getItem("userId");
-      
+
       const bodyData = {
         patientId: Number(patientId),
         nutritionistId: Number(nutritionistId),
@@ -78,7 +78,7 @@ const NutritionistTable = ({ route, navigation }) => {
       };
 
       const endpoint = `/nutrition-programs${programId ? `/${programId}` : ""}`;
-      const response = programId 
+      const response = programId
         ? await api.patch(endpoint, bodyData)
         : await api.post(endpoint, bodyData);
 
@@ -135,8 +135,8 @@ const NutritionistTable = ({ route, navigation }) => {
             {showEndPicker && <DateTimePicker value={endDate} mode="date" display="default" onChange={onEndChange} />}
 
             <View style={styles.rowBetween}>
-                <View style={{ width: '48%' }}><Text style={[styles.label, {color: 'red'}]}>الممنوعات</Text><TextInput value={forbiddenItems} onChangeText={setForbiddenItems} style={[styles.input, {height: 80}]} multiline/></View>
-                <View style={{ width: '48%' }}><Text style={[styles.label, {color: 'green'}]}>المسموحات</Text><TextInput value={allowedItems} onChangeText={setAllowedItems} style={[styles.input, {height: 80}]} multiline/></View>
+              <View style={{ width: '48%' }}><Text style={[styles.label, { color: 'red' }]}>الممنوعات</Text><TextInput value={forbiddenItems} onChangeText={setForbiddenItems} style={[styles.input, { height: 80 }]} multiline /></View>
+              <View style={{ width: '48%' }}><Text style={[styles.label, { color: 'green' }]}>المسموحات</Text><TextInput value={allowedItems} onChangeText={setAllowedItems} style={[styles.input, { height: 80 }]} multiline /></View>
             </View>
 
             <Text style={styles.sectionTitle}>الوجبات</Text>
@@ -146,12 +146,12 @@ const NutritionistTable = ({ route, navigation }) => {
 
             {/* --- حقل الملاحظات الإضافية --- */}
             <Text style={styles.label}>ملاحظات إضافية على الوجبات</Text>
-            <TextInput 
-              value={mealNotes} 
-              onChangeText={setMealNotes} 
-              style={[styles.input, { height: 80, textAlignVertical: 'top' }]} 
+            <TextInput
+              value={mealNotes}
+              onChangeText={setMealNotes}
+              style={[styles.input, { height: 80, textAlignVertical: 'top' }]}
               placeholder="اكتب أي تعليمات خاصة هنا..."
-              multiline 
+              multiline
             />
 
             <TouchableOpacity onPress={handleSave} style={[styles.saveBtn, { backgroundColor: programId ? '#0ea5e9' : '#204a42' }]}>
@@ -172,7 +172,7 @@ const MealInput = ({ label, value, onChange }) => (
 );
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f1f5f9', padding: 15 },
+  container: { flex: 1, backgroundColor: '#ecfdf5', padding: 15 },
   loadingContainer: { flex: 1, justifyContent: "center" },
   headerTitle: { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginVertical: 15 },
   formCard: { backgroundColor: '#fff', borderRadius: 20, padding: 20, elevation: 5 },

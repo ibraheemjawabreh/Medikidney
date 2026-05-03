@@ -22,18 +22,18 @@ const validateWeight = (val, fieldName, required = true) => {
 const formatDateTime = (dateStr, t) => {
   if (!dateStr) return { time: t.unknown, ago: "" };
   const date = new Date(dateStr);
-  const now  = new Date();
+  const now = new Date();
 
   // تنسيق الوقت مع مراعاة اللغة المختارة
   const locale = t.vitalSigns.now === 'الآن' ? 'ar-SA' : 'en-US';
   const time = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
-  const diffMs  = now - date;
+  const diffMs = now - date;
   const diffMin = Math.floor(diffMs / 60000);
 
   let ago = "";
-  if      (diffMin < 1)   ago = t.vitalSigns.now;
-  else if (diffMin < 60)  ago = t.vitalSigns.minutesAgo.replace('{n}', diffMin);
+  if (diffMin < 1) ago = t.vitalSigns.now;
+  else if (diffMin < 60) ago = t.vitalSigns.minutesAgo.replace('{n}', diffMin);
   else if (diffMin < 120) ago = t.vitalSigns.hourAgo;
   else if (diffMin < 1440) ago = t.vitalSigns.hoursAgo.replace('{n}', Math.floor(diffMin / 60));
   else ago = t.vitalSigns.dayAgo.replace('{n}', Math.floor(diffMin / 1440));
@@ -43,17 +43,17 @@ const formatDateTime = (dateStr, t) => {
 
 // ── تحديد حالة الضغط ─────────────────────────────────────────────────────────
 const getBpStatus = (sys, dia, t) => {
-  if (sys > 140 || dia > 90) return { label: t.vitalSigns.status.high,  color: "#ef4444", bg: "#fef2f2" };
-  if (sys < 90  || dia < 60) return { label: t.vitalSigns.status.low,  color: "#f59e0b", bg: "#fffbeb" };
-  return                             { label: t.vitalSigns.status.normal,  color: "#059669", bg: "#f0fdf4" };
+  if (sys > 140 || dia > 90) return { label: t.vitalSigns.status.high, color: "#ef4444", bg: "#fef2f2" };
+  if (sys < 90 || dia < 60) return { label: t.vitalSigns.status.low, color: "#f59e0b", bg: "#fffbeb" };
+  return { label: t.vitalSigns.status.normal, color: "#059669", bg: "#f0fdf4" };
 };
 
 // ── بطاقة قراءة واحدة ────────────────────────────────────────────────────────
 const VitalCard = ({ item, index, totalCount, onDelete, t }) => {
-  const vitalId        = item.vital_id || item.id;
-  const { time, ago }  = formatDateTime(item.recorded_at || item.createdAt, t);
-  const bpStatus       = getBpStatus(item.systolic, item.diastolic, t);
-  const readingNumber  = totalCount - index; // رقم القراءة (الأحدث = الأكبر)
+  const vitalId = item.vital_id || item.id;
+  const { time, ago } = formatDateTime(item.recorded_at || item.createdAt, t);
+  const bpStatus = getBpStatus(item.systolic, item.diastolic, t);
+  const readingNumber = totalCount - index; // رقم القراءة (الأحدث = الأكبر)
 
   return (
     <View style={cardStyles.wrap}>
@@ -146,7 +146,7 @@ const cardStyles = StyleSheet.create({
     backgroundColor: '#fafafa', borderBottomWidth: 1, borderBottomColor: '#f1f5f9',
   },
   headerRight: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10 },
-  headerLeft:  { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
+  headerLeft: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
 
   readingBadge: {
     width: 30, height: 30, borderRadius: 15,
@@ -155,10 +155,10 @@ const cardStyles = StyleSheet.create({
   readingNum: { color: '#fff', fontSize: 12, fontWeight: '800' },
 
   timeText: { fontSize: 13, fontWeight: '700', color: '#1f2937', textAlign: 'right' },
-  agoText:  { fontSize: 11, color: '#9ca3af', textAlign: 'right', marginTop: 1 },
+  agoText: { fontSize: 11, color: '#9ca3af', textAlign: 'right', marginTop: 1 },
 
   statusBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
-  statusText:  { fontSize: 11, fontWeight: '700' },
+  statusText: { fontSize: 11, fontWeight: '700' },
 
   deleteBtn: { padding: 5, backgroundColor: '#fef2f2', borderRadius: 8 },
 
@@ -166,12 +166,12 @@ const cardStyles = StyleSheet.create({
     flexDirection: 'row-reverse', paddingHorizontal: 14, paddingVertical: 14,
     justifyContent: 'space-around', alignItems: 'center',
   },
-  valueBox:  { alignItems: 'center', gap: 4, flex: 1 },
-  bpRow:     { flexDirection: 'row-reverse', alignItems: 'center', gap: 2 },
-  bigNum:    { fontSize: 20, fontWeight: '800', color: '#111827' },
-  slash:     { fontSize: 18, color: '#d1d5db', marginHorizontal: 2 },
-  unit:      { fontSize: 10, color: '#9ca3af', fontWeight: '600', textAlign: 'center' },
-  divider:   { width: 1, height: 40, backgroundColor: '#f1f5f9' },
+  valueBox: { alignItems: 'center', gap: 4, flex: 1 },
+  bpRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 2 },
+  bigNum: { fontSize: 20, fontWeight: '800', color: '#111827' },
+  slash: { fontSize: 18, color: '#d1d5db', marginHorizontal: 2 },
+  unit: { fontSize: 10, color: '#9ca3af', fontWeight: '600', textAlign: 'center' },
+  divider: { width: 1, height: 40, backgroundColor: '#f1f5f9' },
 });
 
 // ── المكوّن الرئيسي ───────────────────────────────────────────────────────────
@@ -179,10 +179,10 @@ const VitalSignsTab = ({ route }) => {
   const { t } = useLanguage();
   const sessionId = route?.params?.sessionId;
 
-  const [loading,      setLoading]      = useState(false);
+  const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [vitals,       setVitals]       = useState([]);
-  const [showForm,     setShowForm]     = useState(false);
+  const [vitals, setVitals] = useState([]);
+  const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
     systolic: '', diastolic: '', pulse: '', temperature: '', oxygen: '',
   });
@@ -218,10 +218,10 @@ const VitalSignsTab = ({ route }) => {
       await api.post(
         `/dialysis-sessions/${sessionId}/details/vital-signs`,
         {
-          systolic:         Number(systolic),
-          diastolic:        Number(diastolic),
-          pulse:            Number(pulse),
-          temperature:      Number(temperature),
+          systolic: Number(systolic),
+          diastolic: Number(diastolic),
+          pulse: Number(pulse),
+          temperature: Number(temperature),
           oxygenSaturation: form.oxygen ? Number(form.oxygen) : null,
         }
       );
@@ -245,16 +245,16 @@ const VitalSignsTab = ({ route }) => {
     const confirmed = Platform.OS === 'web'
       ? window.confirm(t.vitalSigns.deleteConfirmMsg)
       : await new Promise(resolve => {
-          Alert.alert(
-            t.vitalSigns.deleteConfirmTitle,
-            t.vitalSigns.deleteConfirmMsg,
-            [
-              { text: t.cancel, onPress: () => resolve(false), style: "cancel" },
-              { text: t.vitalSigns.deleteConfirmTitle.replace('تأكيد ', ''),   onPress: () => resolve(true), style: "destructive" },
-            ],
-            { cancelable: true, onDismiss: () => resolve(false) }
-          );
-        });
+        Alert.alert(
+          t.vitalSigns.deleteConfirmTitle,
+          t.vitalSigns.deleteConfirmMsg,
+          [
+            { text: t.cancel, onPress: () => resolve(false), style: "cancel" },
+            { text: t.vitalSigns.deleteConfirmTitle.replace('تأكيد ', ''), onPress: () => resolve(true), style: "destructive" },
+          ],
+          { cancelable: true, onDismiss: () => resolve(false) }
+        );
+      });
 
     if (!confirmed) return;
 
@@ -454,8 +454,8 @@ export default VitalSignsTab;
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f3f4f6' },
-  content:   { padding: 16, paddingBottom: 40 },
+  container: { flex: 1, backgroundColor: '#ecfdf5' },
+  content: { padding: 16, paddingBottom: 40 },
 
   // شريط العنوان
   topBar: {
@@ -476,13 +476,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#065f46', borderRadius: 16, padding: 16,
     marginBottom: 16, elevation: 2,
   },
-  latestLabel:   { color: '#a7f3d0', fontSize: 11, fontWeight: '700', textAlign: 'right', marginBottom: 10 },
-  latestRow:     { flexDirection: 'row-reverse', justifyContent: 'space-around', alignItems: 'center' },
-  latestItem:    { alignItems: 'center', gap: 3 },
-  latestVal:     { fontSize: 22, fontWeight: '800', color: '#fff' },
-  latestUnit:    { fontSize: 10, color: '#6ee7b7', fontWeight: '600' },
+  latestLabel: { color: '#a7f3d0', fontSize: 11, fontWeight: '700', textAlign: 'right', marginBottom: 10 },
+  latestRow: { flexDirection: 'row-reverse', justifyContent: 'space-around', alignItems: 'center' },
+  latestItem: { alignItems: 'center', gap: 3 },
+  latestVal: { fontSize: 22, fontWeight: '800', color: '#fff' },
+  latestUnit: { fontSize: 10, color: '#6ee7b7', fontWeight: '600' },
   latestDivider: { width: 1, height: 36, backgroundColor: '#ffffff20' },
-  latestTime:    { color: '#6ee7b7', fontSize: 11, textAlign: 'left', marginTop: 10 },
+  latestTime: { color: '#6ee7b7', fontSize: 11, textAlign: 'left', marginTop: 10 },
 
   // فورم
   formCard: {
@@ -490,12 +490,12 @@ const styles = StyleSheet.create({
     marginBottom: 16, elevation: 2,
     borderTopWidth: 3, borderTopColor: '#059669',
   },
-  formTitle:  { fontSize: 15, fontWeight: '800', color: '#111827', textAlign: 'right', marginBottom: 16 },
+  formTitle: { fontSize: 15, fontWeight: '800', color: '#111827', textAlign: 'right', marginBottom: 16 },
   fieldLabel: { textAlign: 'right', color: '#374151', fontSize: 12, fontWeight: '600', marginBottom: 6, marginTop: 10 },
 
-  bpRow:  { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
+  bpRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
   bpSlash: { fontSize: 24, color: '#d1d5db', lineHeight: 50 },
-  bpTag:  { fontSize: 11, color: '#6b7280', fontWeight: '800', marginLeft: 4, minWidth: 24, textAlign: 'center' },
+  bpTag: { fontSize: 11, color: '#6b7280', fontWeight: '800', marginLeft: 4, minWidth: 24, textAlign: 'center' },
   twoCol: { flexDirection: 'row-reverse', marginTop: 4 },
 
   inputBox: {
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
   },
 
   // فارغ
-  emptyBox:  { alignItems: 'center', paddingTop: 40, gap: 8 },
+  emptyBox: { alignItems: 'center', paddingTop: 40, gap: 8 },
   emptyText: { fontSize: 15, color: '#6b7280', fontWeight: '700' },
-  emptySub:  { fontSize: 12, color: '#9ca3af' },
+  emptySub: { fontSize: 12, color: '#9ca3af' },
 });

@@ -88,7 +88,7 @@ const ResetPassword = ({ route, navigation }) => {
 export default ResetPassword;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 16, backgroundColor: "#F9FAFB" },
+  container: { flex: 1, justifyContent: "center", padding: 16, backgroundColor: "#ecfdf5" },
   header: { fontSize: 22, fontWeight: "bold", color: "#2563EB", textAlign: "center", marginBottom: 24 },
   card: { backgroundColor: "#FFF", borderRadius: 16, padding: 20, elevation: 4 },
   button: { backgroundColor: "#2563EB", borderRadius: 12, paddingVertical: 14, marginTop: 10 },

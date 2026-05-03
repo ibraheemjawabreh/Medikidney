@@ -71,7 +71,7 @@ const PatientProfile = ({ navigation }) => {
 
   const ultrafiltrationAverage = useMemo(() => {
     if (!sessions || sessions.length === 0) return null;
-    
+
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -88,7 +88,7 @@ const PatientProfile = ({ navigation }) => {
 
     recentSessions.forEach(session => {
       let ufValue = parseFloat(session.fluid_removed);
-      
+
       if (isNaN(ufValue) || ufValue <= 0) {
         const settingsWithUF = session.dialysisSettings?.filter(s => s.ultrafiltration_rate != null) || [];
         if (settingsWithUF.length > 0) {
@@ -440,9 +440,9 @@ const PatientProfile = ({ navigation }) => {
                 {isSavingWeight
                   ? <ActivityIndicator color="#fff" size="small" />
                   : <>
-                      <MaterialCommunityIcons name="content-save-check" size={20} color="#fff" />
-                      <Text style={weightLockStyles.saveBtnText}>{t.patientProfile.saveWeight}</Text>
-                    </>
+                    <MaterialCommunityIcons name="content-save-check" size={20} color="#fff" />
+                    <Text style={weightLockStyles.saveBtnText}>{t.patientProfile.saveWeight}</Text>
+                  </>
                 }
               </TouchableOpacity>
             </View>
@@ -882,8 +882,8 @@ const PatientProfile = ({ navigation }) => {
 
               {myAppointments.filter(a => a.status === 'COMPLETED').length > 0 ? (
                 myAppointments.filter(a => a.status === 'COMPLETED').map((appt, index) => (
-                  <TouchableOpacity 
-                    key={appt.appointment_id || index} 
+                  <TouchableOpacity
+                    key={appt.appointment_id || index}
                     style={styles.completedApptCard}
                     activeOpacity={0.7}
                     onPress={() => navigation.navigate('ConsultationDetails', { consultation: appt })}
@@ -918,7 +918,7 @@ const PatientProfile = ({ navigation }) => {
                         <Text style={styles.completedApptDateText}>{formatTime(appt.appt_time)}</Text>
                       </View>
                     </View>
-                    
+
                     <View style={styles.cardFooter}>
                       <Text style={styles.viewDetailsText}>عرض التفاصيل الكاملة</Text>
                       <Icon name="chevron-left" type="material-community" size={18} color="#059669" />
@@ -944,7 +944,7 @@ export default PatientProfile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#ecfdf5",
   },
 
   loadingContainer: {

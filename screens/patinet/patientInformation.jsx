@@ -231,8 +231,8 @@ const PatinetInfo = ({ route, navigation }) => {
       >
         {/* ── البيانات الشخصية ── */}
         <SectionCard title={t.patientInfo.personalData} icon="account-details-outline" accentColor="#204a42" defaultOpen={true}>
-          <InfoRow label={t.patientInfo.fullName}   value={patient.full_name}    icon="account"                     color="#204a42" />
-          <InfoRow label={t.patientInfo.nationalId} value={patient.national_id}  icon="card-account-details-outline" color="#3b82f6" />
+          <InfoRow label={t.patientInfo.fullName} value={patient.full_name} icon="account" color="#204a42" />
+          <InfoRow label={t.patientInfo.nationalId} value={patient.national_id} icon="card-account-details-outline" color="#3b82f6" />
           <InfoRow
             label={t.patientInfo.dob}
             value={formatDate(patient.date_of_birth || patient.birth_date)}
@@ -256,18 +256,18 @@ const PatinetInfo = ({ route, navigation }) => {
 
         {/* ── معلومات التواصل ── */}
         <SectionCard title={t.patientInfo.contactInfo} icon="phone-outline" accentColor="#0369a1" defaultOpen={true}>
-          <InfoRow label={t.patientInfo.phone}       value={patient.phone_number || patient.phone} icon="phone"       color="#0369a1" />
-          <InfoRow label={t.patientInfo.emergencyPhone} value={patient.emergency_contact}              icon="phone-alert" color="#ef4444" />
-          <InfoRow label={t.patientInfo.email} value={patient.email}                         icon="email-outline" color="#6366f1" isLast />
+          <InfoRow label={t.patientInfo.phone} value={patient.phone_number || patient.phone} icon="phone" color="#0369a1" />
+          <InfoRow label={t.patientInfo.emergencyPhone} value={patient.emergency_contact} icon="phone-alert" color="#ef4444" />
+          <InfoRow label={t.patientInfo.email} value={patient.email} icon="email-outline" color="#6366f1" isLast />
         </SectionCard>
 
         {/* ── التاريخ الطبي ── */}
         <SectionCard title={t.patientInfo.medicalHistory} icon="medical-bag" accentColor="#dc2626" defaultOpen={true}>
-          <InfoRow label={t.patientInfo.bloodType}      value={patient.blood_type}        icon="water-plus"           color="#ef4444" />
-          <InfoRow label={t.patientInfo.chronicDiseases} value={patient.chronic_diseases}   icon="heart-pulse"          color="#f59e0b" />
-          <InfoRow label={t.patientInfo.allergies}         value={patient.allergies}          icon="allergy"              color="#f59e0b" />
-          <InfoRow label={t.patientInfo.medicalNotes}    value={patient.medical_history_notes} icon="file-document-outline" color="#64748b" />
-          <InfoRow label={t.patientInfo.generalNotes}    value={patient.notes}              icon="note-text-outline"    color="#64748b" />
+          <InfoRow label={t.patientInfo.bloodType} value={patient.blood_type} icon="water-plus" color="#ef4444" />
+          <InfoRow label={t.patientInfo.chronicDiseases} value={patient.chronic_diseases} icon="heart-pulse" color="#f59e0b" />
+          <InfoRow label={t.patientInfo.allergies} value={patient.allergies} icon="allergy" color="#f59e0b" />
+          <InfoRow label={t.patientInfo.medicalNotes} value={patient.medical_history_notes} icon="file-document-outline" color="#64748b" />
+          <InfoRow label={t.patientInfo.generalNotes} value={patient.notes} icon="note-text-outline" color="#64748b" />
 
           {/* حالة التدخين — تُعرض كبادج */}
           <View style={styles.infoRow}>
@@ -297,8 +297,8 @@ export default PatinetInfo;
 
 // ─── الستايلات ────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container:   { flex: 1, backgroundColor: "#f1f5f9" },
-  loadingBox:  { flex: 1, justifyContent: "center", alignItems: "center", gap: 14, backgroundColor: "#f1f5f9" },
+  container: { flex: 1, backgroundColor: "#ecfdf5" },
+  loadingBox: { flex: 1, justifyContent: "center", alignItems: "center", gap: 14, backgroundColor: "#f1f5f9" },
   loadingText: { color: "#64748b", fontSize: 14, fontWeight: "600" },
 
   // ── الهيدر ──
@@ -332,8 +332,8 @@ const styles = StyleSheet.create({
   },
 
   // الأفاتار
-  avatarSection:  { flexDirection: "row-reverse", alignItems: "center", marginBottom: 20 },
-  avatarWrap:     { position: "relative", marginLeft: 16 },
+  avatarSection: { flexDirection: "row-reverse", alignItems: "center", marginBottom: 20 },
+  avatarWrap: { position: "relative", marginLeft: 16 },
   avatarCircle: {
     width: 82,
     height: 82,
@@ -361,8 +361,8 @@ const styles = StyleSheet.create({
   bloodBadgeText: { color: "#fff", fontSize: 10, fontWeight: "800" },
 
   nameSection: { flex: 1, alignItems: "flex-end" },
-  headerName:  { color: "#fff", fontSize: 20, fontWeight: "900", textAlign: "right" },
-  headerSub:   { color: "#a7f3d0", fontSize: 13, marginTop: 4, textAlign: "right" },
+  headerName: { color: "#fff", fontSize: 20, fontWeight: "900", textAlign: "right" },
+  headerSub: { color: "#a7f3d0", fontSize: 13, marginTop: 4, textAlign: "right" },
 
   // إحصائيات
   quickStats: {
@@ -374,10 +374,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
   },
-  qStat:      { alignItems: "center", flex: 1 },
-  qStatVal:   { color: "#fff", fontSize: 13, fontWeight: "800", marginBottom: 3, textAlign: "center" },
+  qStat: { alignItems: "center", flex: 1 },
+  qStatVal: { color: "#fff", fontSize: 13, fontWeight: "800", marginBottom: 3, textAlign: "center" },
   qStatLabel: { color: "#94a3b8", fontSize: 10, fontWeight: "600" },
-  qDivider:   { width: 1, height: 32, backgroundColor: "rgba(255,255,255,0.15)" },
+  qDivider: { width: 1, height: 32, backgroundColor: "rgba(255,255,255,0.15)" },
 
 
 
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sectionTitle: { fontSize: 15, fontWeight: "800" },
-  sectionBody:  { paddingHorizontal: 16, paddingVertical: 12 },
+  sectionBody: { paddingHorizontal: 16, paddingVertical: 12 },
 
   // سطر معلومة
   infoRow: {
@@ -430,11 +430,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   infoTextWrap: { flex: 1 },
-  infoLabel:    { fontSize: 11, color: "#94a3b8", fontWeight: "700", textAlign: "right", marginBottom: 2 },
-  infoValue:    { fontSize: 15, color: "#1e293b", fontWeight: "700", textAlign: "right", lineHeight: 20 },
-  rowDivider:   { marginVertical: 2, backgroundColor: "#f8fafc", marginHorizontal: -4 },
+  infoLabel: { fontSize: 11, color: "#94a3b8", fontWeight: "700", textAlign: "right", marginBottom: 2 },
+  infoValue: { fontSize: 15, color: "#1e293b", fontWeight: "700", textAlign: "right", lineHeight: 20 },
+  rowDivider: { marginVertical: 2, backgroundColor: "#f8fafc", marginHorizontal: -4 },
 
   // بادج
-  badge:     { alignSelf: "flex-end", marginTop: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
+  badge: { alignSelf: "flex-end", marginTop: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
   badgeText: { fontSize: 13, fontWeight: "800" },
 });

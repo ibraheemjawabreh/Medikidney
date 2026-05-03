@@ -39,12 +39,12 @@ const SearchPatient = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === "ios" ? "padding" : "height"} 
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
       <View style={styles.innerContainer}>
-        
+
         {/* Header Section */}
         <View style={styles.headerSection}>
           <Text style={styles.headerTitle}>{t.searchPatient.title}</Text>
@@ -84,13 +84,13 @@ const SearchPatient = ({ navigation }) => {
               keyExtractor={(item) => item.id.toString()}
               showsVerticalScrollIndicator={false}
               renderItem={({ item }) => (
-                <TouchableOpacity 
-                  style={styles.patientItemCard} 
+                <TouchableOpacity
+                  style={styles.patientItemCard}
                   onPress={() => {
                     setPatients([]);
                     navigation.navigate("StaffPatientView", { patientId: item.id });
                   }}
-                > 
+                >
                   <View style={styles.patientInfo}>
                     <Text style={styles.patientName}>{item.name}</Text>
                     <Text style={styles.patientId}>#{item.id}</Text>
@@ -104,8 +104,8 @@ const SearchPatient = ({ navigation }) => {
           </View>
         ) : search.length > 2 && !isLoading ? (
           <View style={styles.emptyState}>
-             <MaterialCommunityIcons name="account-search-outline" size={60} color="#cbd5e1" />
-             <Text style={styles.emptyText}>{t.searchPatient.noResults}</Text>
+            <MaterialCommunityIcons name="account-search-outline" size={60} color="#cbd5e1" />
+            <Text style={styles.emptyText}>{t.searchPatient.noResults}</Text>
           </View>
         ) : null}
 

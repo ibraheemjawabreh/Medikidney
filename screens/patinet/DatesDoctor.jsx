@@ -330,7 +330,7 @@ const AppointmentScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F3F4F6" },
+  container: { flex: 1, backgroundColor: "#ecfdf5" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   header: { backgroundColor: "#065f46", padding: 30, paddingTop: 60, borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
   headerTitle: { fontSize: 22, color: "#fff", fontWeight: "bold", textAlign: "center" },

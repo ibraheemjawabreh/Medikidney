@@ -139,7 +139,7 @@ const translations = {
     // ─── بحث المريض ─────────────────────────────────────
     searchPatient: {
       title: 'البحث عن مريض',
-      placeholder: 'ابحث بالاسم أو رقم الهوية...',
+      placeholder: 'ابحث عن طريق الاسم  ...',
       noResults: 'لا توجد نتائج',
       fetchError: 'حدث خطأ أثناء البحث',
     },

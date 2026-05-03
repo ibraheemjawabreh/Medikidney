@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     height: 58,
   },
   inputStyle: {
-    textAlign: "left",
+    textAlign: "right",
     fontSize: 16,
     fontWeight: "700",
     color: "#1e293b",

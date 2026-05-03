@@ -130,11 +130,7 @@ const ProfileSettingsScreen = ({ navigation }) => {
           title={t.settings.changePassword}
           onPress={() => navigation.navigate("ChangePassword")}
         />
-        <SettingItem
-          icon="person"
-          title={t.settings.editAccount}
-          onPress={() => {}}
-        />
+
 
         {/* Language toggle item */}
         <TouchableOpacity style={styles.item} onPress={handleLanguageToggle}>

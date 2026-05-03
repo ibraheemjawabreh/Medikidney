@@ -371,7 +371,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
               )}
             </>
           )}
-       
+
         </View>
 
         {/* ── Vital Signs ── */}
@@ -419,7 +419,12 @@ const PatientSessionDetailView = ({ route, navigation }) => {
                 <View style={styles.vitalsGrid}>
                   <MetricChip label={t.patientSessionDetail.bloodFlow} value={`${s.blood_flow_rate} ml/min`} icon="water-pump" color="#06b6d4" />
                   <MetricChip label={t.patientSessionDetail.dialysateFlow} value={`${s.dialysate_flow} ml/h`} icon="beaker-outline" color="#0891b2" />
-                  <MetricChip label={t.patientSessionDetail.ufRate} value={`${s.ultrafiltration_rate} ml/h`} icon="filter-outline" color="#0e7490" />
+                  <MetricChip
+                    label="كمية السوائل المسحوبة"
+                    value={`${(!isNaN(parseFloat(s.ultrafiltration_rate)) && parseFloat(s.ultrafiltration_rate) > 50) ? (parseFloat(s.ultrafiltration_rate) / 1000).toFixed(2) : (s.ultrafiltration_rate || 0)} لتر`}
+                    icon="water-percent"
+                    color="#0e7490"
+                  />
                 </View>
               </View>
             ))
@@ -532,7 +537,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f0f4f8" },
+  container: { flex: 1, backgroundColor: "#ecfdf5" },
   center: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
   loadingText: { marginTop: 12, color: "#64748b", fontSize: 14 },
   errorText: { marginTop: 12, color: "#ef4444", fontSize: 15, textAlign: "center" },

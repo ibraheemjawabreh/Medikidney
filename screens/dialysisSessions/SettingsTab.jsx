@@ -31,11 +31,12 @@ const SettingsTab = ({ route }) => {
 
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [saved, setSaved] = useState(null);   
+  const [saved, setSaved] = useState(null);
   const [form, setForm] = useState({
     bloodFlowRate: '', dialysateFlow: '', ultrafiltrationRate: '',
   });
   const [prevWeightAfter, setPrevWeightAfter] = useState('—');
+  const [currWeightBefore, setCurrWeightBefore] = useState('—');
   const [monthlyAverageUF, setMonthlyAverageUF] = useState(null);
 
   const fetchSessionData = async () => {
@@ -43,42 +44,51 @@ const SettingsTab = ({ route }) => {
     try {
       const sessionRes = await api.get(`/dialysis-sessions/${sessionId}`);
       const currentSession = sessionRes.data;
-      
+
       const patientId = currentSession.patient_id;
       if (!patientId) return;
 
       const allSessionsRes = await api.get(`/dialysis-sessions?patientId=${patientId}`);
       const allSessions = Array.isArray(allSessionsRes.data) ? allSessionsRes.data : [];
-      
+
       const pastSessions = allSessions
         .filter(s => new Date(s.date) < new Date(currentSession.date) && s.status === 'COMPLETED')
         .sort((a, b) => new Date(b.date) - new Date(a.date));
       if (pastSessions.length > 0 && pastSessions[0].weight_after) {
-          setPrevWeightAfter(String(pastSessions[0].weight_after));
+        setPrevWeightAfter(String(pastSessions[0].weight_after));
+      }
+
+      if (currentSession.weight_before != null) {
+        setCurrWeightBefore(String(currentSession.weight_before));
+      } else if (currentSession.weight != null) {
+        setCurrWeightBefore(String(currentSession.weight));
       }
 
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const recentSessions = allSessions.filter(s => s.status === 'COMPLETED' && new Date(s.date) >= thirtyDaysAgo);
-      
+
       if (recentSessions.length > 0) {
-          let totalUF = 0;
-          let count = 0;
-          recentSessions.forEach(s => {
-            let ufValue = parseFloat(s.fluid_removed);
-            if (isNaN(ufValue) || ufValue <= 0) {
-                const settingsWithUF = s.dialysisSettings?.filter(set => set.ultrafiltration_rate != null) || [];
-                if (settingsWithUF.length > 0) {
-                  const rate = parseFloat(settingsWithUF[settingsWithUF.length - 1].ultrafiltration_rate);
-                  ufValue = rate > 50 ? rate / 1000 : rate;
-                }
+        let totalUF = 0;
+        let count = 0;
+        recentSessions.forEach(s => {
+          let ufValue = parseFloat(s.fluid_removed);
+          if (!isNaN(ufValue) && ufValue > 50) {
+            ufValue = ufValue / 1000;
+          }
+          if (isNaN(ufValue) || ufValue <= 0) {
+            const settingsWithUF = s.dialysisSettings?.filter(set => set.ultrafiltration_rate != null) || [];
+            if (settingsWithUF.length > 0) {
+              const rate = parseFloat(settingsWithUF[settingsWithUF.length - 1].ultrafiltration_rate);
+              ufValue = rate > 50 ? rate / 1000 : rate;
             }
-            if (!isNaN(ufValue) && ufValue > 0) {
-                totalUF += ufValue;
-                count++;
-            }
-          });
-          setMonthlyAverageUF(count > 0 ? (totalUF / count).toFixed(2) : '0.00');
+          }
+          if (!isNaN(ufValue) && ufValue > 0) {
+            totalUF += ufValue;
+            count++;
+          }
+        });
+        setMonthlyAverageUF(count > 0 ? (totalUF / count).toFixed(2) : '0.00');
       }
     } catch (err) {
       console.log("Error fetching supplementary session data:", err);
@@ -113,8 +123,8 @@ const SettingsTab = ({ route }) => {
     }
   };
 
-  useEffect(() => { 
-    fetchLatest(); 
+  useEffect(() => {
+    fetchLatest();
     fetchSessionData();
   }, [sessionId]);
 
@@ -139,7 +149,7 @@ const SettingsTab = ({ route }) => {
       // تحديث الحالة فوراً بالقيم المسجلة لضمان الظهور السريع
       const newObj = res.data?.data || res.data || payload;
       setSaved(newObj);
-      
+
       Alert.alert(t.success, t.deviceSettings.saveSuccess);
       fetchLatest();
     } catch (err) {
@@ -235,18 +245,30 @@ const SettingsTab = ({ route }) => {
                   </View>
                 </View>
 
-                <View style={{ flexDirection: 'row-reverse', gap: 10 }}>
-                  <View style={[styles.inputBox, { flex: 1, backgroundColor: '#f1f5f9', borderColor: '#e2e8f0', justifyContent: 'center' }]}>
-                    <View style={{ alignItems: 'center' }}>
-                      <Text style={{ fontSize: 10, color: '#64748b', marginBottom: 2, fontWeight: '700' }}>الوزن بعد الجلسة السابقة</Text>
-                      <View style={{ flexDirection: 'row-reverse', alignItems: 'flex-end', gap: 4 }}>
-                        <Text style={[styles.input, { color: '#334155', flex: 0, textAlign: 'center' }]}>{prevWeightAfter}</Text>
-                        <Text style={styles.unitLabel}>كجم</Text>
+                <View style={{ flexDirection: 'column', gap: 10 }}>
+                  <View style={{ flexDirection: 'row-reverse', gap: 10 }}>
+                    <View style={[styles.inputBox, { flex: 1, backgroundColor: '#f1f5f9', borderColor: '#e2e8f0', justifyContent: 'center' }]}>
+                      <View style={{ alignItems: 'center' }}>
+                        <Text style={{ fontSize: 10, color: '#64748b', marginBottom: 2, fontWeight: '700' }}>بعد الجلسة السابقة</Text>
+                        <View style={{ flexDirection: 'row-reverse', alignItems: 'flex-end', gap: 4 }}>
+                          <Text style={[styles.input, { color: '#334155', flex: 0, textAlign: 'center' }]}>{prevWeightAfter}</Text>
+                          <Text style={styles.unitLabel}>كجم</Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    <View style={[styles.inputBox, { flex: 1, backgroundColor: '#e0f2fe', borderColor: '#bae6fd', justifyContent: 'center' }]}>
+                      <View style={{ alignItems: 'center' }}>
+                        <Text style={{ fontSize: 10, color: '#0284c7', marginBottom: 2, fontWeight: '700' }}>قبل الجلسة الحالية</Text>
+                        <View style={{ flexDirection: 'row-reverse', alignItems: 'flex-end', gap: 4 }}>
+                          <Text style={[styles.input, { color: '#0369a1', flex: 0, textAlign: 'center' }]}>{currWeightBefore}</Text>
+                          <Text style={styles.unitLabel}>كجم</Text>
+                        </View>
                       </View>
                     </View>
                   </View>
 
-                  <View style={[styles.inputBox, { flex: 1 }, form[f.key] ? { borderColor: f.color } : {}]}>
+                  <View style={[styles.inputBox, form[f.key] ? { borderColor: f.color } : {}]}>
                     <Text style={styles.unitLabel}>{f.unit}</Text>
                     <TextInput
                       style={styles.input}
@@ -314,7 +336,7 @@ const SettingsTab = ({ route }) => {
 export default SettingsTab;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f3f4f6' },
+  container: { flex: 1, backgroundColor: '#ecfdf5' },
   content: { padding: 16, paddingBottom: 40 },
   pageTitle: { fontSize: 18, fontWeight: '800', color: '#111827', textAlign: 'right', marginBottom: 16 },
   savedCard: { backgroundColor: '#0f172a', borderRadius: 18, padding: 18, marginBottom: 16, elevation: 4 },

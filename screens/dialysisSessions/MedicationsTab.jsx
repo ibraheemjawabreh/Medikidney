@@ -9,10 +9,10 @@ import { useLanguage } from '../../context/LanguageContext';
 
 // ── الأدوية الشائعة (أزرار جاهزة) ────────────────────────────
 const PRESET_MEDS = [
-  { name: "HEPARIN",  icon: "needle",       color: "#ef4444", dosage: 5000, unit: "IU",  label: "هيبارين" },
-  { name: "EPO",      icon: "blood-bag",     color: "#3b82f6", dosage: 4000, unit: "IU",  label: "EPO" },
-  { name: "IRON",     icon: "pill",          color: "#f59e0b", dosage: 100,  unit: "mg",  label: "حديد" },
-  { name: "SALINE",   icon: "water",         color: "#0ea5e9", dosage: 500,  unit: "ml",  label: "محلول ملحي" },
+  { name: "HEPARIN", icon: "needle", color: "#ef4444", dosage: 5000, unit: "IU", label: "هيبارين" },
+  { name: "EPO", icon: "blood-bag", color: "#3b82f6", dosage: 4000, unit: "IU", label: "EPO" },
+  { name: "IRON", icon: "pill", color: "#f59e0b", dosage: 100, unit: "mg", label: "حديد" },
+  { name: "SALINE", icon: "water", color: "#0ea5e9", dosage: 500, unit: "ml", label: "محلول ملحي" },
 ];
 
 // ── تنسيق الوقت ──────────────────────────────────────────────
@@ -30,7 +30,7 @@ const confirmAction = async (msg, t) => {
   return new Promise(resolve => {
     Alert.alert(t.medications.deleteConfirm.split('?')[0] + '?', msg, [
       { text: t.cancel, onPress: () => resolve(false), style: "cancel" },
-      { text: t.yes,    onPress: () => resolve(true) },
+      { text: t.yes, onPress: () => resolve(true) },
     ], { cancelable: true, onDismiss: () => resolve(false) });
   });
 };
@@ -48,14 +48,14 @@ const MedicationsTab = ({ route }) => {
   const { t } = useLanguage();
   const sessionId = route?.params?.sessionId;
 
-  const [meds,           setMeds]           = useState([]);
-  const [loading,        setLoading]        = useState(false);
-  const [isSubmitting,   setIsSubmitting]   = useState(false);
-  const [showCustom,     setShowCustom]     = useState(false);
+  const [meds, setMeds] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCustom, setShowCustom] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(null); // الدواء الشائع المختار
-  const [presetDosage,   setPresetDosage]   = useState('');   // الجرعة المعدلة
-  const [presetNotes,    setPresetNotes]    = useState('');
-  const [customForm,     setCustomForm]     = useState({ name: '', dosage: '', unit: 'mg', notes: '' });
+  const [presetDosage, setPresetDosage] = useState('');   // الجرعة المعدلة
+  const [presetNotes, setPresetNotes] = useState('');
+  const [customForm, setCustomForm] = useState({ name: '', dosage: '', unit: 'mg', notes: '' });
 
   // ── جلب الأدوية المسجلة ─────────────────────────────────────
   const fetchMeds = async () => {
@@ -86,9 +86,9 @@ const MedicationsTab = ({ route }) => {
         `/dialysis-sessions/${sessionId}/details/medications`,
         {
           medicationName: medData.name,
-          dosage:         Number(medData.dosage),
-          unit:           medData.unit,
-          notes:          medData.notes || t.medications.saveSuccess,
+          dosage: Number(medData.dosage),
+          unit: medData.unit,
+          notes: medData.notes || t.medications.saveSuccess,
         }
       );
       showAlert(t.success, `${t.medications.saveSuccess} ${medData.label || medData.name}`);
@@ -383,8 +383,8 @@ const MedicationsTab = ({ route }) => {
 export default MedicationsTab;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f3f4f6' },
-  content:   { padding: 16, paddingBottom: 40 },
+  container: { flex: 1, backgroundColor: '#ecfdf5' },
+  content: { padding: 16, paddingBottom: 40 },
 
   // شريط العنوان
   topBar: {
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center',
   },
   medRight: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10 },
-  medLeft:  { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
+  medLeft: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
   medIconCircle: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center',
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
   noteText: { color: '#6b7280', fontSize: 12, flex: 1, textAlign: 'right' },
 
   // فارغ
-  emptyBox:  { alignItems: 'center', paddingTop: 40, gap: 8 },
+  emptyBox: { alignItems: 'center', paddingTop: 40, gap: 8 },
   emptyText: { fontSize: 15, color: '#6b7280', fontWeight: '700' },
-  emptySub:  { fontSize: 12, color: '#9ca3af', textAlign: 'center' },
+  emptySub: { fontSize: 12, color: '#9ca3af', textAlign: 'center' },
 });

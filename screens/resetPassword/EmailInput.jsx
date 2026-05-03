@@ -10,41 +10,41 @@ const EmailInput = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-  try {
-    setLoading(true);
-    setErrors({});
+    try {
+      setLoading(true);
+      setErrors({});
 
-    await ValidationEmail.validate({ email }, { abortEarly: false });
+      await ValidationEmail.validate({ email }, { abortEarly: false });
 
-    const response = await api.post(
-      "/auth/forgot-password",
-      { email }
-    );
+      const response = await api.post(
+        "/auth/forgot-password",
+        { email }
+      );
 
-    console.log("Server response:", response.data);
+      console.log("Server response:", response.data);
 
-    if (response.status === 200 || response.status === 201) {
-      Alert.alert("نجاح", response.data.message);
-      navigation.navigate("OtpCode", { email });
+      if (response.status === 200 || response.status === 201) {
+        Alert.alert("نجاح", response.data.message);
+        navigation.navigate("OtpCode", { email });
+      }
+
+    } catch (err) {
+      console.log("Axios error:", err.response || err);
+      if (err.inner) {
+        const validationErrors = {};
+        err.inner.forEach(error => {
+          validationErrors[error.path] = error.message;
+        });
+        setErrors(validationErrors);
+      } else if (err.response?.status === 404) {
+        setErrors({ email: "البريد الإلكتروني غير مسجل في النظام" });
+      } else {
+        Alert.alert("خطأ", "فشل الاتصال بالسيرفر");
+      }
+    } finally {
+      setLoading(false);
     }
-
-  } catch (err) {
-    console.log("Axios error:", err.response || err);
-    if (err.inner) {
-      const validationErrors = {};
-      err.inner.forEach(error => {
-        validationErrors[error.path] = error.message;
-      });
-      setErrors(validationErrors);
-    } else if (err.response?.status === 404) {
-      setErrors({ email: "البريد الإلكتروني غير مسجل في النظام" });
-    } else {
-      Alert.alert("خطأ", "فشل الاتصال بالسيرفر");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <View style={styles.container}>
@@ -72,7 +72,7 @@ export default EmailInput;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#ecfdf5",
     padding: 16,
     justifyContent: "center",
   },

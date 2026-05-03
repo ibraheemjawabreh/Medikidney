@@ -269,9 +269,9 @@ const SessionDetails = ({ route, navigation }) => {
                     {isFinishing
                       ? <ActivityIndicator color="#fff" size="small" />
                       : <>
-                          <MaterialCommunityIcons name="check-circle" size={20} color="#fff" />
-                          <Text style={modalStyles.confirmBtnText}>{t.sessionDetails.saveAndEnd}</Text>
-                        </>
+                        <MaterialCommunityIcons name="check-circle" size={20} color="#fff" />
+                        <Text style={modalStyles.confirmBtnText}>{t.sessionDetails.saveAndEnd}</Text>
+                      </>
                     }
                   </Pressable>
                 </View>
@@ -350,7 +350,7 @@ const SessionDetails = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9FAFB' },
+  container: { flex: 1, backgroundColor: '#ecfdf5' },
   header: { backgroundColor: '#065f46', padding: 20, paddingTop: 50, alignItems: 'center' },
   patientName: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginBottom: 0 },
 

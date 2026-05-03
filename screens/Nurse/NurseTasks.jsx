@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { 
-  View, Text, StyleSheet, TextInput, TouchableOpacity, 
-  ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform 
+import {
+  View, Text, StyleSheet, TextInput, TouchableOpacity,
+  ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform
 } from "react-native";
 import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -10,7 +10,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 const NurseTasks = ({ route, navigation }) => {
   const { patientId, patientName } = route.params || {};
-  
+
   const [loading, setLoading] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
 
@@ -32,7 +32,7 @@ const NurseTasks = ({ route, navigation }) => {
         const savedSession = await AsyncStorage.getItem(`active_session_${patientId}`);
         if (savedSession) {
           const data = JSON.parse(savedSession);
-          if(data.scheduleId) setScheduleId(data.scheduleId.toString()); 
+          if (data.scheduleId) setScheduleId(data.scheduleId.toString());
           setIsStarted(true);
         }
       } catch (e) {
@@ -91,13 +91,13 @@ const NurseTasks = ({ route, navigation }) => {
       };
 
       await api.post(
-        "/dialysis-sessions", 
+        "/dialysis-sessions",
         finalPayload
       );
 
       await AsyncStorage.removeItem(`active_session_${patientId}`);
       Alert.alert("نجاح ✅", "تم تسجيل الجلسة بالكامل.");
-      navigation.goBack(); 
+      navigation.goBack();
     } catch (error) {
       Alert.alert("فشل الإرسال", error.response?.data?.message?.toString() || "تأكد من البيانات");
     } finally {
@@ -108,18 +108,20 @@ const NurseTasks = ({ route, navigation }) => {
   const handleCancelLocal = async () => {
     Alert.alert("تنبيه", "هل أنت متأكد من مسح الجلسة؟", [
       { text: "تراجع", style: "cancel" },
-      { text: "نعم، مسح", onPress: async () => {
+      {
+        text: "نعم، مسح", onPress: async () => {
           await AsyncStorage.removeItem(`active_session_${patientId}`);
           setIsStarted(false);
           setBpBefore("");
           setNotes("");
           setWeightAfter("");
-      }}
+        }
+      }
     ]);
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}
     >
@@ -142,18 +144,18 @@ const NurseTasks = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={[styles.card, {borderColor: '#10b981'}]}>
+          <View style={[styles.card, { borderColor: '#10b981' }]}>
             <View style={styles.titleRow}>
               <MaterialCommunityIcons name="check-circle" size={24} color="#10b981" />
-              <Text style={[styles.cardTitle, {color: '#10b981'}]}>بيانات الإنهاء</Text>
+              <Text style={[styles.cardTitle, { color: '#10b981' }]}>بيانات الإنهاء</Text>
             </View>
 
             <Text style={styles.label}>حالة الجلسة</Text>
             <View style={styles.statusRow}>
               {["COMPLETED", "CANCELLED", "MISSED"].map((st) => (
-                <TouchableOpacity 
+                <TouchableOpacity
                   key={st}
-                  style={[styles.statusBtn, status === st && (st === "COMPLETED" ? styles.statusBtnActive : st === "CANCELLED" ? styles.statusBtnActiveRed : styles.statusBtnActiveOrange)]} 
+                  style={[styles.statusBtn, status === st && (st === "COMPLETED" ? styles.statusBtnActive : st === "CANCELLED" ? styles.statusBtnActiveRed : styles.statusBtnActiveOrange)]}
                   onPress={() => setStatus(st)}
                 >
                   <Text style={[styles.statusBtnText, status === st && styles.statusBtnTextActive]}>
@@ -174,11 +176,11 @@ const NurseTasks = ({ route, navigation }) => {
 
             {/* حقل الملاحظات الجديد */}
             <Text style={styles.label}>ملاحظات التمريض</Text>
-            <TextInput 
-              style={[styles.input, styles.textArea]} 
-              value={notes} 
-              onChangeText={setNotes} 
-              placeholder="اكتب أي ملاحظات طبية هنا..." 
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="اكتب أي ملاحظات طبية هنا..."
               multiline={true}
               numberOfLines={4}
               textAlignVertical="top"
@@ -193,7 +195,7 @@ const NurseTasks = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
         )}
-        <View style={{ height: 100 }} /> 
+        <View style={{ height: 100 }} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -202,7 +204,7 @@ const NurseTasks = ({ route, navigation }) => {
 export default NurseTasks;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f1f5f9", padding: 15 },
+  container: { flex: 1, backgroundColor: "#ecfdf5", padding: 15 },
   headerCard: { backgroundColor: "#1e3a8a", padding: 25, borderRadius: 20, marginBottom: 20, alignItems: 'center' },
   patientName: { color: "#fff", fontSize: 20, fontWeight: "bold" },
   subHeader: { color: "#bfdbfe", fontSize: 12, marginTop: 5 },

@@ -40,15 +40,15 @@ const PatientSessionScreen = ({ route, navigation }) => {
   const { sessionId, patientName, startTime } = route.params || {};
 
   // ── حالة الجلسة ──
-  const [sessionData,   setSessionData]   = useState(null);
-  const [phase, setPhase]                 = useState('IN_SESSION'); // IN_SESSION | WEIGHT_INPUT | DONE
-  const [elapsed, setElapsed]             = useState(0);
+  const [sessionData, setSessionData] = useState(null);
+  const [phase, setPhase] = useState('IN_SESSION'); // IN_SESSION | WEIGHT_INPUT | DONE
+  const [elapsed, setElapsed] = useState(0);
 
   // ── وزن بعد الجلسة ──
-  const [weightAfter,   setWeightAfter]   = useState('');
-  const [weightError,   setWeightError]   = useState(null);
-  const [isSaving,      setIsSaving]      = useState(false);
-  const [weightBefore,  setWeightBefore]  = useState(null);
+  const [weightAfter, setWeightAfter] = useState('');
+  const [weightError, setWeightError] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [weightBefore, setWeightBefore] = useState(null);
 
   // ── Timer ──
   const timerRef = useRef(null);
@@ -279,9 +279,9 @@ const PatientSessionScreen = ({ route, navigation }) => {
             {isSaving
               ? <ActivityIndicator color="#fff" size="small" />
               : <>
-                  <MaterialCommunityIcons name="content-save-check" size={20} color="#fff" />
-                  <Text style={styles.lockSaveBtnText}>{t.patientSessionScreen.saveBtn}</Text>
-                </>
+                <MaterialCommunityIcons name="content-save-check" size={20} color="#fff" />
+                <Text style={styles.lockSaveBtnText}>{t.patientSessionScreen.saveBtn}</Text>
+              </>
             }
           </Pressable>
         </View>
@@ -343,7 +343,7 @@ export default PatientSessionScreen;
 
 const styles = StyleSheet.create({
   // ── IN_SESSION ──────────────────────────────────────────────────────────────
-  sessionScreen: { flex: 1, backgroundColor: '#065f46' },
+  sessionScreen: { flex: 1, backgroundColor: '#ecfdf5' },
   sessionHeader: {
     paddingTop: 60,
     paddingBottom: 30,

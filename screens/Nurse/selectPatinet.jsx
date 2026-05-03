@@ -13,18 +13,18 @@ const SelectPatient = () => {
   const { t } = useLanguage();
   const navigation = useNavigation();
 
-  const [loading, setLoading]           = useState(false);
-  const [proceeding, setProceeding]     = useState(false);
-  const [shifts, setShifts]             = useState([]);
-  const [activeShift, setActiveShift]   = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [proceeding, setProceeding] = useState(false);
+  const [shifts, setShifts] = useState([]);
+  const [activeShift, setActiveShift] = useState(1);
 
   // 1. selectedIds: ما يختاره الممرض الآن (UI فقط)
-  const [selectedIds, setSelectedIds]   = useState([]);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   // 2. confirmedIds: ما هو محجوز فعلياً للممرض في قاعدة البيانات
   const [confirmedIds, setConfirmedIds] = useState([]);
 
-  const [myNurseId, setMyNurseId]       = useState(null);
+  const [myNurseId, setMyNurseId] = useState(null);
 
   // ─── جلب البيانات وبناء الحالة ─────────────────────────────
   const fetchData = async () => {
@@ -205,14 +205,14 @@ const SelectPatient = () => {
                 <MaterialCommunityIcons
                   name={
                     isDone ? "check-circle" :
-                    isTakenByOther ? "lock" :
-                    isSelected ? "checkbox-marked-circle" : "checkbox-blank-circle-outline"
+                      isTakenByOther ? "lock" :
+                        isSelected ? "checkbox-marked-circle" : "checkbox-blank-circle-outline"
                   }
                   size={28}
                   color={
                     isDone ? "#059669" :
-                    isTakenByOther ? "#ef4444" :
-                    isSelected ? "#059669" : "#D1D5DB"
+                      isTakenByOther ? "#ef4444" :
+                        isSelected ? "#059669" : "#D1D5DB"
                   }
                 />
                 <View style={styles.info}>
@@ -221,9 +221,9 @@ const SelectPatient = () => {
                   </Text>
                   <Text style={styles.sub}>
                     {isDone ? t.selectPatient.sessionComplete :
-                     isConfirmed ? t.selectPatient.confirmedInList :
-                     isTakenByOther ? `${t.selectPatient.withNurse} ${patient.assignedNurseName}` :
-                     `${t.selectPatient.machine} ${patient.machineNumber}`}
+                      isConfirmed ? t.selectPatient.confirmedInList :
+                        isTakenByOther ? `${t.selectPatient.withNurse} ${patient.assignedNurseName}` :
+                          `${t.selectPatient.machine} ${patient.machineNumber}`}
                   </Text>
                 </View>
               </Pressable>
@@ -255,7 +255,7 @@ const SelectPatient = () => {
 export default SelectPatient;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F9FAFB" },
+  container: { flex: 1, backgroundColor: "#ecfdf5" },
   header: { backgroundColor: "#065f46", paddingTop: 55, paddingBottom: 16, paddingHorizontal: 18, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   headerTop: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center", marginBottom: 14 },
   headerTitle: { fontSize: 20, fontWeight: "800", color: "#fff" },
@@ -272,28 +272,28 @@ const styles = StyleSheet.create({
   activeCountBadge: { backgroundColor: "#065f46" },
   countText: { fontSize: 11, fontWeight: "bold", color: "#fff" },
   scroll: { padding: 16, paddingBottom: 120 },
-  emptyContainer: { 
-    flex: 1, 
-    justifyContent: "center", 
-    alignItems: "center", 
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 100,
     gap: 16
   },
-  emptyText: { 
-    fontSize: 18, 
-    color: "#94a3b8", 
+  emptyText: {
+    fontSize: 18,
+    color: "#94a3b8",
     fontWeight: "600",
     textAlign: "center"
   },
-  card: { 
-    backgroundColor: "#fff", 
-    borderRadius: 16, 
-    padding: 16, 
-    marginBottom: 10, 
-    borderWidth: 1.5, 
-    borderColor: "#F3F4F6", 
-    flexDirection: "row-reverse", 
-    alignItems: "center", 
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 10,
+    borderWidth: 1.5,
+    borderColor: "#F3F4F6",
+    flexDirection: "row-reverse",
+    alignItems: "center",
     gap: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },

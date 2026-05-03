@@ -27,16 +27,16 @@ const OtpCode = ({ route, navigation }) => {
       }
 
     } catch (err) {
-     
+
       if (err.inner) {
         const validationErrors = err.inner.map(e => e.message).join("\n");
         Alert.alert("خطأ", validationErrors);
       }
-      
+
       else if (err.response) {
         Alert.alert("خطأ", err.response?.data?.message || "فشل الاتصال بالسيرفر");
       }
-      
+
       else {
         Alert.alert("خطأ", err.message);
       }
@@ -73,7 +73,7 @@ const OtpCode = ({ route, navigation }) => {
 export default OtpCode;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F9FAFB", padding: 16, justifyContent: "center" },
+  container: { flex: 1, backgroundColor: "#ecfdf5", padding: 16, justifyContent: "center" },
   header: { fontSize: 22, fontWeight: "bold", color: "#2563EB", textAlign: "center", marginBottom: 24 },
   card: { backgroundColor: "#FFFFFF", borderRadius: 16, padding: 20, elevation: 4 },
   inputContainer: { borderBottomWidth: 0, backgroundColor: "#F3F4F6", borderRadius: 10, paddingHorizontal: 10, marginTop: 6 },
