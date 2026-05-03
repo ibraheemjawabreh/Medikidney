@@ -123,9 +123,15 @@ const LoginScreen = ({ navigation }) => {
                   />
                 </TouchableOpacity>
               }
-              inputContainerStyle={styles.inputContainer}
               inputStyle={styles.inputStyle}
             />
+
+            <TouchableOpacity 
+              style={styles.forgotPasswordContainer} 
+              onPress={() => navigation.navigate("EmailInput")}
+            >
+              <Text style={styles.forgotPasswordText}>{t.login.forgotPassword}</Text>
+            </TouchableOpacity>
 
             <Button
               title={isLoading ? t.login.loggingIn : t.login.loginBtn}
@@ -220,6 +226,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#1e293b",
+  },
+  forgotPasswordContainer: {
+    alignSelf: 'flex-end',
+    marginTop: -8,
+    marginBottom: 16,
+    marginRight: 10,
+  },
+  forgotPasswordText: {
+    fontSize: 15,
+    color: '#059669',
+    fontWeight: '700',
   },
   loginButtonContainer: {
     marginTop: 10,

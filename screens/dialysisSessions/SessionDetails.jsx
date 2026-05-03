@@ -289,7 +289,46 @@ const SessionDetails = ({ route, navigation }) => {
             <MaterialCommunityIcons name="arrow-right" size={24} color="#fff" />
           </Pressable>
           <Text style={styles.patientName}>{patient.patientName}</Text>
-          <View style={{ width: 34 }} />
+          
+          <Pressable 
+            style={styles.avatarContainer}
+            onPress={async () => {
+              const name = sessionData?.patient?.full_name || patient?.patientName;
+              console.log('--- Resolving Patient Profile ---');
+              console.log('Searching for name:', name);
+              
+              if (!name) {
+                Alert.alert(t.error, t.staffPatientView.errorNoPatientId);
+                return;
+              }
+
+              try {
+                // البحث عن المريض بالاسم للحصول على الـ User ID (id) الصحيح
+                // لأن الممرض لا يملك إلا الـ patient_id (الرقم الطبي)
+                const searchRes = await api.get(`/users/profile/patients/search?name=${encodeURIComponent(name)}`);
+                
+                // البحث عن مطابقة دقيقة بالاسم إذا وجدنا أكثر من نتيجة
+                const matchedPatient = searchRes.data?.find(p => p.name === name) || searchRes.data?.[0];
+                const userId = matchedPatient?.id;
+
+                console.log('Resolved User ID:', userId);
+
+                if (userId) {
+                  navigation.navigate('StaffPatientView', { patientId: userId });
+                } else {
+                  // محاولة أخيرة بالرقم المتوفر
+                  const fallbackId = patient?.patientId || sessionData?.patient_id;
+                  navigation.navigate('StaffPatientView', { patientId: fallbackId });
+                }
+              } catch (error) {
+                console.log('Profile resolution error:', error.message);
+                const fallbackId = patient?.patientId || sessionData?.patient_id;
+                navigation.navigate('StaffPatientView', { patientId: fallbackId });
+              }
+            }}
+          >
+            <MaterialCommunityIcons name="account-circle" size={34} color="rgba(255,255,255,0.9)" />
+          </Pressable>
         </View>
 
         {/* ── تايمر العد التنازلي ── */}
@@ -353,6 +392,13 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#ecfdf5' },
   header: { backgroundColor: '#065f46', padding: 20, paddingTop: 50, alignItems: 'center' },
   patientName: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginBottom: 0 },
+  avatarContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
   // ── Step bar (below header) ──
   stepBar: {
