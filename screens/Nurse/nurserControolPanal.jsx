@@ -2,6 +2,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SelectPatient from "./selectPatinet";
 import ProfileSettingsScreen from "../SettingsWithProfile/SettingWithProfile";
 import SearchPatient from "../patinet/searchPatinet";
@@ -11,6 +12,7 @@ const Tab = createBottomTabNavigator();
 
 const NursePages = () => {
   const { t } = useLanguage();
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.container}>
@@ -18,7 +20,7 @@ const NursePages = () => {
         initialRouteName="SelectPatient"
         screenOptions={({ route }) => ({
           headerShown: false,
-          tabBarStyle: styles.tabBar,
+          tabBarStyle: [styles.tabBar, { paddingBottom: Math.max(insets.bottom, 8), height: 60 + Math.max(insets.bottom, 8) }],
           tabBarActiveTintColor: "#059669",
           tabBarInactiveTintColor: "#9CA3AF",
           tabBarLabelStyle: styles.tabLabel,

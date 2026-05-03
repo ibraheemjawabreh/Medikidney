@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLanguage } from '../../context/LanguageContext';
 
 import PatientProfile from "./PatinetProfile";
@@ -12,13 +13,14 @@ const Tab = createBottomTabNavigator();
 
 const PatinetPages = () => {
   const { t } = useLanguage();
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.container}>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
-          tabBarStyle: styles.tabBar,
+          tabBarStyle: [styles.tabBar, { paddingBottom: Math.max(insets.bottom, 8), height: 60 + Math.max(insets.bottom, 8) }],
           tabBarActiveTintColor: "#382120",
           tabBarInactiveTintColor: "#9CA3AF",
           tabBarLabelStyle: styles.tabLabel,

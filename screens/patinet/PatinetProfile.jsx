@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -582,21 +582,7 @@ const PatientProfile = ({ navigation }) => {
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
             <Text style={styles.sectionHeading}>{t.patientProfile.tabs.sessions}</Text>
 
-            {ultrafiltrationAverage !== null && (
-              <View style={styles.ufStatsCard}>
-                <View style={styles.ufIconBox}>
-                  <Icon name="water-percent" type="material-community" size={28} color="#0284c7" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.ufStatsTitle}>متوسط الترشيح الفائق</Text>
-                  <Text style={styles.ufStatsDesc}>لآخر 30 يوماً</Text>
-                </View>
-                <View style={styles.ufValueBox}>
-                  <Text style={styles.ufStatsValue}>{ultrafiltrationAverage}</Text>
-                  <Text style={styles.ufStatsUnit}>لتر</Text>
-                </View>
-              </View>
-            )}
+
 
             {sessions.length > 0 ? sessions.map((session, index) => {
               const statusConfig = {

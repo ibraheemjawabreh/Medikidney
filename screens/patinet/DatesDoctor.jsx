@@ -53,7 +53,7 @@ const AppointmentScreen = () => {
       ]);
 
       setDoctors(Array.isArray(docsRes.data) ? docsRes.data : []);
-      const activeAppts = (myApptsRes.data || []).filter(a => a.status !== 'CANCELLED');
+      const activeAppts = (myApptsRes.data || []).filter(a => a.status === 'SCHEDULED');
       setMyAppointments(activeAppts);
 
       Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }).start();
@@ -222,20 +222,32 @@ const AppointmentScreen = () => {
           {myAppointments.length > 0 && (
             <View style={styles.myApptsSection}>
               <Text style={styles.label}>{t.appointments.myAppointments}</Text>
-              {myAppointments.map((appt) => (
-                <View key={appt.appointment_id} style={styles.myApptCard}>
-                  <Pressable
-                    onPress={() => handleCancelAppointment(appt.appointment_id)}
-                    style={styles.deleteBtn}
-                  >
-                    <MaterialCommunityIcons name="trash-can-outline" size={22} color="#EF4444" />
-                  </Pressable>
-                  <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                    <Text style={styles.docName}>{t.appointments.dr} {appt.doctor?.full_name}</Text>
-                    <Text style={styles.apptDateText}>{appt.appt_date} | {formatTime(appt.appt_time)}</Text>
+              {myAppointments.map((appt) => {
+                const isCompleted = appt.status === 'COMPLETED';
+                return (
+                  <View key={appt.appointment_id} style={styles.myApptCard}>
+                    {isCompleted ? (
+                      <View style={styles.completedBadge}>
+                        <MaterialCommunityIcons name="check-circle-outline" size={20} color="#059669" />
+                      </View>
+                    ) : (
+                      <Pressable
+                        onPress={() => handleCancelAppointment(appt.appointment_id)}
+                        style={styles.deleteBtn}
+                      >
+                        <MaterialCommunityIcons name="trash-can-outline" size={22} color="#EF4444" />
+                      </Pressable>
+                    )}
+                    <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                      <Text style={styles.docName}>{t.appointments.dr} {appt.doctor?.full_name}</Text>
+                      <Text style={styles.apptDateText}>{appt.appt_date} | {formatTime(appt.appt_time)}</Text>
+                      {isCompleted && (
+                        <Text style={styles.completedText}>{t.patientProfile?.status?.completed || 'مكتمل'}</Text>
+                      )}
+                    </View>
                   </View>
-                </View>
-              ))}
+                );
+              })}
             </View>
           )}
 
@@ -349,6 +361,8 @@ const styles = StyleSheet.create({
     elevation: 2
   },
   deleteBtn: { padding: 8, backgroundColor: '#FEF2F2', borderRadius: 8 },
+  completedBadge: { padding: 8, backgroundColor: '#ECFDF5', borderRadius: 8 },
+  completedText: { fontSize: 11, color: '#059669', fontWeight: '600', marginTop: 2 },
   docName: { fontWeight: 'bold', color: '#1F2937', fontSize: 14 },
   apptDateText: { color: '#6B7280', fontSize: 12 },
   divider: { height: 1, backgroundColor: '#D1D5DB', marginVertical: 15 },

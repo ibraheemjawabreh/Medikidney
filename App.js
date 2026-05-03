@@ -3,6 +3,7 @@ import { NavigationContainer, createNavigationContainerRef } from '@react-naviga
 import AppNavigator from './AppNavigation/AppNavigation';
 import { useNotifications } from './hooks/useNotifications';
 import { LanguageProvider } from './context/LanguageContext';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -14,10 +15,12 @@ export default function App() {
   }, []);
 
   return (
-    <LanguageProvider>
-      <NavigationContainer ref={navigationRef}>
-        <AppNavigator />
-      </NavigationContainer>
-    </LanguageProvider>
+    <SafeAreaProvider>
+      <LanguageProvider>
+        <NavigationContainer ref={navigationRef}>
+          <AppNavigator />
+        </NavigationContainer>
+      </LanguageProvider>
+    </SafeAreaProvider>
   );
 }
