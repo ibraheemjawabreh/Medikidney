@@ -496,26 +496,26 @@ const PatientProfile = ({ navigation }) => {
         <Tab.Item
           title={t.patientProfile.tabs.nutrition}
           titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
-          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }}
-          icon={<Icon name="food-apple" type="material-community" size={22} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />}
+          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
+          icon={<Icon name="food-apple" type="material-community" size={18} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />}
         />
         <Tab.Item
           title={t.patientProfile.tabs.sessions}
           titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
-          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }}
-          icon={<Icon name="clock-outline" type="material-community" size={22} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />}
+          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
+          icon={<Icon name="clock-outline" type="material-community" size={18} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />}
         />
         <Tab.Item
           title={t.patientProfile.tabs.tests}
           titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
-          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }}
-          icon={<Icon name="clipboard-pulse" type="material-community" size={22} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />}
+          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
+          icon={<Icon name="clipboard-pulse" type="material-community" size={18} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />}
         />
         <Tab.Item
           title={t.patientProfile.tabs.appointments}
           titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
-          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }}
-          icon={<Icon name="calendar-clock" type="material-community" size={22} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />}
+          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
+          icon={<Icon name="calendar-clock" type="material-community" size={18} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />}
         />
       </Tab>
 

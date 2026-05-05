@@ -75,15 +75,7 @@ const StaffPatientView = ({ route, navigation }) => {
 
   const fetchConsultations = async (id) => {
     try {
-      // محاولة أولى: patientId (الوضع الافتراضي)
-      let response = await api.get(`/clinic-consultations?patientId=${id}`);
-      
-      // إذا لم يرجع نتائج، جرب patient_id (snake_case)
-      if (!Array.isArray(response.data) || response.data.length === 0) {
-        response = await api.get(`/clinic-consultations?patient_id=${id}`);
-      }
-
-      console.log('Consultations data:', response.data);
+      const response = await api.get(`/clinic-consultations?patientId=${id}`);
       setConsultations(Array.isArray(response.data) ? response.data : []);
     } catch (e) {
       if (e.response?.status !== 403) {
@@ -303,10 +295,30 @@ const StaffPatientView = ({ route, navigation }) => {
 
 
       <Tab value={tabIndex} onChange={setTabIndex} indicatorStyle={styles.tabIndicator} containerStyle={styles.tabBar} variant="default">
-        <Tab.Item title={t.staffPatientView.tabs.nutrition} titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="food-apple" type="material-community" size={22} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />} />
-        <Tab.Item title={t.staffPatientView.tabs.sessions} titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="clock-outline" type="material-community" size={22} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />} />
-        <Tab.Item title={t.staffPatientView.tabs.tests} titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="clipboard-pulse" type="material-community" size={22} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />} />
-        <Tab.Item title={t.staffPatientView.tabs.notes} titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]} titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true }} icon={<Icon name="note-edit-outline" type="material-community" size={22} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />} />
+        <Tab.Item
+          title={t.staffPatientView.tabs.nutrition}
+          titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
+          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
+          icon={<Icon name="food-apple" type="material-community" size={18} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />}
+        />
+        <Tab.Item
+          title={t.staffPatientView.tabs.sessions}
+          titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
+          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
+          icon={<Icon name="clock-outline" type="material-community" size={18} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />}
+        />
+        <Tab.Item
+          title={t.staffPatientView.tabs.tests}
+          titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
+          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
+          icon={<Icon name="clipboard-pulse" type="material-community" size={18} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />}
+        />
+        <Tab.Item
+          title={t.staffPatientView.tabs.notes}
+          titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
+          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
+          icon={<Icon name="note-edit-outline" type="material-community" size={18} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />}
+        />
       </Tab>
 
       {/* ── Tab Content ── */}
