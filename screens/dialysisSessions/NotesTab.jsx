@@ -50,4 +50,4 @@ const styles = StyleSheet.create({
   btnText: { color: '#fff', fontWeight: 'bold' }
 });
 
-export default NotesTab;
+export default NotesTab;

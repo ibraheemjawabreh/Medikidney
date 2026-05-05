@@ -392,10 +392,16 @@ const StaffPatientView = ({ route, navigation }) => {
                 <TouchableOpacity
                   key={index}
                   style={[styles.sessionCard, { borderRightColor: sc.borderColor }]}
-                  onPress={() => navigation.navigate("PatientSessionDetailView", {
-                    sessionId: session.session_id || session.id,
-                    patientId: patient?.patient_id,
-                  })}
+                  onPress={() => {
+                    if (!patient?.patient_id) {
+                      Alert.alert(t.error, "خطأ: معرف المريض غير موجود");
+                      return;
+                    }
+                    navigation.navigate("PatientSessionDetailView", {
+                      sessionId: session.session_id || session.id,
+                      patientId: patient.patient_id,
+                    });
+                  }}
                   activeOpacity={0.75}
                 >
                   {/* Card Header */}

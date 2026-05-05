@@ -617,9 +617,14 @@ const PatientProfile = ({ navigation }) => {
                         startTime: session.start_time,
                       });
                     } else {
+                      // التحقق من وجود patient_id قبل الانتقال
+                      if (!patient?.patient_id) {
+                        Alert.alert(t.error, "خطأ: معرف المريض غير موجود");
+                        return;
+                      }
                       navigation.navigate("PatientSessionDetailView", {
                         sessionId: session.session_id || session.id,
-                        patientId: patient?.patient_id,
+                        patientId: patient.patient_id,
                       });
                     }
                   }}

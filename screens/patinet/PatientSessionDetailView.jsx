@@ -54,7 +54,23 @@ const PatientSessionDetailView = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ─── التحقق من المعاملات المطلوبة ───────────────────────────────
+  if (!sessionId || !patientId) {
+    return (
+      <View style={styles.center}>
+        <Icon name="alert-circle-outline" type="material-community" size={60} color="#ef4444" />
+        <Text style={styles.errorText}>
+          خطأ: معرف الجلسة أو المريض غير موجود{'\n'}sessionId: {sessionId}{'\n'}patientId: {patientId}
+        </Text>
+        <TouchableOpacity style={styles.retryBtn} onPress={() => navigation.goBack()}>
+          <Text style={{ color: "#fff", fontWeight: "bold" }}>{t.patientSessionDetail.retry}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   const fetchSession = useCallback(async () => {
+    console.log('[PatientSessionDetailView] fetchSession started with sessionId:', sessionId, 'patientId:', patientId);
     try {
       setLoading(true);
       setError(null);
@@ -73,9 +89,13 @@ const PatientSessionDetailView = ({ route, navigation }) => {
       // 1. Try comprehensive last-session endpoint
       try {
         const lastRes = await api.get(`/dialysis-sessions/patient/${patientId}/last-session`);
-        if (lastRes.data?.session?.session_id === sessionId) {
+        console.log('[PatientSessionDetailView] last-session response:', lastRes.data);
+        // استخدام == بدل === لتجنب فشل المقارنة بين number و string
+        // eslint-disable-next-line eqeqeq
+        if (lastRes.data?.session?.session_id == sessionId) {
           // Perfect match — use all data from the comprehensive endpoint
           const d = lastRes.data;
+          console.log('[PatientSessionDetailView] Using last-session data');
           setData({
             session: d.session,
             patient: d.patient,
@@ -86,10 +106,12 @@ const PatientSessionDetailView = ({ route, navigation }) => {
             dialysisSettings: d.dialysisSettings || [],
             symptoms: d.symptoms || { total: 0, breakdown: {}, details: [] },
           });
+          setLoading(false);
           return;
         }
-      } catch (_) {
+      } catch (e) {
         // last-session failed or mismatched — fall through to parallel fetches
+        console.log('[PatientSessionDetailView] last-session failed or mismatched, trying individual endpoints:', e.message);
       }
 
       // 2. Fetch all data in parallel from individual endpoints
@@ -110,11 +132,58 @@ const PatientSessionDetailView = ({ route, navigation }) => {
       // Basic session info
       if (basicRes.status === "fulfilled") {
         const s = basicRes.value.data;
+        console.log('[PatientSessionDetailView] basicRes data:', JSON.stringify(s).substring(0, 200));
         sessionData = s;
         patientData = s.patient || null;
         nurseData = s.nurse || null;
         scheduleData = s.schedule || null;
       } else {
+        // ── Fallback: جلب من قائمة الجلسات (يعمل مع NUTRITIONIST و غيره) ──
+        const errorStatus = basicRes.reason?.response?.status;
+        console.log('[PatientSessionDetailView] individual endpoint failed (status:', errorStatus, '), trying sessions list fallback...');
+
+        try {
+          const listRes = await api.get(`/dialysis-sessions?patientId=${patientId}`);
+          const sessionsList = Array.isArray(listRes.data) ? listRes.data : [];
+          // eslint-disable-next-line eqeqeq
+          const found = sessionsList.find(s => s.session_id == sessionId || s.id == sessionId);
+
+          if (found) {
+            const symList = Array.isArray(found.symptoms) ? found.symptoms : [];
+            const symBreakdown = {};
+            symList.forEach(sym => {
+              const type = sym.symptomType || sym.symptom_type;
+              const sev = sym.severity;
+              if (!symBreakdown[type]) symBreakdown[type] = {};
+              symBreakdown[type][sev] = (symBreakdown[type][sev] || 0) + 1;
+            });
+
+            setData({
+              session: found,
+              patient: found.patient || null,
+              nurse: found.nurse || null,
+              schedule: found.schedule || null,
+              vitalSigns: found.vitalSigns || [],
+              medications: found.medications || [],
+              dialysisSettings: found.dialysisSettings || [],
+              symptoms: {
+                total: symList.length,
+                breakdown: symBreakdown,
+                details: symList.map(sym => ({
+                  symptom_id: sym.symptom_id || sym.id,
+                  symptom_type: sym.symptomType || sym.symptom_type,
+                  severity: sym.severity,
+                  occurred_at: sym.occurred_at || sym.occurredAt || sym.createdAt,
+                  notes: sym.notes,
+                })),
+              },
+            });
+            return;
+          }
+        } catch (listErr) {
+          console.log('[PatientSessionDetailView] list fallback also failed:', listErr.message);
+        }
+
         throw new Error(t.patientSessionDetail.fetchError);
       }
 
@@ -176,6 +245,16 @@ const PatientSessionDetailView = ({ route, navigation }) => {
         medicationsResult = Array.isArray(d) ? d : d?.data || [];
       }
 
+      console.log('[PatientSessionDetailView] About to setData with:', {
+        session: !!sessionData,
+        patient: !!patientData,
+        nurse: !!nurseData,
+        vitalSigns: vitalSignsData.length,
+        dialysisSettings: dialysisSettingsData.length,
+        symptoms: symptomsData.total,
+        medications: medicationsResult.length,
+      });
+
       setData({
         session: sessionData,
         patient: patientData,
@@ -186,9 +265,13 @@ const PatientSessionDetailView = ({ route, navigation }) => {
         dialysisSettings: dialysisSettingsData,
         symptoms: symptomsData,
       });
+      console.log('[PatientSessionDetailView] setData completed successfully');
     } catch (e) {
-      console.log("Session detail error:", e.message);
-      setError(t.patientSessionDetail.fetchError);
+      console.log('[PatientSessionDetailView] Session detail error:', e.message);
+      console.log('[PatientSessionDetailView] Error type:', e.constructor.name);
+      console.log('[PatientSessionDetailView] Full error object:', e);
+      console.log('[PatientSessionDetailView] sessionId:', sessionId, '| patientId:', patientId);
+      setError(e.message || t.patientSessionDetail.fetchError);
     } finally {
       setLoading(false);
     }
