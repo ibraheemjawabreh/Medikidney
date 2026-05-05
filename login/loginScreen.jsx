@@ -123,6 +123,7 @@ const LoginScreen = ({ navigation }) => {
                   />
                 </TouchableOpacity>
               }
+              inputContainerStyle={styles.inputContainer}
               inputStyle={styles.inputStyle}
             />
 

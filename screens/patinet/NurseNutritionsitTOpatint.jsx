@@ -416,15 +416,46 @@ const StaffPatientView = ({ route, navigation }) => {
                   {/* Card Metrics */}
                   <View style={styles.sessionMetricsRow}>
                     <View style={styles.sessionMetricBox}>
-                      <Icon name="heart-pulse" type="material-community" size={14} color="#ef4444" />
-                      <Text style={styles.metricLabel}>{t.staffPatientView.bpBefore}</Text>
-                      <Text style={[styles.metricValue, { fontSize: 13 }]}>{session.blood_pressure_before || "—"}</Text>
+                      <Icon name="scale" type="material-community" size={14} color="#3b82f6" />
+                      <Text style={styles.metricLabel}>الوزن قبل</Text>
+                      <Text style={[styles.metricValue, { fontSize: 13, color: '#3b82f6' }]}>
+                        {session.weight_before != null ? `${session.weight_before} kg` : "—"}
+                      </Text>
                     </View>
                     <View style={styles.sessionMetricDivider} />
                     <View style={styles.sessionMetricBox}>
-                      <Icon name="heart-outline" type="material-community" size={14} color="#f97316" />
-                      <Text style={styles.metricLabel}>{t.staffPatientView.bpAfter}</Text>
-                      <Text style={[styles.metricValue, { fontSize: 13 }]}>{session.blood_pressure_after || "—"}</Text>
+                      <Icon name="scale" type="material-community" size={14} color="#059669" />
+                      <Text style={styles.metricLabel}>الوزن بعد</Text>
+                      <Text style={[styles.metricValue, { fontSize: 13, color: '#059669' }]}>
+                        {session.weight_after != null ? `${session.weight_after} kg` : "—"}
+                      </Text>
+                    </View>
+                    <View style={styles.sessionMetricDivider} />
+                    <View style={styles.sessionMetricBox}>
+                      <Icon name="water" type="material-community" size={14} color="#0ea5e9" />
+                      <Text style={styles.metricLabel}>السوائل المسحوبة</Text>
+                      <Text style={[styles.metricValue, { fontSize: 13, color: '#0ea5e9' }]}>
+                        {(() => {
+                          // 1. الأولوية: قيمة ultrafiltration_rate من إعدادات الجلسة
+                          const settingsArr = session.dialysisSettings || [];
+                          const lastSetting = settingsArr.length > 0 ? settingsArr[settingsArr.length - 1] : null;
+                          const ufRaw = parseFloat(lastSetting?.ultrafiltration_rate ?? lastSetting?.ultrafiltrationRate);
+                          if (!isNaN(ufRaw) && ufRaw > 0) {
+                            const ufLiters = ufRaw > 50 ? (ufRaw / 1000).toFixed(2) : ufRaw.toFixed(2);
+                            return `${ufLiters} L`;
+                          }
+                          // 2. احتياطي: الفرق بين الوزن قبل وبعد
+                          if (session.weight_before != null && session.weight_after != null) {
+                            return `${Math.abs(session.weight_before - session.weight_after).toFixed(1)} L`;
+                          }
+                          // 3. احتياطي: fluid_removed من الجلسة
+                          if (session.fluid_removed != null && session.fluid_removed > 0) {
+                            return `${session.fluid_removed} L`;
+                          }
+                          return '—';
+                        })()
+                        }
+                      </Text>
                     </View>
                   </View>
 
@@ -493,34 +524,48 @@ const StaffPatientView = ({ route, navigation }) => {
                   )) : <View style={styles.emptyState}><Icon name="pill-off" type="material-community" size={60} color="#cbd5e1" /><Text style={styles.emptyText}>{t.staffPatientView.noMedications}</Text></View>}
                 </View>
               )}
-              {subTabIndex === 1 && medicalTests.map((test, idx) => (
-                <MedicalCard
-                  key={idx}
-                  id={test.test_id || test.id}
-                  type="lab"
-                  title={test.test_type}
-                  date={test.date_completed}
-                  doctor={test.doctor?.full_name}
-                  description={test.description}
-                  status={test.status || (test.result ? 'COMPLETED' : 'PENDING')}
-                  hasFile={!!(test.test_id || test.id)}
-                  typeIcon="test-tube"
-                />
-              ))}
-              {subTabIndex === 2 && radiology.map((rad, idx) => (
-                <MedicalCard
-                  key={idx}
-                  id={rad.image_id || rad.id}
-                  type="radiology"
-                  title={rad.image_type}
-                  date={rad.completed_at}
-                  doctor={rad.doctor?.full_name}
-                  description={rad.description}
-                  status={rad.status}
-                  hasFile={!!(rad.image_id || rad.id)}
-                  typeIcon="file-image-outline"
-                />
-              ))}
+              {subTabIndex === 1 && (
+                medicalTests.length > 0 ? medicalTests.map((test, idx) => (
+                  <MedicalCard
+                    key={idx}
+                    id={test.test_id || test.id}
+                    type="lab"
+                    title={test.test_type}
+                    date={test.date_completed}
+                    doctor={test.doctor?.full_name}
+                    description={test.description}
+                    status={test.status || (test.result ? 'COMPLETED' : 'PENDING')}
+                    hasFile={!!(test.test_id || test.id)}
+                    typeIcon="test-tube"
+                  />
+                )) : (
+                  <View style={styles.emptyState}>
+                    <Icon name="test-tube-off" type="material-community" size={60} color="#cbd5e1" />
+                    <Text style={styles.emptyText}>{t.staffPatientView.noLabTests || 'لا توجد فحوصات مختبرية'}</Text>
+                  </View>
+                )
+              )}
+              {subTabIndex === 2 && (
+                radiology.length > 0 ? radiology.map((rad, idx) => (
+                  <MedicalCard
+                    key={idx}
+                    id={rad.image_id || rad.id}
+                    type="radiology"
+                    title={rad.image_type}
+                    date={rad.completed_at}
+                    doctor={rad.doctor?.full_name}
+                    description={rad.description}
+                    status={rad.status}
+                    hasFile={!!(rad.image_id || rad.id)}
+                    typeIcon="file-image-outline"
+                  />
+                )) : (
+                  <View style={styles.emptyState}>
+                    <Icon name="radiology-box-outline" type="material-community" size={60} color="#cbd5e1" />
+                    <Text style={styles.emptyText}>{t.staffPatientView.noRadiology || 'لا توجد صور أشعة'}</Text>
+                  </View>
+                )
+              )}
             </ScrollView>
           </View>
         )}

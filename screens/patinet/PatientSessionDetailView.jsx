@@ -357,18 +357,43 @@ const PatientSessionDetailView = ({ route, navigation }) => {
                 </View>
               </View>
 
-              {/* كمية السوائل المزالة */}
-              {session?.weight_before != null && session?.weight_after != null && (
-                <View style={styles.fluidRemovedRow}>
-                  <Icon name="water-outline" type="material-community" size={16} color="#06b6d4" />
-                  <Text style={styles.fluidRemovedText}>
-                    {t.patientSessionDetail.fluidRemoved} {' '}
-                    <Text style={styles.fluidRemovedValue}>
-                      {Math.abs(session.weight_before - session.weight_after).toFixed(1)} لتر
+              {/* كمية السوائل المزالة - تظهر دائماً إذا توفرت قيمة */}
+              {(() => {
+                // 1. الأولوية: ultrafiltration_rate من إعدادات الجهاز (ما أدخله الممرض)
+                const lastSetting = dialysisSettings && dialysisSettings.length > 0
+                  ? dialysisSettings[dialysisSettings.length - 1]
+                  : null;
+                const ufRaw = parseFloat(lastSetting?.ultrafiltration_rate ?? lastSetting?.ultrafiltrationRate);
+                const hasUF = !isNaN(ufRaw) && ufRaw > 0;
+                const ufLiters = hasUF
+                  ? (ufRaw > 50 ? (ufRaw / 1000).toFixed(2) : ufRaw.toFixed(2))
+                  : null;
+
+                // 2. احتياطي: الفرق بين الوزن قبل وبعد
+                const weightDiff = (session?.weight_before != null && session?.weight_after != null)
+                  ? Math.abs(session.weight_before - session.weight_after).toFixed(1)
+                  : null;
+
+                const displayValue = ufLiters ?? weightDiff;
+                const isEstimate = !ufLiters && weightDiff != null;
+
+                if (!displayValue) return null;
+
+                return (
+                  <View style={styles.fluidRemovedRow}>
+                    <Icon name="water-outline" type="material-community" size={16} color="#06b6d4" />
+                    <Text style={styles.fluidRemovedText}>
+                      {t.patientSessionDetail.fluidRemoved}{' '}
+                      <Text style={styles.fluidRemovedValue}>
+                        {displayValue} لتر
+                      </Text>
+                      {isEstimate && (
+                        <Text style={{ fontSize: 11, color: '#94a3b8' }}> (تقريبي)</Text>
+                      )}
                     </Text>
-                  </Text>
-                </View>
-              )}
+                  </View>
+                );
+              })()}
             </>
           )}
 
