@@ -75,7 +75,14 @@ const StaffPatientView = ({ route, navigation }) => {
 
   const fetchConsultations = async (id) => {
     try {
-      const response = await api.get(`/clinic-consultations?patientId=${id}`);
+      // محاولة أولى: patientId (الوضع الافتراضي)
+      let response = await api.get(`/clinic-consultations?patientId=${id}`);
+      
+      // إذا لم يرجع نتائج، جرب patient_id (snake_case)
+      if (!Array.isArray(response.data) || response.data.length === 0) {
+        response = await api.get(`/clinic-consultations?patient_id=${id}`);
+      }
+
       console.log('Consultations data:', response.data);
       setConsultations(Array.isArray(response.data) ? response.data : []);
     } catch (e) {
@@ -128,6 +135,7 @@ const StaffPatientView = ({ route, navigation }) => {
       const response = await api.get(
         `/users/profile/patients/${patientId}`
       );
+      console.log('FULL Patient Response:', JSON.stringify(response.data));
       setPatient(response.data);
 
       const realId = response.data?.patient_id;
@@ -154,6 +162,13 @@ const StaffPatientView = ({ route, navigation }) => {
   const formatDate = (date) => {
     if (!date) return t.staffPatientView.pendingDispense || "قيد الانتظار";
     return new Date(date).toLocaleDateString(t.vitalSigns.now === 'الآن' ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
+
+  const formatTime = (timeStr) => {
+    if (!timeStr) return "";
+    let [h, m] = timeStr.split(":");
+    let hh = parseInt(h);
+    return `${hh % 12 || 12}:${m} ${hh >= 12 ? t.time.pm : t.time.am}`;
   };
 
   const handleDownload = async (id, type) => {
@@ -1013,6 +1028,21 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#94a3b8',
     fontWeight: '600',
+  },
+  cardFooter: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+    marginTop: 12,
+    paddingTop: 12,
+    gap: 8,
+  },
+  viewDetailsText: {
+    fontSize: 13,
+    color: '#059669',
+    fontWeight: '700',
   },
 });
 

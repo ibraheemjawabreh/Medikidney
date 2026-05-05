@@ -33,7 +33,7 @@ const SettingsTab = ({ route }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saved, setSaved] = useState(null);
   const [form, setForm] = useState({
-    bloodFlowRate: '', dialysateFlow: '', ultrafiltrationRate: '',
+    bloodFlowRate: '200', dialysateFlow: '500', ultrafiltrationRate: '2.5',
   });
   const [prevWeightAfter, setPrevWeightAfter] = useState('—');
   const [currWeightBefore, setCurrWeightBefore] = useState('—');
@@ -89,6 +89,21 @@ const SettingsTab = ({ route }) => {
           }
         });
         setMonthlyAverageUF(count > 0 ? (totalUF / count).toFixed(2) : '0.00');
+      }
+
+      // حساب السوائل المسحوبة الافتراضية = الوزن الحالي - وزن بعد الجلسة السابقة
+      const wBefore = currentSession.weight_before ?? currentSession.weight;
+      const wAfterPrev = pastSessions.length > 0 ? pastSessions[0].weight_after : null;
+      if (wBefore != null && wAfterPrev != null) {
+        const diff = parseFloat(wBefore) - parseFloat(wAfterPrev);
+        if (!isNaN(diff) && diff > 0) {
+          const calculatedUF = diff.toFixed(1);
+          // فقط إذا ما في إعدادات محفوظة مسبقاً
+          setForm(prev => prev.ultrafiltrationRate === '2.5' || prev.ultrafiltrationRate === ''
+            ? { ...prev, ultrafiltrationRate: calculatedUF }
+            : prev
+          );
+        }
       }
     } catch (err) {
       console.log("Error fetching supplementary session data:", err);
@@ -175,7 +190,7 @@ const SettingsTab = ({ route }) => {
               `/dialysis-sessions/${sessionId}/details/dialysis-settings/${settingId}`
             );
             setSaved(null);
-            setForm({ bloodFlowRate: '', dialysateFlow: '', ultrafiltrationRate: '' });
+            setForm({ bloodFlowRate: '200', dialysateFlow: '500', ultrafiltrationRate: '2.5' });
           } catch (err) {
             Alert.alert(t.error, t.deviceSettings.deleteFailed);
           } finally {

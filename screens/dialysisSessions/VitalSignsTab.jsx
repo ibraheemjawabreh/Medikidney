@@ -184,7 +184,7 @@ const VitalSignsTab = ({ route }) => {
   const [vitals, setVitals] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
-    systolic: '', diastolic: '', pulse: '', temperature: '', oxygen: '',
+    systolic: '120', diastolic: '80', pulse: '72', temperature: '36.5', oxygen: '98',
   });
 
   const fetchVitals = async () => {
@@ -226,7 +226,7 @@ const VitalSignsTab = ({ route }) => {
         }
       );
       Alert.alert(t.success, t.vitalSigns.saveSuccess);
-      setForm({ systolic: '', diastolic: '', pulse: '', temperature: '', oxygen: '' });
+      setForm({ systolic: '120', diastolic: '80', pulse: '72', temperature: '36.5', oxygen: '98' });
       setShowForm(false);
       fetchVitals();
     } catch (err) {
