@@ -63,6 +63,12 @@ const NurseTasks = ({ route, navigation }) => {
     }
   };
 
+  // دالة لتحويل وقت JavaScript إلى ISO format
+  const timeToISOFormat = (date) => {
+    const isoString = date.toISOString();
+    return isoString; // يعيد الصيغة الكاملة مثل "2026-05-08T12:34:56.000Z"
+  };
+
   const handleFinalSubmit = async () => {
     if (!bpAfter || !fluidRemoved || !weightAfter) {
       Alert.alert("تنبيه", "يرجى إكمال بيانات نهاية الجلسة (الضغط والسوائل والوزن)");
@@ -75,12 +81,15 @@ const NurseTasks = ({ route, navigation }) => {
       const savedSession = await AsyncStorage.getItem(`active_session_${patientId}`);
       const localData = JSON.parse(savedSession);
 
+      // الحصول على الوقت الحالي بصيغة ISO صحيحة
+      const currentEndTime = new Date();
+
       const finalPayload = {
         patientId: Number(patientId),
         scheduleId: Number(localData.scheduleId || scheduleId),
         date: new Date().toISOString().split('T')[0],
         startTime: startTime,
-        endTime: new Date().toISOString(),
+        endTime: timeToISOFormat(currentEndTime),
         weightBefore: 0,
         weightAfter: Number(weightAfter),
         bloodPressureBefore: bpBefore,
@@ -89,6 +98,8 @@ const NurseTasks = ({ route, navigation }) => {
         status: status,
         notes: notes || "لا توجد ملاحظات إضافية"
       };
+
+      console.log("الـ Payload المُرسل:", finalPayload);
 
       await api.post(
         "/dialysis-sessions",
@@ -99,6 +110,7 @@ const NurseTasks = ({ route, navigation }) => {
       Alert.alert("نجاح ✅", "تم تسجيل الجلسة بالكامل.");
       navigation.goBack();
     } catch (error) {
+      console.log("خطأ الإرسال:", error.response?.data);
       Alert.alert("فشل الإرسال", error.response?.data?.message?.toString() || "تأكد من البيانات");
     } finally {
       setLoading(false);
