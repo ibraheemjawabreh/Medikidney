@@ -23,6 +23,26 @@ import { useLanguage } from '../../context/LanguageContext';
 
 const { width } = Dimensions.get("window");
 
+// ─── بيانات ثابتة خارج المكون (لا تتغير) ───────────────────────
+const STATUS_CONFIG = {
+  COMPLETED:   { label: 'مكتملة', bg: '#dcfce7', text: '#166534', icon: 'check-circle-outline', borderColor: '#059669' },
+  IN_PROGRESS: { label: 'جارية',  bg: '#fef3c7', text: '#92400e', icon: 'progress-clock',       borderColor: '#f59e0b' },
+  SCHEDULED:   { label: 'مجدولة', bg: '#dbeafe', text: '#1e40af', icon: 'calendar-clock',       borderColor: '#3b82f6' },
+};
+const DEFAULT_STATUS = { label: '', bg: '#f1f5f9', text: '#64748b', icon: 'help-circle-outline', borderColor: '#94a3b8' };
+
+// حساب كمية السوائل المسحوبة — الأولوية: UF rate ← فرق الوزن ← fluid_removed
+const getFluidRemoved = (session) => {
+  const settings = session.dialysisSettings || [];
+  const last = settings[settings.length - 1];
+  const uf = parseFloat(last?.ultrafiltration_rate ?? last?.ultrafiltrationRate);
+  if (!isNaN(uf) && uf > 0) return `${uf > 50 ? (uf / 1000).toFixed(2) : uf.toFixed(2)} L`;
+  if (session.weight_before != null && session.weight_after != null)
+    return `${Math.abs(session.weight_before - session.weight_after).toFixed(1)} L`;
+  if (session.fluid_removed > 0) return `${session.fluid_removed} L`;
+  return '—';
+};
+
 const PatientProfile = ({ navigation }) => {
   const { t } = useLanguage();
   const [tabIndex, setTabIndex] = useState(0);
@@ -266,6 +286,14 @@ const PatientProfile = ({ navigation }) => {
     }
   };
 
+  // ─── مكونات عرض بسيطة (تستخدم formatDate و t من المكون الأب) ───
+  const EmptyBox = ({ icon, text }) => (
+    <View style={styles.emptyState}>
+      <Icon name={icon} type="material-community" size={60} color="#cbd5e1" />
+      <Text style={styles.emptyText}>{text}</Text>
+    </View>
+  );
+
   const InfoItem = ({ label, value, icon, color = "#059669" }) => (
     <View style={styles.infoBox}>
       <Icon name={icon} type="material-community" size={22} color={color} />
@@ -288,65 +316,40 @@ const PatientProfile = ({ navigation }) => {
     </View>
   );
 
-  const MedicalCard = ({ id, type, title, date, doctor, description, status, hasFile, typeIcon }) => (
-    <View style={styles.reportCard}>
-      <View style={styles.reportHeader}>
-        <View style={styles.reportTitleRow}>
-          <Icon name={typeIcon} type="material-community" size={26} color="#204a42" />
-          <Text style={styles.reportTitle}>{title}</Text>
+  const MedicalCard = ({ id, type, title, date, doctor, description, status, hasFile, typeIcon }) => {
+    const isPending = status === "PENDING" || status === "pending";
+    return (
+      <View style={styles.reportCard}>
+        <View style={styles.reportHeader}>
+          <View style={styles.reportTitleRow}>
+            <Icon name={typeIcon} type="material-community" size={26} color="#204a42" />
+            <Text style={styles.reportTitle}>{title}</Text>
+          </View>
+          <Text style={styles.reportDate}>{formatDate(date)}</Text>
         </View>
-        <Text style={styles.reportDate}>{formatDate(date)}</Text>
-      </View>
-
-      <View style={styles.reportContent}>
-        <Text style={styles.reportDetail}>
-          <Text style={styles.boldLabel}>{t.patientProfile.doctor}:</Text> د. {doctor || t.unknown}
-        </Text>
-
-        <Text style={styles.reportDetail}>
-          <Text style={styles.boldLabel}>{t.patientProfile.description}:</Text> {description || t.unknown}
-        </Text>
-
-        <View
-          style={[
-            styles.statusBadge,
-            {
-              backgroundColor:
-                status === "PENDING" || status === "pending" ? "#fef3c7" : "#dcfce7",
-            },
-          ]}
-        >
-          <Text
-            style={[
-              styles.statusText,
-              {
-                color:
-                  status === "PENDING" || status === "pending" ? "#92400e" : "#166534",
-              },
-            ]}
-          >
-            {status === "PENDING" || status === "pending" ? t.patientProfile.status.pending : t.patientProfile.status.completed}
+        <View style={styles.reportContent}>
+          <Text style={styles.reportDetail}>
+            <Text style={styles.boldLabel}>{t.patientProfile.doctor}:</Text> د. {doctor || t.unknown}
           </Text>
+          <Text style={styles.reportDetail}>
+            <Text style={styles.boldLabel}>{t.patientProfile.description}:</Text> {description || t.unknown}
+          </Text>
+          <View style={[styles.statusBadge, { backgroundColor: isPending ? "#fef3c7" : "#dcfce7" }]}>
+            <Text style={[styles.statusText, { color: isPending ? "#92400e" : "#166534" }]}>
+              {isPending ? t.patientProfile.status.pending : t.patientProfile.status.completed}
+            </Text>
+          </View>
         </View>
+        <Button
+          title={t.patientProfile.previewFile}
+          icon={<Icon name="file-pdf-box" type="material-community" color="white" size={20} containerStyle={{ marginLeft: 5 }} />}
+          buttonStyle={styles.downloadBtn}
+          onPress={() => handleDownload(id, type)}
+          disabled={!hasFile}
+        />
       </View>
-
-      <Button
-        title={t.patientProfile.previewFile}
-        icon={
-          <Icon
-            name="file-pdf-box"
-            type="material-community"
-            color="white"
-            size={20}
-            containerStyle={{ marginLeft: 5 }}
-          />
-        }
-        buttonStyle={styles.downloadBtn}
-        onPress={() => handleDownload(id, type)}
-        disabled={!hasFile}
-      />
-    </View>
-  );
+    );
+  };
 
   if (loading) {
     return (
@@ -486,37 +489,22 @@ const PatientProfile = ({ navigation }) => {
         </View>
       </View>
 
-      <Tab
-        value={tabIndex}
-        onChange={setTabIndex}
-        indicatorStyle={styles.tabIndicator}
-        containerStyle={styles.tabBar}
-        variant="default"
-      >
-        <Tab.Item
-          title={t.patientProfile.tabs.nutrition}
-          titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
-          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
-          icon={<Icon name="food-apple" type="material-community" size={18} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />}
-        />
-        <Tab.Item
-          title={t.patientProfile.tabs.sessions}
-          titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
-          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
-          icon={<Icon name="clock-outline" type="material-community" size={18} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />}
-        />
-        <Tab.Item
-          title={t.patientProfile.tabs.tests}
-          titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
-          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
-          icon={<Icon name="clipboard-pulse" type="material-community" size={18} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />}
-        />
-        <Tab.Item
-          title={t.patientProfile.tabs.appointments}
-          titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
-          titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
-          icon={<Icon name="calendar-clock" type="material-community" size={18} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />}
-        />
+      {/* ── التابات الرئيسية ── */}
+      <Tab value={tabIndex} onChange={setTabIndex} indicatorStyle={styles.tabIndicator} containerStyle={styles.tabBar} variant="default">
+        {[
+          { title: t.patientProfile.tabs.nutrition,    icon: 'food-apple'      },
+          { title: t.patientProfile.tabs.sessions,     icon: 'clock-outline'   },
+          { title: t.patientProfile.tabs.tests,        icon: 'clipboard-pulse' },
+          { title: t.patientProfile.tabs.appointments, icon: 'calendar-clock'  },
+        ].map(({ title, icon }, i) => (
+          <Tab.Item
+            key={i}
+            title={title}
+            titleStyle={(active) => [styles.tabTitle, { color: active ? '#204a42' : '#94a3b8' }]}
+            titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
+            icon={<Icon name={icon} type="material-community" size={18} color={tabIndex === i ? '#204a42' : '#94a3b8'} />}
+          />
+        ))}
       </Tab>
 
       <TabView value={tabIndex} onChange={setTabIndex}>
@@ -585,19 +573,7 @@ const PatientProfile = ({ navigation }) => {
 
 
             {sessions.length > 0 ? sessions.map((session, index) => {
-              const statusConfig = {
-                COMPLETED: { label: "مكتملة", bg: "#dcfce7", text: "#166534", icon: "check-circle-outline", borderColor: "#059669" },
-                IN_PROGRESS: { label: "جارية", bg: "#fef3c7", text: "#92400e", icon: "progress-clock", borderColor: "#f59e0b" },
-                SCHEDULED: { label: "مجدولة", bg: "#dbeafe", text: "#1e40af", icon: "calendar-clock", borderColor: "#3b82f6" },
-              };
-
-              const sc = statusConfig[session.status] || {
-                label: session.status,
-                bg: "#f1f5f9",
-                text: "#64748b",
-                icon: "help-circle-outline",
-                borderColor: "#94a3b8",
-              };
+              const sc = STATUS_CONFIG[session.status] || { ...DEFAULT_STATUS, label: session.status };
 
               const isActive = session.status === "IN_PROGRESS" || session.status === "PENDING";
 
@@ -666,25 +642,7 @@ const PatientProfile = ({ navigation }) => {
                       <Icon name="water" type="material-community" size={14} color="#0ea5e9" />
                       <Text style={styles.metricLabel}>السوائل المسحوبة</Text>
                       <Text style={[styles.metricValue, { fontSize: 13, color: '#0ea5e9' }]}>
-                        {(() => {
-                          // 1. الأولوية: ultrafiltration_rate من إعدادات الجهاز (ما يدخله الممرض)
-                          const settingsArr = session.dialysisSettings || [];
-                          const lastSetting = settingsArr.length > 0 ? settingsArr[settingsArr.length - 1] : null;
-                          const ufRaw = parseFloat(lastSetting?.ultrafiltration_rate ?? lastSetting?.ultrafiltrationRate);
-                          if (!isNaN(ufRaw) && ufRaw > 0) {
-                            const ufLiters = ufRaw > 50 ? (ufRaw / 1000).toFixed(2) : ufRaw.toFixed(2);
-                            return `${ufLiters} L`;
-                          }
-                          // 2. احتياطي: الفرق بين الوزن قبل وبعد
-                          if (session.weight_before != null && session.weight_after != null) {
-                            return `${Math.abs(session.weight_before - session.weight_after).toFixed(1)} L`;
-                          }
-                          // 3. احتياطي: fluid_removed من الجلسة
-                          if (session.fluid_removed != null && session.fluid_removed > 0) {
-                            return `${session.fluid_removed} L`;
-                          }
-                          return '—';
-                        })()}
+                        {getFluidRemoved(session)}
                       </Text>
                     </View>
                   </View>
@@ -715,33 +673,19 @@ const PatientProfile = ({ navigation }) => {
 
         <TabView.Item style={styles.tabViewContent}>
           <View style={{ flex: 1 }}>
+            {/* ── السب-تابات: أدوية / مختبر / أشعة ── */}
             <View style={styles.subTabContainer}>
-              <TouchableOpacity
-                onPress={() => setSubTabIndex(0)}
-                style={[styles.subTabItem, subTabIndex === 0 && styles.subTabActive]}
-              >
-                <Text style={[styles.subTabText, subTabIndex === 0 && styles.subTextActive]}>
-                  {t.medications.title}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => setSubTabIndex(1)}
-                style={[styles.subTabItem, subTabIndex === 1 && styles.subTabActive]}
-              >
-                <Text style={[styles.subTabText, subTabIndex === 1 && styles.subTextActive]}>
-                  المختبر
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => setSubTabIndex(2)}
-                style={[styles.subTabItem, subTabIndex === 2 && styles.subTabActive]}
-              >
-                <Text style={[styles.subTabText, subTabIndex === 2 && styles.subTextActive]}>
-                  الأشعة
-                </Text>
-              </TouchableOpacity>
+              {[t.medications.title, 'المختبر', 'الأشعة'].map((label, i) => (
+                <TouchableOpacity
+                  key={i}
+                  onPress={() => setSubTabIndex(i)}
+                  style={[styles.subTabItem, subTabIndex === i && styles.subTabActive]}
+                >
+                  <Text style={[styles.subTabText, subTabIndex === i && styles.subTextActive]}>
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
@@ -749,82 +693,44 @@ const PatientProfile = ({ navigation }) => {
                 <View>
                   <Text style={styles.sectionHeading}>{t.medications.title}</Text>
 
-                  {prescriptions.length > 0 ? prescriptions.map((item, idx) => (
-                    <View key={idx} style={styles.prescriptionCard}>
-                      <View style={styles.prescriptionHeader}>
-                        <View style={{ alignItems: "flex-end" }}>
-                          <Text style={styles.prescriptionDoctor}>
-                            د. {item.doctor?.full_name}
-                          </Text>
+                  {/* قائمة الوصفات أو رسالة فارغة */}
+                  {prescriptions.length > 0 ? prescriptions.map((item, idx) => {
+                    const isDispensed = item.dispense_status === "DISPENSED";
+                    return (
+                      <View key={idx} style={styles.prescriptionCard}>
+                        {/* هيدر الوصفة: اسم الدكتور + التاريخ + حالة الصرف */}
+                        <View style={styles.prescriptionHeader}>
+                          <View style={{ alignItems: "flex-end" }}>
+                            <Text style={styles.prescriptionDoctor}>د. {item.doctor?.full_name}</Text>
+                            <View style={[styles.statusBadge, { backgroundColor: isDispensed ? "#dcfce7" : "#fee2e2" }]}>
+                              <Text style={[styles.statusText, { color: isDispensed ? "#166534" : "#991b1b" }]}>
+                                {isDispensed ? t.patientProfile.status.completed : t.patientProfile.status.pending}
+                              </Text>
+                            </View>
+                          </View>
+                          <Text style={styles.prescriptionDate}>{formatDate(item.date_prescribed)}</Text>
+                        </View>
 
+                        <Divider style={{ marginVertical: 10 }} />
+
+                        {/* قائمة الأدوية */}
+                        {item.details?.map((drug, dIdx) => (
                           <View
-                            style={[
-                              styles.statusBadge,
-                              {
-                                backgroundColor:
-                                  item.dispense_status === "DISPENSED" ? "#dcfce7" : "#fee2e2",
-                              },
-                            ]}
+                            key={dIdx}
+                            style={[styles.drugItem, { borderRightWidth: 4, borderRightColor: drug.is_active ? "#059669" : "#94a3b8" }]}
                           >
-                            <Text
-                              style={[
-                                styles.statusText,
-                                {
-                                  color:
-                                    item.dispense_status === "DISPENSED" ? "#166534" : "#991b1b",
-                                },
-                              ]}
-                            >
-                              {item.dispense_status === "DISPENSED" ? t.patientProfile.status.completed : t.patientProfile.status.pending}
-                            </Text>
+                            <View style={styles.drugNameRow}>
+                              <Icon name="pill" type="material-community" size={20} color={drug.is_active ? "#204a42" : "#94a3b8"} />
+                              <Text style={[styles.drugName, { color: drug.is_active ? "#204a42" : "#94a3b8" }]}>
+                                {drug.drug_name}
+                              </Text>
+                            </View>
+                            <Text style={styles.drugInstructions}>{drug.instructions}</Text>
                           </View>
-                        </View>
-
-                        <Text style={styles.prescriptionDate}>
-                          {formatDate(item.date_prescribed)}
-                        </Text>
+                        ))}
                       </View>
-
-                      <Divider style={{ marginVertical: 10 }} />
-
-                      {item.details?.map((drug, dIdx) => (
-                        <View
-                          key={dIdx}
-                          style={[
-                            styles.drugItem,
-                            {
-                              borderRightWidth: 4,
-                              borderRightColor: drug.is_active ? "#059669" : "#94a3b8",
-                            },
-                          ]}
-                        >
-                          <View style={styles.drugNameRow}>
-                            <Icon
-                              name="pill"
-                              type="material-community"
-                              size={20}
-                              color={drug.is_active ? "#204a42" : "#94a3b8"}
-                            />
-                            <Text
-                              style={[
-                                styles.drugName,
-                                { color: drug.is_active ? "#204a42" : "#94a3b8" },
-                              ]}
-                            >
-                              {drug.drug_name}
-                            </Text>
-                          </View>
-
-                          <Text style={styles.drugInstructions}>{drug.instructions}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  )) : (
-                    <View style={styles.emptyState}>
-                      <Icon name="pill-off" type="material-community" size={60} color="#cbd5e1" />
-                      <Text style={styles.emptyText}>{t.medications.noMeds}</Text>
-                    </View>
-                  )}
+                    );
+                  }) : <EmptyBox icon="pill-off" text={t.medications.noMeds} />}
                 </View>
               )}
 
@@ -842,12 +748,7 @@ const PatientProfile = ({ navigation }) => {
                     hasFile={!!(test.test_id || test.id)}
                     typeIcon="test-tube"
                   />
-                )) : (
-                  <View style={styles.emptyState}>
-                    <Icon name="test-tube-off" type="material-community" size={60} color="#cbd5e1" />
-                    <Text style={styles.emptyText}>{t.medications.noLabTests || 'لا توجد فحوصات مختبرية'}</Text>
-                  </View>
-                )
+                )) : <EmptyBox icon="test-tube-off" text={t.medications.noLabTests || 'لا توجد فحوصات مختبرية'} />
               )}
 
               {subTabIndex === 2 && (
@@ -864,12 +765,7 @@ const PatientProfile = ({ navigation }) => {
                     hasFile={!!(rad.image_id || rad.id)}
                     typeIcon="file-image-outline"
                   />
-                )) : (
-                  <View style={styles.emptyState}>
-                    <Icon name="radiology-box-outline" type="material-community" size={60} color="#cbd5e1" />
-                    <Text style={styles.emptyText}>{t.medications.noRadiology || 'لا توجد صور أشعة'}</Text>
-                  </View>
-                )
+                )) : <EmptyBox icon="radiology-box-outline" text={t.medications.noRadiology || 'لا توجد صور أشعة'} />
               )}
             </ScrollView>
           </View>
@@ -893,23 +789,32 @@ const PatientProfile = ({ navigation }) => {
                 {t.appointments?.completedTitle || 'سجل المواعيد المكتملة'}
               </Text>
 
-              {myAppointments.filter(a => a.status === 'COMPLETED').length > 0 ? (
-                myAppointments.filter(a => a.status === 'COMPLETED').map((appt, index) => (
+              {/* قائمة المواعيد المكتملة */}
+              {(() => {
+                const completed = myAppointments.filter(a => a.status === 'COMPLETED');
+                if (completed.length === 0) {
+                  return (
+                    <View style={styles.emptyApptBox}>
+                      <Icon name="clipboard-check-outline" type="material-community" size={40} color="#cbd5e1" />
+                      <Text style={styles.emptyText}>{t.appointments?.noCompleted || 'لا توجد مواعيد مكتملة'}</Text>
+                    </View>
+                  );
+                }
+                return completed.map((appt, index) => (
                   <TouchableOpacity
                     key={appt.appointment_id || index}
                     style={styles.completedApptCard}
                     activeOpacity={0.7}
                     onPress={() => navigation.navigate('ConsultationDetails', { consultation: appt })}
                   >
+                    {/* معلومات الدكتور والنوع */}
                     <View style={styles.completedApptHeader}>
                       <View style={styles.completedApptDocRow}>
                         <View style={styles.completedApptAvatar}>
                           <Icon name="stethoscope" type="material-community" size={20} color="#059669" />
                         </View>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.completedApptDocName}>
-                            د. {appt.doctor?.full_name || '—'}
-                          </Text>
+                          <Text style={styles.completedApptDocName}>د. {appt.doctor?.full_name || '—'}</Text>
                           <Text style={styles.completedApptType}>
                             {appt.appointment_type === 'CLINIC_REVIEW' ? (t.appointments.clinicReview || 'مراجعة عيادة') : appt.appointment_type}
                           </Text>
@@ -921,6 +826,7 @@ const PatientProfile = ({ navigation }) => {
                       </View>
                     </View>
 
+                    {/* التاريخ والوقت */}
                     <View style={styles.completedApptDateRow}>
                       <View style={styles.completedApptDateItem}>
                         <Icon name="calendar" type="material-community" size={15} color="#64748b" />
@@ -932,18 +838,14 @@ const PatientProfile = ({ navigation }) => {
                       </View>
                     </View>
 
+                    {/* رابط عرض التفاصيل */}
                     <View style={styles.cardFooter}>
                       <Text style={styles.viewDetailsText}>عرض التفاصيل الكاملة</Text>
                       <Icon name="chevron-left" type="material-community" size={18} color="#059669" />
                     </View>
                   </TouchableOpacity>
-                ))
-              ) : (
-                <View style={styles.emptyApptBox}>
-                  <Icon name="clipboard-check-outline" type="material-community" size={40} color="#cbd5e1" />
-                  <Text style={styles.emptyText}>{t.appointments?.noCompleted || 'لا توجد مواعيد مكتملة'}</Text>
-                </View>
-              )}
+                ));
+              })()}
             </View>
           </ScrollView>
         </TabView.Item>
