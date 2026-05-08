@@ -7,6 +7,10 @@ import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import {
+  buildLocalSessionDatePayload,
+  buildLocalTimePayload,
+} from "../../utils/sessionTime";
 
 const NurseTasks = ({ route, navigation }) => {
   const { patientId, patientName } = route.params || {};
@@ -51,7 +55,7 @@ const NurseTasks = ({ route, navigation }) => {
     const sessionData = {
       bpBefore,
       scheduleId: Number(scheduleId),
-      startTime: new Date().toISOString(),
+      startTime: buildLocalTimePayload(),
     };
 
     try {
@@ -61,12 +65,6 @@ const NurseTasks = ({ route, navigation }) => {
     } catch (e) {
       Alert.alert("خطأ", "فشل حفظ البيانات محلياً");
     }
-  };
-
-  // دالة لتحويل وقت JavaScript إلى ISO format
-  const timeToISOFormat = (date) => {
-    const isoString = date.toISOString();
-    return isoString; // يعيد الصيغة الكاملة مثل "2026-05-08T12:34:56.000Z"
   };
 
   const handleFinalSubmit = async () => {
@@ -81,15 +79,12 @@ const NurseTasks = ({ route, navigation }) => {
       const savedSession = await AsyncStorage.getItem(`active_session_${patientId}`);
       const localData = JSON.parse(savedSession);
 
-      // الحصول على الوقت الحالي بصيغة ISO صحيحة
-      const currentEndTime = new Date();
-
       const finalPayload = {
         patientId: Number(patientId),
         scheduleId: Number(localData.scheduleId || scheduleId),
-        date: new Date().toISOString().split('T')[0],
+        date: buildLocalSessionDatePayload(),
         startTime: startTime,
-        endTime: timeToISOFormat(currentEndTime),
+        endTime: buildLocalTimePayload(),
         weightBefore: 0,
         weightAfter: Number(weightAfter),
         bloodPressureBefore: bpBefore,

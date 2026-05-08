@@ -8,6 +8,10 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../services/api";
+import {
+  buildLocalSessionDatePayload,
+  buildLocalTimePayload,
+} from "../../utils/sessionTime";
 
 const PatientState = ({ route }) => {
   const navigation = useNavigation();
@@ -121,17 +125,13 @@ const PatientState = ({ route }) => {
       setIsSavingSession(true);
       const now = new Date();
 
-      const todayISO = new Date(
-        Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
-      ).toISOString();
-
       const createRes = await api.post(
         "/dialysis-sessions",
         {
           patientId: pendingPatient.patientId,
           scheduleId: pendingPatient.scheduleId,
-          date: todayISO,
-          startTime: now.toISOString(),
+          date: buildLocalSessionDatePayload(now),
+          startTime: buildLocalTimePayload(now),
           status: "PENDING",
           weightBefore: num,
           fluidRemoved: 0,
@@ -151,7 +151,10 @@ const PatientState = ({ route }) => {
         navigation.navigate("SessionDetails", { patient: updatedPatient });
       } else {
         // Fallback في حال لم يجده
-        const fallbackId = createRes.data?.sessionId || createRes.data?.id;
+        const fallbackId =
+          createRes.data?.session_id ||
+          createRes.data?.sessionId ||
+          createRes.data?.id;
         navigation.navigate("SessionDetails", {
           patient: { ...pendingPatient, sessionId: fallbackId, sessionStatus: 'PENDING' }
         });

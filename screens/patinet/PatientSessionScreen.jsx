@@ -94,7 +94,15 @@ const PatientSessionScreen = ({ route, navigation }) => {
     }
 
     // حساب الوقت المنقضي من وقت بداية الجلسة
-    const base = startTime ? Math.floor((Date.now() - new Date(startTime).getTime()) / 1000) : 0;
+    const startTimestamp =
+      startTime && !Number.isNaN(new Date(startTime).getTime())
+        ? new Date(startTime).getTime()
+        : sessionData?.created_at
+          ? new Date(sessionData.created_at).getTime()
+          : null;
+    const base = startTimestamp
+      ? Math.floor((Date.now() - startTimestamp) / 1000)
+      : 0;
     setElapsed(Math.max(0, base));
 
     timerRef.current = setInterval(() => {
@@ -102,7 +110,7 @@ const PatientSessionScreen = ({ route, navigation }) => {
     }, 1000);
 
     return () => clearInterval(timerRef.current);
-  }, [phase, startTime]);
+  }, [phase, sessionData?.created_at, startTime]);
 
   // ── تنبيه الوزن بعد ساعتين ────────────────────────────────────────────────
   useEffect(() => {

@@ -12,6 +12,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
 import SessionTimer from '../../components/SessionTimer';
+import { buildLocalTimePayload } from '../../utils/sessionTime';
 
 const SessionDetails = ({ route, navigation }) => {
   const { patient } = route.params;
@@ -100,7 +101,11 @@ const SessionDetails = ({ route, navigation }) => {
       setIsFinishing(true);
       await api.patch(
         `/dialysis-sessions/${sessionId}/status`,
-        { status: "COMPLETED", weightAfter: num }
+        {
+          status: "COMPLETED",
+          weightAfter: num,
+          endTime: buildLocalTimePayload(),
+        }
       );
       await AsyncStorage.removeItem(`step_${sessionId}`);
       await SessionTimer.clearTimer(sessionId);
@@ -121,7 +126,10 @@ const SessionDetails = ({ route, navigation }) => {
       setIsFinishing(true);
       await api.patch(
         `/dialysis-sessions/${sessionId}/status`,
-        { status: "COMPLETED" }
+        {
+          status: "COMPLETED",
+          endTime: buildLocalTimePayload(),
+        }
       );
       // مسح الخطوة والتايمر لأن الجلسة انتهت
       await AsyncStorage.removeItem(`step_${sessionId}`);

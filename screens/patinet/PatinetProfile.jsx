@@ -590,7 +590,7 @@ const PatientProfile = ({ navigation }) => {
                       navigation.navigate("PatientSessionScreen", {
                         sessionId: session.session_id || session.id,
                         patientName: patient?.full_name,
-                        startTime: session.start_time,
+                        startTime: session.created_at || session.start_time,
                       });
                     } else {
                       // التحقق من وجود patient_id قبل الانتقال
