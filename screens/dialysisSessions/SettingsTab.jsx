@@ -25,7 +25,7 @@ const SettingsTab = ({ route }) => {
   const FIELDS = [
     { key: 'bloodFlowRate', label: t.deviceSettings.fields.bloodFlow, placeholder: '200', unit: 'ml/min', icon: 'water-pump', color: '#ef4444', hint: 'Blood Flow Rate — BFR' },
     { key: 'dialysateFlow', label: t.deviceSettings.fields.dialysateFlow, placeholder: '500', unit: 'ml/min', icon: 'beaker-outline', color: '#3b82f6', hint: 'Dialysate Flow — DF' },
-    { key: 'ultrafiltrationRate', label: 'كمية السوائل المسحوبة', placeholder: 'مثال: 2.5', unit: 'لتر/مل', icon: 'water-percent', color: '#0ea5e9', hint: 'Fluid Removed / Ultrafiltration' },
+    { key: 'ultrafiltrationRate', label: 'السوائل المسحوبة', placeholder: 'مثال: 2.5', unit: 'لتر/مل', icon: 'water-percent', color: '#0ea5e9', hint: 'Fluid Removed / Ultrafiltration' },
   ];
   const sessionId = route?.params?.sessionId;
 
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   valueItem: { alignItems: 'center', gap: 5, flex: 1 },
   valueBig: { fontSize: 24, fontWeight: '900' },
   valueUnit: { fontSize: 10, color: '#475569', fontWeight: '700' },
-  valueLabel: { fontSize: 11, color: '#64748b', fontWeight: '600' },
+  valueLabel: { fontSize: 11, color: '#64748b', fontWeight: '600', textAlign: 'center' },
   emptyCard: { backgroundColor: '#fff', borderRadius: 16, padding: 30, alignItems: 'center', marginBottom: 16, gap: 6, borderWidth: 1.5, borderColor: '#e5e7eb', borderStyle: 'dashed' },
   emptyText: { fontSize: 15, color: '#6b7280', fontWeight: '700' },
   emptySub: { fontSize: 12, color: '#9ca3af' },

@@ -46,16 +46,22 @@ const LoginScreen = ({ navigation }) => {
       try {
         const deviceToken = await AsyncStorage.getItem("deviceToken");
         if (deviceToken) {
-          await api.post('/notifications/register-device', {
-            deviceToken: deviceToken,
-            deviceName: 'medikidney-mobile',
-          }, {
-            headers: { Authorization: `Bearer ${data.access_token}` }
-          });
-          console.log("✅ Device token registered after login");
+          try {
+            await api.post('/notifications/register-device', {
+              deviceToken: deviceToken,
+              deviceName: 'medikidney-mobile',
+            }, {
+              headers: { Authorization: `Bearer ${data.access_token}` }
+            });
+            console.log("✅ Device token registered after login");
+          } catch (tokenErr) {
+            // لا نوقف التطبيق إذا فشل تسجيل device token - فقط نسجل التحذير
+            console.warn("⚠️ تنبيه: لم يتمكن من تسجيل device token:", tokenErr?.message);
+            // التطبيق سيستمر بدون مشكلة
+          }
         }
-      } catch (tokenErr) {
-        console.log("⚠️ Could not register device token after login:", tokenErr);
+      } catch (storageErr) {
+        console.warn("⚠️ خطأ في قراءة device token:", storageErr);
       }
 
       const userRole = data.user.role;

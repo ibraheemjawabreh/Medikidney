@@ -10,13 +10,19 @@ import api from "../../services/api";
 import { formatSessionTime } from "../../utils/sessionTime";
 
 const ShowSessions = ({ route }) => {
-  const { sessionId } = route.params;
+  const params = route?.params || {};
+  const sessionId = params.sessionId || params.id;
   const [sessionDetails, setSessionDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchSessionDetails = async () => {
     try {
       setLoading(true);
+      if (!sessionId) {
+        console.log('⚠️ لا يوجد معرّف جلسة');
+        setSessionDetails(null);
+        return;
+      }
       const response = await api.get(`/dialysis-sessions/${sessionId}`);
       setSessionDetails(response.data);
     } catch (error) {
@@ -31,7 +37,11 @@ const ShowSessions = ({ route }) => {
   };
 
   useEffect(() => {
-    fetchSessionDetails();
+    if (sessionId) {
+      fetchSessionDetails();
+    } else {
+      setLoading(false);
+    }
   }, [sessionId]);
 
   if (loading) {

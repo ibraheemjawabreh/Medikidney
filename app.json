@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/project-logo.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.majed.medikidney",

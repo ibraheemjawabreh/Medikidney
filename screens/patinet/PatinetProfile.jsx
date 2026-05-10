@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -43,10 +43,16 @@ const getFluidRemoved = (session) => {
   return '—';
 };
 
-const PatientProfile = ({ navigation }) => {
+const PatientProfile = ({ navigation, route }) => {
   const { t } = useLanguage();
-  const [tabIndex, setTabIndex] = useState(0);
-  const [subTabIndex, setSubTabIndex] = useState(0);
+  
+  // استقبل الـ initialTab و initialSubTab من الإشعار
+  const params = route?.params || {};
+  const initialTab = params.initialTab !== undefined ? params.initialTab : 0;
+  const initialSubTab = params.initialSubTab !== undefined ? params.initialSubTab : 0;
+  
+  const [tabIndex, setTabIndex] = useState(initialTab);
+  const [subTabIndex, setSubTabIndex] = useState(initialSubTab);
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [nutritionPlan, setNutritionPlan] = useState(null);
@@ -128,6 +134,18 @@ const PatientProfile = ({ navigation }) => {
   }, [sessions]);
 
   useFocusEffect(useCallback(() => { fetchPatientData(); }, [fetchPatientData]));
+
+  // استقبل تحديثات الـ tabs من الإشعار
+  useEffect(() => {
+    const newParams = route?.params || {};
+    if (newParams.initialTab !== undefined) {
+      setTabIndex(newParams.initialTab);
+    }
+    if (newParams.initialSubTab !== undefined) {
+      setSubTabIndex(newParams.initialSubTab);
+    }
+    console.log('🔔 تم استقبال إشعار:', { initialTab: newParams.initialTab, initialSubTab: newParams.initialSubTab });
+  }, [route?.params]);
 
   const fetchMyAppointments = async () => {
     try {
