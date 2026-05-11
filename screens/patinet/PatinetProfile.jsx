@@ -20,6 +20,7 @@ import api from "../../services/api";
 import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLanguage } from '../../context/LanguageContext';
+import { useNotificationContext } from '../../context/NotificationContext';
 
 const { width } = Dimensions.get("window");
 
@@ -45,6 +46,7 @@ const getFluidRemoved = (session) => {
 
 const PatientProfile = ({ navigation, route }) => {
   const { t } = useLanguage();
+  const { unreadCount, updateUnreadCount } = useNotificationContext();
   
   // استقبل الـ initialTab و initialSubTab من الإشعار
   const params = route?.params || {};
@@ -85,6 +87,7 @@ const PatientProfile = ({ navigation, route }) => {
           fetchMedicalTests(pId),
           fetchRadiology(pId),
           fetchMyAppointments(),
+          fetchUnreadCount(),
         ]);
       }
     } catch (error) {
@@ -133,7 +136,11 @@ const PatientProfile = ({ navigation, route }) => {
     return count > 0 ? (totalUF / count).toFixed(2) : null;
   }, [sessions]);
 
-  useFocusEffect(useCallback(() => { fetchPatientData(); }, [fetchPatientData]));
+  useFocusEffect(useCallback(() => { 
+    fetchPatientData();
+    // جلب عدد الإشعارات غير المقروءة عند العودة للصفحة
+    fetchUnreadCount();
+  }, [fetchPatientData]));
 
   // استقبل تحديثات الـ tabs من الإشعار
   useEffect(() => {
@@ -154,6 +161,17 @@ const PatientProfile = ({ navigation, route }) => {
       setMyAppointments(activeAppts);
     } catch (e) {
       setMyAppointments([]);
+    }
+  };
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await api.get('/notifications/unread-count');
+      const count = response.data.unreadCount || 0;
+      updateUnreadCount(count);
+    } catch (error) {
+      console.error('Fetch unread count error:', error);
+      updateUnreadCount(0);
     }
   };
 
@@ -476,7 +494,20 @@ const PatientProfile = ({ navigation, route }) => {
         <View style={styles.headerCircleTwo} />
 
         <View style={styles.topBar}>
-          <View />
+          <TouchableOpacity
+            style={styles.glassIconButton}
+            onPress={() => navigation.navigate("Notifications")}
+            activeOpacity={0.85}
+          >
+            <MaterialCommunityIcons name="bell" size={26} color="#fff" />
+            {unreadCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationBadgeText}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.glassIconButton}
@@ -1683,6 +1714,30 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#26CDD6',
     fontWeight: '700',
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#DE1A1C',
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  notificationBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '900',
+    textAlign: 'center',
   },
 });
 

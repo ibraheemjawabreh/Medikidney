@@ -43,28 +43,32 @@ const LoginScreen = ({ navigation }) => {
         await AsyncStorage.setItem("userId", String(data.user.userId));
       }
 
-      try {
-        const deviceToken = await AsyncStorage.getItem("deviceToken");
-        if (deviceToken) {
-          try {
-            await api.post('/notifications/register-device', {
-              deviceToken: deviceToken,
-              deviceName: 'medikidney-mobile',
-            }, {
-              headers: { Authorization: `Bearer ${data.access_token}` }
-            });
-            console.log("✅ Device token registered after login");
-          } catch (tokenErr) {
-            // لا نوقف التطبيق إذا فشل تسجيل device token - فقط نسجل التحذير
-            console.warn("⚠️ تنبيه: لم يتمكن من تسجيل device token:", tokenErr?.message);
-            // التطبيق سيستمر بدون مشكلة
+      const userRole = data.user.role;
+      
+      // Register device token only for PATIENTS
+      if (userRole === "PATIENT") {
+        try {
+          const deviceToken = await AsyncStorage.getItem("deviceToken");
+          if (deviceToken) {
+            try {
+              await api.post('/notifications/register-device', {
+                deviceToken: deviceToken,
+                deviceName: 'medikidney-mobile',
+              }, {
+                headers: { Authorization: `Bearer ${data.access_token}` }
+              });
+              console.log("✅ Device token registered after login");
+            } catch (tokenErr) {
+              // لا نوقف التطبيق إذا فشل تسجيل device token - فقط نسجل التحذير
+              console.warn("⚠️ تنبيه: لم يتمكن من تسجيل device token:", tokenErr?.message);
+              // التطبيق سيستمر بدون مشكلة
+            }
           }
+        } catch (storageErr) {
+          console.warn("⚠️ خطأ في قراءة device token:", storageErr);
         }
-      } catch (storageErr) {
-        console.warn("⚠️ خطأ في قراءة device token:", storageErr);
       }
 
-      const userRole = data.user.role;
       if (userRole === "PATIENT") navigation.replace("PatinetPages");
       else if (userRole === "NURSE") navigation.replace("NurseHome");
       else if (userRole === "NUTRITIONIST") navigation.replace("NutritionistHome");

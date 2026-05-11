@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import api from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import { useNotificationContext } from '../context/NotificationContext';
 
 // اضبط سلوك الإشعار - يظهر حتى لو التطبيق مفتوح
 Notifications.setNotificationHandler({
@@ -14,6 +15,7 @@ Notifications.setNotificationHandler({
 });
 
 export const useNotifications = (navigation) => {
+  const { updateUnreadCount } = useNotificationContext();
   const notificationListener = useRef();
   const responseListener = useRef();
 
@@ -43,6 +45,7 @@ export const useNotifications = (navigation) => {
           body: notification.request.content.body,
           data: notification.request.content.data,
         });
+        syncUnreadCount();
       });
 
     // استمع لنقر المستخدم على الإشعار
@@ -61,7 +64,16 @@ export const useNotifications = (navigation) => {
       if (notificationListener.current) notificationListener.current.remove();
       if (responseListener.current) responseListener.current.remove();
     };
-  }, [navigation]);
+  }, [navigation, updateUnreadCount]);
+
+  const syncUnreadCount = async () => {
+    try {
+      const response = await api.get('/notifications/unread-count');
+      updateUnreadCount(response.data?.unreadCount || 0);
+    } catch (error) {
+      console.warn('Unable to sync unread notification count:', error?.message);
+    }
+  };
 
   const requestAndStoreDeviceToken = async () => {
     try {
@@ -81,7 +93,7 @@ export const useNotifications = (navigation) => {
       // احصل على الـ Expo Push token
       const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
       const deviceToken = await Notifications.getExpoPushTokenAsync({
-        projectId: projectId || '9c15bffd-9306-4543-9140-8af9d629a22c'
+        projectId: projectId || 'db1d55b0-3193-4b75-b568-cc57c3faea0c'
       });
       console.log('✅ Expo Push Token:', deviceToken.data);
 

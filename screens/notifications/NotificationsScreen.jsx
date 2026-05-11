@@ -9,27 +9,52 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Card, Button, Divider } from '@rneui/themed';
+import { Card } from '@rneui/themed';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import * as Haptics from 'expo-haptics';
 import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
+import { useNotificationContext } from '../../context/NotificationContext';
 
 const NotificationsScreen = () => {
   const { t } = useLanguage();
+  const { resetUnreadCount } = useNotificationContext();
+  const navigation = useNavigation();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    fetchNotifications();
-    fetchUnreadCount();
+    const initPage = async () => {
+      await fetchNotifications();
+      
+      // Clear only the unread counters when the list is opened. Keep the list items visible.
+      try {
+        await api.patch('/notifications/mark-all-read');
+        setUnreadCount(0);
+        resetUnreadCount();
+      } catch (error) {
+        console.error('Error clearing badge on entry:', error);
+      }
+    };
+    
+    initPage();
   }, []);
+
+
 
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/notifications/unread');
+      // Fetch all notifications (or fallback to unread if /notifications is not supported)
+      let response;
+      try {
+        response = await api.get('/notifications');
+      } catch (err) {
+        response = await api.get('/notifications/unread');
+      }
       setNotifications(response.data || []);
     } catch (error) {
       console.error('Fetch notifications error:', error);
@@ -58,10 +83,8 @@ const NotificationsScreen = () => {
   const handleMarkAsRead = async (notificationId) => {
     try {
       await api.patch(`/notifications/${notificationId}/read`);
-      setNotifications((prev) =>
-        prev.filter((n) => n.notification_id !== notificationId)
-      );
-      await fetchUnreadCount();
+      setUnreadCount(0);
+      resetUnreadCount();
     } catch (error) {
       console.error('Update notification error:', error);
       Alert.alert(t.error, t.notifications.updateError);
@@ -71,8 +94,8 @@ const NotificationsScreen = () => {
   const handleMarkAllAsRead = async () => {
     try {
       await api.patch('/notifications/mark-all-read');
-      setNotifications([]);
-      await fetchUnreadCount();
+      setUnreadCount(0);
+      resetUnreadCount();
       Alert.alert(t.success, t.notifications.markAllSuccess);
     } catch (error) {
       console.error('Mark all error:', error);
@@ -93,6 +116,106 @@ const NotificationsScreen = () => {
     }
   };
 
+  const handleNotificationTap = async (notification) => {
+    const notificationType = notification.notification_type;
+    const relatedId = notification.related_id;
+
+    console.log('🔔 معالجة الإشعار:', { notificationType, relatedId });
+
+    // تشغيل haptic feedback
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (err) {
+      // لا نوقف العملية إذا فشل Haptics
+    }
+
+    // Remove only the notification the patient opened.
+    try {
+      await api.patch(`/notifications/${notification.notification_id}/delete`);
+      setNotifications((prev) =>
+        prev.filter((n) => n.notification_id !== notification.notification_id)
+      );
+    } catch (err) {
+      console.error('Error deleting opened notification:', err);
+      try {
+        await api.patch(`/notifications/${notification.notification_id}/read`);
+        setNotifications((prev) =>
+          prev.filter((n) => n.notification_id !== notification.notification_id)
+        );
+      } catch (fallbackErr) {
+        console.error('Error marking opened notification as read:', fallbackErr);
+      }
+    }
+
+    // ثم انتقل للمكان المناسب
+    switch (notificationType) {
+      case 'TEST_RESULT':
+      case 'LAB_TEST':
+      case 'TEST':
+        console.log('➡️ الانتقال لنتائج الفحوصات - Test ID:', relatedId);
+        navigation.navigate('PatientProfile', {
+          initialTab: 2,  // Tests tab
+          initialSubTab: 1,  // Lab Tests subtab
+          testId: relatedId
+        });
+        break;
+
+      case 'RADIOLOGY':
+      case 'IMAGING':
+        console.log('➡️ الانتقال للأشعات - Image ID:', relatedId);
+        navigation.navigate('PatientProfile', {
+          initialTab: 2,  // Tests tab
+          initialSubTab: 2,  // Radiology subtab
+          radiologyId: relatedId
+        });
+        break;
+
+      case 'PRESCRIPTION':
+      case 'MEDICATION':
+        console.log('➡️ الانتقال للأدوية - Prescription ID:', relatedId);
+        navigation.navigate('PatientProfile', {
+          initialTab: 2,  // Tests tab
+          initialSubTab: 0,  // Prescriptions subtab
+          prescriptionId: relatedId
+        });
+        break;
+
+      case 'SESSION_NO_WEIGHT':
+        console.log('➡️ الانتقال لإدخال الوزن - Session ID:', relatedId);
+        navigation.navigate('WeightInput', { sessionId: relatedId });
+        break;
+
+      case 'APPOINTMENT':
+      case 'SCHEDULE':
+        console.log('➡️ الانتقال للمواعيد - Appointment ID:', relatedId);
+        navigation.navigate('PatientProfile', {
+          initialTab: 3,  // Appointments tab
+          appointmentId: relatedId
+        });
+        break;
+
+      case 'MESSAGE':
+      case 'CONSULTATION':
+        console.log('➡️ الانتقال للاستشارات - Consultation ID:', relatedId);
+        navigation.navigate('ConsultationDetails', { consultationId: relatedId });
+        break;
+
+      case 'SESSION':
+      case 'DIALYSIS_SESSION':
+        console.log('➡️ الانتقال لتفاصيل الجلسة - Session ID:', relatedId);
+        navigation.navigate('PatientProfile', {
+          initialTab: 1,  // Sessions tab
+          sessionId: relatedId
+        });
+        break;
+
+      default:
+        console.log('📣 إشعار عام:', notificationType);
+        // تم بالفعل وضع علامة "تمت قراءته"
+        break;
+    }
+  };
+
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'TEST_RESULT':
@@ -109,47 +232,32 @@ const NotificationsScreen = () => {
   };
 
   const renderNotification = ({ item }) => (
-    <Card containerStyle={styles.card}>
-      <View style={styles.notificationContent}>
-        <View style={styles.headerRow}>
-          <Text style={styles.icon}>{getNotificationIcon(item.notification_type)}</Text>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.date}>
-              {new Date(item.created_at).toLocaleDateString(t.vitalSigns.now === 'الآن' ? 'ar-SA' : 'en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </Text>
+    <TouchableOpacity 
+      activeOpacity={0.85}
+      onPress={() => handleNotificationTap(item)}
+    >
+      <Card containerStyle={styles.card}>
+        <View style={styles.notificationContent}>
+          <View style={styles.headerRow}>
+            <Text style={styles.icon}>{getNotificationIcon(item.notification_type)}</Text>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.date}>
+                {new Date(item.created_at).toLocaleDateString(t.vitalSigns.now === 'الآن' ? 'ar-SA' : 'en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </Text>
+            </View>
           </View>
+
+          <Text style={styles.message}>{item.message}</Text>
         </View>
-
-        <Text style={styles.message}>{item.message}</Text>
-
-        <Divider style={styles.divider} />
-
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            onPress={() => handleMarkAsRead(item.notification_id)}
-            style={styles.readButton}
-          >
-            <MaterialIcons name="done-all" size={20} color="#193B6B" />
-            <Text style={styles.readButtonText}>{t.notifications.read}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => handleDeleteNotification(item.notification_id)}
-            style={styles.deleteButton}
-          >
-            <MaterialIcons name="delete" size={20} color="#DE1A1C" />
-            <Text style={styles.deleteButtonText}>{t.notifications.delete}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Card>
+      </Card>
+    </TouchableOpacity>
   );
 
   if (loading) {
@@ -165,11 +273,17 @@ const NotificationsScreen = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <MaterialIcons name={t.vitalSigns.now === 'الآن' ? "chevron-right" : "chevron-left"} size={28} color="#193B6B" />
+        </TouchableOpacity>
         <View>
           <Text style={styles.headerTitle}>{t.notifications.title}</Text>
           {unreadCount > 0 && (
             <Text style={styles.unreadText}>
-              {unreadCount} {unreadCount === 1 ? t.notifications.newNotification : t.notifications.newNotifications}
+              {unreadCount} {unreadCount === 1 ? t.notifications.newSingular : t.notifications.newPlural}
             </Text>
           )}
         </View>
@@ -186,9 +300,9 @@ const NotificationsScreen = () => {
       {notifications.length === 0 ? (
         <View style={styles.emptyContainer}>
           <MaterialIcons name="notifications-none" size={60} color="#ccc" />
-          <Text style={styles.emptyText}>{t.notifications.noNotifications}</Text>
+          <Text style={styles.emptyText}>{t.notifications.empty}</Text>
           <Text style={styles.emptySubText}>
-            {t.notifications.emptySubtext}
+            {t.notifications.emptySub}
           </Text>
         </View>
       ) : (
