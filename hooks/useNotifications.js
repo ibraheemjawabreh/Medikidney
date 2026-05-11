@@ -4,6 +4,7 @@ import api from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { useNotificationContext } from '../context/NotificationContext';
+import { getVisibleUnreadCount } from '../utils/notificationBadge';
 
 // اضبط سلوك الإشعار - يظهر حتى لو التطبيق مفتوح
 Notifications.setNotificationHandler({
@@ -68,8 +69,8 @@ export const useNotifications = (navigation) => {
 
   const syncUnreadCount = async () => {
     try {
-      const response = await api.get('/notifications/unread-count');
-      updateUnreadCount(response.data?.unreadCount || 0);
+      const count = await getVisibleUnreadCount(api);
+      updateUnreadCount(count);
     } catch (error) {
       console.warn('Unable to sync unread notification count:', error?.message);
     }

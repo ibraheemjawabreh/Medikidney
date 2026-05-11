@@ -21,6 +21,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLanguage } from '../../context/LanguageContext';
 import { useNotificationContext } from '../../context/NotificationContext';
+import { getVisibleUnreadCount } from '../../utils/notificationBadge';
 
 const { width } = Dimensions.get("window");
 
@@ -166,8 +167,7 @@ const PatientProfile = ({ navigation, route }) => {
 
   const fetchUnreadCount = async () => {
     try {
-      const response = await api.get('/notifications/unread-count');
-      const count = response.data.unreadCount || 0;
+      const count = await getVisibleUnreadCount(api);
       updateUnreadCount(count);
     } catch (error) {
       console.error('Fetch unread count error:', error);

@@ -16,6 +16,7 @@ import * as Haptics from 'expo-haptics';
 import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
 import { useNotificationContext } from '../../context/NotificationContext';
+import { markNotificationsSeen } from '../../utils/notificationBadge';
 
 const NotificationsScreen = () => {
   const { t } = useLanguage();
@@ -29,10 +30,9 @@ const NotificationsScreen = () => {
   useEffect(() => {
     const initPage = async () => {
       await fetchNotifications();
-      
-      // Clear only the unread counters when the list is opened. Keep the list items visible.
+      await fetchUnreadCount();
       try {
-        await api.patch('/notifications/mark-all-read');
+        await markNotificationsSeen();
         setUnreadCount(0);
         resetUnreadCount();
       } catch (error) {
@@ -44,6 +44,16 @@ const NotificationsScreen = () => {
   }, []);
 
 
+
+  const fetchUnreadCount = async () => {
+    try {
+      const { getVisibleUnreadCount } = require('../../utils/notificationBadge');
+      const count = await getVisibleUnreadCount(api);
+      setUnreadCount(count);
+    } catch (error) {
+      setUnreadCount(0);
+    }
+  };
 
   const fetchNotifications = async () => {
     try {
@@ -64,57 +74,14 @@ const NotificationsScreen = () => {
     }
   };
 
-  const fetchUnreadCount = async () => {
-    try {
-      const response = await api.get('/notifications/unread-count');
-      setUnreadCount(response.data.unreadCount || 0);
-    } catch (error) {
-      console.error('Fetch unread count error:', error);
-    }
-  };
-
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchNotifications();
-    await fetchUnreadCount();
+    await markNotificationsSeen();
+    setUnreadCount(0);
+    resetUnreadCount();
     setRefreshing(false);
   }, []);
-
-  const handleMarkAsRead = async (notificationId) => {
-    try {
-      await api.patch(`/notifications/${notificationId}/read`);
-      setUnreadCount(0);
-      resetUnreadCount();
-    } catch (error) {
-      console.error('Update notification error:', error);
-      Alert.alert(t.error, t.notifications.updateError);
-    }
-  };
-
-  const handleMarkAllAsRead = async () => {
-    try {
-      await api.patch('/notifications/mark-all-read');
-      setUnreadCount(0);
-      resetUnreadCount();
-      Alert.alert(t.success, t.notifications.markAllSuccess);
-    } catch (error) {
-      console.error('Mark all error:', error);
-      Alert.alert(t.error, t.notifications.markAllError);
-    }
-  };
-
-  const handleDeleteNotification = async (notificationId) => {
-    try {
-      await api.patch(`/notifications/${notificationId}/delete`);
-      setNotifications((prev) =>
-        prev.filter((n) => n.notification_id !== notificationId)
-      );
-      await fetchUnreadCount();
-    } catch (error) {
-      console.error('Delete notification error:', error);
-      Alert.alert(t.error, t.notifications.deleteError);
-    }
-  };
 
   const handleNotificationTap = async (notification) => {
     const notificationType = notification.notification_type;
@@ -137,14 +104,8 @@ const NotificationsScreen = () => {
       );
     } catch (err) {
       console.error('Error deleting opened notification:', err);
-      try {
-        await api.patch(`/notifications/${notification.notification_id}/read`);
-        setNotifications((prev) =>
-          prev.filter((n) => n.notification_id !== notification.notification_id)
-        );
-      } catch (fallbackErr) {
-        console.error('Error marking opened notification as read:', fallbackErr);
-      }
+      Alert.alert(t.error, t.notifications.deleteError);
+      return;
     }
 
     // ثم انتقل للمكان المناسب
@@ -287,14 +248,7 @@ const NotificationsScreen = () => {
             </Text>
           )}
         </View>
-        {notifications.length > 0 && (
-          <TouchableOpacity
-            onPress={handleMarkAllAsRead}
-            style={styles.markAllButton}
-          >
-            <Text style={styles.markAllText}>{t.notifications.markAll}</Text>
-          </TouchableOpacity>
-        )}
+        <View style={styles.headerSpacer} />
       </View>
 
       {notifications.length === 0 ? (
@@ -347,16 +301,8 @@ const styles = StyleSheet.create({
     color: '#DE1A1C',
     fontWeight: '600',
   },
-  markAllButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#E9FAFB',
-    borderRadius: 6,
-  },
-  markAllText: {
-    color: '#26CDD6',
-    fontSize: 12,
-    fontWeight: '600',
+  headerSpacer: {
+    width: 40,
   },
   listContainer: {
     padding: 12,
@@ -400,42 +346,6 @@ const styles = StyleSheet.create({
     color: '#8296B1',
     lineHeight: 20,
     marginBottom: 12,
-  },
-  divider: {
-    marginVertical: 12,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 8,
-  },
-  readButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: '#E9FAFB',
-    borderRadius: 6,
-    gap: 4,
-  },
-  readButtonText: {
-    color: '#26CDD6',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  deleteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: '#FBEAEA',
-    borderRadius: 6,
-    gap: 4,
-  },
-  deleteButtonText: {
-    color: '#DE1A1C',
-    fontSize: 12,
-    fontWeight: '600',
   },
   centerContainer: {
     flex: 1,
