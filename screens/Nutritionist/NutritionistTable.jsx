@@ -98,7 +98,7 @@ const NutritionistTable = ({ route, navigation }) => {
     if (selectedDate) setEndDate(selectedDate);
   };
 
-  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator size="large" color="#059669" /></View>;
+  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator size="large" color="#26CDD6" /></View>;
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
@@ -117,7 +117,7 @@ const NutritionistTable = ({ route, navigation }) => {
               <View style={{ width: '48%' }}>
                 <Text style={styles.label}>تاريخ البدء</Text>
                 <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.dateSelector}>
-                  <Icon name="calendar-edit" type="material-community" size={18} color="#204a42" />
+                  <Icon name="calendar-edit" type="material-community" size={18} color="#193B6B" />
                   <Text style={styles.dateText}>{startDate.toLocaleDateString('ar-EG')}</Text>
                 </TouchableOpacity>
               </View>
@@ -125,7 +125,7 @@ const NutritionistTable = ({ route, navigation }) => {
               <View style={{ width: '48%' }}>
                 <Text style={styles.label}>تاريخ الانتهاء</Text>
                 <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.dateSelector}>
-                  <Icon name="calendar-check" type="material-community" size={18} color="#204a42" />
+                  <Icon name="calendar-check" type="material-community" size={18} color="#193B6B" />
                   <Text style={styles.dateText}>{endDate.toLocaleDateString('ar-EG')}</Text>
                 </TouchableOpacity>
               </View>
@@ -154,7 +154,7 @@ const NutritionistTable = ({ route, navigation }) => {
               multiline
             />
 
-            <TouchableOpacity onPress={handleSave} style={[styles.saveBtn, { backgroundColor: programId ? '#0ea5e9' : '#204a42' }]}>
+            <TouchableOpacity onPress={handleSave} style={[styles.saveBtn, { backgroundColor: programId ? '#26CDD6' : '#193B6B' }]}>
               <Text style={styles.saveBtnText}>{programId ? "تحديث الخطة" : "اعتماد الخطة"}</Text>
             </TouchableOpacity>
           </View>
@@ -172,16 +172,16 @@ const MealInput = ({ label, value, onChange }) => (
 );
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ecfdf5', padding: 15 },
+  container: { flex: 1, backgroundColor: '#F1FCFD', padding: 15 },
   loadingContainer: { flex: 1, justifyContent: "center" },
   headerTitle: { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginVertical: 15 },
   formCard: { backgroundColor: '#fff', borderRadius: 20, padding: 20, elevation: 5 },
-  label: { textAlign: 'right', fontWeight: 'bold', marginBottom: 5, fontSize: 13, color: '#475569' },
+  label: { textAlign: 'right', fontWeight: 'bold', marginBottom: 5, fontSize: 13, color: '#8296B1' },
   input: { borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 10, textAlign: 'right', backgroundColor: '#f8fafc', marginBottom: 15 },
   rowBetween: { flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 10 },
   dateSelector: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#f1f5f9', padding: 12, borderRadius: 10, borderWidth: 1, borderColor: '#cbd5e1' },
-  dateText: { marginRight: 10, color: '#204a42', fontWeight: 'bold' },
-  sectionTitle: { textAlign: 'right', fontWeight: 'bold', fontSize: 16, color: '#204a42', marginVertical: 10 },
+  dateText: { marginRight: 10, color: '#193B6B', fontWeight: 'bold' },
+  sectionTitle: { textAlign: 'right', fontWeight: 'bold', fontSize: 16, color: '#193B6B', marginVertical: 10 },
   saveBtn: { padding: 15, borderRadius: 12, alignItems: 'center', marginTop: 20 },
   saveBtnText: { color: '#fff', fontWeight: 'bold' }
 });

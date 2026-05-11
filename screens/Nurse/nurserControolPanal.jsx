@@ -21,8 +21,8 @@ const NursePages = () => {
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarStyle: [styles.tabBar, { paddingBottom: Math.max(insets.bottom, 8), height: 60 + Math.max(insets.bottom, 8) }],
-          tabBarActiveTintColor: "#059669",
-          tabBarInactiveTintColor: "#9CA3AF",
+          tabBarActiveTintColor: "#26CDD6",
+          tabBarInactiveTintColor: "#8296B1",
           tabBarLabelStyle: styles.tabLabel,
           tabBarIcon: ({ color, focused }) => {
             const icons = {

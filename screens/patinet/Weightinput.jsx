@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 15,
-    color: "#2c3e50",
+    color: "#193B6B",
   },
   inputContainer: {
     marginBottom: 10,
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   button: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#26CDD6",
     borderRadius: 10,
     paddingVertical: 10,
   },

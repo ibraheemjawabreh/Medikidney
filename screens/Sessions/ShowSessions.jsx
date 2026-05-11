@@ -47,7 +47,7 @@ const ShowSessions = ({ route }) => {
   if (loading) {
     return (
       <View style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#2A7FFF" />
+        <ActivityIndicator size="large" color="#26CDD6" />
         <Text style={styles.loaderText}>جارِ تحميل تفاصيل الجلسة...</Text>
       </View>
     );
@@ -151,12 +151,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
-    color: "#2A7FFF",
+    color: "#26CDD6",
     marginBottom: 5,
   },
   subtitle: {
     fontSize: 14,
-    color: "#64748B",
+    color: "#8296B1",
     textAlign: "center",
     marginBottom: 15,
   },
@@ -166,20 +166,20 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 15,
   },
-  label: { fontSize: 15, color: "#64748B", fontWeight: "600" },
-  value: { fontSize: 16, color: "#1E293B", fontWeight: "bold" },
+  label: { fontSize: 15, color: "#8296B1", fontWeight: "600" },
+  value: { fontSize: 16, color: "#193B6B", fontWeight: "bold" },
   highlightRow: {
-    backgroundColor: "#EFF6FF",
+    backgroundColor: "#E9FAFB",
     padding: 12,
     borderRadius: 12,
     flexDirection: "row-reverse",
     justifyContent: "space-between",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#BFDBFE",
+    borderColor: "#BCEFF3",
   },
-  highlightLabel: { fontSize: 14, color: "#1E40AF", fontWeight: "700" },
-  highlightValue: { fontSize: 18, color: "#1E40AF", fontWeight: "900" },
+  highlightLabel: { fontSize: 14, color: "#193B6B", fontWeight: "700" },
+  highlightValue: { fontSize: 18, color: "#193B6B", fontWeight: "900" },
   notesBox: {
     marginTop: 10,
     padding: 15,
@@ -188,26 +188,26 @@ const styles = StyleSheet.create({
   },
   notesLabel: {
     fontSize: 15,
-    color: "#475569",
+    color: "#8296B1",
     fontWeight: "bold",
     marginBottom: 8,
     textAlign: "right",
   },
   notesText: {
     textAlign: "right",
-    color: "#475569",
+    color: "#8296B1",
     lineHeight: 22,
     fontSize: 14,
   },
   loaderContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  loaderText: { marginTop: 10, color: "#2A7FFF" },
+  loaderText: { marginTop: 10, color: "#26CDD6" },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
   },
-  errorText: { color: "#EF4444", fontSize: 16, fontWeight: "bold" },
+  errorText: { color: "#DE1A1C", fontSize: 16, fontWeight: "bold" },
 });
 
 export default ShowSessions;

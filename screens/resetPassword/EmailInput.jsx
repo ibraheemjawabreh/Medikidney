@@ -72,7 +72,7 @@ export default EmailInput;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: "#F1FCFD",
     padding: 16,
     justifyContent: "center",
   },
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#2563EB",
+    color: "#26CDD6",
     textAlign: "center",
     marginBottom: 24,
   },
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: "#2563EB",
+    backgroundColor: "#26CDD6",
     borderRadius: 12,
     paddingVertical: 14,
     marginTop: 10,

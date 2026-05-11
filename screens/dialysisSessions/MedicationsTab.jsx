@@ -9,10 +9,10 @@ import { useLanguage } from '../../context/LanguageContext';
 
 // ── الأدوية الشائعة (أزرار جاهزة) ────────────────────────────
 const PRESET_MEDS = [
-  { name: "HEPARIN", icon: "needle", color: "#ef4444", dosage: 5000, unit: "IU", label: "هيبارين" },
-  { name: "EPO", icon: "blood-bag", color: "#3b82f6", dosage: 4000, unit: "IU", label: "EPO" },
-  { name: "IRON", icon: "pill", color: "#f59e0b", dosage: 100, unit: "mg", label: "حديد" },
-  { name: "SALINE", icon: "water", color: "#0ea5e9", dosage: 500, unit: "ml", label: "محلول ملحي" },
+  { name: "HEPARIN", icon: "needle", color: "#DE1A1C", dosage: 5000, unit: "IU", label: "هيبارين" },
+  { name: "EPO", icon: "blood-bag", color: "#26CDD6", dosage: 4000, unit: "IU", label: "EPO" },
+  { name: "IRON", icon: "pill", color: "#A32D2F", dosage: 100, unit: "mg", label: "حديد" },
+  { name: "SALINE", icon: "water", color: "#26CDD6", dosage: 500, unit: "ml", label: "محلول ملحي" },
 ];
 
 // ── تنسيق الوقت ──────────────────────────────────────────────
@@ -206,7 +206,7 @@ const MedicationsTab = ({ route }) => {
                 <TextInput
                   style={styles.inp}
                   placeholder={String(selectedPreset.dosage)}
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor="#8296B1"
                   keyboardType="numeric"
                   value={presetDosage}
                   onChangeText={setPresetDosage}
@@ -219,7 +219,7 @@ const MedicationsTab = ({ route }) => {
                 <TextInput
                   style={[styles.inp, { textAlignVertical: 'top' }]}
                   placeholder="مثال: تم إعطاء الدواء..."
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor="#8296B1"
                   multiline
                   value={presetNotes}
                   onChangeText={setPresetNotes}
@@ -260,11 +260,11 @@ const MedicationsTab = ({ route }) => {
 
           <Text style={styles.fieldLabel}>{t.medications.medName}</Text>
           <View style={styles.inputBox}>
-            <MaterialCommunityIcons name="pill" size={18} color="#059669" style={{ marginLeft: 6 }} />
+            <MaterialCommunityIcons name="pill" size={18} color="#26CDD6" style={{ marginLeft: 6 }} />
             <TextInput
               style={styles.inp}
               placeholder="مثال: Paracetamol"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor="#8296B1"
               value={customForm.name}
               onChangeText={t => setField('name', t)}
             />
@@ -277,7 +277,7 @@ const MedicationsTab = ({ route }) => {
                 <TextInput
                   style={styles.inp}
                   placeholder="500"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor="#8296B1"
                   keyboardType="numeric"
                   value={customForm.dosage}
                   onChangeText={t => setField('dosage', t)}
@@ -291,7 +291,7 @@ const MedicationsTab = ({ route }) => {
                 <TextInput
                   style={styles.inp}
                   placeholder="mg"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor="#8296B1"
                   value={customForm.unit}
                   onChangeText={t => setField('unit', t)}
                 />
@@ -304,7 +304,7 @@ const MedicationsTab = ({ route }) => {
             <TextInput
               style={[styles.inp, { textAlignVertical: 'top' }]}
               placeholder="أي ملاحظة حول الدواء..."
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor="#8296B1"
               multiline
               value={customForm.notes}
               onChangeText={t => setField('notes', t)}
@@ -312,7 +312,7 @@ const MedicationsTab = ({ route }) => {
           </View>
 
           <Pressable
-            style={[styles.saveBtn, isSubmitting && { backgroundColor: '#6ee7b7' }]}
+            style={[styles.saveBtn, isSubmitting && { backgroundColor: '#BCEFF3' }]}
             onPress={handleCustomSubmit}
             disabled={isSubmitting}
           >
@@ -330,7 +330,7 @@ const MedicationsTab = ({ route }) => {
       </Text>
 
       {loading ? (
-        <ActivityIndicator color="#059669" style={{ marginTop: 20 }} />
+        <ActivityIndicator color="#26CDD6" style={{ marginTop: 20 }} />
       ) : meds.length === 0 ? (
         <View style={styles.emptyBox}>
           <MaterialCommunityIcons name="pill-off" size={48} color="#d1d5db" />
@@ -346,7 +346,7 @@ const MedicationsTab = ({ route }) => {
                 {/* اسم الدواء + الوقت */}
                 <View style={styles.medRight}>
                   <View style={styles.medIconCircle}>
-                    <MaterialCommunityIcons name="pill" size={18} color="#059669" />
+                    <MaterialCommunityIcons name="pill" size={18} color="#26CDD6" />
                   </View>
                   <View>
                     <Text style={styles.medName}>{med.medication_name || med.medicationName}</Text>
@@ -359,7 +359,7 @@ const MedicationsTab = ({ route }) => {
                     <Text style={styles.doseText}>{med.dosage} {med.unit}</Text>
                   </View>
                   <Pressable onPress={() => deleteMed(medId)} style={styles.deleteBtn}>
-                    <MaterialCommunityIcons name="trash-can-outline" size={18} color="#ef4444" />
+                    <MaterialCommunityIcons name="trash-can-outline" size={18} color="#DE1A1C" />
                   </Pressable>
                 </View>
               </View>
@@ -367,7 +367,7 @@ const MedicationsTab = ({ route }) => {
               {med.notes ? (
                 <View style={styles.noteRow}>
                   <Text style={styles.noteText}>{med.notes}</Text>
-                  <MaterialCommunityIcons name="note-text-outline" size={14} color="#9ca3af" />
+                  <MaterialCommunityIcons name="note-text-outline" size={14} color="#8296B1" />
                 </View>
               ) : null}
             </View>
@@ -383,7 +383,7 @@ const MedicationsTab = ({ route }) => {
 export default MedicationsTab;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ecfdf5' },
+  container: { flex: 1, backgroundColor: '#F1FCFD' },
   content: { padding: 16, paddingBottom: 40 },
 
   // شريط العنوان
@@ -391,52 +391,52 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse', justifyContent: 'space-between',
     alignItems: 'center', marginBottom: 16,
   },
-  pageTitle: { fontSize: 18, fontWeight: '800', color: '#111827' },
+  pageTitle: { fontSize: 18, fontWeight: '800', color: '#193B6B' },
   customBtn: {
     flexDirection: 'row-reverse', alignItems: 'center', gap: 6,
-    backgroundColor: '#059669', paddingHorizontal: 14, paddingVertical: 9, borderRadius: 10,
+    backgroundColor: '#26CDD6', paddingHorizontal: 14, paddingVertical: 9, borderRadius: 10,
   },
-  customBtnActive: { backgroundColor: '#dc2626' },
+  customBtnActive: { backgroundColor: '#DE1A1C' },
   customBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
 
   // الأدوية الشائعة
   presetSection: { marginBottom: 20 },
-  sectionLabel: { textAlign: 'right', color: '#6b7280', fontSize: 12, fontWeight: '600', marginBottom: 10 },
+  sectionLabel: { textAlign: 'right', color: '#8296B1', fontSize: 12, fontWeight: '600', marginBottom: 10 },
   presetGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', justifyContent: 'space-between' },
   presetCard: {
     backgroundColor: '#fff', width: '48%', padding: 16, borderRadius: 14,
     alignItems: 'center', marginBottom: 12, elevation: 2,
-    borderTopWidth: 3, borderTopColor: '#059669',
+    borderTopWidth: 3, borderTopColor: '#26CDD6',
   },
   presetIconWrap: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
-  presetName: { fontWeight: '800', color: '#1f2937', fontSize: 14, marginBottom: 2 },
-  presetDose: { fontSize: 12, color: '#6b7280', fontWeight: '600', marginBottom: 8 },
+  presetName: { fontWeight: '800', color: '#193B6B', fontSize: 14, marginBottom: 2 },
+  presetDose: { fontSize: 12, color: '#8296B1', fontWeight: '600', marginBottom: 8 },
   presetChip: { paddingHorizontal: 14, paddingVertical: 5, borderRadius: 20 },
   presetChipText: { fontSize: 12, fontWeight: '800' },
 
   // فورم مخصص
   formCard: {
     backgroundColor: '#fff', borderRadius: 16, padding: 18, marginBottom: 16,
-    elevation: 2, borderTopWidth: 3, borderTopColor: '#059669',
+    elevation: 2, borderTopWidth: 3, borderTopColor: '#26CDD6',
   },
-  formTitle: { fontSize: 15, fontWeight: '800', color: '#111827', textAlign: 'right', marginBottom: 12 },
-  fieldLabel: { textAlign: 'right', color: '#374151', fontSize: 12, fontWeight: '600', marginBottom: 6, marginTop: 10 },
+  formTitle: { fontSize: 15, fontWeight: '800', color: '#193B6B', textAlign: 'right', marginBottom: 12 },
+  fieldLabel: { textAlign: 'right', color: '#193B6B', fontSize: 12, fontWeight: '600', marginBottom: 6, marginTop: 10 },
   twoCol: { flexDirection: 'row-reverse', marginTop: 4 },
   inputBox: {
     flexDirection: 'row-reverse', alignItems: 'center',
     backgroundColor: '#f9fafb', borderWidth: 1, borderColor: '#e5e7eb',
     borderRadius: 10, paddingHorizontal: 10, height: 48,
   },
-  inp: { flex: 1, textAlign: 'right', fontSize: 15, color: '#1f2937', fontWeight: '600' },
-  unitSuffix: { color: '#6b7280', fontSize: 13, fontWeight: '800', marginRight: 6 },
+  inp: { flex: 1, textAlign: 'right', fontSize: 15, color: '#193B6B', fontWeight: '600' },
+  unitSuffix: { color: '#8296B1', fontSize: 13, fontWeight: '800', marginRight: 6 },
   saveBtn: {
-    backgroundColor: '#059669', padding: 14, borderRadius: 10,
+    backgroundColor: '#26CDD6', padding: 14, borderRadius: 10,
     alignItems: 'center', marginTop: 18, minHeight: 50, justifyContent: 'center',
   },
   saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
 
   // السجل
-  historyLabel: { textAlign: 'right', fontSize: 14, fontWeight: '800', color: '#374151', marginBottom: 12 },
+  historyLabel: { textAlign: 'right', fontSize: 14, fontWeight: '800', color: '#193B6B', marginBottom: 12 },
   medCard: {
     backgroundColor: '#fff', borderRadius: 14, marginBottom: 10, padding: 14,
     borderWidth: 1, borderColor: '#e5e7eb', elevation: 1,
@@ -448,23 +448,23 @@ const styles = StyleSheet.create({
   medLeft: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
   medIconCircle: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#E9FAFB', alignItems: 'center', justifyContent: 'center',
   },
-  medName: { fontSize: 14, fontWeight: '800', color: '#111827', textAlign: 'right' },
-  medTime: { fontSize: 11, color: '#9ca3af', textAlign: 'right', marginTop: 2 },
+  medName: { fontSize: 14, fontWeight: '800', color: '#193B6B', textAlign: 'right' },
+  medTime: { fontSize: 11, color: '#8296B1', textAlign: 'right', marginTop: 2 },
   doseBadge: {
-    backgroundColor: '#eff6ff', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20,
+    backgroundColor: '#E9FAFB', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20,
   },
-  doseText: { color: '#3b82f6', fontSize: 12, fontWeight: '800' },
-  deleteBtn: { padding: 5, backgroundColor: '#fef2f2', borderRadius: 8 },
+  doseText: { color: '#26CDD6', fontSize: 12, fontWeight: '800' },
+  deleteBtn: { padding: 5, backgroundColor: '#FBEAEA', borderRadius: 8 },
   noteRow: {
     flexDirection: 'row-reverse', alignItems: 'center', gap: 6,
     marginTop: 10, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#f3f4f6',
   },
-  noteText: { color: '#6b7280', fontSize: 12, flex: 1, textAlign: 'right' },
+  noteText: { color: '#8296B1', fontSize: 12, flex: 1, textAlign: 'right' },
 
   // فارغ
   emptyBox: { alignItems: 'center', paddingTop: 40, gap: 8 },
-  emptyText: { fontSize: 15, color: '#6b7280', fontWeight: '700' },
-  emptySub: { fontSize: 12, color: '#9ca3af', textAlign: 'center' },
+  emptyText: { fontSize: 15, color: '#8296B1', fontWeight: '700' },
+  emptySub: { fontSize: 12, color: '#8296B1', textAlign: 'center' },
 });

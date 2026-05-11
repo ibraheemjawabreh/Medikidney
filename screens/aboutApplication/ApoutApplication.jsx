@@ -5,14 +5,14 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 const AboutApp = ({ navigation }) => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ecfdf5" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F1FCFD" />
 
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.goBack()}
         activeOpacity={0.8}
       >
-        <MaterialCommunityIcons name="arrow-left" size={26} color="#0f172a" />
+        <MaterialCommunityIcons name="arrow-left" size={26} color="#193B6B" />
       </TouchableOpacity>
 
       <View style={styles.logoContainer}>
@@ -80,7 +80,7 @@ export default AboutApp;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: "#F1FCFD",
   },
   scrollContent: {
     padding: 25,
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 32,
     fontWeight: "900",
-    color: "#0f172a",
+    color: "#193B6B",
     marginTop: 15,
   },
   badge: {
@@ -109,11 +109,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: '#059669',
+    borderColor: '#26CDD6',
   },
   subtitle: {
     fontSize: 14,
-    color: "#059669",
+    color: "#26CDD6",
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -139,24 +139,24 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#1e293b",
+    color: "#193B6B",
     marginRight: 10,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#059669',
+    backgroundColor: '#26CDD6',
   },
   description: {
     fontSize: 15,
-    color: "#475569",
+    color: "#8296B1",
     lineHeight: 24,
     textAlign: "right",
     marginBottom: 10,
   },
   boldText: {
-    color: '#059669',
+    color: '#26CDD6',
     fontWeight: 'bold',
   },
   goalItem: {
@@ -167,20 +167,20 @@ const styles = StyleSheet.create({
   },
   goalText: {
     fontSize: 14,
-    color: "#475569",
+    color: "#8296B1",
     textAlign: "right",
     marginRight: 10,
     flex: 1,
   },
   bullet: {
-    color: '#059669',
+    color: '#26CDD6',
     fontSize: 20,
     fontWeight: 'bold',
   },
   footer: {
     marginTop: 10,
     textAlign: "center",
-    color: "#94a3b8",
+    color: "#8296B1",
     fontSize: 13,
     fontWeight: '500',
   },
@@ -195,8 +195,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#d1fae5",
-    shadowColor: "#059669",
+    borderColor: "#BCEFF3",
+    shadowColor: "#26CDD6",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.18,
     shadowRadius: 8,

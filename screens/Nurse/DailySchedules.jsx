@@ -74,7 +74,7 @@ const DailySchedules = ({ navigation }) => {
           <MaterialCommunityIcons
             name={isExpanded ? "chevron-up" : "chevron-down"}
             size={24}
-            color="#94a3b8"
+            color="#8296B1"
           />
         </TouchableOpacity>
 
@@ -84,7 +84,7 @@ const DailySchedules = ({ navigation }) => {
               style={[styles.actionButton, styles.disabledProfileButton]}
               onPress={() => alert("قريباً: سيتم تفعيل عرض الملف بعد ربط الـ API الجديد")}
             >
-              <MaterialCommunityIcons name="account-details" size={20} color="#94a3b8" />
+              <MaterialCommunityIcons name="account-details" size={20} color="#8296B1" />
               <Text style={styles.disabledProfileButtonText}>عرض الملف</Text>
             </TouchableOpacity>
 
@@ -141,7 +141,7 @@ const DailySchedules = ({ navigation }) => {
       </View>
 
       {loading && shifts.length === 0 ? (
-        <ActivityIndicator size="large" color="#059669" style={{ marginTop: 50 }} />
+        <ActivityIndicator size="large" color="#26CDD6" style={{ marginTop: 50 }} />
       ) : (
         <FlatList
           data={shifts.find(s => s.shiftNumber === activeShift)?.patients || []}
@@ -163,40 +163,40 @@ const DailySchedules = ({ navigation }) => {
 export default DailySchedules;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#ecfdf5" },
-  header: { padding: 20, backgroundColor: "#204a42", borderBottomWidth: 1, borderBottomColor: "#1e293b", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
+  container: { flex: 1, backgroundColor: "#F1FCFD" },
+  header: { padding: 20, backgroundColor: "#193B6B", borderBottomWidth: 1, borderBottomColor: "#193B6B", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
   headerTitle: { fontSize: 22, fontWeight: "900", color: "#fff", textAlign: 'right' },
-  headerDate: { fontSize: 14, color: "#94a3b8", textAlign: 'right', marginTop: 4 },
+  headerDate: { fontSize: 14, color: "#8296B1", textAlign: 'right', marginTop: 4 },
 
   shiftSelector: { backgroundColor: '#f8fafc', paddingVertical: 12 },
   shiftTab: { flexDirection: 'row-reverse', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#f1f5f9', marginLeft: 10 },
-  activeShiftTab: { backgroundColor: '#059669' },
-  shiftTabText: { fontSize: 14, fontWeight: '600', color: '#64748b' },
+  activeShiftTab: { backgroundColor: '#26CDD6' },
+  shiftTabText: { fontSize: 14, fontWeight: '600', color: '#8296B1' },
   activeShiftTabText: { color: '#fff' },
   countBadge: { backgroundColor: '#cbd5e1', borderRadius: 10, paddingHorizontal: 6, marginRight: 8 },
   activeCountBadge: { backgroundColor: 'rgba(255,255,255,0.3)' },
-  countText: { fontSize: 11, fontWeight: 'bold', color: '#1e293b' },
+  countText: { fontSize: 11, fontWeight: 'bold', color: '#193B6B' },
 
   listContent: { padding: 15 },
   card: { backgroundColor: "#fff", borderRadius: 16, marginBottom: 12, elevation: 2, borderWidth: 1, borderColor: '#f1f5f9', overflow: 'hidden' },
-  expandedCard: { borderColor: '#059669', borderWidth: 1.5 },
+  expandedCard: { borderColor: '#26CDD6', borderWidth: 1.5 },
   cardHeader: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center", padding: 18 },
   patientInfo: { alignItems: 'flex-end', flex: 1 },
-  patientName: { fontSize: 16, fontWeight: "700", color: "#1e293b", marginBottom: 6 },
+  patientName: { fontSize: 16, fontWeight: "700", color: "#193B6B", marginBottom: 6 },
   badgeRow: { flexDirection: 'row-reverse' },
-  machineBadge: { backgroundColor: '#eff6ff', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
-  machineText: { fontSize: 12, color: "#2563eb", fontWeight: '600' },
-  doneBadge: { backgroundColor: '#f0fdf4', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, marginRight: 8 },
-  doneText: { fontSize: 12, color: "#16a34a", fontWeight: '600' },
+  machineBadge: { backgroundColor: '#E9FAFB', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
+  machineText: { fontSize: 12, color: "#26CDD6", fontWeight: '600' },
+  doneBadge: { backgroundColor: '#E9FAFB', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, marginRight: 8 },
+  doneText: { fontSize: 12, color: "#26CDD6", fontWeight: '600' },
 
   actionRow: { flexDirection: "row-reverse", padding: 15, backgroundColor: "#f8fafc", borderTopWidth: 1, borderTopColor: "#e2e8f0", justifyContent: 'space-between' },
   actionButton: { flexDirection: 'row-reverse', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15, borderRadius: 10, width: '48%', justifyContent: 'center' },
   disabledProfileButton: { backgroundColor: "#f1f5f9", borderWidth: 1, borderColor: "#e2e8f0" },
-  disabledProfileButtonText: { color: "#94a3b8", fontWeight: "bold", marginRight: 8 },
-  sessionButton: { backgroundColor: "#059669" },
+  disabledProfileButtonText: { color: "#8296B1", fontWeight: "bold", marginRight: 8 },
+  sessionButton: { backgroundColor: "#26CDD6" },
   disabledButton: { backgroundColor: "#cbd5e1" },
   sessionButtonText: { color: "#fff", fontWeight: "bold", marginRight: 8 },
 
   emptyContainer: { alignItems: 'center', marginTop: 80 },
-  emptyText: { textAlign: 'center', marginTop: 10, color: '#94a3b8', fontSize: 16 }
+  emptyText: { textAlign: 'center', marginTop: 10, color: '#8296B1', fontSize: 16 }
 });

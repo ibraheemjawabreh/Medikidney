@@ -25,7 +25,7 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 // ─── مكوّن سطر معلومة واحدة ──────────────────────────────────────────────────
-const InfoRow = ({ label, value, icon, color = "#059669", isLast = false }) => (
+const InfoRow = ({ label, value, icon, color = "#26CDD6", isLast = false }) => (
   <View>
     <View style={styles.infoRow}>
       <View style={[styles.infoIconBox, { backgroundColor: color + "18" }]}>
@@ -43,7 +43,7 @@ const InfoRow = ({ label, value, icon, color = "#059669", isLast = false }) => (
 );
 
 // ─── مكوّن بطاقة قسم قابلة للطي ──────────────────────────────────────────────
-const SectionCard = ({ title, icon, accentColor = "#204a42", children, defaultOpen = true }) => {
+const SectionCard = ({ title, icon, accentColor = "#193B6B", children, defaultOpen = true }) => {
   const [open, setOpen] = useState(defaultOpen);
 
   const toggle = () => {
@@ -148,8 +148,8 @@ const PatinetInfo = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingBox}>
-        <StatusBar barStyle="light-content" backgroundColor="#204a42" />
-        <ActivityIndicator size="large" color="#059669" />
+        <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
+        <ActivityIndicator size="large" color="#26CDD6" />
         <Text style={styles.loadingText}>{t.patientInfo.loading}</Text>
       </View>
     );
@@ -162,7 +162,7 @@ const PatinetInfo = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#204a42" />
+      <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
 
       {/* ── الهيدر ── */}
       <Animated.View style={[styles.header, { transform: [{ scaleY: headerHeight }] }]}>
@@ -230,49 +230,49 @@ const PatinetInfo = ({ route, navigation }) => {
         scrollEventThrottle={16}
       >
         {/* ── البيانات الشخصية ── */}
-        <SectionCard title={t.patientInfo.personalData} icon="account-details-outline" accentColor="#204a42" defaultOpen={true}>
-          <InfoRow label={t.patientInfo.fullName} value={patient.full_name} icon="account" color="#204a42" />
-          <InfoRow label={t.patientInfo.nationalId} value={patient.national_id} icon="card-account-details-outline" color="#3b82f6" />
+        <SectionCard title={t.patientInfo.personalData} icon="account-details-outline" accentColor="#193B6B" defaultOpen={true}>
+          <InfoRow label={t.patientInfo.fullName} value={patient.full_name} icon="account" color="#193B6B" />
+          <InfoRow label={t.patientInfo.nationalId} value={patient.national_id} icon="card-account-details-outline" color="#26CDD6" />
           <InfoRow
             label={t.patientInfo.dob}
             value={formatDate(patient.date_of_birth || patient.birth_date)}
             icon="calendar-range"
-            color="#f59e0b"
+            color="#A32D2F"
           />
           <InfoRow
             label={t.patientInfo.ageLabel}
             value={age ? t.patientInfo.age.replace('{n}', age) : null}
             icon="account-clock-outline"
-            color="#8b5cf6"
+            color="#8296B1"
           />
           <InfoRow
             label={t.patientInfo.gender}
             value={patient.gender === "Male" ? t.patientInfo.genderMale : t.patientInfo.genderFemale}
             icon="gender-male-female"
-            color="#8b5cf6"
+            color="#8296B1"
           />
-          <InfoRow label={t.patientInfo.address} value={patient.address} icon="map-marker-outline" color="#059669" isLast />
+          <InfoRow label={t.patientInfo.address} value={patient.address} icon="map-marker-outline" color="#26CDD6" isLast />
         </SectionCard>
 
         {/* ── معلومات التواصل ── */}
-        <SectionCard title={t.patientInfo.contactInfo} icon="phone-outline" accentColor="#0369a1" defaultOpen={true}>
-          <InfoRow label={t.patientInfo.phone} value={patient.phone_number || patient.phone} icon="phone" color="#0369a1" />
-          <InfoRow label={t.patientInfo.emergencyPhone} value={patient.emergency_contact} icon="phone-alert" color="#ef4444" />
-          <InfoRow label={t.patientInfo.email} value={patient.email} icon="email-outline" color="#6366f1" isLast />
+        <SectionCard title={t.patientInfo.contactInfo} icon="phone-outline" accentColor="#26CDD6" defaultOpen={true}>
+          <InfoRow label={t.patientInfo.phone} value={patient.phone_number || patient.phone} icon="phone" color="#26CDD6" />
+          <InfoRow label={t.patientInfo.emergencyPhone} value={patient.emergency_contact} icon="phone-alert" color="#DE1A1C" />
+          <InfoRow label={t.patientInfo.email} value={patient.email} icon="email-outline" color="#8296B1" isLast />
         </SectionCard>
 
         {/* ── التاريخ الطبي ── */}
-        <SectionCard title={t.patientInfo.medicalHistory} icon="medical-bag" accentColor="#dc2626" defaultOpen={true}>
-          <InfoRow label={t.patientInfo.bloodType} value={patient.blood_type} icon="water-plus" color="#ef4444" />
-          <InfoRow label={t.patientInfo.chronicDiseases} value={patient.chronic_diseases} icon="heart-pulse" color="#f59e0b" />
-          <InfoRow label={t.patientInfo.allergies} value={patient.allergies} icon="allergy" color="#f59e0b" />
-          <InfoRow label={t.patientInfo.medicalNotes} value={patient.medical_history_notes} icon="file-document-outline" color="#64748b" />
-          <InfoRow label={t.patientInfo.generalNotes} value={patient.notes} icon="note-text-outline" color="#64748b" />
+        <SectionCard title={t.patientInfo.medicalHistory} icon="medical-bag" accentColor="#DE1A1C" defaultOpen={true}>
+          <InfoRow label={t.patientInfo.bloodType} value={patient.blood_type} icon="water-plus" color="#DE1A1C" />
+          <InfoRow label={t.patientInfo.chronicDiseases} value={patient.chronic_diseases} icon="heart-pulse" color="#A32D2F" />
+          <InfoRow label={t.patientInfo.allergies} value={patient.allergies} icon="allergy" color="#A32D2F" />
+          <InfoRow label={t.patientInfo.medicalNotes} value={patient.medical_history_notes} icon="file-document-outline" color="#8296B1" />
+          <InfoRow label={t.patientInfo.generalNotes} value={patient.notes} icon="note-text-outline" color="#8296B1" />
 
           {/* حالة التدخين — تُعرض كبادج */}
           <View style={styles.infoRow}>
-            <View style={[styles.infoIconBox, { backgroundColor: (isSmoker ? "#ef4444" : "#059669") + "18" }]}>
-              <Icon name="smoking" type="material-community" size={19} color={isSmoker ? "#ef4444" : "#059669"} />
+            <View style={[styles.infoIconBox, { backgroundColor: (isSmoker ? "#DE1A1C" : "#26CDD6") + "18" }]}>
+              <Icon name="smoking" type="material-community" size={19} color={isSmoker ? "#DE1A1C" : "#26CDD6"} />
             </View>
             <View style={styles.infoTextWrap}>
               <Text style={styles.infoLabel}>{t.patientInfo.smokingStatus}</Text>
@@ -280,8 +280,8 @@ const PatinetInfo = ({ route, navigation }) => {
                 value={patient.smoking_status}
                 trueLabel={t.patientInfo.smoker}
                 falseLabel={t.patientInfo.nonSmoker}
-                trueColor="#ef4444"
-                falseColor="#059669"
+                trueColor="#DE1A1C"
+                falseColor="#26CDD6"
               />
             </View>
           </View>
@@ -297,13 +297,13 @@ export default PatinetInfo;
 
 // ─── الستايلات ────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#ecfdf5" },
+  container: { flex: 1, backgroundColor: "#F1FCFD" },
   loadingBox: { flex: 1, justifyContent: "center", alignItems: "center", gap: 14, backgroundColor: "#f1f5f9" },
-  loadingText: { color: "#64748b", fontSize: 14, fontWeight: "600" },
+  loadingText: { color: "#8296B1", fontSize: 14, fontWeight: "600" },
 
   // ── الهيدر ──
   header: {
-    backgroundColor: "#204a42",
+    backgroundColor: "#193B6B",
     paddingTop: 50,
     paddingBottom: 24,
     paddingHorizontal: 20,
@@ -342,18 +342,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2.5,
-    borderColor: "#059669",
+    borderColor: "#26CDD6",
   },
   bloodBadge: {
     position: "absolute",
     bottom: 0,
     right: -4,
-    backgroundColor: "#ef4444",
+    backgroundColor: "#DE1A1C",
     paddingHorizontal: 6,
     paddingVertical: 3,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: "#204a42",
+    borderColor: "#193B6B",
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
 
   nameSection: { flex: 1, alignItems: "flex-end" },
   headerName: { color: "#fff", fontSize: 20, fontWeight: "900", textAlign: "right" },
-  headerSub: { color: "#a7f3d0", fontSize: 13, marginTop: 4, textAlign: "right" },
+  headerSub: { color: "#BCEFF3", fontSize: 13, marginTop: 4, textAlign: "right" },
 
   // إحصائيات
   quickStats: {
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
   },
   qStat: { alignItems: "center", flex: 1 },
   qStatVal: { color: "#fff", fontSize: 13, fontWeight: "800", marginBottom: 3, textAlign: "center" },
-  qStatLabel: { color: "#94a3b8", fontSize: 10, fontWeight: "600" },
+  qStatLabel: { color: "#8296B1", fontSize: 10, fontWeight: "600" },
   qDivider: { width: 1, height: 32, backgroundColor: "rgba(255,255,255,0.15)" },
 
 
@@ -430,8 +430,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   infoTextWrap: { flex: 1 },
-  infoLabel: { fontSize: 11, color: "#94a3b8", fontWeight: "700", textAlign: "right", marginBottom: 2 },
-  infoValue: { fontSize: 15, color: "#1e293b", fontWeight: "700", textAlign: "right", lineHeight: 20 },
+  infoLabel: { fontSize: 11, color: "#8296B1", fontWeight: "700", textAlign: "right", marginBottom: 2 },
+  infoValue: { fontSize: 15, color: "#193B6B", fontWeight: "700", textAlign: "right", lineHeight: 20 },
   rowDivider: { marginVertical: 2, backgroundColor: "#f8fafc", marginHorizontal: -4 },
 
   // بادج

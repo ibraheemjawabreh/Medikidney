@@ -194,14 +194,14 @@ const AppointmentScreen = () => {
 
   if (isWakingUp) return (
     <View style={styles.center}>
-      <ActivityIndicator size="large" color="#059669" />
+      <ActivityIndicator size="large" color="#26CDD6" />
       <Text style={styles.loadingText}>{t.appointments.systemLoading}</Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#065f46" />
+      <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
 
       <View style={styles.header}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -228,14 +228,14 @@ const AppointmentScreen = () => {
                   <View key={appt.appointment_id} style={styles.myApptCard}>
                     {isCompleted ? (
                       <View style={styles.completedBadge}>
-                        <MaterialCommunityIcons name="check-circle-outline" size={20} color="#059669" />
+                        <MaterialCommunityIcons name="check-circle-outline" size={20} color="#26CDD6" />
                       </View>
                     ) : (
                       <Pressable
                         onPress={() => handleCancelAppointment(appt.appointment_id)}
                         style={styles.deleteBtn}
                       >
-                        <MaterialCommunityIcons name="trash-can-outline" size={22} color="#EF4444" />
+                        <MaterialCommunityIcons name="trash-can-outline" size={22} color="#DE1A1C" />
                       </Pressable>
                     )}
                     <View style={{ flex: 1, alignItems: 'flex-end' }}>
@@ -295,7 +295,7 @@ const AppointmentScreen = () => {
           )}
 
           {loading ? (
-            <ActivityIndicator style={{ marginTop: 20 }} color="#059669" />
+            <ActivityIndicator style={{ marginTop: 20 }} color="#26CDD6" />
           ) : slots.length > 0 ? (
             <View style={styles.section}>
               <Text style={styles.label}>{t.appointments.step3}</Text>
@@ -342,11 +342,11 @@ const AppointmentScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#ecfdf5" },
+  container: { flex: 1, backgroundColor: "#F1FCFD" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  header: { backgroundColor: "#065f46", padding: 30, paddingTop: 60, borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
+  header: { backgroundColor: "#193B6B", padding: 30, paddingTop: 60, borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
   headerTitle: { fontSize: 22, color: "#fff", fontWeight: "bold", textAlign: "center" },
-  headerSub: { color: "#A7F3D0", textAlign: "center", fontSize: 12 },
+  headerSub: { color: "#BCEFF3", textAlign: "center", fontSize: 12 },
   scroll: { padding: 16, paddingBottom: 120 },
   myApptsSection: { marginBottom: 10 },
   myApptCard: {
@@ -357,40 +357,40 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     alignItems: 'center',
     borderRightWidth: 4,
-    borderRightColor: '#10B981',
+    borderRightColor: '#26CDD6',
     elevation: 2
   },
-  deleteBtn: { padding: 8, backgroundColor: '#FEF2F2', borderRadius: 8 },
-  completedBadge: { padding: 8, backgroundColor: '#ECFDF5', borderRadius: 8 },
-  completedText: { fontSize: 11, color: '#059669', fontWeight: '600', marginTop: 2 },
-  docName: { fontWeight: 'bold', color: '#1F2937', fontSize: 14 },
-  apptDateText: { color: '#6B7280', fontSize: 12 },
+  deleteBtn: { padding: 8, backgroundColor: '#FBEAEA', borderRadius: 8 },
+  completedBadge: { padding: 8, backgroundColor: '#F1FCFD', borderRadius: 8 },
+  completedText: { fontSize: 11, color: '#26CDD6', fontWeight: '600', marginTop: 2 },
+  docName: { fontWeight: 'bold', color: '#193B6B', fontSize: 14 },
+  apptDateText: { color: '#8296B1', fontSize: 12 },
   divider: { height: 1, backgroundColor: '#D1D5DB', marginVertical: 15 },
   card: { backgroundColor: "#fff", borderRadius: 15, padding: 15, elevation: 2 },
-  label: { fontSize: 15, fontWeight: "bold", color: "#374151", marginBottom: 10, textAlign: "right" },
+  label: { fontSize: 15, fontWeight: "bold", color: "#193B6B", marginBottom: 10, textAlign: "right" },
   pickerBox: { backgroundColor: "#F9FAFB", borderRadius: 10, borderWidth: 1, borderColor: "#E5E7EB", marginBottom: 10 },
   picker: { height: 50 },
   input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, textAlign: "right", minHeight: 60, borderWidth: 1, borderColor: "#E5E7EB" },
   section: { marginTop: 20 },
   daysContainer: { flexDirection: "row-reverse" },
   dayCard: { backgroundColor: "#fff", padding: 15, borderRadius: 12, marginLeft: 10, alignItems: "center", borderWidth: 1, borderColor: "#E5E7EB", minWidth: 90 },
-  activeDay: { backgroundColor: "#059669", borderColor: "#059669" },
-  dayText: { fontWeight: "bold", color: "#374151" },
+  activeDay: { backgroundColor: "#26CDD6", borderColor: "#26CDD6" },
+  dayText: { fontWeight: "bold", color: "#193B6B" },
   activeText: { color: "#fff" },
-  smallTime: { fontSize: 10, color: "#9CA3AF" },
+  smallTime: { fontSize: 10, color: "#8296B1" },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "flex-end", gap: 8 },
   slot: { backgroundColor: "#fff", width: "30%", padding: 12, borderRadius: 10, alignItems: "center", borderWidth: 1, borderColor: "#E5E7EB" },
-  activeSlot: { backgroundColor: "#10B981", borderColor: "#10B981" },
+  activeSlot: { backgroundColor: "#26CDD6", borderColor: "#26CDD6" },
   bookedSlot: { backgroundColor: "#F3F4F6", borderColor: "#D1D5DB" },
   slotText: { fontSize: 13, fontWeight: "600" },
-  bookedText: { color: "#9CA3AF" },
-  bookedLabel: { fontSize: 8, color: "#EF4444" },
+  bookedText: { color: "#8296B1" },
+  bookedLabel: { fontSize: 8, color: "#DE1A1C" },
   footer: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 20, backgroundColor: "#fff", borderTopWidth: 1, borderColor: "#E5E7EB" },
-  confirmBtn: { backgroundColor: "#059669", padding: 16, borderRadius: 12, alignItems: "center" },
+  confirmBtn: { backgroundColor: "#26CDD6", padding: 16, borderRadius: 12, alignItems: "center" },
   btnText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  errorBox: { marginTop: 20, padding: 15, backgroundColor: "#FEF2F2", borderRadius: 10 },
-  errorText: { color: "#DC2626", textAlign: "center", fontSize: 13 },
-  loadingText: { marginTop: 10, color: "#6B7280" }
+  errorBox: { marginTop: 20, padding: 15, backgroundColor: "#FBEAEA", borderRadius: 10 },
+  errorText: { color: "#DE1A1C", textAlign: "center", fontSize: 13 },
+  loadingText: { marginTop: 10, color: "#8296B1" }
 });
 
 export default AppointmentScreen;

@@ -107,7 +107,7 @@ const LoginScreen = ({ navigation }) => {
               value={username}
               onChangeText={setusername}
               errorMessage={errors.username}
-              leftIcon={<MaterialCommunityIcons name="account-outline" size={22} color="#059669" />}
+              leftIcon={<MaterialCommunityIcons name="account-outline" size={22} color="#26CDD6" />}
               inputContainerStyle={styles.inputContainer}
               inputStyle={styles.inputStyle}
             />
@@ -119,13 +119,13 @@ const LoginScreen = ({ navigation }) => {
               value={password}
               onChangeText={setpassword}
               errorMessage={errors.password}
-              leftIcon={<MaterialCommunityIcons name="lock-outline" size={22} color="#059669" />}
+              leftIcon={<MaterialCommunityIcons name="lock-outline" size={22} color="#26CDD6" />}
               rightIcon={
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                   <MaterialCommunityIcons
                     name={showPassword ? "eye-off-outline" : "eye-outline"}
                     size={22}
-                    color="#059669"
+                    color="#26CDD6"
                   />
                 </TouchableOpacity>
               }
@@ -161,7 +161,7 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: "#F1FCFD",
   },
   scrollContainer: {
     flexGrow: 1,
@@ -177,8 +177,8 @@ const styles = StyleSheet.create({
     paddingTop: 34,
     paddingBottom: 30,
     borderWidth: 1,
-    borderColor: "#d1fae5",
-    shadowColor: "#059669",
+    borderColor: "#BCEFF3",
+    shadowColor: "#26CDD6",
     shadowOffset: { width: 0, height: 14 },
     shadowOpacity: 0.18,
     shadowRadius: 24,
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   },
   subtitleText: {
     fontSize: 15,
-    color: "#222325",
+    color: "#193B6B",
     fontWeight: "600",
     textAlign: "center",
     marginTop: 8,
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: "900",
-    color: "#334155",
+    color: "#193B6B",
     marginBottom: 8,
     textAlign: "right",
     marginRight: 6,
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8fafc",
     borderBottomWidth: 0,
     borderWidth: 1.5,
-    borderColor: "#d1fae5",
+    borderColor: "#BCEFF3",
     borderRadius: 18,
     paddingHorizontal: 16,
     height: 58,
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
     fontSize: 16,
     fontWeight: "700",
-    color: "#1e293b",
+    color: "#193B6B",
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
@@ -242,20 +242,20 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     fontSize: 15,
-    color: '#059669',
+    color: '#26CDD6',
     fontWeight: '700',
   },
   loginButtonContainer: {
     marginTop: 10,
     borderRadius: 18,
-    shadowColor: "#0f172a",
+    shadowColor: "#193B6B",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.22,
     shadowRadius: 14,
     elevation: 8,
   },
   loginButton: {
-    backgroundColor: "#0f172a",
+    backgroundColor: "#193B6B",
     height: 60,
     borderRadius: 18,
   },

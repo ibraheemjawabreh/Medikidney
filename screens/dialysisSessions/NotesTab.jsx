@@ -46,7 +46,7 @@ const NotesTab = ({ route }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
   textArea: { backgroundColor: '#fff', padding: 15, borderRadius: 10, borderWidth: 1, borderColor: '#E5E7EB', height: 200, textAlign: 'right' },
-  btn: { backgroundColor: '#059669', padding: 15, borderRadius: 10, marginTop: 20, alignItems: 'center' },
+  btn: { backgroundColor: '#26CDD6', padding: 15, borderRadius: 10, marginTop: 20, alignItems: 'center' },
   btnText: { color: '#fff', fontWeight: 'bold' }
 });
 

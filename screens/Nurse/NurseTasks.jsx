@@ -141,7 +141,7 @@ const NurseTasks = ({ route, navigation }) => {
         {!isStarted ? (
           <View style={styles.card}>
             <View style={styles.titleRow}>
-              <MaterialCommunityIcons name="play-circle" size={24} color="#2563eb" />
+              <MaterialCommunityIcons name="play-circle" size={24} color="#26CDD6" />
               <Text style={styles.cardTitle}>ما قبل الجلسة</Text>
             </View>
             <Text style={styles.label}>الضغط قبل</Text>
@@ -151,10 +151,10 @@ const NurseTasks = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={[styles.card, { borderColor: '#10b981' }]}>
+          <View style={[styles.card, { borderColor: '#26CDD6' }]}>
             <View style={styles.titleRow}>
-              <MaterialCommunityIcons name="check-circle" size={24} color="#10b981" />
-              <Text style={[styles.cardTitle, { color: '#10b981' }]}>بيانات الإنهاء</Text>
+              <MaterialCommunityIcons name="check-circle" size={24} color="#26CDD6" />
+              <Text style={[styles.cardTitle, { color: '#26CDD6' }]}>بيانات الإنهاء</Text>
             </View>
 
             <Text style={styles.label}>حالة الجلسة</Text>
@@ -211,26 +211,26 @@ const NurseTasks = ({ route, navigation }) => {
 export default NurseTasks;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#ecfdf5", padding: 15 },
-  headerCard: { backgroundColor: "#1e3a8a", padding: 25, borderRadius: 20, marginBottom: 20, alignItems: 'center' },
+  container: { flex: 1, backgroundColor: "#F1FCFD", padding: 15 },
+  headerCard: { backgroundColor: "#193B6B", padding: 25, borderRadius: 20, marginBottom: 20, alignItems: 'center' },
   patientName: { color: "#fff", fontSize: 20, fontWeight: "bold" },
-  subHeader: { color: "#bfdbfe", fontSize: 12, marginTop: 5 },
+  subHeader: { color: "#BCEFF3", fontSize: 12, marginTop: 5 },
   card: { backgroundColor: "#fff", borderRadius: 20, padding: 20, borderWidth: 1, borderColor: '#e2e8f0', elevation: 2 },
   titleRow: { flexDirection: 'row-reverse', alignItems: 'center', marginBottom: 15 },
-  cardTitle: { fontSize: 17, fontWeight: "bold", marginRight: 8, color: '#1e293b' },
-  label: { fontSize: 13, color: "#64748b", marginBottom: 6, textAlign: 'right', fontWeight: '700' },
-  input: { backgroundColor: "#f8fafc", padding: 12, borderRadius: 10, borderWidth: 1, borderColor: "#cbd5e1", textAlign: 'right', marginBottom: 12, color: '#1e293b' },
+  cardTitle: { fontSize: 17, fontWeight: "bold", marginRight: 8, color: '#193B6B' },
+  label: { fontSize: 13, color: "#8296B1", marginBottom: 6, textAlign: 'right', fontWeight: '700' },
+  input: { backgroundColor: "#f8fafc", padding: 12, borderRadius: 10, borderWidth: 1, borderColor: "#cbd5e1", textAlign: 'right', marginBottom: 12, color: '#193B6B' },
   textArea: { minHeight: 80, textAlignVertical: 'top', paddingTop: 10 }, // ستايل الملاحظات
-  primaryButton: { backgroundColor: "#2563eb", padding: 16, borderRadius: 12, alignItems: "center" },
-  successButton: { backgroundColor: "#10b981", padding: 16, borderRadius: 12, alignItems: "center", marginTop: 10 },
+  primaryButton: { backgroundColor: "#26CDD6", padding: 16, borderRadius: 12, alignItems: "center" },
+  successButton: { backgroundColor: "#26CDD6", padding: 16, borderRadius: 12, alignItems: "center", marginTop: 10 },
   buttonText: { color: "#fff", fontSize: 15, fontWeight: "bold" },
   statusRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 15 },
   statusBtn: { flex: 1, padding: 10, borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 8, alignItems: 'center', marginHorizontal: 2 },
-  statusBtnActive: { backgroundColor: '#10b981', borderColor: '#10b981' },
-  statusBtnActiveRed: { backgroundColor: '#ef4444', borderColor: '#ef4444' },
-  statusBtnActiveOrange: { backgroundColor: '#f59e0b', borderColor: '#f59e0b' },
-  statusBtnText: { color: '#64748b', fontSize: 11, fontWeight: 'bold' },
+  statusBtnActive: { backgroundColor: '#26CDD6', borderColor: '#26CDD6' },
+  statusBtnActiveRed: { backgroundColor: '#DE1A1C', borderColor: '#DE1A1C' },
+  statusBtnActiveOrange: { backgroundColor: '#A32D2F', borderColor: '#A32D2F' },
+  statusBtnText: { color: '#8296B1', fontSize: 11, fontWeight: 'bold' },
   statusBtnTextActive: { color: '#fff' },
   cancelLink: { marginTop: 15, alignItems: 'center' },
-  cancelText: { color: '#ef4444', fontSize: 12, textDecorationLine: 'underline' }
+  cancelText: { color: '#DE1A1C', fontSize: 12, textDecorationLine: 'underline' }
 });

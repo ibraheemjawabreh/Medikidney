@@ -21,8 +21,8 @@ const PatinetPages = () => {
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarStyle: [styles.tabBar, { paddingBottom: Math.max(insets.bottom, 8), height: 60 + Math.max(insets.bottom, 8) }],
-          tabBarActiveTintColor: "#382120",
-          tabBarInactiveTintColor: "#9CA3AF",
+          tabBarActiveTintColor: "#193B6B",
+          tabBarInactiveTintColor: "#8296B1",
           tabBarLabelStyle: styles.tabLabel,
           tabBarIcon: ({ color, focused }) => {
             let iconName;

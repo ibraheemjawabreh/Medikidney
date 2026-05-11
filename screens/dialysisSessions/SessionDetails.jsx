@@ -170,7 +170,7 @@ const SessionDetails = ({ route, navigation }) => {
                 {/* الأيقونة والعنوان */}
                 <View style={modalStyles.headerIcon}>
                   <View style={modalStyles.iconCircle}>
-                    <MaterialCommunityIcons name="check-circle-outline" size={40} color="#059669" />
+                    <MaterialCommunityIcons name="check-circle-outline" size={40} color="#26CDD6" />
                   </View>
                 </View>
                 <Text style={modalStyles.title}>{t.sessionDetails.endSessionTitle}</Text>
@@ -182,18 +182,18 @@ const SessionDetails = ({ route, navigation }) => {
                   onPress={() => setEndModalPhase('weight_input')}
                 >
                   <View style={modalStyles.optionIconBox}>
-                    <MaterialCommunityIcons name="scale" size={24} color="#3b82f6" />
+                    <MaterialCommunityIcons name="scale" size={24} color="#26CDD6" />
                   </View>
                   <View style={modalStyles.optionTextBox}>
                     <Text style={modalStyles.optionTitle}>{t.sessionDetails.enterWeightOption}</Text>
                     <Text style={modalStyles.optionDesc}>{t.sessionDetails.enterWeightDesc}</Text>
                   </View>
-                  <MaterialCommunityIcons name="chevron-left" size={22} color="#94a3b8" />
+                  <MaterialCommunityIcons name="chevron-left" size={22} color="#8296B1" />
                 </Pressable>
 
                 {/* زر التخطي */}
                 <Pressable
-                  style={[modalStyles.optionBtn, { borderColor: '#fef3c7' }]}
+                  style={[modalStyles.optionBtn, { borderColor: '#FBEAEA' }]}
                   onPress={() => {
                     Alert.alert(
                       t.sessionDetails.skipConfirmTitle,
@@ -206,14 +206,14 @@ const SessionDetails = ({ route, navigation }) => {
                   }}
                   disabled={isFinishing}
                 >
-                  <View style={[modalStyles.optionIconBox, { backgroundColor: '#fffbeb' }]}>
-                    <MaterialCommunityIcons name="account-arrow-right" size={24} color="#f59e0b" />
+                  <View style={[modalStyles.optionIconBox, { backgroundColor: '#FBEAEA' }]}>
+                    <MaterialCommunityIcons name="account-arrow-right" size={24} color="#A32D2F" />
                   </View>
                   <View style={modalStyles.optionTextBox}>
                     <Text style={modalStyles.optionTitle}>{t.sessionDetails.skipWeightOption}</Text>
                     <Text style={modalStyles.optionDesc}>{t.sessionDetails.skipWeightDesc}</Text>
                   </View>
-                  <MaterialCommunityIcons name="chevron-left" size={22} color="#94a3b8" />
+                  <MaterialCommunityIcons name="chevron-left" size={22} color="#8296B1" />
                 </Pressable>
 
                 {/* زر الإلغاء */}
@@ -231,8 +231,8 @@ const SessionDetails = ({ route, navigation }) => {
             {endModalPhase === 'weight_input' && (
               <>
                 <View style={modalStyles.headerIcon}>
-                  <View style={[modalStyles.iconCircle, { backgroundColor: '#eff6ff' }]}>
-                    <MaterialCommunityIcons name="scale" size={36} color="#3b82f6" />
+                  <View style={[modalStyles.iconCircle, { backgroundColor: '#E9FAFB' }]}>
+                    <MaterialCommunityIcons name="scale" size={36} color="#26CDD6" />
                   </View>
                 </View>
                 <Text style={modalStyles.title}>{t.sessionDetails.weightTitle}</Text>
@@ -242,11 +242,11 @@ const SessionDetails = ({ route, navigation }) => {
 
                 {/* حقل الإدخال */}
                 <View style={[modalStyles.inputRow, weightInputError ? modalStyles.inputErr : null]}>
-                  <MaterialCommunityIcons name="scale" size={20} color="#3b82f6" />
+                  <MaterialCommunityIcons name="scale" size={20} color="#26CDD6" />
                   <TextInput
                     style={modalStyles.input}
                     placeholder="مثال: 72.5"
-                    placeholderTextColor="#9ca3af"
+                    placeholderTextColor="#8296B1"
                     keyboardType="decimal-pad"
                     value={weightAfter}
                     onChangeText={t => { setWeightAfter(t); setWeightInputError(''); }}
@@ -265,12 +265,12 @@ const SessionDetails = ({ route, navigation }) => {
                     onPress={() => { setEndModalPhase('choice'); setWeightInputError(''); }}
                     disabled={isFinishing}
                   >
-                    <MaterialCommunityIcons name="arrow-right" size={18} color="#64748b" />
+                    <MaterialCommunityIcons name="arrow-right" size={18} color="#8296B1" />
                     <Text style={modalStyles.backChoiceBtnText}>{t.back}</Text>
                   </Pressable>
 
                   <Pressable
-                    style={[modalStyles.confirmBtn, isFinishing && { backgroundColor: '#6ee7b7' }]}
+                    style={[modalStyles.confirmBtn, isFinishing && { backgroundColor: '#BCEFF3' }]}
                     onPress={handleFinishWithWeight}
                     disabled={isFinishing}
                   >
@@ -397,8 +397,8 @@ const SessionDetails = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ecfdf5' },
-  header: { backgroundColor: '#065f46', padding: 20, paddingTop: 50, alignItems: 'center' },
+  container: { flex: 1, backgroundColor: '#F1FCFD' },
+  header: { backgroundColor: '#193B6B', padding: 20, paddingTop: 50, alignItems: 'center' },
   patientName: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginBottom: 0 },
   avatarContainer: {
     width: 36,
@@ -424,10 +424,10 @@ const styles = StyleSheet.create({
   },
   stepIndicatorContainer: { flexDirection: 'row-reverse', gap: 8, marginBottom: 6 },
   stepDot: { width: 40, height: 6, borderRadius: 3 },
-  activeDot: { backgroundColor: '#059669' },
+  activeDot: { backgroundColor: '#26CDD6' },
   inactiveDot: { backgroundColor: '#e2e8f0' },
   stepTitleBelow: {
-    color: '#1e293b',
+    color: '#193B6B',
     fontSize: 15,
     fontWeight: '800',
   },
@@ -443,14 +443,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#dc2626',
+    backgroundColor: '#DE1A1C',
     marginHorizontal: 20,
     marginTop: 12,
     marginBottom: 8,
     paddingVertical: 13,
     borderRadius: 12,
     elevation: 3,
-    shadowColor: '#dc2626',
+    shadowColor: '#DE1A1C',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -466,10 +466,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     justifyContent: 'space-between',
   },
-  nextBtn: { backgroundColor: '#2563eb', flexDirection: 'row-reverse', paddingVertical: 12, paddingHorizontal: 25, borderRadius: 10, alignItems: 'center' },
+  nextBtn: { backgroundColor: '#26CDD6', flexDirection: 'row-reverse', paddingVertical: 12, paddingHorizontal: 25, borderRadius: 10, alignItems: 'center' },
   nextBtnText: { color: '#fff', fontWeight: 'bold', marginLeft: 8 },
   backBtn: { paddingVertical: 12, paddingHorizontal: 25, borderRadius: 10, borderWidth: 1, borderColor: '#D1D5DB' },
-  backBtnText: { color: '#4B5563', fontWeight: 'bold' },
+  backBtnText: { color: '#8296B1', fontWeight: 'bold' },
 });
 
 const modalStyles = StyleSheet.create({
@@ -501,27 +501,27 @@ const modalStyles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#f0fdf4',
+    backgroundColor: '#E9FAFB',
     alignItems: 'center',
     justifyContent: 'center',
   },
   title: {
     fontSize: 22,
     fontWeight: '900',
-    color: '#1e293b',
+    color: '#193B6B',
     textAlign: 'center',
     marginBottom: 6,
   },
   subtitle: {
     fontSize: 14,
-    color: '#64748b',
+    color: '#8296B1',
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 22,
   },
   patientName: {
     fontSize: 15,
-    color: '#64748b',
+    color: '#8296B1',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -542,7 +542,7 @@ const modalStyles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 14,
-    backgroundColor: '#eff6ff',
+    backgroundColor: '#E9FAFB',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -552,13 +552,13 @@ const modalStyles = StyleSheet.create({
   optionTitle: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#1e293b',
+    color: '#193B6B',
     textAlign: 'right',
     marginBottom: 3,
   },
   optionDesc: {
     fontSize: 12,
-    color: '#94a3b8',
+    color: '#8296B1',
     textAlign: 'right',
   },
 
@@ -569,7 +569,7 @@ const modalStyles = StyleSheet.create({
     marginTop: 4,
   },
   cancelBtnText: {
-    color: '#94a3b8',
+    color: '#8296B1',
     fontSize: 15,
     fontWeight: '700',
   },
@@ -588,22 +588,22 @@ const modalStyles = StyleSheet.create({
     marginTop: 8,
   },
   inputErr: {
-    borderColor: '#ef4444',
+    borderColor: '#DE1A1C',
   },
   input: {
     flex: 1,
     textAlign: 'right',
     fontSize: 22,
     fontWeight: '700',
-    color: '#1e293b',
+    color: '#193B6B',
   },
   unit: {
-    color: '#94a3b8',
+    color: '#8296B1',
     fontSize: 16,
     fontWeight: '700',
   },
   errText: {
-    color: '#ef4444',
+    color: '#DE1A1C',
     fontSize: 13,
     textAlign: 'right',
     marginTop: 8,
@@ -628,7 +628,7 @@ const modalStyles = StyleSheet.create({
     borderRadius: 12,
   },
   backChoiceBtnText: {
-    color: '#64748b',
+    color: '#8296B1',
     fontSize: 15,
     fontWeight: '700',
   },
@@ -638,7 +638,7 @@ const modalStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#059669',
+    backgroundColor: '#26CDD6',
     paddingVertical: 14,
     borderRadius: 12,
   },

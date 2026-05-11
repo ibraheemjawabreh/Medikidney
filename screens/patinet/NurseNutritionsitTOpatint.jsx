@@ -188,7 +188,7 @@ const StaffPatientView = ({ route, navigation }) => {
   };
 
   // --- Sub-Components ---
-  const InfoItem = ({ label, value, icon, color = "#059669" }) => (
+  const InfoItem = ({ label, value, icon, color = "#26CDD6" }) => (
     <View style={styles.infoBox}>
       <Icon name={icon} type="material-community" size={22} color={color} />
       <View style={{ marginRight: 12, flex: 1 }}>
@@ -214,7 +214,7 @@ const StaffPatientView = ({ route, navigation }) => {
     <View style={styles.reportCard}>
       <View style={styles.reportHeader}>
         <View style={styles.reportTitleRow}>
-          <Icon name={typeIcon} type="material-community" size={26} color="#204a42" />
+          <Icon name={typeIcon} type="material-community" size={26} color="#193B6B" />
           <Text style={styles.reportTitle}>{title}</Text>
         </View>
         <Text style={styles.reportDate}>{formatDate(date)}</Text>
@@ -222,8 +222,8 @@ const StaffPatientView = ({ route, navigation }) => {
       <View style={styles.reportContent}>
         <Text style={styles.reportDetail}><Text style={styles.boldLabel}>{t.staffPatientView.doctor}</Text> د. {doctor || t.staffPatientView.notSpecified}</Text>
         <Text style={styles.reportDetail}><Text style={styles.boldLabel}>{t.staffPatientView.description}</Text> {description || t.staffPatientView.noDesc}</Text>
-        <View style={[styles.statusBadge, { backgroundColor: (status === 'PENDING' || status === 'pending') ? '#fef3c7' : '#dcfce7' }]}>
-          <Text style={[styles.statusText, { color: (status === 'PENDING' || status === 'pending') ? '#92400e' : '#166534' }]}>
+        <View style={[styles.statusBadge, { backgroundColor: (status === 'PENDING' || status === 'pending') ? '#FBEAEA' : '#E9FAFB' }]}>
+          <Text style={[styles.statusText, { color: (status === 'PENDING' || status === 'pending') ? '#A32D2F' : '#193B6B' }]}>
             {(status === 'PENDING' || status === 'pending') ? t.patientProfile.status.pending : t.patientProfile.status.completed}
           </Text>
         </View>
@@ -241,7 +241,7 @@ const StaffPatientView = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#059669" />
+        <ActivityIndicator size="large" color="#26CDD6" />
         <Text style={styles.loadingText}>{t.staffPatientView.updatingData}</Text>
       </View>
     );
@@ -249,7 +249,7 @@ const StaffPatientView = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#204a42" />
+      <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
 
       <View style={styles.modernHeader}>
         <View style={styles.headerCircleOne} />
@@ -280,7 +280,7 @@ const StaffPatientView = ({ route, navigation }) => {
           >
             <View style={styles.avatarRing}>
               <View style={styles.avatarContainer}>
-                <Icon name="account" type="material-community" size={68} color="#204a42" />
+                <Icon name="account" type="material-community" size={68} color="#193B6B" />
               </View>
             </View>
           </TouchableOpacity>
@@ -297,27 +297,27 @@ const StaffPatientView = ({ route, navigation }) => {
       <Tab value={tabIndex} onChange={setTabIndex} indicatorStyle={styles.tabIndicator} containerStyle={styles.tabBar} variant="default">
         <Tab.Item
           title={t.staffPatientView.tabs.nutrition}
-          titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
+          titleStyle={(active) => [styles.tabTitle, { color: active ? "#193B6B" : "#8296B1" }]}
           titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
-          icon={<Icon name="food-apple" type="material-community" size={18} color={tabIndex === 0 ? "#204a42" : "#94a3b8"} />}
+          icon={<Icon name="food-apple" type="material-community" size={18} color={tabIndex === 0 ? "#193B6B" : "#8296B1"} />}
         />
         <Tab.Item
           title={t.staffPatientView.tabs.sessions}
-          titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
+          titleStyle={(active) => [styles.tabTitle, { color: active ? "#193B6B" : "#8296B1" }]}
           titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
-          icon={<Icon name="clock-outline" type="material-community" size={18} color={tabIndex === 1 ? "#204a42" : "#94a3b8"} />}
+          icon={<Icon name="clock-outline" type="material-community" size={18} color={tabIndex === 1 ? "#193B6B" : "#8296B1"} />}
         />
         <Tab.Item
           title={t.staffPatientView.tabs.tests}
-          titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
+          titleStyle={(active) => [styles.tabTitle, { color: active ? "#193B6B" : "#8296B1" }]}
           titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
-          icon={<Icon name="clipboard-pulse" type="material-community" size={18} color={tabIndex === 2 ? "#204a42" : "#94a3b8"} />}
+          icon={<Icon name="clipboard-pulse" type="material-community" size={18} color={tabIndex === 2 ? "#193B6B" : "#8296B1"} />}
         />
         <Tab.Item
           title={t.staffPatientView.tabs.notes}
-          titleStyle={(active) => [styles.tabTitle, { color: active ? "#204a42" : "#94a3b8" }]}
+          titleStyle={(active) => [styles.tabTitle, { color: active ? "#193B6B" : "#8296B1" }]}
           titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
-          icon={<Icon name="note-edit-outline" type="material-community" size={18} color={tabIndex === 3 ? "#204a42" : "#94a3b8"} />}
+          icon={<Icon name="note-edit-outline" type="material-community" size={18} color={tabIndex === 3 ? "#193B6B" : "#8296B1"} />}
         />
       </Tab>
 
@@ -328,7 +328,7 @@ const StaffPatientView = ({ route, navigation }) => {
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding} style={{ flex: 1 }}>
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionHeading}>{t.staffPatientView.nutritionPlan}</Text>
-              {canEditNutrition && (
+              {canEditNutrition && nutritionPlan && (
                 <TouchableOpacity
                   onPress={() => navigation.navigate("NutritionistTable", { patientId: patient?.patient_id })}
                   style={styles.editBtn}>
@@ -359,21 +359,21 @@ const StaffPatientView = ({ route, navigation }) => {
                   <Divider style={{ marginVertical: 15 }} />
 
                   <Text style={[styles.sectionHeading, { fontSize: 16, marginBottom: 10 }]}>{t.staffPatientView.dailyMeals}</Text>
-                  <MealItem label={t.staffPatientView.breakfast} content={nutritionPlan.breakfast} icon="coffee-outline" color="#f59e0b" />
-                  <MealItem label={t.staffPatientView.lunch} content={nutritionPlan.lunch} icon="food-turkey" color="#ef4444" />
-                  <MealItem label={t.staffPatientView.dinner} content={nutritionPlan.dinner} icon="weather-night" color="#3b82f6" />
+                  <MealItem label={t.staffPatientView.breakfast} content={nutritionPlan.breakfast} icon="coffee-outline" color="#A32D2F" />
+                  <MealItem label={t.staffPatientView.lunch} content={nutritionPlan.lunch} icon="food-turkey" color="#DE1A1C" />
+                  <MealItem label={t.staffPatientView.dinner} content={nutritionPlan.dinner} icon="weather-night" color="#26CDD6" />
 
                   {(nutritionPlan.meal_notes || nutritionPlan.mealNotes) && (
                     <View style={styles.notesBox}>
-                      <Icon name="information-outline" type="material-community" size={18} color="#64748b" />
+                      <Icon name="information-outline" type="material-community" size={18} color="#8296B1" />
                       <Text style={styles.notesText}>{nutritionPlan.meal_notes || nutritionPlan.mealNotes}</Text>
                     </View>
                   )}
 
                   <Divider style={{ marginVertical: 15 }} />
 
-                  <InfoItem label={t.staffPatientView.allowedItems} value={nutritionPlan.allowed_items || nutritionPlan.allowedItems} icon="check-decagram" color="#059669" />
-                  <InfoItem label={t.staffPatientView.forbiddenItems} value={nutritionPlan.forbidden_items || nutritionPlan.forbiddenItems} icon="alert-octagon" color="#ef4444" />
+                  <InfoItem label={t.staffPatientView.allowedItems} value={nutritionPlan.allowed_items || nutritionPlan.allowedItems} icon="check-decagram" color="#26CDD6" />
+                  <InfoItem label={t.staffPatientView.forbiddenItems} value={nutritionPlan.forbidden_items || nutritionPlan.forbiddenItems} icon="alert-octagon" color="#DE1A1C" />
                 </View>
               </View>
             ) : (
@@ -397,24 +397,14 @@ const StaffPatientView = ({ route, navigation }) => {
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding} style={{ flex: 1 }}>
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionHeading}>{t.staffPatientView.sessionsLog}</Text>
-              <TouchableOpacity
-                style={styles.statsBtn}
-                onPress={() => navigation.navigate("PatientSessionStatistics", {
-                  patientId: patient?.patient_id,
-                  patientName: patient?.full_name,
-                })}
-              >
-                <Icon name="chart-line" type="material-community" size={16} color="#fff" />
-                <Text style={styles.statsBtnText}>{t.staffPatientView.statistics}</Text>
-              </TouchableOpacity>
             </View>
             {sessions.length > 0 ? sessions.map((session, index) => {
               const statusConfig = {
-                COMPLETED: { label: t.patientProfile.status.completed, bg: "#dcfce7", text: "#166534", icon: "check-circle-outline", borderColor: "#059669" },
-                IN_PROGRESS: { label: t.patientProfile.status.pending, bg: "#fef3c7", text: "#92400e", icon: "progress-clock", borderColor: "#f59e0b" },
-                SCHEDULED: { label: t.patientProfile.status.scheduled || "مجدولة", bg: "#dbeafe", text: "#1e40af", icon: "calendar-clock", borderColor: "#3b82f6" },
+                COMPLETED: { label: t.patientProfile.status.completed, bg: "#E9FAFB", text: "#193B6B", icon: "check-circle-outline", borderColor: "#26CDD6" },
+                IN_PROGRESS: { label: t.patientProfile.status.pending, bg: "#FBEAEA", text: "#A32D2F", icon: "progress-clock", borderColor: "#A32D2F" },
+                SCHEDULED: { label: t.patientProfile.status.scheduled || "مجدولة", bg: "#E9FAFB", text: "#193B6B", icon: "calendar-clock", borderColor: "#26CDD6" },
               };
-              const sc = statusConfig[session.status] || { label: session.status, bg: "#f1f5f9", text: "#64748b", icon: "help-circle-outline", borderColor: "#94a3b8" };
+              const sc = statusConfig[session.status] || { label: session.status, bg: "#f1f5f9", text: "#8296B1", icon: "help-circle-outline", borderColor: "#8296B1" };
               return (
                 <TouchableOpacity
                   key={index}
@@ -434,7 +424,7 @@ const StaffPatientView = ({ route, navigation }) => {
                   {/* Card Header */}
                   <View style={styles.sessionHeader}>
                     <View style={styles.sessionDateBox}>
-                      <Icon name="calendar-range" type="material-community" size={15} color="#64748b" />
+                      <Icon name="calendar-range" type="material-community" size={15} color="#8296B1" />
                       <Text style={styles.sessionDate}>{formatDate(session.date)}</Text>
                     </View>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -449,25 +439,25 @@ const StaffPatientView = ({ route, navigation }) => {
                   {/* Card Metrics */}
                   <View style={styles.sessionMetricsRow}>
                     <View style={styles.sessionMetricBox}>
-                      <Icon name="scale" type="material-community" size={14} color="#3b82f6" />
+                      <Icon name="scale" type="material-community" size={14} color="#26CDD6" />
                       <Text style={styles.metricLabel}>الوزن قبل</Text>
-                      <Text style={[styles.metricValue, { fontSize: 13, color: '#3b82f6' }]}>
+                      <Text style={[styles.metricValue, { fontSize: 13, color: '#26CDD6' }]}>
                         {session.weight_before != null ? `${session.weight_before} kg` : "—"}
                       </Text>
                     </View>
                     <View style={styles.sessionMetricDivider} />
                     <View style={styles.sessionMetricBox}>
-                      <Icon name="scale" type="material-community" size={14} color="#059669" />
+                      <Icon name="scale" type="material-community" size={14} color="#26CDD6" />
                       <Text style={styles.metricLabel}>الوزن بعد</Text>
-                      <Text style={[styles.metricValue, { fontSize: 13, color: '#059669' }]}>
+                      <Text style={[styles.metricValue, { fontSize: 13, color: '#26CDD6' }]}>
                         {session.weight_after != null ? `${session.weight_after} kg` : "—"}
                       </Text>
                     </View>
                     <View style={styles.sessionMetricDivider} />
                     <View style={styles.sessionMetricBox}>
-                      <Icon name="water" type="material-community" size={14} color="#0ea5e9" />
+                      <Icon name="water" type="material-community" size={14} color="#26CDD6" />
                       <Text style={styles.metricLabel}>السوائل المسحوبة</Text>
-                      <Text style={[styles.metricValue, { fontSize: 13, color: '#0ea5e9' }]}>
+                      <Text style={[styles.metricValue, { fontSize: 13, color: '#26CDD6' }]}>
                         {(() => {
                           // 1. الأولوية: قيمة ultrafiltration_rate من إعدادات الجلسة
                           const settingsArr = session.dialysisSettings || [];
@@ -499,7 +489,7 @@ const StaffPatientView = ({ route, navigation }) => {
 
                   {/* Tap hint */}
                   <View style={styles.sessionTapHint}>
-                    <Icon name="chevron-left" type="material-community" size={16} color="#94a3b8" />
+                    <Icon name="chevron-left" type="material-community" size={16} color="#8296B1" />
                     <Text style={styles.sessionTapHintText}>{t.staffPatientView.tapDetailsHint}</Text>
                   </View>
                 </TouchableOpacity>
@@ -527,8 +517,8 @@ const StaffPatientView = ({ route, navigation }) => {
                       <View style={styles.prescriptionHeader}>
                         <View style={{ alignItems: 'flex-end' }}>
                           <Text style={styles.prescriptionDoctor}>د. {item.doctor?.full_name}</Text>
-                          <View style={[styles.statusBadge, { backgroundColor: item.dispense_status === 'DISPENSED' ? '#dcfce7' : '#fee2e2' }]}>
-                            <Text style={[styles.statusText, { color: item.dispense_status === 'DISPENSED' ? '#166534' : '#991b1b' }]}>
+                          <View style={[styles.statusBadge, { backgroundColor: item.dispense_status === 'DISPENSED' ? '#E9FAFB' : '#FBEAEA' }]}>
+                            <Text style={[styles.statusText, { color: item.dispense_status === 'DISPENSED' ? '#193B6B' : '#A32D2F' }]}>
                               {item.dispense_status === 'DISPENSED' ? t.staffPatientView.dispensed : t.staffPatientView.pendingDispense}
                             </Text>
                           </View>
@@ -537,17 +527,17 @@ const StaffPatientView = ({ route, navigation }) => {
                       </View>
                       <Divider style={{ marginVertical: 10 }} />
                       {item.details?.map((drug, dIdx) => (
-                        <View key={dIdx} style={[styles.drugItem, { borderRightWidth: 4, borderRightColor: drug.is_active ? '#059669' : '#94a3b8' }]}>
+                        <View key={dIdx} style={[styles.drugItem, { borderRightWidth: 4, borderRightColor: drug.is_active ? '#26CDD6' : '#8296B1' }]}>
                           <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' }}>
                             <View style={styles.drugNameRow}>
-                              <Icon name="pill" type="material-community" size={20} color={drug.is_active ? "#204a42" : "#94a3b8"} />
-                              <Text style={[styles.drugName, { color: drug.is_active ? '#204a42' : '#94a3b8' }]}>{drug.drug_name} {!drug.is_active && `(${t.staffPatientView.canceled})`}</Text>
+                              <Icon name="pill" type="material-community" size={20} color={drug.is_active ? "#193B6B" : "#8296B1"} />
+                              <Text style={[styles.drugName, { color: drug.is_active ? '#193B6B' : '#8296B1' }]}>{drug.drug_name} {!drug.is_active && `(${t.staffPatientView.canceled})`}</Text>
                             </View>
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                              <Text style={{ fontSize: 11, color: drug.status ? '#059669' : '#f59e0b', marginRight: 4 }}>
+                              <Text style={{ fontSize: 11, color: drug.status ? '#26CDD6' : '#A32D2F', marginRight: 4 }}>
                                 {drug.status ? t.staffPatientView.drugDispensed : t.staffPatientView.drugNotDispensed}
                               </Text>
-                              <Icon name={drug.status ? "check-circle" : "clock-outline"} type="material-community" size={18} color={drug.status ? "#059669" : "#f59e0b"} />
+                              <Icon name={drug.status ? "check-circle" : "clock-outline"} type="material-community" size={18} color={drug.status ? "#26CDD6" : "#A32D2F"} />
                             </View>
                           </View>
                           <Text style={styles.drugInstructions}>{drug.instructions}</Text>
@@ -619,7 +609,7 @@ const StaffPatientView = ({ route, navigation }) => {
                   <View style={styles.consultHeader}>
                     <View style={styles.consultDocRow}>
                       <View style={styles.consultAvatar}>
-                        <Icon name="stethoscope" type="material-community" size={20} color="#059669" />
+                        <Icon name="stethoscope" type="material-community" size={20} color="#26CDD6" />
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={styles.consultDocName}>د. {appt.doctor?.full_name || '—'}</Text>
@@ -629,25 +619,25 @@ const StaffPatientView = ({ route, navigation }) => {
                       </View>
                     </View>
                     <View style={styles.consultBadge}>
-                      <Icon name="check-circle" type="material-community" size={14} color="#059669" />
+                      <Icon name="check-circle" type="material-community" size={14} color="#26CDD6" />
                       <Text style={styles.consultBadgeText}>{t.patientProfile?.status?.completed || 'مكتملة'}</Text>
                     </View>
                   </View>
 
                   <View style={styles.consultDateRow}>
                     <View style={styles.consultDateItem}>
-                      <Icon name="calendar" type="material-community" size={15} color="#64748b" />
+                      <Icon name="calendar" type="material-community" size={15} color="#8296B1" />
                       <Text style={styles.consultDateText}>{appt.appt_date}</Text>
                     </View>
                     <View style={styles.consultDateItem}>
-                      <Icon name="clock-outline" type="material-community" size={15} color="#64748b" />
+                      <Icon name="clock-outline" type="material-community" size={15} color="#8296B1" />
                       <Text style={styles.consultDateText}>{formatTime(appt.appt_time)}</Text>
                     </View>
                   </View>
 
                   <View style={styles.cardFooter}>
                     <Text style={styles.viewDetailsText}>عرض التفاصيل الكاملة</Text>
-                    <Icon name="chevron-left" type="material-community" size={18} color="#059669" />
+                    <Icon name="chevron-left" type="material-community" size={18} color="#26CDD6" />
                   </View>
                 </TouchableOpacity>
               ))
@@ -667,11 +657,11 @@ const StaffPatientView = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: "#F1FCFD",
   },
   modernHeader: {
     height: 235,
-    backgroundColor: "#204a42",
+    backgroundColor: "#193B6B",
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
     paddingHorizontal: 20,
@@ -679,7 +669,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "relative",
     elevation: 14,
-    shadowColor: "#204a42",
+    shadowColor: "#193B6B",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.35,
     shadowRadius: 18,
@@ -727,7 +717,7 @@ const styles = StyleSheet.create({
   },
 
   fileBadgeText: {
-    color: "#d1fae5",
+    color: "#BCEFF3",
     fontSize: 13,
     fontWeight: "800",
     marginRight: 6,
@@ -752,7 +742,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 4,
-    borderColor: "#d1fae5",
+    borderColor: "#BCEFF3",
     elevation: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
@@ -769,7 +759,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 14,
     elevation: 10,
-    shadowColor: "#204a42",
+    shadowColor: "#193B6B",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.16,
     shadowRadius: 14,
@@ -794,7 +784,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: "#F1FCFD",
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 10,
@@ -807,14 +797,14 @@ const styles = StyleSheet.create({
 
   infoMiniLabel: {
     fontSize: 12,
-    color: "#94a3b8",
+    color: "#8296B1",
     fontWeight: "700",
     textAlign: "right",
   },
 
   infoMiniValue: {
     fontSize: 15,
-    color: "#204a42",
+    color: "#193B6B",
     fontWeight: "900",
     marginTop: 2,
     textAlign: "right",
@@ -825,7 +815,7 @@ const styles = StyleSheet.create({
     width: 190,
     height: 190,
     borderRadius: 95,
-    backgroundColor: "rgba(5, 150, 105, 0.28)",
+    backgroundColor: "rgba(38, 205, 214, 0.15)",
     top: -75,
     right: -55,
   },
@@ -851,46 +841,44 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.22)",
   },
   tabBar: { backgroundColor: "#fff", elevation: 2, borderBottomWidth: 1, borderColor: '#e2e8f0' },
-  tabIndicator: { backgroundColor: "#204a42", height: 3, borderRadius: 3 },
+  tabIndicator: { backgroundColor: "#193B6B", height: 3, borderRadius: 3 },
   tabTitle: { fontSize: 11, fontWeight: "bold", marginTop: 3, textAlign: 'center' },
   tabViewContent: { flex: 1, width: width },
   scrollPadding: { padding: 20 },
   subTabContainer: { flexDirection: 'row-reverse', backgroundColor: '#f1f5f9', margin: 15, borderRadius: 12, padding: 4 },
   subTabItem: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 10 },
   subTabActive: { backgroundColor: '#fff', elevation: 2 },
-  subTabText: { fontSize: 14, color: '#64748b', fontWeight: '600' },
-  subTextActive: { color: '#204a42', fontWeight: 'bold' },
+  subTabText: { fontSize: 14, color: '#8296B1', fontWeight: '600' },
+  subTextActive: { color: '#193B6B', fontWeight: 'bold' },
   sectionHeaderRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  sectionHeading: { fontSize: 20, fontWeight: "800", color: "#1e293b", textAlign: "right", marginBottom: 15 },
-  editBtn: { flexDirection: 'row-reverse', backgroundColor: '#204a42', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, alignItems: 'center' },
+  sectionHeading: { fontSize: 20, fontWeight: "800", color: "#193B6B", textAlign: "right", marginBottom: 15 },
+  editBtn: { flexDirection: 'row-reverse', backgroundColor: '#193B6B', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, alignItems: 'center' },
   editBtnText: { color: '#fff', fontSize: 13, fontWeight: 'bold', marginRight: 5 },
-  statsBtn: { flexDirection: 'row-reverse', backgroundColor: '#059669', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, alignItems: 'center', gap: 4 },
-  statsBtnText: { color: '#fff', fontSize: 13, fontWeight: 'bold', marginRight: 5 },
   nutritionCard: { backgroundColor: "#fff", borderRadius: 25, overflow: "hidden", elevation: 4, borderWidth: 1, borderColor: '#f1f5f9' },
-  planHeader: { backgroundColor: "#204a42", padding: 15, flexDirection: "row-reverse", justifyContent: 'space-between', alignItems: "center" },
+  planHeader: { backgroundColor: "#193B6B", padding: 15, flexDirection: "row-reverse", justifyContent: 'space-between', alignItems: "center" },
   planTitle: { color: "#fff", fontWeight: "bold", fontSize: 16 },
   planBody: { padding: 20 },
-  dateInfoContainer: { flexDirection: 'row-reverse', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#f0f9ff', borderRadius: 15, padding: 10, marginBottom: 15 },
+  dateInfoContainer: { flexDirection: 'row-reverse', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#E9FAFB', borderRadius: 15, padding: 10, marginBottom: 15 },
   dateSubBox: { alignItems: 'center' },
-  dateLabelText: { fontSize: 11, color: '#0369a1', fontWeight: 'bold' },
-  dateValueText: { fontSize: 13, color: '#1e293b', fontWeight: '800' },
-  descriptionSection: { backgroundColor: '#f8fafc', padding: 12, borderRadius: 12, borderRightWidth: 4, borderRightColor: '#0ea5e9', marginBottom: 15 },
-  descTitle: { fontSize: 12, color: '#64748b', fontWeight: 'bold', textAlign: 'right' },
-  descContent: { fontSize: 14, color: '#334155', textAlign: 'right', marginTop: 4, lineHeight: 20 },
+  dateLabelText: { fontSize: 11, color: '#26CDD6', fontWeight: 'bold' },
+  dateValueText: { fontSize: 13, color: '#193B6B', fontWeight: '800' },
+  descriptionSection: { backgroundColor: '#f8fafc', padding: 12, borderRadius: 12, borderRightWidth: 4, borderRightColor: '#26CDD6', marginBottom: 15 },
+  descTitle: { fontSize: 12, color: '#8296B1', fontWeight: 'bold', textAlign: 'right' },
+  descContent: { fontSize: 14, color: '#193B6B', textAlign: 'right', marginTop: 4, lineHeight: 20 },
   infoBox: { flexDirection: "row-reverse", marginBottom: 15 },
-  infoLabel: { fontSize: 13, color: "#64748b", textAlign: "right" },
-  infoTextValue: { fontSize: 15, fontWeight: "700", color: "#334155", textAlign: "right" },
+  infoLabel: { fontSize: 13, color: "#8296B1", textAlign: "right" },
+  infoTextValue: { fontSize: 15, fontWeight: "700", color: "#193B6B", textAlign: "right" },
   mealBox: { flexDirection: "row-reverse", alignItems: 'center', marginBottom: 12, backgroundColor: '#fafafa', padding: 10, borderRadius: 12 },
   mealIconCircle: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
   mealLabel: { fontSize: 12, fontWeight: 'bold', textAlign: 'right' },
-  mealContent: { fontSize: 14, color: '#334155', textAlign: 'right', marginTop: 2 },
+  mealContent: { fontSize: 14, color: '#193B6B', textAlign: 'right', marginTop: 2 },
   notesBox: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#f1f5f9', padding: 8, borderRadius: 8, marginTop: 5 },
-  notesText: { fontSize: 12, color: '#64748b', marginRight: 8, flex: 1, textAlign: 'right' },
-  sessionCard: { backgroundColor: "#fff", borderRadius: 20, padding: 15, marginBottom: 15, elevation: 3, borderRightWidth: 6, borderRightColor: '#204a42' },
+  notesText: { fontSize: 12, color: '#8296B1', marginRight: 8, flex: 1, textAlign: 'right' },
+  sessionCard: { backgroundColor: "#fff", borderRadius: 20, padding: 15, marginBottom: 15, elevation: 3, borderRightWidth: 6, borderRightColor: '#193B6B' },
   sessionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   sessionDateBox: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  sessionDate: { fontSize: 13, color: '#64748b', marginLeft: 5 },
-  sessionId: { fontSize: 14, fontWeight: '800', color: '#1e293b' },
+  sessionDate: { fontSize: 13, color: '#8296B1', marginLeft: 5 },
+  sessionId: { fontSize: 14, fontWeight: '800', color: '#193B6B' },
   sessionStatusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8, gap: 3 },
   sessionStatusText: { fontSize: 11, fontWeight: 'bold' },
   sessionMetricsRow: { flexDirection: 'row-reverse', justifyContent: 'space-around', backgroundColor: '#f8fafc', borderRadius: 12, padding: 10, marginBottom: 10 },
@@ -899,30 +887,30 @@ const styles = StyleSheet.create({
   sessionContent: { flexDirection: 'row-reverse', justifyContent: 'space-between' },
   sessionMetric: { flex: 1, alignItems: 'flex-end' },
   sessionTapHint: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-end' },
-  sessionTapHintText: { fontSize: 11, color: '#94a3b8', marginRight: 2 },
-  metricLabel: { fontSize: 11, color: '#94a3b8' },
-  metricValue: { fontSize: 14, fontWeight: 'bold', color: '#1e293b' },
+  sessionTapHintText: { fontSize: 11, color: '#8296B1', marginRight: 2 },
+  metricLabel: { fontSize: 11, color: '#8296B1' },
+  metricValue: { fontSize: 14, fontWeight: 'bold', color: '#193B6B' },
   emptyState: { alignItems: 'center', marginTop: 50 },
-  emptyText: { color: "#94a3b8", textAlign: "center", marginTop: 10 },
-  prescriptionCard: { backgroundColor: "#fff", borderRadius: 15, padding: 15, marginBottom: 15, elevation: 3, borderRightWidth: 5, borderRightColor: '#059669' },
+  emptyText: { color: "#8296B1", textAlign: "center", marginTop: 10 },
+  prescriptionCard: { backgroundColor: "#fff", borderRadius: 15, padding: 15, marginBottom: 15, elevation: 3, borderRightWidth: 5, borderRightColor: '#26CDD6' },
   prescriptionHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-  prescriptionDoctor: { fontSize: 15, fontWeight: 'bold', color: '#1e293b' },
-  prescriptionDate: { fontSize: 13, color: '#64748b' },
+  prescriptionDoctor: { fontSize: 15, fontWeight: 'bold', color: '#193B6B' },
+  prescriptionDate: { fontSize: 13, color: '#8296B1' },
   drugItem: { backgroundColor: '#f8fafc', padding: 12, borderRadius: 10, marginBottom: 10, borderWidth: 1, borderColor: '#e2e8f0' },
   drugNameRow: { flexDirection: 'row-reverse', alignItems: 'center', marginBottom: 4 },
-  drugName: { fontSize: 15, fontWeight: 'bold', color: '#204a42', marginRight: 8 },
-  drugInstructions: { fontSize: 14, color: '#475569', textAlign: 'right' },
-  reportCard: { backgroundColor: '#fff', borderRadius: 15, padding: 16, marginBottom: 15, elevation: 3, borderLeftWidth: 4, borderLeftColor: '#204a42' },
+  drugName: { fontSize: 15, fontWeight: 'bold', color: '#193B6B', marginRight: 8 },
+  drugInstructions: { fontSize: 14, color: '#8296B1', textAlign: 'right' },
+  reportCard: { backgroundColor: '#fff', borderRadius: 15, padding: 16, marginBottom: 15, elevation: 3, borderLeftWidth: 4, borderLeftColor: '#193B6B' },
   reportHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   reportTitleRow: { flexDirection: 'row-reverse', alignItems: 'center' },
-  reportTitle: { fontSize: 17, fontWeight: 'bold', color: '#1e293b', marginRight: 8 },
-  reportDate: { fontSize: 13, color: '#64748b' },
+  reportTitle: { fontSize: 17, fontWeight: 'bold', color: '#193B6B', marginRight: 8 },
+  reportDate: { fontSize: 13, color: '#8296B1' },
   reportContent: { marginBottom: 15 },
-  reportDetail: { fontSize: 15, color: '#475569', textAlign: 'right', marginBottom: 4 },
-  boldLabel: { fontWeight: 'bold', color: '#1e293b' },
+  reportDetail: { fontSize: 15, color: '#8296B1', textAlign: 'right', marginBottom: 4 },
+  boldLabel: { fontWeight: 'bold', color: '#193B6B' },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, alignSelf: 'flex-end', marginTop: 4 },
   statusText: { fontSize: 11, fontWeight: 'bold' },
-  downloadBtn: { backgroundColor: '#204a42', borderRadius: 10, marginTop: 10, height: 48 },
+  downloadBtn: { backgroundColor: '#193B6B', borderRadius: 10, marginTop: 10, height: 48 },
 
   // ── Completed Consultations Cards ──
   consultCard: {
@@ -931,7 +919,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 14,
     borderRightWidth: 4,
-    borderRightColor: '#059669',
+    borderRightColor: '#26CDD6',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -955,19 +943,19 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#ecfdf5',
+    backgroundColor: '#F1FCFD',
     alignItems: 'center',
     justifyContent: 'center',
   },
   consultDocName: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#1e293b',
+    color: '#193B6B',
     textAlign: 'right',
   },
   consultType: {
     fontSize: 12,
-    color: '#64748b',
+    color: '#8296B1',
     fontWeight: '600',
     textAlign: 'right',
     marginTop: 2,
@@ -976,7 +964,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#ecfdf5',
+    backgroundColor: '#F1FCFD',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -984,7 +972,7 @@ const styles = StyleSheet.create({
   consultBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#059669',
+    color: '#26CDD6',
   },
   consultDateRow: {
     flexDirection: 'row-reverse',
@@ -1002,7 +990,7 @@ const styles = StyleSheet.create({
   },
   consultDateText: {
     fontSize: 13,
-    color: '#64748b',
+    color: '#8296B1',
     fontWeight: '600',
   },
   consultSection: {
@@ -1023,7 +1011,7 @@ const styles = StyleSheet.create({
   },
   consultSectionText: {
     fontSize: 14,
-    color: '#334155',
+    color: '#193B6B',
     lineHeight: 22,
     textAlign: 'right',
     fontWeight: '500',
@@ -1038,7 +1026,7 @@ const styles = StyleSheet.create({
   },
   consultNoDetailsText: {
     fontSize: 13,
-    color: '#94a3b8',
+    color: '#8296B1',
     fontWeight: '600',
   },
   cardFooter: {
@@ -1053,7 +1041,7 @@ const styles = StyleSheet.create({
   },
   viewDetailsText: {
     fontSize: 13,
-    color: '#059669',
+    color: '#26CDD6',
     fontWeight: '700',
   },
 });

@@ -68,7 +68,7 @@ const ChangePassword = ({ navigation }) => {
             onChangeText={setoldPassword}
             errorMessage={errors.oldPassword}
             secureTextEntry
-            leftIcon={{ type: "feather", name: "lock", color: "#059669", size: 20 }}
+            leftIcon={{ type: "feather", name: "lock", color: "#26CDD6", size: 20 }}
             inputContainerStyle={styles.inputContainer}
           />
 
@@ -79,7 +79,7 @@ const ChangePassword = ({ navigation }) => {
             onChangeText={setnewPassword}
             errorMessage={errors.newPassword}
             secureTextEntry
-            leftIcon={{ type: "feather", name: "key", color: "#059669", size: 20 }}
+            leftIcon={{ type: "feather", name: "key", color: "#26CDD6", size: 20 }}
             inputContainerStyle={styles.inputContainer}
           />
 
@@ -90,7 +90,7 @@ const ChangePassword = ({ navigation }) => {
             onChangeText={setconfirmPassword}
             errorMessage={errors.confirmPassword}
             secureTextEntry
-            leftIcon={{ type: "feather", name: "shield", color: "#059669", size: 20 }}
+            leftIcon={{ type: "feather", name: "shield", color: "#26CDD6", size: 20 }}
             inputContainerStyle={styles.inputContainer}
           />
 
@@ -106,7 +106,7 @@ const ChangePassword = ({ navigation }) => {
             title={t.changePasswordScreen.cancelBtn}
             type="clear"
             onPress={() => navigation.goBack()}
-            titleStyle={{ color: "#ef4444" }}
+            titleStyle={{ color: "#DE1A1C" }}
             containerStyle={{ marginTop: 10 }}
           />
         </View>
@@ -118,11 +118,11 @@ const ChangePassword = ({ navigation }) => {
 export default ChangePassword;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#ecfdf5" },
+  container: { flex: 1, backgroundColor: "#F1FCFD" },
   scrollContainer: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 20, paddingVertical: 30 },
   headerSection: { marginBottom: 30, alignItems: 'center' },
-  header: { fontSize: 28, fontWeight: "900", color: "#0f172a" },
-  subtitle: { fontSize: 14, color: "#64748b", textAlign: "center", marginTop: 5, paddingHorizontal: 20 },
+  header: { fontSize: 28, fontWeight: "900", color: "#193B6B" },
+  subtitle: { fontSize: 14, color: "#8296B1", textAlign: "center", marginTop: 5, paddingHorizontal: 20 },
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 25,
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e2e8f0'
   },
-  label: { fontSize: 14, fontWeight: "900", color: "#334155", marginBottom: 5, textAlign: 'right', marginRight: 10 },
+  label: { fontSize: 14, fontWeight: "900", color: "#193B6B", marginBottom: 5, textAlign: 'right', marginRight: 10 },
   inputContainer: {
     borderBottomWidth: 0,
     backgroundColor: "#f8fafc",
@@ -146,5 +146,5 @@ const styles = StyleSheet.create({
     height: 55
   },
   buttonContainer: { borderRadius: 15, marginTop: 10 },
-  button: { backgroundColor: "#0f172a", borderRadius: 15, paddingVertical: 15 },
+  button: { backgroundColor: "#193B6B", borderRadius: 15, paddingVertical: 15 },
 });

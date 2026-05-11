@@ -178,12 +178,12 @@ const PatientState = ({ route }) => {
   // ─── حالة الجلسة بصرياً ───────────────────────────────────
   const getStatusInfo = (status) => {
     switch (status) {
-      case "COMPLETED": return { label: "مكتملة", color: "#059669", icon: "check-circle", bg: "#f0fdf4" };
+      case "COMPLETED": return { label: "مكتملة", color: "#26CDD6", icon: "check-circle", bg: "#E9FAFB" };
       case "PENDING":
-      case "IN_PROGRESS": return { label: "تم البدء (جاري الغسيل)", color: "#2563eb", icon: "sync", bg: "#eff6ff" };
-      case "CANCELLED": return { label: "ملغية", color: "#ef4444", icon: "close-circle", bg: "#fef2f2" };
-      case "MISSED": return { label: "غائب", color: "#6b7280", icon: "account-off", bg: "#f9fafb" };
-      default: return { label: "لم يتم البدء", color: "#6b7280", icon: "play-circle-outline", bg: "#f9fafb" };
+      case "IN_PROGRESS": return { label: "تم البدء (جاري الغسيل)", color: "#26CDD6", icon: "sync", bg: "#E9FAFB" };
+      case "CANCELLED": return { label: "ملغية", color: "#DE1A1C", icon: "close-circle", bg: "#FBEAEA" };
+      case "MISSED": return { label: "غائب", color: "#8296B1", icon: "account-off", bg: "#f9fafb" };
+      default: return { label: "لم يتم البدء", color: "#8296B1", icon: "play-circle-outline", bg: "#f9fafb" };
     }
   };
 
@@ -204,7 +204,7 @@ const PatientState = ({ route }) => {
           <View style={mStyles.sheet}>
             {/* العنوان */}
             <View style={mStyles.sheetHeader}>
-              <MaterialCommunityIcons name="scale" size={28} color="#3b82f6" />
+              <MaterialCommunityIcons name="scale" size={28} color="#26CDD6" />
               <Text style={mStyles.sheetTitle}>وزن المريض قبل الجلسة</Text>
             </View>
             {pendingPatient && (
@@ -213,11 +213,11 @@ const PatientState = ({ route }) => {
 
             {/* حقل الإدخال */}
             <View style={[mStyles.inputRow, weightInputError ? mStyles.inputErr : null]}>
-              <MaterialCommunityIcons name="scale" size={20} color="#3b82f6" />
+              <MaterialCommunityIcons name="scale" size={20} color="#26CDD6" />
               <TextInput
                 style={mStyles.input}
                 placeholder="مثال: 74.5"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor="#8296B1"
                 keyboardType="decimal-pad"
                 value={weightInput}
                 onChangeText={t => { setWeightInput(t); setWeightInputError(''); }}
@@ -240,7 +240,7 @@ const PatientState = ({ route }) => {
               </Pressable>
 
               <Pressable
-                style={[mStyles.confirmBtn, isSavingSession && { backgroundColor: '#6ee7b7' }]}
+                style={[mStyles.confirmBtn, isSavingSession && { backgroundColor: '#BCEFF3' }]}
                 onPress={handleConfirmWeight}
                 disabled={isSavingSession}
               >
@@ -260,14 +260,14 @@ const PatientState = ({ route }) => {
       {/* ── Header ──────────────────────────────────────── */}
       <View style={styles.header}>
         <Pressable onPress={() => navigation.navigate("NurseHome")} style={styles.backBtn}>
-          <MaterialCommunityIcons name="arrow-right" size={24} color="#065f46" />
+          <MaterialCommunityIcons name="arrow-right" size={24} color="#193B6B" />
         </Pressable>
         <Text style={styles.title}>مرضاي اليوم ({myPatients.length})</Text>
         <Pressable
           onPress={() => navigation.navigate("SelectPatient")}
           style={styles.editBtn}
         >
-          <MaterialCommunityIcons name="pencil-outline" size={22} color="#065f46" />
+          <MaterialCommunityIcons name="pencil-outline" size={22} color="#193B6B" />
         </Pressable>
       </View>
 
@@ -279,13 +279,13 @@ const PatientState = ({ route }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => fetchStatus(true)}
-            colors={["#059669"]}
-            tintColor="#059669"
+            colors={["#26CDD6"]}
+            tintColor="#26CDD6"
           />
         }
       >
         {loading && !refreshing ? (
-          <ActivityIndicator size="large" color="#059669" style={{ marginTop: 60 }} />
+          <ActivityIndicator size="large" color="#26CDD6" style={{ marginTop: 60 }} />
         ) : myPatients.length === 0 ? (
           <View style={styles.emptyBox}>
             <MaterialCommunityIcons name="account-search-outline" size={60} color="#D1D5DB" />
@@ -327,7 +327,7 @@ const PatientState = ({ route }) => {
                 <View style={styles.cardFooter}>
                   {isCompleted ? (
                     <View style={styles.doneRow}>
-                      <MaterialCommunityIcons name="check-decagram" size={20} color="#059669" />
+                      <MaterialCommunityIcons name="check-decagram" size={20} color="#26CDD6" />
                       <Text style={styles.doneText}>اكتملت جلسة الغسيل بنجاح</Text>
                     </View>
                   ) : hasSession ? (
@@ -341,7 +341,7 @@ const PatientState = ({ route }) => {
                   ) : (
                     <View style={styles.actionRow}>
                       <Pressable
-                        style={[styles.actionBtn, { flex: 2, backgroundColor: "#d97706" }]}
+                        style={[styles.actionBtn, { flex: 2, backgroundColor: "#A32D2F" }]}
                         onPress={() => handleStartSession(patient)}
                         disabled={loading}
                       >
@@ -361,7 +361,7 @@ const PatientState = ({ route }) => {
                         onPress={() => handleUnassign(patient)}
                         disabled={loading}
                       >
-                        <MaterialCommunityIcons name="trash-can-outline" size={22} color="#ef4444" />
+                        <MaterialCommunityIcons name="trash-can-outline" size={22} color="#DE1A1C" />
                       </Pressable>
                     </View>
                   )}
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F3F4F6" },
 
   header: {
-    backgroundColor: "#ecfdf5",
+    backgroundColor: "#F1FCFD",
     paddingTop: 52,
     paddingBottom: 14,
     paddingHorizontal: 20,
@@ -395,27 +395,27 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     padding: 8,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: "#F1FCFD",
     borderRadius: 12,
   },
   editBtn: {
     padding: 8,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: "#F1FCFD",
     borderRadius: 12,
   },
   title: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#111827",
+    color: "#193B6B",
   },
 
   scroll: { padding: 16 },
 
   emptyBox: { alignItems: "center", marginTop: 80 },
-  emptyText: { color: "#9CA3AF", marginTop: 12, fontSize: 16, fontWeight: "600" },
+  emptyText: { color: "#8296B1", marginTop: 12, fontSize: 16, fontWeight: "600" },
   backToSelectBtn: {
     marginTop: 20,
-    backgroundColor: "#059669",
+    backgroundColor: "#26CDD6",
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 12,
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     elevation: 2,
     borderRightWidth: 5,
-    borderRightColor: "#059669",
+    borderRightColor: "#26CDD6",
   },
   cardHeader: {
     flexDirection: "row-reverse",
@@ -446,8 +446,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   statusText: { fontSize: 12, fontWeight: "700" },
-  machineText: { color: "#6B7280", fontSize: 12, fontWeight: "600" },
-  patientName: { fontSize: 18, fontWeight: "800", color: "#1F2937", textAlign: "right", marginBottom: 12 },
+  machineText: { color: "#8296B1", fontSize: 12, fontWeight: "600" },
+  patientName: { fontSize: 18, fontWeight: "800", color: "#193B6B", textAlign: "right", marginBottom: 12 },
 
   cardFooter: {
     marginTop: 4,
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   actionBtn: {
-    backgroundColor: "#059669",
+    backgroundColor: "#26CDD6",
     flexDirection: "row-reverse",
     justifyContent: "center",
     alignItems: "center",
@@ -471,11 +471,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   removeBtn: {
-    backgroundColor: "#fef2f2",
+    backgroundColor: "#FBEAEA",
     padding: 11,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#fee2e2",
+    borderColor: "#FBEAEA",
   },
   doneRow: {
     flexDirection: "row-reverse",
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
   },
-  doneText: { color: "#059669", fontWeight: "700", fontSize: 14 },
+  doneText: { color: "#26CDD6", fontWeight: "700", fontSize: 14 },
 });
 
 const mStyles = StyleSheet.create({
@@ -511,11 +511,11 @@ const mStyles = StyleSheet.create({
   sheetTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#1e293b',
+    color: '#193B6B',
   },
   sheetPatient: {
     fontSize: 16,
-    color: '#64748b',
+    color: '#8296B1',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -531,22 +531,22 @@ const mStyles = StyleSheet.create({
     gap: 10,
   },
   inputErr: {
-    borderColor: '#ef4444',
+    borderColor: '#DE1A1C',
   },
   input: {
     flex: 1,
     textAlign: 'right',
     fontSize: 20,
     fontWeight: '700',
-    color: '#1e293b',
+    color: '#193B6B',
   },
   unit: {
-    color: '#94a3b8',
+    color: '#8296B1',
     fontSize: 16,
     fontWeight: '700',
   },
   errText: {
-    color: '#ef4444',
+    color: '#DE1A1C',
     fontSize: 13,
     textAlign: 'right',
     marginTop: 8,
@@ -566,7 +566,7 @@ const mStyles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelBtnText: {
-    color: '#64748b',
+    color: '#8296B1',
     fontSize: 16,
     fontWeight: '700',
   },
@@ -576,7 +576,7 @@ const mStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#26CDD6',
     paddingVertical: 14,
     borderRadius: 12,
   },

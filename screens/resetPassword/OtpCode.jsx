@@ -73,11 +73,11 @@ const OtpCode = ({ route, navigation }) => {
 export default OtpCode;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#ecfdf5", padding: 16, justifyContent: "center" },
-  header: { fontSize: 22, fontWeight: "bold", color: "#2563EB", textAlign: "center", marginBottom: 24 },
+  container: { flex: 1, backgroundColor: "#F1FCFD", padding: 16, justifyContent: "center" },
+  header: { fontSize: 22, fontWeight: "bold", color: "#26CDD6", textAlign: "center", marginBottom: 24 },
   card: { backgroundColor: "#FFFFFF", borderRadius: 16, padding: 20, elevation: 4 },
   inputContainer: { borderBottomWidth: 0, backgroundColor: "#F3F4F6", borderRadius: 10, paddingHorizontal: 10, marginTop: 6 },
   input: { textAlign: "center", fontSize: 18 },
-  button: { backgroundColor: "#2563EB", borderRadius: 12, paddingVertical: 14, marginTop: 10 },
+  button: { backgroundColor: "#26CDD6", borderRadius: 12, paddingVertical: 14, marginTop: 10 },
   buttonText: { fontSize: 16, fontWeight: "bold", color: "#FFFFFF" },
 });

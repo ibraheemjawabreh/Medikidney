@@ -54,7 +54,7 @@ const ConsultationDetails = ({ route, navigation }) => {
         <View style={styles.mainCard}>
           <View style={styles.docRow}>
             <View style={styles.avatar}>
-              <Icon name="stethoscope" type="material-community" size={32} color="#059669" />
+              <Icon name="stethoscope" type="material-community" size={32} color="#26CDD6" />
             </View>
             <View style={{ flex: 1, marginRight: 15 }}>
               <Text style={styles.docName}>د. {consultation.doctor?.full_name || '—'}</Text>
@@ -68,18 +68,18 @@ const ConsultationDetails = ({ route, navigation }) => {
 
           <View style={styles.dateRow}>
             <View style={styles.dateItem}>
-              <Icon name="calendar" type="material-community" size={18} color="#64748b" />
+              <Icon name="calendar" type="material-community" size={18} color="#8296B1" />
               <Text style={styles.dateText}>{consultation.appt_date}</Text>
             </View>
             <View style={styles.dateItem}>
-              <Icon name="clock-outline" type="material-community" size={18} color="#64748b" />
+              <Icon name="clock-outline" type="material-community" size={18} color="#8296B1" />
               <Text style={styles.dateText}>{formatTime(consultation.appt_time)}</Text>
             </View>
           </View>
 
           {consultation.visit_reason && (
             <View style={styles.reasonContainer}>
-              <Icon name="text-box-outline" type="material-community" size={16} color="#475569" />
+              <Icon name="text-box-outline" type="material-community" size={16} color="#8296B1" />
               <Text style={styles.reasonText}>
                 <Text style={{ fontWeight: '700' }}>سبب الزيارة: </Text>
                 {consultation.visit_reason}
@@ -94,32 +94,32 @@ const ConsultationDetails = ({ route, navigation }) => {
             title={t.appointments?.diagnosis || 'التشخيص الطبي'}
             content={consultation.diagnosis}
             icon="clipboard-pulse"
-            color="#dc2626"
-            bgColor="#fef2f2"
+            color="#DE1A1C"
+            bgColor="#FBEAEA"
           />
 
           <InfoSection
             title={t.appointments?.treatmentPlan || 'الخطة العلاجية'}
             content={consultation.treatment_plan}
             icon="medical-bag"
-            color="#2563eb"
-            bgColor="#eff6ff"
+            color="#26CDD6"
+            bgColor="#E9FAFB"
           />
 
           <InfoSection
             title={t.appointments?.medications || 'الأدوية الموصوفة'}
             content={consultation.medications}
             icon="pill"
-            color="#059669"
-            bgColor="#ecfdf5"
+            color="#26CDD6"
+            bgColor="#F1FCFD"
           />
 
           <InfoSection
             title={t.appointments?.doctorNotes || 'ملاحظات الطبيب'}
             content={consultation.notes}
             icon="note-text-outline"
-            color="#d97706"
-            bgColor="#fffbeb"
+            color="#A32D2F"
+            bgColor="#FBEAEA"
           />
 
           {!consultation.diagnosis && !consultation.treatment_plan && !consultation.notes && !consultation.medications && (
@@ -141,7 +141,7 @@ export default ConsultationDetails;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ecfdf5',
+    backgroundColor: '#F1FCFD',
   },
   centerContainer: {
     flex: 1,
@@ -151,11 +151,11 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#ef4444',
+    color: '#DE1A1C',
     fontFamily: 'Tajawal-Medium',
   },
   header: {
-    backgroundColor: '#204a42',
+    backgroundColor: '#193B6B',
     paddingTop: Platform.OS === 'ios' ? 50 : 30,
     paddingBottom: 20,
     paddingHorizontal: 15,
@@ -203,21 +203,21 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#ecfdf5',
+    backgroundColor: '#F1FCFD',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#d1fae5',
+    borderColor: '#BCEFF3',
   },
   docName: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#1e293b',
+    color: '#193B6B',
     textAlign: 'right',
   },
   docSpecialty: {
     fontSize: 14,
-    color: '#64748b',
+    color: '#8296B1',
     textAlign: 'right',
     marginTop: 4,
   },
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#334155',
+    color: '#193B6B',
   },
   reasonContainer: {
     marginTop: 16,
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   reasonText: {
     flex: 1,
     fontSize: 14,
-    color: '#475569',
+    color: '#8296B1',
     textAlign: 'right',
     lineHeight: 22,
   },
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   },
   sectionText: {
     fontSize: 15,
-    color: '#334155',
+    color: '#193B6B',
     lineHeight: 24,
     textAlign: 'right',
     fontWeight: '500',
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   },
   emptyDetailsText: {
     fontSize: 15,
-    color: '#94a3b8',
+    color: '#8296B1',
     textAlign: 'center',
     marginTop: 16,
     lineHeight: 24,

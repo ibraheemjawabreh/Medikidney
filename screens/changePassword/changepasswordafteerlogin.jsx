@@ -96,7 +96,7 @@ const ChangePasswordFirstTime = ({ navigation, route }) => {
             value={newPassword}
             onChangeText={setNewPassword}
             secureTextEntry
-            leftIcon={{ type: "feather", name: "lock", color: "#059669", size: 20 }}
+            leftIcon={{ type: "feather", name: "lock", color: "#26CDD6", size: 20 }}
             inputContainerStyle={styles.inputContainer}
           />
 
@@ -106,7 +106,7 @@ const ChangePasswordFirstTime = ({ navigation, route }) => {
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
-            leftIcon={{ type: "feather", name: "shield", color: "#059669", size: 20 }}
+            leftIcon={{ type: "feather", name: "shield", color: "#26CDD6", size: 20 }}
             inputContainerStyle={styles.inputContainer}
           />
 
@@ -135,16 +135,16 @@ const ChangePasswordFirstTime = ({ navigation, route }) => {
 export default ChangePasswordFirstTime;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#ecfdf5" },
+  container: { flex: 1, backgroundColor: "#F1FCFD" },
   scrollContainer: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 20 },
   headerSection: { marginBottom: 30, alignItems: 'center' },
-  header: { fontSize: 28, fontWeight: "900", color: "#0f172a" },
-  subtitle: { fontSize: 14, color: "#64748b", textAlign: "center", marginTop: 5 },
+  header: { fontSize: 28, fontWeight: "900", color: "#193B6B" },
+  subtitle: { fontSize: 14, color: "#8296B1", textAlign: "center", marginTop: 5 },
   card: { backgroundColor: "#fff", borderRadius: 25, padding: 25, elevation: 4 },
-  label: { fontSize: 14, fontWeight: "bold", color: "#334155", textAlign: 'right', marginBottom: 5 },
+  label: { fontSize: 14, fontWeight: "bold", color: "#193B6B", textAlign: 'right', marginBottom: 5 },
   inputContainer: { borderBottomWidth: 0, backgroundColor: "#f8fafc", borderRadius: 15, paddingHorizontal: 15, borderWidth: 1, borderColor: "#e2e8f0" },
   buttonContainer: { borderRadius: 15, marginTop: 10 },
-  mainButton: { backgroundColor: "#0f172a", borderRadius: 15, paddingVertical: 15 },
+  mainButton: { backgroundColor: "#193B6B", borderRadius: 15, paddingVertical: 15 },
   skipButton: { marginTop: 10 },
-  skipText: { color: "#64748b", fontWeight: "bold" }
+  skipText: { color: "#8296B1", fontWeight: "bold" }
 });

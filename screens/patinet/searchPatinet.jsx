@@ -58,7 +58,7 @@ const SearchPatient = ({ navigation }) => {
             value={search}
             onChangeText={handleChangeSearch}
             errorMessage={error}
-            leftIcon={<MaterialCommunityIcons name="magnify" size={24} color="#94a3b8" />}
+            leftIcon={<MaterialCommunityIcons name="magnify" size={24} color="#8296B1" />}
             inputContainerStyle={styles.inputContainer}
             inputStyle={styles.inputStyle}
             containerStyle={{ paddingHorizontal: 0 }}
@@ -96,7 +96,7 @@ const SearchPatient = ({ navigation }) => {
                     <Text style={styles.patientId}>#{item.id}</Text>
                   </View>
                   <View style={styles.avatarCircle}>
-                    <MaterialCommunityIcons name="account-circle" size={35} color="#059669" />
+                    <MaterialCommunityIcons name="account-circle" size={35} color="#26CDD6" />
                   </View>
                 </TouchableOpacity>
               )}
@@ -119,7 +119,7 @@ export default SearchPatient;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ecfdf5", // نفس خلفية تسجيل الدخول (Emerald-50/100)
+    backgroundColor: "#F1FCFD", // نفس خلفية تسجيل الدخول (Emerald-50/100)
   },
   innerContainer: {
     flex: 1,
@@ -133,12 +133,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "900",
-    color: "#0f172a", // Slate-900
+    color: "#193B6B", // Slate-900
     textAlign: 'right',
   },
   headerSubtitle: {
     fontSize: 14,
-    color: "#64748b", // Slate-500
+    color: "#8296B1", // Slate-500
     fontWeight: "500",
     textAlign: 'right',
     marginTop: 4,
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 20,
-    shadowColor: "#0f172a",
+    shadowColor: "#193B6B",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.05,
     shadowRadius: 15,
@@ -167,10 +167,10 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     fontSize: 15,
     fontWeight: "600",
-    color: "#1e293b",
+    color: "#193B6B",
   },
   mainButton: {
-    backgroundColor: "#0f172a", // Slate-900 مثل زر الدخول
+    backgroundColor: "#193B6B", // Slate-900 مثل زر الدخول
     borderRadius: 15,
     height: 55,
   },
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   },
   resultsCount: {
     textAlign: 'right',
-    color: "#64748b",
+    color: "#8296B1",
     fontSize: 13,
     marginBottom: 10,
     fontWeight: 'bold',
@@ -211,16 +211,16 @@ const styles = StyleSheet.create({
   patientName: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#1e293b",
+    color: "#193B6B",
   },
   patientId: {
     fontSize: 12,
-    color: "#059669", // Emerald-600 لتعطي طابع طبي
+    color: "#26CDD6", // Emerald-600 لتعطي طابع طبي
     fontWeight: '600',
     marginTop: 2,
   },
   avatarCircle: {
-    backgroundColor: '#f0fdf4',
+    backgroundColor: '#E9FAFB',
     padding: 8,
     borderRadius: 12,
     marginLeft: 15,
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 10,
     fontSize: 14,
-    color: "#64748b",
+    color: "#8296B1",
     fontWeight: 'bold',
   }
 });

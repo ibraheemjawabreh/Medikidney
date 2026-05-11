@@ -25,11 +25,11 @@ const { width } = Dimensions.get("window");
 
 // ─── بيانات ثابتة خارج المكون (لا تتغير) ───────────────────────
 const STATUS_CONFIG = {
-  COMPLETED:   { label: 'مكتملة', bg: '#dcfce7', text: '#166534', icon: 'check-circle-outline', borderColor: '#059669' },
-  IN_PROGRESS: { label: 'جارية',  bg: '#fef3c7', text: '#92400e', icon: 'progress-clock',       borderColor: '#f59e0b' },
-  SCHEDULED:   { label: 'مجدولة', bg: '#dbeafe', text: '#1e40af', icon: 'calendar-clock',       borderColor: '#3b82f6' },
+  COMPLETED:   { label: 'مكتملة', bg: '#E9FAFB', text: '#193B6B', icon: 'check-circle-outline', borderColor: '#26CDD6' },
+  IN_PROGRESS: { label: 'جارية',  bg: '#FBEAEA', text: '#A32D2F', icon: 'progress-clock',       borderColor: '#A32D2F' },
+  SCHEDULED:   { label: 'مجدولة', bg: '#E9FAFB', text: '#193B6B', icon: 'calendar-clock',       borderColor: '#26CDD6' },
 };
-const DEFAULT_STATUS = { label: '', bg: '#f1f5f9', text: '#64748b', icon: 'help-circle-outline', borderColor: '#94a3b8' };
+const DEFAULT_STATUS = { label: '', bg: '#f1f5f9', text: '#8296B1', icon: 'help-circle-outline', borderColor: '#8296B1' };
 
 // حساب كمية السوائل المسحوبة — الأولوية: UF rate ← فرق الوزن ← fluid_removed
 const getFluidRemoved = (session) => {
@@ -312,7 +312,7 @@ const PatientProfile = ({ navigation, route }) => {
     </View>
   );
 
-  const InfoItem = ({ label, value, icon, color = "#059669" }) => (
+  const InfoItem = ({ label, value, icon, color = "#26CDD6" }) => (
     <View style={styles.infoBox}>
       <Icon name={icon} type="material-community" size={22} color={color} />
       <View style={{ marginRight: 12, flex: 1 }}>
@@ -340,7 +340,7 @@ const PatientProfile = ({ navigation, route }) => {
       <View style={styles.reportCard}>
         <View style={styles.reportHeader}>
           <View style={styles.reportTitleRow}>
-            <Icon name={typeIcon} type="material-community" size={26} color="#204a42" />
+            <Icon name={typeIcon} type="material-community" size={26} color="#193B6B" />
             <Text style={styles.reportTitle}>{title}</Text>
           </View>
           <Text style={styles.reportDate}>{formatDate(date)}</Text>
@@ -352,8 +352,8 @@ const PatientProfile = ({ navigation, route }) => {
           <Text style={styles.reportDetail}>
             <Text style={styles.boldLabel}>{t.patientProfile.description}:</Text> {description || t.unknown}
           </Text>
-          <View style={[styles.statusBadge, { backgroundColor: isPending ? "#fef3c7" : "#dcfce7" }]}>
-            <Text style={[styles.statusText, { color: isPending ? "#92400e" : "#166534" }]}>
+          <View style={[styles.statusBadge, { backgroundColor: isPending ? "#FBEAEA" : "#E9FAFB" }]}>
+            <Text style={[styles.statusText, { color: isPending ? "#A32D2F" : "#193B6B" }]}>
               {isPending ? t.patientProfile.status.pending : t.patientProfile.status.completed}
             </Text>
           </View>
@@ -372,7 +372,7 @@ const PatientProfile = ({ navigation, route }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#059669" />
+        <ActivityIndicator size="large" color="#26CDD6" />
         <Text style={styles.loadingText}>{t.patientProfile.loading}</Text>
       </View>
     );
@@ -380,7 +380,7 @@ const PatientProfile = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#204a42" />
+      <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
 
       {/* ══════ شاشة إدخال الوزن بعد الجلسة (lock) ══════════════ */}
       {pendingWeightSession && (
@@ -400,7 +400,7 @@ const PatientProfile = ({ navigation, route }) => {
               {/* الأيقونة */}
               <View style={weightLockStyles.iconWrap}>
                 <View style={weightLockStyles.iconCircle}>
-                  <MaterialCommunityIcons name="scale" size={40} color="#f59e0b" />
+                  <MaterialCommunityIcons name="scale" size={40} color="#A32D2F" />
                 </View>
               </View>
 
@@ -418,18 +418,18 @@ const PatientProfile = ({ navigation, route }) => {
                 </Text>
                 {pendingWeightSession.weight_before != null && (
                   <Text style={weightLockStyles.weightBeforeText}>
-                    {t.patientProfile.weightBefore}: <Text style={{ fontWeight: '800', color: '#3b82f6' }}>{pendingWeightSession.weight_before} kg</Text>
+                    {t.patientProfile.weightBefore}: <Text style={{ fontWeight: '800', color: '#26CDD6' }}>{pendingWeightSession.weight_before} kg</Text>
                   </Text>
                 )}
               </View>
 
               {/* حقل الإدخال */}
               <View style={[weightLockStyles.inputRow, weightAfterError ? weightLockStyles.inputErr : null]}>
-                <MaterialCommunityIcons name="scale" size={22} color="#3b82f6" />
+                <MaterialCommunityIcons name="scale" size={22} color="#26CDD6" />
                 <TextInput
                   style={weightLockStyles.input}
                   placeholder="مثال: 72.5"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor="#8296B1"
                   keyboardType="decimal-pad"
                   value={weightAfterInput}
                   onChangeText={t => { setWeightAfterInput(t); setWeightAfterError(''); }}
@@ -453,7 +453,7 @@ const PatientProfile = ({ navigation, route }) => {
 
               {/* زر الحفظ */}
               <TouchableOpacity
-                style={[weightLockStyles.saveBtn, isSavingWeight && { backgroundColor: '#6ee7b7' }]}
+                style={[weightLockStyles.saveBtn, isSavingWeight && { backgroundColor: '#BCEFF3' }]}
                 onPress={handleSaveWeightAfter}
                 disabled={isSavingWeight}
                 activeOpacity={0.8}
@@ -494,7 +494,7 @@ const PatientProfile = ({ navigation, route }) => {
           >
             <View style={styles.avatarRing}>
               <View style={styles.avatarContainer}>
-                <Icon name="account" type="material-community" size={68} color="#204a42" />
+                <Icon name="account" type="material-community" size={68} color="#193B6B" />
               </View>
             </View>
           </TouchableOpacity>
@@ -518,9 +518,9 @@ const PatientProfile = ({ navigation, route }) => {
           <Tab.Item
             key={i}
             title={title}
-            titleStyle={(active) => [styles.tabTitle, { color: active ? '#204a42' : '#94a3b8' }]}
+            titleStyle={(active) => [styles.tabTitle, { color: active ? '#193B6B' : '#8296B1' }]}
             titleProps={{ numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6, allowFontScaling: false }}
-            icon={<Icon name={icon} type="material-community" size={18} color={tabIndex === i ? '#204a42' : '#94a3b8'} />}
+            icon={<Icon name={icon} type="material-community" size={18} color={tabIndex === i ? '#193B6B' : '#8296B1'} />}
           />
         ))}
       </Tab>
@@ -565,14 +565,14 @@ const PatientProfile = ({ navigation, route }) => {
 
                   <Divider style={{ marginVertical: 15 }} />
 
-                  <MealItem label={t.patientProfile.meals.breakfast} content={nutritionPlan.breakfast} icon="coffee-outline" color="#f59e0b" />
-                  <MealItem label={t.patientProfile.meals.lunch} content={nutritionPlan.lunch} icon="food-turkey" color="#ef4444" />
-                  <MealItem label={t.patientProfile.meals.dinner} content={nutritionPlan.dinner} icon="weather-night" color="#3b82f6" />
+                  <MealItem label={t.patientProfile.meals.breakfast} content={nutritionPlan.breakfast} icon="coffee-outline" color="#A32D2F" />
+                  <MealItem label={t.patientProfile.meals.lunch} content={nutritionPlan.lunch} icon="food-turkey" color="#DE1A1C" />
+                  <MealItem label={t.patientProfile.meals.dinner} content={nutritionPlan.dinner} icon="weather-night" color="#26CDD6" />
 
                   <Divider style={{ marginVertical: 15 }} />
 
-                  <InfoItem label="المسموحات" value={nutritionPlan.allowed_items || nutritionPlan.allowedItems} icon="check-decagram" color="#059669" />
-                  <InfoItem label="الممنوعات" value={nutritionPlan.forbidden_items || nutritionPlan.forbiddenItems} icon="alert-octagon" color="#ef4444" />
+                  <InfoItem label="المسموحات" value={nutritionPlan.allowed_items || nutritionPlan.allowedItems} icon="check-decagram" color="#26CDD6" />
+                  <InfoItem label="الممنوعات" value={nutritionPlan.forbidden_items || nutritionPlan.forbiddenItems} icon="alert-octagon" color="#DE1A1C" />
                 </View>
               </View>
             ) : (
@@ -626,7 +626,7 @@ const PatientProfile = ({ navigation, route }) => {
                 >
                   <View style={styles.sessionHeader}>
                     <View style={styles.sessionDateBox}>
-                      <Icon name="calendar-range" type="material-community" size={15} color="#64748b" />
+                      <Icon name="calendar-range" type="material-community" size={15} color="#8296B1" />
                       <Text style={styles.sessionDate}>{formatDate(session.date)}</Text>
                     </View>
 
@@ -641,25 +641,25 @@ const PatientProfile = ({ navigation, route }) => {
 
                   <View style={styles.sessionMetricsRow}>
                     <View style={styles.sessionMetricBox}>
-                      <Icon name="scale" type="material-community" size={14} color="#3b82f6" />
+                      <Icon name="scale" type="material-community" size={14} color="#26CDD6" />
                       <Text style={styles.metricLabel}>الوزن قبل</Text>
-                      <Text style={[styles.metricValue, { fontSize: 13, color: '#3b82f6' }]}>
+                      <Text style={[styles.metricValue, { fontSize: 13, color: '#26CDD6' }]}>
                         {session.weight_before != null ? `${session.weight_before} kg` : "—"}
                       </Text>
                     </View>
                     <View style={styles.sessionMetricDivider} />
                     <View style={styles.sessionMetricBox}>
-                      <Icon name="scale" type="material-community" size={14} color="#059669" />
+                      <Icon name="scale" type="material-community" size={14} color="#26CDD6" />
                       <Text style={styles.metricLabel}>الوزن بعد</Text>
-                      <Text style={[styles.metricValue, { fontSize: 13, color: '#059669' }]}>
+                      <Text style={[styles.metricValue, { fontSize: 13, color: '#26CDD6' }]}>
                         {session.weight_after != null ? `${session.weight_after} kg` : "—"}
                       </Text>
                     </View>
                     <View style={styles.sessionMetricDivider} />
                     <View style={styles.sessionMetricBox}>
-                      <Icon name="water" type="material-community" size={14} color="#0ea5e9" />
+                      <Icon name="water" type="material-community" size={14} color="#26CDD6" />
                       <Text style={styles.metricLabel}>السوائل المسحوبة</Text>
-                      <Text style={[styles.metricValue, { fontSize: 13, color: '#0ea5e9' }]}>
+                      <Text style={[styles.metricValue, { fontSize: 13, color: '#26CDD6' }]}>
                         {getFluidRemoved(session)}
                       </Text>
                     </View>
@@ -673,7 +673,7 @@ const PatientProfile = ({ navigation, route }) => {
                       </View>
                     ) : (
                       <>
-                        <Icon name={t.vitalSigns.now === 'الآن' ? "chevron-left" : "chevron-right"} type="material-community" size={16} color="#94a3b8" />
+                        <Icon name={t.vitalSigns.now === 'الآن' ? "chevron-left" : "chevron-right"} type="material-community" size={16} color="#8296B1" />
                         <Text style={styles.sessionTapHintText}>{t.patientProfile.previewFile}</Text>
                       </>
                     )}
@@ -720,8 +720,8 @@ const PatientProfile = ({ navigation, route }) => {
                         <View style={styles.prescriptionHeader}>
                           <View style={{ alignItems: "flex-end" }}>
                             <Text style={styles.prescriptionDoctor}>د. {item.doctor?.full_name}</Text>
-                            <View style={[styles.statusBadge, { backgroundColor: isDispensed ? "#dcfce7" : "#fee2e2" }]}>
-                              <Text style={[styles.statusText, { color: isDispensed ? "#166534" : "#991b1b" }]}>
+                            <View style={[styles.statusBadge, { backgroundColor: isDispensed ? "#E9FAFB" : "#FBEAEA" }]}>
+                              <Text style={[styles.statusText, { color: isDispensed ? "#193B6B" : "#A32D2F" }]}>
                                 {isDispensed ? t.patientProfile.status.completed : t.patientProfile.status.pending}
                               </Text>
                             </View>
@@ -735,11 +735,11 @@ const PatientProfile = ({ navigation, route }) => {
                         {item.details?.map((drug, dIdx) => (
                           <View
                             key={dIdx}
-                            style={[styles.drugItem, { borderRightWidth: 4, borderRightColor: drug.is_active ? "#059669" : "#94a3b8" }]}
+                            style={[styles.drugItem, { borderRightWidth: 4, borderRightColor: drug.is_active ? "#26CDD6" : "#8296B1" }]}
                           >
                             <View style={styles.drugNameRow}>
-                              <Icon name="pill" type="material-community" size={20} color={drug.is_active ? "#204a42" : "#94a3b8"} />
-                              <Text style={[styles.drugName, { color: drug.is_active ? "#204a42" : "#94a3b8" }]}>
+                              <Icon name="pill" type="material-community" size={20} color={drug.is_active ? "#193B6B" : "#8296B1"} />
+                              <Text style={[styles.drugName, { color: drug.is_active ? "#193B6B" : "#8296B1" }]}>
                                 {drug.drug_name}
                               </Text>
                             </View>
@@ -829,7 +829,7 @@ const PatientProfile = ({ navigation, route }) => {
                     <View style={styles.completedApptHeader}>
                       <View style={styles.completedApptDocRow}>
                         <View style={styles.completedApptAvatar}>
-                          <Icon name="stethoscope" type="material-community" size={20} color="#059669" />
+                          <Icon name="stethoscope" type="material-community" size={20} color="#26CDD6" />
                         </View>
                         <View style={{ flex: 1 }}>
                           <Text style={styles.completedApptDocName}>د. {appt.doctor?.full_name || '—'}</Text>
@@ -839,7 +839,7 @@ const PatientProfile = ({ navigation, route }) => {
                         </View>
                       </View>
                       <View style={styles.completedApptBadge}>
-                        <Icon name="check-circle" type="material-community" size={14} color="#059669" />
+                        <Icon name="check-circle" type="material-community" size={14} color="#26CDD6" />
                         <Text style={styles.completedApptBadgeText}>{t.patientProfile?.status?.completed || 'مكتملة'}</Text>
                       </View>
                     </View>
@@ -847,11 +847,11 @@ const PatientProfile = ({ navigation, route }) => {
                     {/* التاريخ والوقت */}
                     <View style={styles.completedApptDateRow}>
                       <View style={styles.completedApptDateItem}>
-                        <Icon name="calendar" type="material-community" size={15} color="#64748b" />
+                        <Icon name="calendar" type="material-community" size={15} color="#8296B1" />
                         <Text style={styles.completedApptDateText}>{appt.appt_date}</Text>
                       </View>
                       <View style={styles.completedApptDateItem}>
-                        <Icon name="clock-outline" type="material-community" size={15} color="#64748b" />
+                        <Icon name="clock-outline" type="material-community" size={15} color="#8296B1" />
                         <Text style={styles.completedApptDateText}>{formatTime(appt.appt_time)}</Text>
                       </View>
                     </View>
@@ -859,7 +859,7 @@ const PatientProfile = ({ navigation, route }) => {
                     {/* رابط عرض التفاصيل */}
                     <View style={styles.cardFooter}>
                       <Text style={styles.viewDetailsText}>عرض التفاصيل الكاملة</Text>
-                      <Icon name="chevron-left" type="material-community" size={18} color="#059669" />
+                      <Icon name="chevron-left" type="material-community" size={18} color="#26CDD6" />
                     </View>
                   </TouchableOpacity>
                 ));
@@ -877,7 +877,7 @@ export default PatientProfile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: "#F1FCFD",
   },
 
   loadingContainer: {
@@ -889,12 +889,12 @@ const styles = StyleSheet.create({
 
   loadingText: {
     marginTop: 12,
-    color: "#64748b",
+    color: "#8296B1",
   },
 
   modernHeader: {
     height: 235,
-    backgroundColor: "#204a42",
+    backgroundColor: "#193B6B",
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
     paddingHorizontal: 20,
@@ -902,7 +902,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "relative",
     elevation: 14,
-    shadowColor: "#204a42",
+    shadowColor: "#193B6B",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.35,
     shadowRadius: 18,
@@ -955,7 +955,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 4,
-    borderColor: "#d1fae5",
+    borderColor: "#BCEFF3",
     elevation: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
@@ -1002,7 +1002,7 @@ const styles = StyleSheet.create({
   },
 
   tabIndicator: {
-    backgroundColor: "#204a42",
+    backgroundColor: "#193B6B",
     height: 3,
   },
 
@@ -1048,19 +1048,19 @@ const styles = StyleSheet.create({
 
   subTabText: {
     fontSize: 14,
-    color: "#64748b",
+    color: "#8296B1",
     fontWeight: "600",
   },
 
   subTextActive: {
-    color: "#204a42",
+    color: "#193B6B",
     fontWeight: "bold",
   },
 
   sectionHeading: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#1e293b",
+    color: "#193B6B",
     textAlign: "right",
     marginBottom: 15,
   },
@@ -1079,7 +1079,7 @@ const styles = StyleSheet.create({
   },
 
   planHeader: {
-    backgroundColor: "#204a42",
+    backgroundColor: "#193B6B",
     padding: 15,
     flexDirection: "row-reverse",
     justifyContent: "space-between",
@@ -1100,7 +1100,7 @@ const styles = StyleSheet.create({
     flexDirection: "row-reverse",
     justifyContent: "space-around",
     alignItems: "center",
-    backgroundColor: "#f0f9ff",
+    backgroundColor: "#E9FAFB",
     borderRadius: 15,
     padding: 10,
     marginBottom: 15,
@@ -1112,13 +1112,13 @@ const styles = StyleSheet.create({
 
   dateLabelText: {
     fontSize: 11,
-    color: "#0369a1",
+    color: "#26CDD6",
     fontWeight: "bold",
   },
 
   dateValueText: {
     fontSize: 13,
-    color: "#1e293b",
+    color: "#193B6B",
     fontWeight: "800",
   },
 
@@ -1127,20 +1127,20 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     borderRightWidth: 4,
-    borderRightColor: "#0ea5e9",
+    borderRightColor: "#26CDD6",
     marginBottom: 15,
   },
 
   descTitle: {
     fontSize: 12,
-    color: "#64748b",
+    color: "#8296B1",
     fontWeight: "bold",
     textAlign: "right",
   },
 
   descContent: {
     fontSize: 14,
-    color: "#334155",
+    color: "#193B6B",
     textAlign: "right",
     marginTop: 4,
     lineHeight: 20,
@@ -1153,14 +1153,14 @@ const styles = StyleSheet.create({
 
   infoLabel: {
     fontSize: 13,
-    color: "#64748b",
+    color: "#8296B1",
     textAlign: "right",
   },
 
   infoTextValue: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#334155",
+    color: "#193B6B",
     textAlign: "right",
   },
 
@@ -1189,7 +1189,7 @@ const styles = StyleSheet.create({
 
   mealContent: {
     fontSize: 14,
-    color: "#334155",
+    color: "#193B6B",
     textAlign: "right",
     marginTop: 2,
   },
@@ -1201,7 +1201,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     elevation: 3,
     borderRightWidth: 6,
-    borderRightColor: "#204a42",
+    borderRightColor: "#193B6B",
   },
 
   sessionHeader: {
@@ -1219,14 +1219,14 @@ const styles = StyleSheet.create({
 
   sessionDate: {
     fontSize: 13,
-    color: "#64748b",
+    color: "#8296B1",
     marginLeft: 5,
   },
 
   sessionId: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#1e293b",
+    color: "#193B6B",
   },
 
   sessionStatusBadge: {
@@ -1271,21 +1271,21 @@ const styles = StyleSheet.create({
 
   sessionTapHintText: {
     fontSize: 11,
-    color: "#94a3b8",
+    color: "#8296B1",
     marginRight: 2,
   },
 
   sessionCardActive: {
     borderWidth: 2,
-    borderColor: "#f59e0b",
-    backgroundColor: "#fffbeb",
+    borderColor: "#A32D2F",
+    backgroundColor: "#FBEAEA",
   },
 
   activeSessionBanner: {
     flexDirection: "row-reverse",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#fef3c7",
+    backgroundColor: "#FBEAEA",
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 10,
@@ -1295,24 +1295,24 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#f59e0b",
+    backgroundColor: "#A32D2F",
   },
 
   activeSessionText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#92400e",
+    color: "#A32D2F",
   },
 
   metricLabel: {
     fontSize: 11,
-    color: "#94a3b8",
+    color: "#8296B1",
   },
 
   metricValue: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#1e293b",
+    color: "#193B6B",
   },
 
   emptyState: {
@@ -1321,7 +1321,7 @@ const styles = StyleSheet.create({
   },
 
   emptyText: {
-    color: "#94a3b8",
+    color: "#8296B1",
     textAlign: "center",
     marginTop: 10,
   },
@@ -1333,7 +1333,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     elevation: 3,
     borderRightWidth: 5,
-    borderRightColor: "#059669",
+    borderRightColor: "#26CDD6",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -1349,12 +1349,12 @@ const styles = StyleSheet.create({
   prescriptionDoctor: {
     fontSize: 15,
     fontWeight: "bold",
-    color: "#1e293b",
+    color: "#193B6B",
   },
 
   prescriptionDate: {
     fontSize: 13,
-    color: "#64748b",
+    color: "#8296B1",
   },
 
   drugItem: {
@@ -1375,13 +1375,13 @@ const styles = StyleSheet.create({
   drugName: {
     fontSize: 15,
     fontWeight: "bold",
-    color: "#204a42",
+    color: "#193B6B",
     marginRight: 8,
   },
 
   drugInstructions: {
     fontSize: 14,
-    color: "#475569",
+    color: "#8296B1",
     textAlign: "right",
   },
 
@@ -1392,7 +1392,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     elevation: 3,
     borderLeftWidth: 4,
-    borderLeftColor: "#204a42",
+    borderLeftColor: "#193B6B",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -1414,13 +1414,13 @@ const styles = StyleSheet.create({
   reportTitle: {
     fontSize: 17,
     fontWeight: "bold",
-    color: "#1e293b",
+    color: "#193B6B",
     marginRight: 8,
   },
 
   reportDate: {
     fontSize: 13,
-    color: "#64748b",
+    color: "#8296B1",
   },
 
   reportContent: {
@@ -1429,14 +1429,14 @@ const styles = StyleSheet.create({
 
   reportDetail: {
     fontSize: 15,
-    color: "#475569",
+    color: "#8296B1",
     textAlign: "right",
     marginBottom: 4,
   },
 
   boldLabel: {
     fontWeight: "bold",
-    color: "#1e293b",
+    color: "#193B6B",
   },
 
   statusBadge: {
@@ -1453,14 +1453,14 @@ const styles = StyleSheet.create({
   },
 
   downloadBtn: {
-    backgroundColor: "#204a42",
+    backgroundColor: "#193B6B",
     borderRadius: 10,
     marginTop: 10,
     height: 48,
   },
 
   bookingPrimaryBtn: {
-    backgroundColor: "#204a42",
+    backgroundColor: "#193B6B",
     flexDirection: "row-reverse",
     width: "100%",
     paddingVertical: 16,
@@ -1468,7 +1468,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 4,
-    shadowColor: "#204a42",
+    shadowColor: "#193B6B",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -1488,7 +1488,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginBottom: 12,
     borderRightWidth: 5,
-    borderRightColor: "#059669",
+    borderRightColor: "#26CDD6",
     elevation: 2,
     alignItems: "center",
     shadowColor: "#000",
@@ -1498,7 +1498,7 @@ const styles = StyleSheet.create({
   },
 
   apptCardIcon: {
-    backgroundColor: "#dcfce7",
+    backgroundColor: "#E9FAFB",
     padding: 10,
     borderRadius: 12,
     marginLeft: 15,
@@ -1512,7 +1512,7 @@ const styles = StyleSheet.create({
   apptCardDoc: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#1e293b",
+    color: "#193B6B",
     marginBottom: 4,
     textAlign: "right",
     width: "100%",
@@ -1525,7 +1525,7 @@ const styles = StyleSheet.create({
 
   apptCardDetail: {
     fontSize: 13,
-    color: "#64748b",
+    color: "#8296B1",
     marginRight: 4,
   },
 
@@ -1541,18 +1541,18 @@ const styles = StyleSheet.create({
   ufStatsCard: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
-    backgroundColor: '#f0f9ff',
+    backgroundColor: '#E9FAFB',
     borderRadius: 16,
     padding: 16,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#bae6fd',
+    borderColor: '#BCEFF3',
   },
   ufIconBox: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#e0f2fe',
+    backgroundColor: '#E9FAFB',
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 12,
@@ -1560,12 +1560,12 @@ const styles = StyleSheet.create({
   ufStatsTitle: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#0369a1',
+    color: '#26CDD6',
     textAlign: 'right',
   },
   ufStatsDesc: {
     fontSize: 12,
-    color: '#0ea5e9',
+    color: '#26CDD6',
     textAlign: 'right',
     marginTop: 2,
   },
@@ -1584,11 +1584,11 @@ const styles = StyleSheet.create({
   ufStatsValue: {
     fontSize: 22,
     fontWeight: '900',
-    color: '#0284c7',
+    color: '#26CDD6',
   },
   ufStatsUnit: {
     fontSize: 11,
-    color: '#7dd3fc',
+    color: '#BCEFF3',
     fontWeight: 'bold',
   },
 
@@ -1599,7 +1599,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 14,
     borderRightWidth: 4,
-    borderRightColor: '#059669',
+    borderRightColor: '#26CDD6',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -1623,19 +1623,19 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#ecfdf5',
+    backgroundColor: '#F1FCFD',
     alignItems: 'center',
     justifyContent: 'center',
   },
   completedApptDocName: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#1e293b',
+    color: '#193B6B',
     textAlign: 'right',
   },
   completedApptType: {
     fontSize: 12,
-    color: '#64748b',
+    color: '#8296B1',
     fontWeight: '600',
     textAlign: 'right',
     marginTop: 2,
@@ -1644,7 +1644,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#ecfdf5',
+    backgroundColor: '#F1FCFD',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -1652,7 +1652,7 @@ const styles = StyleSheet.create({
   completedApptBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#059669',
+    color: '#26CDD6',
   },
   completedApptDateRow: {
     flexDirection: 'row-reverse',
@@ -1666,7 +1666,7 @@ const styles = StyleSheet.create({
   },
   completedApptDateText: {
     fontSize: 13,
-    color: '#64748b',
+    color: '#8296B1',
     fontWeight: '600',
   },
   cardFooter: {
@@ -1681,7 +1681,7 @@ const styles = StyleSheet.create({
   },
   viewDetailsText: {
     fontSize: 13,
-    color: '#059669',
+    color: '#26CDD6',
     fontWeight: '700',
   },
 });
@@ -1714,22 +1714,22 @@ const weightLockStyles = StyleSheet.create({
     width: 76,
     height: 76,
     borderRadius: 38,
-    backgroundColor: '#fffbeb',
+    backgroundColor: '#FBEAEA',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
-    borderColor: '#fef3c7',
+    borderColor: '#FBEAEA',
   },
   title: {
     fontSize: 22,
     fontWeight: '900',
-    color: '#1e293b',
+    color: '#193B6B',
     textAlign: 'center',
     marginBottom: 6,
   },
   subtitle: {
     fontSize: 13,
-    color: '#64748b',
+    color: '#8296B1',
     textAlign: 'center',
     marginBottom: 20,
     lineHeight: 20,
@@ -1745,11 +1745,11 @@ const weightLockStyles = StyleSheet.create({
   sessionInfoText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#475569',
+    color: '#8296B1',
   },
   weightBeforeText: {
     fontSize: 13,
-    color: '#64748b',
+    color: '#8296B1',
   },
   inputRow: {
     flexDirection: 'row-reverse',
@@ -1763,22 +1763,22 @@ const weightLockStyles = StyleSheet.create({
     gap: 10,
   },
   inputErr: {
-    borderColor: '#ef4444',
+    borderColor: '#DE1A1C',
   },
   input: {
     flex: 1,
     textAlign: 'right',
     fontSize: 22,
     fontWeight: '700',
-    color: '#1e293b',
+    color: '#193B6B',
   },
   unit: {
-    color: '#94a3b8',
+    color: '#8296B1',
     fontSize: 16,
     fontWeight: '700',
   },
   errText: {
-    color: '#ef4444',
+    color: '#DE1A1C',
     fontSize: 13,
     textAlign: 'right',
     marginTop: 8,
@@ -1788,15 +1788,15 @@ const weightLockStyles = StyleSheet.create({
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f0fdf4',
+    backgroundColor: '#E9FAFB',
     padding: 12,
     borderRadius: 12,
     marginTop: 12,
   },
-  diffLabel: { fontSize: 12, color: '#166534' },
-  diffVal: { fontSize: 18, fontWeight: '800', color: '#059669' },
+  diffLabel: { fontSize: 12, color: '#193B6B' },
+  diffVal: { fontSize: 18, fontWeight: '800', color: '#26CDD6' },
   saveBtn: {
-    backgroundColor: '#059669',
+    backgroundColor: '#26CDD6',
     flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'center',

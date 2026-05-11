@@ -136,7 +136,7 @@ const NotificationsScreen = () => {
             onPress={() => handleMarkAsRead(item.notification_id)}
             style={styles.readButton}
           >
-            <MaterialIcons name="done-all" size={20} color="#382120" />
+            <MaterialIcons name="done-all" size={20} color="#193B6B" />
             <Text style={styles.readButtonText}>{t.notifications.read}</Text>
           </TouchableOpacity>
 
@@ -144,7 +144,7 @@ const NotificationsScreen = () => {
             onPress={() => handleDeleteNotification(item.notification_id)}
             style={styles.deleteButton}
           >
-            <MaterialIcons name="delete" size={20} color="#d32f2f" />
+            <MaterialIcons name="delete" size={20} color="#DE1A1C" />
             <Text style={styles.deleteButtonText}>{t.notifications.delete}</Text>
           </TouchableOpacity>
         </View>
@@ -155,7 +155,7 @@ const NotificationsScreen = () => {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#382120" />
+        <ActivityIndicator size="large" color="#193B6B" />
         <Text style={styles.loadingText}>{t.loading}</Text>
       </View>
     );
@@ -225,22 +225,22 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#382120',
+    color: '#193B6B',
     marginBottom: 4,
   },
   unreadText: {
     fontSize: 12,
-    color: '#d32f2f',
+    color: '#DE1A1C',
     fontWeight: '600',
   },
   markAllButton: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#e8f5e9',
+    backgroundColor: '#E9FAFB',
     borderRadius: 6,
   },
   markAllText: {
-    color: '#2e7d32',
+    color: '#26CDD6',
     fontSize: 12,
     fontWeight: '600',
   },
@@ -274,16 +274,16 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#382120',
+    color: '#193B6B',
     marginBottom: 4,
   },
   date: {
     fontSize: 12,
-    color: '#999',
+    color: '#8296B1',
   },
   message: {
     fontSize: 14,
-    color: '#555',
+    color: '#8296B1',
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -300,12 +300,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: '#e8f5e9',
+    backgroundColor: '#E9FAFB',
     borderRadius: 6,
     gap: 4,
   },
   readButtonText: {
-    color: '#2e7d32',
+    color: '#26CDD6',
     fontSize: 12,
     fontWeight: '600',
   },
@@ -314,12 +314,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: '#ffebee',
+    backgroundColor: '#FBEAEA',
     borderRadius: 6,
     gap: 4,
   },
   deleteButtonText: {
-    color: '#d32f2f',
+    color: '#DE1A1C',
     fontSize: 12,
     fontWeight: '600',
   },
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#666',
+    color: '#8296B1',
   },
   emptyContainer: {
     flex: 1,
@@ -343,13 +343,13 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#666',
+    color: '#8296B1',
     marginTop: 16,
     textAlign: 'center',
   },
   emptySubText: {
     fontSize: 14,
-    color: '#999',
+    color: '#8296B1',
     marginTop: 8,
     textAlign: 'center',
   },

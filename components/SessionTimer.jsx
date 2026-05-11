@@ -80,7 +80,7 @@ const SessionTimer = ({ session, size = 'small' }) => {
   const s = remaining % 60;
   const timeStr = `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   const progress = Math.min(1, 1 - (remaining / TOTAL_DURATION));
-  const barColor = remaining > 1800 ? '#34d399' : remaining > 600 ? '#fbbf24' : '#ef4444';
+  const barColor = remaining > 1800 ? '#26CDD6' : remaining > 600 ? '#BCEFF3' : '#DE1A1C';
 
   const isLarge = size === 'large';
 
@@ -226,12 +226,12 @@ const largeStyles = StyleSheet.create({
 // ─── Styles: Small (Card) ───────────────────────────────────────────
 const smallStyles = StyleSheet.create({
   container: {
-    backgroundColor: '#f0fdf4',
+    backgroundColor: '#E9FAFB',
     borderRadius: 12,
     padding: 12,
     marginTop: 10,
     borderWidth: 1,
-    borderColor: '#d1fae5',
+    borderColor: '#BCEFF3',
   },
   row: {
     flexDirection: 'row-reverse',
@@ -247,7 +247,7 @@ const smallStyles = StyleSheet.create({
   },
   label: {
     fontSize: 11,
-    color: '#64748b',
+    color: '#8296B1',
     fontWeight: '700',
     flex: 1,
     textAlign: 'left',

@@ -43,9 +43,9 @@ const formatDateTime = (dateStr, t) => {
 
 // ── تحديد حالة الضغط ─────────────────────────────────────────────────────────
 const getBpStatus = (sys, dia, t) => {
-  if (sys > 140 || dia > 90) return { label: t.vitalSigns.status.high, color: "#ef4444", bg: "#fef2f2" };
-  if (sys < 90 || dia < 60) return { label: t.vitalSigns.status.low, color: "#f59e0b", bg: "#fffbeb" };
-  return { label: t.vitalSigns.status.normal, color: "#059669", bg: "#f0fdf4" };
+  if (sys > 140 || dia > 90) return { label: t.vitalSigns.status.high, color: "#DE1A1C", bg: "#FBEAEA" };
+  if (sys < 90 || dia < 60) return { label: t.vitalSigns.status.low, color: "#A32D2F", bg: "#FBEAEA" };
+  return { label: t.vitalSigns.status.normal, color: "#26CDD6", bg: "#E9FAFB" };
 };
 
 // ── بطاقة قراءة واحدة ────────────────────────────────────────────────────────
@@ -83,7 +83,7 @@ const VitalCard = ({ item, index, totalCount, onDelete, t }) => {
             onPress={() => onDelete(vitalId)}
             style={cardStyles.deleteBtn}
           >
-            <MaterialCommunityIcons name="trash-can-outline" size={17} color="#ef4444" />
+            <MaterialCommunityIcons name="trash-can-outline" size={17} color="#DE1A1C" />
           </Pressable>
         </View>
       </View>
@@ -94,9 +94,9 @@ const VitalCard = ({ item, index, totalCount, onDelete, t }) => {
         {/* الضغط */}
         <View style={cardStyles.valueBox}>
           <View style={cardStyles.bpRow}>
-            <Text style={[cardStyles.bigNum, { color: '#3b82f6' }]}>{item.diastolic}</Text>
+            <Text style={[cardStyles.bigNum, { color: '#26CDD6' }]}>{item.diastolic}</Text>
             <Text style={cardStyles.slash}>/</Text>
-            <Text style={[cardStyles.bigNum, { color: '#ef4444' }]}>{item.systolic}</Text>
+            <Text style={[cardStyles.bigNum, { color: '#DE1A1C' }]}>{item.systolic}</Text>
           </View>
           <Text style={cardStyles.unit}>mmHg ضغط الدم</Text>
         </View>
@@ -105,7 +105,7 @@ const VitalCard = ({ item, index, totalCount, onDelete, t }) => {
 
         {/* النبض */}
         <View style={cardStyles.valueBox}>
-          <Text style={[cardStyles.bigNum, { color: '#f59e0b' }]}>{item.pulse}</Text>
+          <Text style={[cardStyles.bigNum, { color: '#A32D2F' }]}>{item.pulse}</Text>
           <Text style={cardStyles.unit}>bpm نبض</Text>
         </View>
 
@@ -113,7 +113,7 @@ const VitalCard = ({ item, index, totalCount, onDelete, t }) => {
 
         {/* الحرارة */}
         <View style={cardStyles.valueBox}>
-          <Text style={[cardStyles.bigNum, { color: '#8b5cf6' }]}>{item.temperature}</Text>
+          <Text style={[cardStyles.bigNum, { color: '#8296B1' }]}>{item.temperature}</Text>
           <Text style={cardStyles.unit}>°C حرارة</Text>
         </View>
 
@@ -122,7 +122,7 @@ const VitalCard = ({ item, index, totalCount, onDelete, t }) => {
           <>
             <View style={cardStyles.divider} />
             <View style={cardStyles.valueBox}>
-              <Text style={[cardStyles.bigNum, { color: '#0ea5e9' }]}>{item.oxygen_saturation}</Text>
+              <Text style={[cardStyles.bigNum, { color: '#26CDD6' }]}>{item.oxygen_saturation}</Text>
               <Text style={cardStyles.unit}>% أكسجين</Text>
             </View>
           </>
@@ -150,17 +150,17 @@ const cardStyles = StyleSheet.create({
 
   readingBadge: {
     width: 30, height: 30, borderRadius: 15,
-    backgroundColor: '#065f46', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#193B6B', alignItems: 'center', justifyContent: 'center',
   },
   readingNum: { color: '#fff', fontSize: 12, fontWeight: '800' },
 
-  timeText: { fontSize: 13, fontWeight: '700', color: '#1f2937', textAlign: 'right' },
-  agoText: { fontSize: 11, color: '#9ca3af', textAlign: 'right', marginTop: 1 },
+  timeText: { fontSize: 13, fontWeight: '700', color: '#193B6B', textAlign: 'right' },
+  agoText: { fontSize: 11, color: '#8296B1', textAlign: 'right', marginTop: 1 },
 
   statusBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
   statusText: { fontSize: 11, fontWeight: '700' },
 
-  deleteBtn: { padding: 5, backgroundColor: '#fef2f2', borderRadius: 8 },
+  deleteBtn: { padding: 5, backgroundColor: '#FBEAEA', borderRadius: 8 },
 
   values: {
     flexDirection: 'row-reverse', paddingHorizontal: 14, paddingVertical: 14,
@@ -168,9 +168,9 @@ const cardStyles = StyleSheet.create({
   },
   valueBox: { alignItems: 'center', gap: 4, flex: 1 },
   bpRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 2 },
-  bigNum: { fontSize: 20, fontWeight: '800', color: '#111827' },
+  bigNum: { fontSize: 20, fontWeight: '800', color: '#193B6B' },
   slash: { fontSize: 18, color: '#d1d5db', marginHorizontal: 2 },
-  unit: { fontSize: 10, color: '#9ca3af', fontWeight: '600', textAlign: 'center' },
+  unit: { fontSize: 10, color: '#8296B1', fontWeight: '600', textAlign: 'center' },
   divider: { width: 1, height: 40, backgroundColor: '#f1f5f9' },
 });
 
@@ -303,27 +303,27 @@ const VitalSignsTab = ({ route }) => {
           <View style={styles.latestRow}>
             <View style={styles.latestItem}>
               <Text style={styles.latestVal}>
-                <Text style={{ color: '#fca5a5' }}>{vitals[0].systolic}</Text>
+                <Text style={{ color: '#F2A0A1' }}>{vitals[0].systolic}</Text>
                 <Text style={{ color: '#ffffff60' }}>/</Text>
-                <Text style={{ color: '#93c5fd' }}>{vitals[0].diastolic}</Text>
+                <Text style={{ color: '#BCEFF3' }}>{vitals[0].diastolic}</Text>
               </Text>
               <Text style={styles.latestUnit}>mmHg</Text>
             </View>
             <View style={styles.latestDivider} />
             <View style={styles.latestItem}>
-              <Text style={[styles.latestVal, { color: '#fcd34d' }]}>{vitals[0].pulse}</Text>
+              <Text style={[styles.latestVal, { color: '#BCEFF3' }]}>{vitals[0].pulse}</Text>
               <Text style={styles.latestUnit}>bpm</Text>
             </View>
             <View style={styles.latestDivider} />
             <View style={styles.latestItem}>
-              <Text style={[styles.latestVal, { color: '#c4b5fd' }]}>{vitals[0].temperature}°</Text>
+              <Text style={[styles.latestVal, { color: '#BCEFF3' }]}>{vitals[0].temperature}°</Text>
               <Text style={styles.latestUnit}>°C</Text>
             </View>
             {vitals[0].oxygen_saturation != null && (
               <>
                 <View style={styles.latestDivider} />
                 <View style={styles.latestItem}>
-                  <Text style={[styles.latestVal, { color: '#7dd3fc' }]}>{vitals[0].oxygen_saturation}%</Text>
+                  <Text style={[styles.latestVal, { color: '#BCEFF3' }]}>{vitals[0].oxygen_saturation}%</Text>
                   <Text style={styles.latestUnit}>O₂</Text>
                 </View>
               </>
@@ -347,7 +347,7 @@ const VitalSignsTab = ({ route }) => {
               <Text style={styles.bpTag}>SYS</Text>
               <TextInput
                 style={styles.inp} placeholder="120"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor="#8296B1"
                 keyboardType="numeric" value={form.systolic}
                 onChangeText={t => setField('systolic', t)}
               />
@@ -357,7 +357,7 @@ const VitalSignsTab = ({ route }) => {
               <Text style={styles.bpTag}>DIA</Text>
               <TextInput
                 style={styles.inp} placeholder="80"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor="#8296B1"
                 keyboardType="numeric" value={form.diastolic}
                 onChangeText={t => setField('diastolic', t)}
               />
@@ -369,10 +369,10 @@ const VitalSignsTab = ({ route }) => {
             <View style={{ flex: 1 }}>
               <Text style={styles.fieldLabel}>{t.vitalSigns.pulse}</Text>
               <View style={styles.inputBox}>
-                <MaterialCommunityIcons name="pulse" size={16} color="#f59e0b" style={{ marginLeft: 4 }} />
+                <MaterialCommunityIcons name="pulse" size={16} color="#A32D2F" style={{ marginLeft: 4 }} />
                 <TextInput
                   style={styles.inp} placeholder="72"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor="#8296B1"
                   keyboardType="numeric" value={form.pulse}
                   onChangeText={t => setField('pulse', t)}
                 />
@@ -382,10 +382,10 @@ const VitalSignsTab = ({ route }) => {
             <View style={{ flex: 1 }}>
               <Text style={styles.fieldLabel}>{t.vitalSigns.temperature}</Text>
               <View style={styles.inputBox}>
-                <MaterialCommunityIcons name="thermometer" size={16} color="#8b5cf6" style={{ marginLeft: 4 }} />
+                <MaterialCommunityIcons name="thermometer" size={16} color="#8296B1" style={{ marginLeft: 4 }} />
                 <TextInput
                   style={styles.inp} placeholder="36.5"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor="#8296B1"
                   keyboardType="numeric" value={form.temperature}
                   onChangeText={t => setField('temperature', t)}
                 />
@@ -396,10 +396,10 @@ const VitalSignsTab = ({ route }) => {
           {/* أكسجين */}
           <Text style={styles.fieldLabel}>{t.vitalSigns.oxygen}</Text>
           <View style={styles.inputBox}>
-            <MaterialCommunityIcons name="water-percent" size={16} color="#0ea5e9" style={{ marginLeft: 4 }} />
+            <MaterialCommunityIcons name="water-percent" size={16} color="#26CDD6" style={{ marginLeft: 4 }} />
             <TextInput
               style={styles.inp} placeholder="98"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor="#8296B1"
               keyboardType="numeric" value={form.oxygen}
               onChangeText={t => setField('oxygen', t)}
             />
@@ -407,7 +407,7 @@ const VitalSignsTab = ({ route }) => {
           </View>
 
           <Pressable
-            style={[styles.saveBtn, isSubmitting && { backgroundColor: '#6ee7b7' }]}
+            style={[styles.saveBtn, isSubmitting && { backgroundColor: '#BCEFF3' }]}
             onPress={handleSave} disabled={isSubmitting}
           >
             {isSubmitting
@@ -420,7 +420,7 @@ const VitalSignsTab = ({ route }) => {
 
       {/* ── سجل القراءات ── */}
       {loading ? (
-        <ActivityIndicator color="#059669" style={{ marginTop: 30 }} />
+        <ActivityIndicator color="#26CDD6" style={{ marginTop: 30 }} />
       ) : vitals.length === 0 ? (
         <View style={styles.emptyBox}>
           <MaterialCommunityIcons name="heart-pulse" size={48} color="#d1d5db" />
@@ -454,7 +454,7 @@ export default VitalSignsTab;
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ecfdf5' },
+  container: { flex: 1, backgroundColor: '#F1FCFD' },
   content: { padding: 16, paddingBottom: 40 },
 
   // شريط العنوان
@@ -462,40 +462,40 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse', justifyContent: 'space-between',
     alignItems: 'center', marginBottom: 16,
   },
-  pageTitle: { fontSize: 18, fontWeight: '800', color: '#111827' },
+  pageTitle: { fontSize: 18, fontWeight: '800', color: '#193B6B' },
   addBtn: {
     flexDirection: 'row-reverse', alignItems: 'center', gap: 6,
-    backgroundColor: '#059669', paddingHorizontal: 14, paddingVertical: 9,
+    backgroundColor: '#26CDD6', paddingHorizontal: 14, paddingVertical: 9,
     borderRadius: 10,
   },
-  addBtnActive: { backgroundColor: '#dc2626' },
+  addBtnActive: { backgroundColor: '#DE1A1C' },
   addBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
 
   // آخر قراءة
   latestCard: {
-    backgroundColor: '#065f46', borderRadius: 16, padding: 16,
+    backgroundColor: '#193B6B', borderRadius: 16, padding: 16,
     marginBottom: 16, elevation: 2,
   },
-  latestLabel: { color: '#a7f3d0', fontSize: 11, fontWeight: '700', textAlign: 'right', marginBottom: 10 },
+  latestLabel: { color: '#BCEFF3', fontSize: 11, fontWeight: '700', textAlign: 'right', marginBottom: 10 },
   latestRow: { flexDirection: 'row-reverse', justifyContent: 'space-around', alignItems: 'center' },
   latestItem: { alignItems: 'center', gap: 3 },
   latestVal: { fontSize: 22, fontWeight: '800', color: '#fff' },
-  latestUnit: { fontSize: 10, color: '#6ee7b7', fontWeight: '600' },
+  latestUnit: { fontSize: 10, color: '#BCEFF3', fontWeight: '600' },
   latestDivider: { width: 1, height: 36, backgroundColor: '#ffffff20' },
-  latestTime: { color: '#6ee7b7', fontSize: 11, textAlign: 'left', marginTop: 10 },
+  latestTime: { color: '#BCEFF3', fontSize: 11, textAlign: 'left', marginTop: 10 },
 
   // فورم
   formCard: {
     backgroundColor: '#fff', borderRadius: 16, padding: 18,
     marginBottom: 16, elevation: 2,
-    borderTopWidth: 3, borderTopColor: '#059669',
+    borderTopWidth: 3, borderTopColor: '#26CDD6',
   },
-  formTitle: { fontSize: 15, fontWeight: '800', color: '#111827', textAlign: 'right', marginBottom: 16 },
-  fieldLabel: { textAlign: 'right', color: '#374151', fontSize: 12, fontWeight: '600', marginBottom: 6, marginTop: 10 },
+  formTitle: { fontSize: 15, fontWeight: '800', color: '#193B6B', textAlign: 'right', marginBottom: 16 },
+  fieldLabel: { textAlign: 'right', color: '#193B6B', fontSize: 12, fontWeight: '600', marginBottom: 6, marginTop: 10 },
 
   bpRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
   bpSlash: { fontSize: 24, color: '#d1d5db', lineHeight: 50 },
-  bpTag: { fontSize: 11, color: '#6b7280', fontWeight: '800', marginLeft: 4, minWidth: 24, textAlign: 'center' },
+  bpTag: { fontSize: 11, color: '#8296B1', fontWeight: '800', marginLeft: 4, minWidth: 24, textAlign: 'center' },
   twoCol: { flexDirection: 'row-reverse', marginTop: 4 },
 
   inputBox: {
@@ -505,12 +505,12 @@ const styles = StyleSheet.create({
   },
   inp: {
     flex: 1, textAlign: 'right', fontSize: 16,
-    color: '#1f2937', fontWeight: '600',
+    color: '#193B6B', fontWeight: '600',
   },
-  suffix: { color: '#9ca3af', fontSize: 12, fontWeight: '700' },
+  suffix: { color: '#8296B1', fontSize: 12, fontWeight: '700' },
 
   saveBtn: {
-    backgroundColor: '#059669', padding: 14, borderRadius: 10,
+    backgroundColor: '#26CDD6', padding: 14, borderRadius: 10,
     alignItems: 'center', marginTop: 18, minHeight: 50, justifyContent: 'center',
   },
   saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
@@ -518,11 +518,11 @@ const styles = StyleSheet.create({
   // سجل
   historyLabel: {
     textAlign: 'right', fontSize: 14, fontWeight: '800',
-    color: '#374151', marginBottom: 12,
+    color: '#193B6B', marginBottom: 12,
   },
 
   // فارغ
   emptyBox: { alignItems: 'center', paddingTop: 40, gap: 8 },
-  emptyText: { fontSize: 15, color: '#6b7280', fontWeight: '700' },
-  emptySub: { fontSize: 12, color: '#9ca3af' },
+  emptyText: { fontSize: 15, color: '#8296B1', fontWeight: '700' },
+  emptySub: { fontSize: 12, color: '#8296B1' },
 });

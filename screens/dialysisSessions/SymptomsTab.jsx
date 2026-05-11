@@ -10,15 +10,15 @@ import api from "../../services/api";
 import { useLanguage } from '../../context/LanguageContext';
 
 const SYMPTOMS_LIST = (t) => [
-  { id: 'LOW_BP', label: t.symptoms.list.LOW_BP, icon: 'arrow-down-bold-circle-outline', color: '#ef4444' },
-  { id: 'CRAMPS', label: t.symptoms.list.CRAMPS, icon: 'lightning-bolt-outline', color: '#f59e0b' },
-  { id: 'NAUSEA', label: t.symptoms.list.NAUSEA, icon: 'emoticon-confused-outline', color: '#10b981' },
-  { id: 'HEADACHE', label: t.symptoms.list.HEADACHE, icon: 'head-flash-outline', color: '#3b82f6' },
-  { id: 'CHEST_PAIN', label: t.symptoms.list.CHEST_PAIN, icon: 'heart-pulse', color: '#ec4899' },
-  { id: 'DIZZINESS', label: t.symptoms.list.DIZZINESS, icon: 'rotate-3d-variant', color: '#8b5cf6' },
-  { id: 'ITCHING', label: t.symptoms.list.ITCHING, icon: 'hand-back-right-outline', color: '#06b6d4' },
-  { id: 'MUSCLE_PAIN', label: t.symptoms.list.MUSCLE_PAIN, icon: 'arm-flex-outline', color: '#f97316' },
-  { id: 'OTHER', label: t.symptoms.list.OTHER, icon: 'dots-horizontal-circle-outline', color: '#6b7280' },
+  { id: 'LOW_BP', label: t.symptoms.list.LOW_BP, icon: 'arrow-down-bold-circle-outline', color: '#DE1A1C' },
+  { id: 'CRAMPS', label: t.symptoms.list.CRAMPS, icon: 'lightning-bolt-outline', color: '#A32D2F' },
+  { id: 'NAUSEA', label: t.symptoms.list.NAUSEA, icon: 'emoticon-confused-outline', color: '#26CDD6' },
+  { id: 'HEADACHE', label: t.symptoms.list.HEADACHE, icon: 'head-flash-outline', color: '#26CDD6' },
+  { id: 'CHEST_PAIN', label: t.symptoms.list.CHEST_PAIN, icon: 'heart-pulse', color: '#DE1A1C' },
+  { id: 'DIZZINESS', label: t.symptoms.list.DIZZINESS, icon: 'rotate-3d-variant', color: '#8296B1' },
+  { id: 'ITCHING', label: t.symptoms.list.ITCHING, icon: 'hand-back-right-outline', color: '#26CDD6' },
+  { id: 'MUSCLE_PAIN', label: t.symptoms.list.MUSCLE_PAIN, icon: 'arm-flex-outline', color: '#A32D2F' },
+  { id: 'OTHER', label: t.symptoms.list.OTHER, icon: 'dots-horizontal-circle-outline', color: '#8296B1' },
 ];
 
 const SymptomsTab = ({ route }) => {
@@ -125,7 +125,7 @@ const SymptomsTab = ({ route }) => {
   };
 
   if (loading && history.length === 0) {
-    return <View style={styles.centered}><ActivityIndicator color="#059669" /></View>;
+    return <View style={styles.centered}><ActivityIndicator color="#26CDD6" /></View>;
   }
 
   return (
@@ -166,7 +166,7 @@ const SymptomsTab = ({ route }) => {
           multiline
           numberOfLines={4}
           placeholder={t.symptoms.notesPlaceholder}
-          placeholderTextColor="#9ca3af"
+          placeholderTextColor="#8296B1"
           value={note}
           onChangeText={setNote}
           textAlignVertical="top"
@@ -203,7 +203,7 @@ const SymptomsTab = ({ route }) => {
             return (
               <View key={i} style={styles.historyRow}>
                 <Pressable onPress={() => handleDeleteSymptom(h.id || h.symptom_id)}>
-                  <MaterialCommunityIcons name="close-circle" size={18} color="#ef4444" />
+                  <MaterialCommunityIcons name="close-circle" size={18} color="#DE1A1C" />
                 </Pressable>
 
                 <Text style={styles.historyText}>
@@ -226,11 +226,11 @@ const SymptomsTab = ({ route }) => {
 export default SymptomsTab;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ecfdf5' },
+  container: { flex: 1, backgroundColor: '#F1FCFD' },
   content: { padding: 20 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 
-  sectionTitle: { fontSize: 16, fontWeight: '800', color: '#111827', textAlign: 'right', marginBottom: 15 },
+  sectionTitle: { fontSize: 16, fontWeight: '800', color: '#193B6B', textAlign: 'right', marginBottom: 15 },
 
   grid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 10 },
   symptomChip: {
@@ -240,23 +240,23 @@ const styles = StyleSheet.create({
     elevation: 1, shadowColor: '#000', shadowOpacity: 0.05,
     minWidth: '45%'
   },
-  chipText: { fontSize: 13, fontWeight: '700', color: '#374151' },
+  chipText: { fontSize: 13, fontWeight: '700', color: '#193B6B' },
 
   noteBox: {
     backgroundColor: '#fff', borderRadius: 15, padding: 15,
     borderWidth: 1, borderColor: '#e5e7eb', elevation: 1
   },
-  textArea: { height: 120, textAlign: 'right', fontSize: 14, color: '#1f2937' },
+  textArea: { height: 120, textAlign: 'right', fontSize: 14, color: '#193B6B' },
 
   saveBtn: {
-    backgroundColor: '#059669', flexDirection: 'row-reverse',
+    backgroundColor: '#26CDD6', flexDirection: 'row-reverse',
     justifyContent: 'center', alignItems: 'center', gap: 10,
     padding: 15, borderRadius: 12, marginTop: 25, elevation: 3
   },
   saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
 
   historySection: { marginTop: 30, paddingTop: 20, borderTopWidth: 1, borderTopColor: '#e5e7eb' },
-  historyTitle: { fontSize: 14, fontWeight: '800', color: '#6b7280', textAlign: 'right', marginBottom: 10 },
+  historyTitle: { fontSize: 14, fontWeight: '800', color: '#8296B1', textAlign: 'right', marginBottom: 10 },
   historyRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: '#fff', padding: 10, borderRadius: 8 },
-  historyText: { fontSize: 13, color: '#374151', fontWeight: '600' }
+  historyText: { fontSize: 13, color: '#193B6B', fontWeight: '600' }
 });

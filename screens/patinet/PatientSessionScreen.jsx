@@ -195,9 +195,9 @@ const PatientSessionScreen = ({ route, navigation }) => {
   if (phase === 'DONE') {
     return (
       <View style={styles.center}>
-        <StatusBar barStyle="light-content" backgroundColor="#059669" />
+        <StatusBar barStyle="light-content" backgroundColor="#26CDD6" />
         <View style={styles.doneCard}>
-          <MaterialCommunityIcons name="check-decagram" size={80} color="#059669" />
+          <MaterialCommunityIcons name="check-decagram" size={80} color="#26CDD6" />
           <Text style={styles.doneTitle}>{t.patientSessionScreen.doneTitle}</Text>
           <Text style={styles.doneSub}>{t.patientSessionScreen.doneSub}</Text>
           {sessionData?.weight_before != null && (
@@ -206,9 +206,9 @@ const PatientSessionScreen = ({ route, navigation }) => {
                 <Text style={styles.doneSummaryVal}>{sessionData.weight_before} kg</Text>
                 <Text style={styles.doneSummaryLabel}>{t.patientSessionScreen.weightBefore}</Text>
               </View>
-              <MaterialCommunityIcons name="arrow-left" size={20} color="#94a3b8" />
+              <MaterialCommunityIcons name="arrow-left" size={20} color="#8296B1" />
               <View style={styles.doneSummaryRow}>
-                <Text style={[styles.doneSummaryVal, { color: '#059669' }]}>
+                <Text style={[styles.doneSummaryVal, { color: '#26CDD6' }]}>
                   {(sessionData?.weight_after ?? weightAfter) || '—'} kg
                 </Text>
                 <Text style={styles.doneSummaryLabel}>{t.patientSessionScreen.weightAfter}</Text>
@@ -227,11 +227,11 @@ const PatientSessionScreen = ({ route, navigation }) => {
   if (phase === 'WEIGHT_INPUT') {
     return (
       <View style={styles.lockScreen}>
-        <StatusBar barStyle="light-content" backgroundColor="#1e293b" />
+        <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
 
         {/* الرأس */}
         <View style={styles.lockHeader}>
-          <MaterialCommunityIcons name="lock" size={32} color="#f59e0b" />
+          <MaterialCommunityIcons name="lock" size={32} color="#A32D2F" />
           <Text style={styles.lockTitle}>{t.patientSessionScreen.lockTitle}</Text>
           <Text style={styles.lockSub}>
             {t.patientSessionScreen.lockSub}
@@ -250,11 +250,11 @@ const PatientSessionScreen = ({ route, navigation }) => {
         <View style={styles.lockInputCard}>
           <Text style={styles.lockInputTitle}>{t.patientSessionScreen.weightNowLabel}</Text>
           <View style={[styles.lockInputRow, weightError && styles.lockInputErr]}>
-            <MaterialCommunityIcons name="scale" size={24} color="#3b82f6" />
+            <MaterialCommunityIcons name="scale" size={24} color="#26CDD6" />
             <TextInput
               style={styles.lockInput}
               placeholder={t.patientSessionScreen.weightPlaceholder}
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor="#8296B1"
               keyboardType="decimal-pad"
               value={weightAfter}
               onChangeText={t => {
@@ -280,7 +280,7 @@ const PatientSessionScreen = ({ route, navigation }) => {
           )}
 
           <Pressable
-            style={[styles.lockSaveBtn, isSaving && { backgroundColor: '#6ee7b7' }]}
+            style={[styles.lockSaveBtn, isSaving && { backgroundColor: '#BCEFF3' }]}
             onPress={handleSaveWeight}
             disabled={isSaving}
           >
@@ -300,7 +300,7 @@ const PatientSessionScreen = ({ route, navigation }) => {
   // ── مرحلة الجلسة الجارية ─────────────────────────────────────────────────
   return (
     <View style={styles.sessionScreen}>
-      <StatusBar barStyle="light-content" backgroundColor="#065f46" />
+      <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
 
       {/* Header */}
       <View style={styles.sessionHeader}>
@@ -311,7 +311,7 @@ const PatientSessionScreen = ({ route, navigation }) => {
       {/* التايمر */}
       <View style={styles.timerCard}>
         <View style={styles.timerCircle}>
-          <MaterialCommunityIcons name="water-sync" size={36} color="#34d399" style={{ marginBottom: 8 }} />
+          <MaterialCommunityIcons name="water-sync" size={36} color="#26CDD6" style={{ marginBottom: 8 }} />
           <Text style={styles.timerText}>{formatDuration(elapsed)}</Text>
           <Text style={styles.timerLabel}>{t.patientSessionScreen.sessionTimeLabel}</Text>
         </View>
@@ -322,15 +322,15 @@ const PatientSessionScreen = ({ route, navigation }) => {
 
       {weightBefore != null && (
         <View style={styles.weightBeforeCard}>
-          <MaterialCommunityIcons name="scale" size={20} color="#3b82f6" />
+          <MaterialCommunityIcons name="scale" size={20} color="#26CDD6" />
           <Text style={styles.weightBeforeText}>
-            {t.patientSessionScreen.weightBeforeLabel}: <Text style={{ fontWeight: '800', color: '#3b82f6' }}>{weightBefore} kg</Text>
+            {t.patientSessionScreen.weightBeforeLabel}: <Text style={{ fontWeight: '800', color: '#26CDD6' }}>{weightBefore} kg</Text>
           </Text>
         </View>
       )}
 
       <View style={styles.infoCard}>
-        <MaterialCommunityIcons name="information-outline" size={20} color="#94a3b8" />
+        <MaterialCommunityIcons name="information-outline" size={20} color="#8296B1" />
         <Text style={styles.infoText}>
           {t.patientSessionScreen.infoText}
         </Text>
@@ -338,7 +338,7 @@ const PatientSessionScreen = ({ route, navigation }) => {
 
       {/* زر العودة */}
       <View style={styles.sessionFooter}>
-        <Pressable style={[styles.endBtn, { backgroundColor: '#334155' }]} onPress={() => navigation.goBack()}>
+        <Pressable style={[styles.endBtn, { backgroundColor: '#193B6B' }]} onPress={() => navigation.goBack()}>
           <MaterialCommunityIcons name="arrow-right" size={24} color="#fff" />
           <Text style={styles.endBtnText}>{t.patientSessionScreen.returnBtn}</Text>
         </Pressable>
@@ -351,7 +351,7 @@ export default PatientSessionScreen;
 
 const styles = StyleSheet.create({
   // ── IN_SESSION ──────────────────────────────────────────────────────────────
-  sessionScreen: { flex: 1, backgroundColor: '#ecfdf5' },
+  sessionScreen: { flex: 1, backgroundColor: '#F1FCFD' },
   sessionHeader: {
     paddingTop: 60,
     paddingBottom: 30,
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sessionPatient: { fontSize: 22, fontWeight: '900', color: '#fff', textAlign: 'center' },
-  sessionSub: { fontSize: 14, color: '#a7f3d0', marginTop: 4 },
+  sessionSub: { fontSize: 14, color: '#BCEFF3', marginTop: 4 },
 
   timerCard: {
     alignItems: 'center',
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     backgroundColor: 'rgba(255,255,255,0.1)',
     borderWidth: 4,
-    borderColor: '#34d399',
+    borderColor: '#26CDD6',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontVariant: ['tabular-nums'],
   },
-  timerLabel: { fontSize: 13, color: '#6ee7b7', marginTop: 4 },
+  timerLabel: { fontSize: 13, color: '#BCEFF3', marginTop: 4 },
   pulseRing: {
     position: 'absolute',
     width: 216,
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 14,
   },
-  infoText: { flex: 1, fontSize: 13, color: '#a7f3d0', textAlign: 'right', lineHeight: 20 },
+  infoText: { flex: 1, fontSize: 13, color: '#BCEFF3', textAlign: 'right', lineHeight: 20 },
 
   sessionFooter: {
     position: 'absolute',
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     paddingBottom: 36,
   },
   endBtn: {
-    backgroundColor: '#dc2626',
+    backgroundColor: '#DE1A1C',
     flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'center',
@@ -435,10 +435,10 @@ const styles = StyleSheet.create({
   endBtnText: { color: '#fff', fontSize: 18, fontWeight: '800' },
 
   // ── WEIGHT_INPUT (lock screen) ───────────────────────────────────────────────
-  lockScreen: { flex: 1, backgroundColor: '#1e293b', padding: 24 },
+  lockScreen: { flex: 1, backgroundColor: '#193B6B', padding: 24 },
   lockHeader: { alignItems: 'center', paddingTop: 60, marginBottom: 30 },
   lockTitle: { fontSize: 22, fontWeight: '900', color: '#fff', marginTop: 16, textAlign: 'center' },
-  lockSub: { fontSize: 13, color: '#f59e0b', marginTop: 8, textAlign: 'center', lineHeight: 20 },
+  lockSub: { fontSize: 13, color: '#A32D2F', marginTop: 8, textAlign: 'center', lineHeight: 20 },
 
   lockWeightBefore: {
     flexDirection: 'row-reverse',
@@ -449,8 +449,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     marginBottom: 20,
   },
-  lockWeightBeforeLabel: { color: '#94a3b8', fontSize: 13 },
-  lockWeightBeforeVal: { color: '#3b82f6', fontSize: 20, fontWeight: '800' },
+  lockWeightBeforeLabel: { color: '#8296B1', fontSize: 13 },
+  lockWeightBeforeVal: { color: '#26CDD6', fontSize: 20, fontWeight: '800' },
 
   lockInputCard: {
     backgroundColor: '#fff',
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
     padding: 20,
     elevation: 6,
   },
-  lockInputTitle: { fontSize: 16, fontWeight: '800', color: '#1e293b', textAlign: 'right', marginBottom: 12 },
+  lockInputTitle: { fontSize: 16, fontWeight: '800', color: '#193B6B', textAlign: 'right', marginBottom: 12 },
   lockInputRow: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
@@ -470,25 +470,25 @@ const styles = StyleSheet.create({
     height: 58,
     gap: 10,
   },
-  lockInputErr: { borderColor: '#ef4444' },
-  lockInput: { flex: 1, textAlign: 'right', fontSize: 22, fontWeight: '700', color: '#1e293b' },
-  lockUnit: { color: '#94a3b8', fontSize: 14, fontWeight: '700' },
-  lockErrText: { color: '#ef4444', fontSize: 12, textAlign: 'right', marginTop: 6, fontWeight: '600' },
+  lockInputErr: { borderColor: '#DE1A1C' },
+  lockInput: { flex: 1, textAlign: 'right', fontSize: 22, fontWeight: '700', color: '#193B6B' },
+  lockUnit: { color: '#8296B1', fontSize: 14, fontWeight: '700' },
+  lockErrText: { color: '#DE1A1C', fontSize: 12, textAlign: 'right', marginTop: 6, fontWeight: '600' },
 
   lockDiff: {
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f0fdf4',
+    backgroundColor: '#E9FAFB',
     padding: 12,
     borderRadius: 12,
     marginTop: 12,
   },
-  lockDiffLabel: { fontSize: 12, color: '#166534' },
-  lockDiffVal: { fontSize: 18, fontWeight: '800', color: '#059669' },
+  lockDiffLabel: { fontSize: 12, color: '#193B6B' },
+  lockDiffVal: { fontSize: 18, fontWeight: '800', color: '#26CDD6' },
 
   lockSaveBtn: {
-    backgroundColor: '#059669',
+    backgroundColor: '#26CDD6',
     flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'center',
@@ -501,10 +501,10 @@ const styles = StyleSheet.create({
   lockSaveBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
 
   // ── DONE ──────────────────────────────────────────────────────────────────────
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0fdf4', padding: 24 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#E9FAFB', padding: 24 },
   doneCard: { backgroundColor: '#fff', borderRadius: 24, padding: 30, alignItems: 'center', elevation: 6, width: '100%' },
-  doneTitle: { fontSize: 24, fontWeight: '900', color: '#059669', marginTop: 16, textAlign: 'center' },
-  doneSub: { fontSize: 14, color: '#64748b', marginTop: 8, textAlign: 'center' },
+  doneTitle: { fontSize: 24, fontWeight: '900', color: '#26CDD6', marginTop: 16, textAlign: 'center' },
+  doneSub: { fontSize: 14, color: '#8296B1', marginTop: 8, textAlign: 'center' },
 
   doneSummary: {
     flexDirection: 'row-reverse',
@@ -517,11 +517,11 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   doneSummaryRow: { alignItems: 'center', gap: 4 },
-  doneSummaryVal: { fontSize: 22, fontWeight: '800', color: '#1e293b' },
-  doneSummaryLabel: { fontSize: 11, color: '#94a3b8', fontWeight: '600' },
+  doneSummaryVal: { fontSize: 22, fontWeight: '800', color: '#193B6B' },
+  doneSummaryLabel: { fontSize: 11, color: '#8296B1', fontWeight: '600' },
 
   doneBtn: {
-    backgroundColor: '#059669',
+    backgroundColor: '#26CDD6',
     paddingVertical: 14,
     paddingHorizontal: 40,
     borderRadius: 14,

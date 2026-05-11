@@ -178,7 +178,7 @@ const SelectPatient = () => {
 
       <ScrollView contentContainerStyle={styles.scroll}>
         {loading ? (
-          <ActivityIndicator size="large" color="#059669" style={{ marginTop: 60 }} />
+          <ActivityIndicator size="large" color="#26CDD6" style={{ marginTop: 60 }} />
         ) : !currentShift?.patients || currentShift.patients.length === 0 ? (
           <View style={styles.emptyContainer}>
             <MaterialCommunityIcons name="file-document-outline" size={60} color="#cbd5e1" />
@@ -210,9 +210,9 @@ const SelectPatient = () => {
                   }
                   size={28}
                   color={
-                    isDone ? "#059669" :
-                      isTakenByOther ? "#ef4444" :
-                        isSelected ? "#059669" : "#D1D5DB"
+                    isDone ? "#26CDD6" :
+                      isTakenByOther ? "#DE1A1C" :
+                        isSelected ? "#26CDD6" : "#D1D5DB"
                   }
                 />
                 <View style={styles.info}>
@@ -255,8 +255,8 @@ const SelectPatient = () => {
 export default SelectPatient;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#ecfdf5" },
-  header: { backgroundColor: "#065f46", paddingTop: 55, paddingBottom: 16, paddingHorizontal: 18, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
+  container: { flex: 1, backgroundColor: "#F1FCFD" },
+  header: { backgroundColor: "#193B6B", paddingTop: 55, paddingBottom: 16, paddingHorizontal: 18, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   headerTop: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center", marginBottom: 14 },
   headerTitle: { fontSize: 20, fontWeight: "800", color: "#fff" },
   stateBtn: { flexDirection: "row-reverse", alignItems: "center", gap: 6, backgroundColor: "rgba(255,255,255,0.2)", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12 },
@@ -266,10 +266,10 @@ const styles = StyleSheet.create({
   shiftTabs: { flexDirection: "row-reverse", gap: 8 },
   tab: { flexDirection: "row-reverse", alignItems: "center", gap: 6, paddingVertical: 7, paddingHorizontal: 14, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.15)" },
   activeTab: { backgroundColor: "#fff" },
-  tabText: { color: "#A7F3D0", fontWeight: "600" },
-  activeTabText: { color: "#065f46", fontWeight: "800" },
+  tabText: { color: "#BCEFF3", fontWeight: "600" },
+  activeTabText: { color: "#193B6B", fontWeight: "800" },
   countBadge: { backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 10, paddingHorizontal: 6 },
-  activeCountBadge: { backgroundColor: "#065f46" },
+  activeCountBadge: { backgroundColor: "#193B6B" },
   countText: { fontSize: 11, fontWeight: "bold", color: "#fff" },
   scroll: { padding: 16, paddingBottom: 120 },
   emptyContainer: {
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    color: "#94a3b8",
+    color: "#8296B1",
     fontWeight: "600",
     textAlign: "center"
   },
@@ -301,14 +301,14 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  cardSelected: { borderColor: "#059669", backgroundColor: "#F0FDF4" },
-  cardConfirmed: { borderColor: "#34d399", borderStyle: 'dashed' },
+  cardSelected: { borderColor: "#26CDD6", backgroundColor: "#E9FAFB" },
+  cardConfirmed: { borderColor: "#26CDD6", borderStyle: 'dashed' },
   cardDisabled: { backgroundColor: "#f8fafc", opacity: 0.6 },
   info: { flex: 1 },
-  name: { fontSize: 16, fontWeight: "700", color: "#1F2937", textAlign: "right" },
-  disabledText: { color: "#94a3b8" },
-  sub: { fontSize: 12, color: "#6B7280", textAlign: "right", marginTop: 3 },
+  name: { fontSize: 16, fontWeight: "700", color: "#193B6B", textAlign: "right" },
+  disabledText: { color: "#8296B1" },
+  sub: { fontSize: 12, color: "#8296B1", textAlign: "right", marginTop: 3 },
   footer: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 16, paddingBottom: 28, backgroundColor: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, elevation: 10 },
-  proceedBtn: { backgroundColor: "#059669", flexDirection: "row-reverse", padding: 16, borderRadius: 14, alignItems: "center", justifyContent: "center", gap: 10 },
+  proceedBtn: { backgroundColor: "#26CDD6", flexDirection: "row-reverse", padding: 16, borderRadius: 14, alignItems: "center", justifyContent: "center", gap: 10 },
   proceedText: { color: "#fff", fontWeight: "800", fontSize: 16 },
 });

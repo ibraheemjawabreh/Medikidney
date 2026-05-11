@@ -23,9 +23,9 @@ const extractVal = (obj, key) => {
 const SettingsTab = ({ route }) => {
   const { t } = useLanguage();
   const FIELDS = [
-    { key: 'bloodFlowRate', label: t.deviceSettings.fields.bloodFlow, placeholder: '200', unit: 'ml/min', icon: 'water-pump', color: '#ef4444', hint: 'Blood Flow Rate — BFR' },
-    { key: 'dialysateFlow', label: t.deviceSettings.fields.dialysateFlow, placeholder: '500', unit: 'ml/min', icon: 'beaker-outline', color: '#3b82f6', hint: 'Dialysate Flow — DF' },
-    { key: 'ultrafiltrationRate', label: 'السوائل المسحوبة', placeholder: 'مثال: 2.5', unit: 'لتر/مل', icon: 'water-percent', color: '#0ea5e9', hint: 'Fluid Removed / Ultrafiltration' },
+    { key: 'bloodFlowRate', label: t.deviceSettings.fields.bloodFlow, placeholder: '200', unit: 'ml/min', icon: 'water-pump', color: '#DE1A1C', hint: 'Blood Flow Rate — BFR' },
+    { key: 'dialysateFlow', label: t.deviceSettings.fields.dialysateFlow, placeholder: '500', unit: 'ml/min', icon: 'beaker-outline', color: '#26CDD6', hint: 'Dialysate Flow — DF' },
+    { key: 'ultrafiltrationRate', label: 'السوائل المسحوبة', placeholder: 'مثال: 2.5', unit: 'لتر/مل', icon: 'water-percent', color: '#26CDD6', hint: 'Fluid Removed / Ultrafiltration' },
   ];
   const sessionId = route?.params?.sessionId;
 
@@ -208,12 +208,12 @@ const SettingsTab = ({ route }) => {
       <Text style={styles.pageTitle}>{t.deviceSettings.title}</Text>
 
       {loading && !saved ? (
-        <ActivityIndicator color="#059669" style={{ marginVertical: 30 }} />
+        <ActivityIndicator color="#26CDD6" style={{ marginVertical: 30 }} />
       ) : saved ? (
         <View style={styles.savedCard}>
           <View style={styles.savedHeader}>
             <Pressable onPress={handleDelete} style={styles.deleteBtn}>
-              <MaterialCommunityIcons name="trash-can-outline" size={18} color="#ef4444" />
+              <MaterialCommunityIcons name="trash-can-outline" size={18} color="#DE1A1C" />
               <Text style={styles.deleteBtnText}>{t.deviceSettings.delete}</Text>
             </Pressable>
             <View style={styles.activeBadge}>
@@ -264,19 +264,19 @@ const SettingsTab = ({ route }) => {
                   <View style={{ flexDirection: 'row-reverse', gap: 10 }}>
                     <View style={[styles.inputBox, { flex: 1, backgroundColor: '#f1f5f9', borderColor: '#e2e8f0', justifyContent: 'center' }]}>
                       <View style={{ alignItems: 'center' }}>
-                        <Text style={{ fontSize: 10, color: '#64748b', marginBottom: 2, fontWeight: '700' }}>بعد الجلسة السابقة</Text>
+                        <Text style={{ fontSize: 10, color: '#8296B1', marginBottom: 2, fontWeight: '700' }}>بعد الجلسة السابقة</Text>
                         <View style={{ flexDirection: 'row-reverse', alignItems: 'flex-end', gap: 4 }}>
-                          <Text style={[styles.input, { color: '#334155', flex: 0, textAlign: 'center' }]}>{prevWeightAfter}</Text>
+                          <Text style={[styles.input, { color: '#193B6B', flex: 0, textAlign: 'center' }]}>{prevWeightAfter}</Text>
                           <Text style={styles.unitLabel}>كجم</Text>
                         </View>
                       </View>
                     </View>
 
-                    <View style={[styles.inputBox, { flex: 1, backgroundColor: '#e0f2fe', borderColor: '#bae6fd', justifyContent: 'center' }]}>
+                    <View style={[styles.inputBox, { flex: 1, backgroundColor: '#E9FAFB', borderColor: '#BCEFF3', justifyContent: 'center' }]}>
                       <View style={{ alignItems: 'center' }}>
-                        <Text style={{ fontSize: 10, color: '#0284c7', marginBottom: 2, fontWeight: '700' }}>قبل الجلسة الحالية</Text>
+                        <Text style={{ fontSize: 10, color: '#26CDD6', marginBottom: 2, fontWeight: '700' }}>قبل الجلسة الحالية</Text>
                         <View style={{ flexDirection: 'row-reverse', alignItems: 'flex-end', gap: 4 }}>
-                          <Text style={[styles.input, { color: '#0369a1', flex: 0, textAlign: 'center' }]}>{currWeightBefore}</Text>
+                          <Text style={[styles.input, { color: '#26CDD6', flex: 0, textAlign: 'center' }]}>{currWeightBefore}</Text>
                           <Text style={styles.unitLabel}>كجم</Text>
                         </View>
                       </View>
@@ -288,7 +288,7 @@ const SettingsTab = ({ route }) => {
                     <TextInput
                       style={styles.input}
                       placeholder={f.placeholder}
-                      placeholderTextColor="#9ca3af"
+                      placeholderTextColor="#8296B1"
                       keyboardType="numeric"
                       value={form[f.key]}
                       onChangeText={t => setField(f.key, t)}
@@ -298,7 +298,7 @@ const SettingsTab = ({ route }) => {
 
                 {monthlyAverageUF !== null && (
                   <View style={styles.monthlyAvgBox}>
-                    <MaterialCommunityIcons name="calculator-variant-outline" size={16} color="#0284c7" />
+                    <MaterialCommunityIcons name="calculator-variant-outline" size={16} color="#26CDD6" />
                     <Text style={styles.monthlyAvgText}>معدل السحب لآخر شهر: {monthlyAverageUF} لتر</Text>
                   </View>
                 )}
@@ -320,7 +320,7 @@ const SettingsTab = ({ route }) => {
                 <TextInput
                   style={styles.input}
                   placeholder={f.placeholder}
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor="#8296B1"
                   keyboardType="numeric"
                   value={form[f.key]}
                   onChangeText={t => setField(f.key, t)}
@@ -331,7 +331,7 @@ const SettingsTab = ({ route }) => {
         })}
 
         <Pressable
-          style={[styles.saveBtn, isSubmitting && { backgroundColor: '#6ee7b7' }]}
+          style={[styles.saveBtn, isSubmitting && { backgroundColor: '#BCEFF3' }]}
           onPress={handleSave}
           disabled={isSubmitting}
         >
@@ -351,51 +351,51 @@ const SettingsTab = ({ route }) => {
 export default SettingsTab;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ecfdf5' },
+  container: { flex: 1, backgroundColor: '#F1FCFD' },
   content: { padding: 16, paddingBottom: 40 },
-  pageTitle: { fontSize: 18, fontWeight: '800', color: '#111827', textAlign: 'right', marginBottom: 16 },
-  savedCard: { backgroundColor: '#0f172a', borderRadius: 18, padding: 18, marginBottom: 16, elevation: 4 },
+  pageTitle: { fontSize: 18, fontWeight: '800', color: '#193B6B', textAlign: 'right', marginBottom: 16 },
+  savedCard: { backgroundColor: '#193B6B', borderRadius: 18, padding: 18, marginBottom: 16, elevation: 4 },
   savedHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   activeBadge: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
-  activeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22c55e' },
-  activeText: { color: '#94a3b8', fontSize: 12, fontWeight: '700' },
+  activeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#26CDD6' },
+  activeText: { color: '#8296B1', fontSize: 12, fontWeight: '700' },
   deleteBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, backgroundColor: '#ffffff15', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 10 },
-  deleteBtnText: { color: '#ef4444', fontWeight: '700', fontSize: 13 },
+  deleteBtnText: { color: '#DE1A1C', fontWeight: '700', fontSize: 13 },
   savedValues: { flexDirection: 'row-reverse', justifyContent: 'space-around', alignItems: 'center' },
-  valuesDivider: { width: 1, height: 60, backgroundColor: '#1e293b' },
+  valuesDivider: { width: 1, height: 60, backgroundColor: '#193B6B' },
   valueItem: { alignItems: 'center', gap: 5, flex: 1 },
   valueBig: { fontSize: 24, fontWeight: '900' },
-  valueUnit: { fontSize: 10, color: '#475569', fontWeight: '700' },
-  valueLabel: { fontSize: 11, color: '#64748b', fontWeight: '600', textAlign: 'center' },
+  valueUnit: { fontSize: 10, color: '#8296B1', fontWeight: '700' },
+  valueLabel: { fontSize: 11, color: '#8296B1', fontWeight: '600', textAlign: 'center' },
   emptyCard: { backgroundColor: '#fff', borderRadius: 16, padding: 30, alignItems: 'center', marginBottom: 16, gap: 6, borderWidth: 1.5, borderColor: '#e5e7eb', borderStyle: 'dashed' },
-  emptyText: { fontSize: 15, color: '#6b7280', fontWeight: '700' },
-  emptySub: { fontSize: 12, color: '#9ca3af' },
-  formCard: { backgroundColor: '#fff', borderRadius: 18, padding: 18, elevation: 2, borderTopWidth: 3, borderTopColor: '#059669' },
-  formTitle: { fontSize: 15, fontWeight: '800', color: '#111827', textAlign: 'right', marginBottom: 16 },
+  emptyText: { fontSize: 15, color: '#8296B1', fontWeight: '700' },
+  emptySub: { fontSize: 12, color: '#8296B1' },
+  formCard: { backgroundColor: '#fff', borderRadius: 18, padding: 18, elevation: 2, borderTopWidth: 3, borderTopColor: '#26CDD6' },
+  formTitle: { fontSize: 15, fontWeight: '800', color: '#193B6B', textAlign: 'right', marginBottom: 16 },
   fieldWrap: { marginBottom: 16 },
   fieldLabelRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   fieldLabelLeft: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
-  fieldLabel: { fontSize: 13, fontWeight: '700', color: '#374151' },
-  fieldHint: { fontSize: 11, color: '#9ca3af', fontWeight: '500' },
+  fieldLabel: { fontSize: 13, fontWeight: '700', color: '#193B6B' },
+  fieldHint: { fontSize: 11, color: '#8296B1', fontWeight: '500' },
   inputBox: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#f9fafb', borderWidth: 1.5, borderColor: '#e5e7eb', borderRadius: 12, paddingHorizontal: 12, height: 52 },
-  input: { flex: 1, textAlign: 'right', fontSize: 17, color: '#111827', fontWeight: '700' },
-  unitLabel: { color: '#9ca3af', fontSize: 12, fontWeight: '700', marginLeft: 4 },
-  saveBtn: { backgroundColor: '#059669', borderRadius: 12, height: 52, flexDirection: 'row-reverse', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 8 },
+  input: { flex: 1, textAlign: 'right', fontSize: 17, color: '#193B6B', fontWeight: '700' },
+  unitLabel: { color: '#8296B1', fontSize: 12, fontWeight: '700', marginLeft: 4 },
+  saveBtn: { backgroundColor: '#26CDD6', borderRadius: 12, height: 52, flexDirection: 'row-reverse', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 8 },
   saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
   monthlyAvgBox: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
-    backgroundColor: '#f0f9ff',
+    backgroundColor: '#E9FAFB',
     padding: 10,
     borderRadius: 10,
     marginTop: 10,
     gap: 6,
     borderWidth: 1,
-    borderColor: '#bae6fd',
+    borderColor: '#BCEFF3',
   },
   monthlyAvgText: {
     fontSize: 12,
-    color: '#0284c7',
+    color: '#26CDD6',
     fontWeight: '700'
   },
 });
