@@ -33,15 +33,22 @@ const STATUS_CONFIG = {
 };
 const DEFAULT_STATUS = { label: '', bg: '#f1f5f9', text: '#8296B1', icon: 'help-circle-outline', borderColor: '#8296B1' };
 
-// حساب كمية السوائل المسحوبة — الأولوية: UF rate ← فرق الوزن ← fluid_removed
+// حساب كمية السوائل المسحوبة — الأولوية المطلقة لإعدادات الجهاز (UF rate)
 const getFluidRemoved = (session) => {
   const settings = session.dialysisSettings || [];
   const last = settings[settings.length - 1];
   const uf = parseFloat(last?.ultrafiltration_rate ?? last?.ultrafiltrationRate);
-  if (!isNaN(uf) && uf > 0) return `${uf > 50 ? (uf / 1000).toFixed(2) : uf.toFixed(2)} L`;
-  if (session.weight_before != null && session.weight_after != null)
-    return `${Math.abs(session.weight_before - session.weight_after).toFixed(1)} L`;
+  
+  if (!isNaN(uf) && uf > 0) {
+    return `${uf > 50 ? (uf / 1000).toFixed(2) : uf.toFixed(2)} L`;
+  }
+  
   if (session.fluid_removed > 0) return `${session.fluid_removed} L`;
+  
+  if (session.weight_before != null && session.weight_after != null) {
+    return `${Math.abs(session.weight_before - session.weight_after).toFixed(1)} L`;
+  }
+  
   return '—';
 };
 
@@ -170,7 +177,7 @@ const PatientProfile = ({ navigation, route }) => {
       const count = await getVisibleUnreadCount(api);
       updateUnreadCount(count);
     } catch (error) {
-      console.error('Fetch unread count error:', error);
+      console.error('Fetch unread count error (PatinetProfile):', error);
       updateUnreadCount(0);
     }
   };
@@ -458,16 +465,6 @@ const PatientProfile = ({ navigation, route }) => {
               {weightAfterError ? (
                 <Text style={weightLockStyles.errText}>{weightAfterError}</Text>
               ) : null}
-
-              {/* حساب الفرق */}
-              {pendingWeightSession.weight_before != null && weightAfterInput && !isNaN(parseFloat(weightAfterInput)) && (
-                <View style={weightLockStyles.diffRow}>
-                  <Text style={weightLockStyles.diffLabel}>{t.patientProfile.fluidRemoved}</Text>
-                  <Text style={weightLockStyles.diffVal}>
-                    {Math.abs(pendingWeightSession.weight_before - parseFloat(weightAfterInput)).toFixed(1)} لتر
-                  </Text>
-                </View>
-              )}
 
               {/* زر الحفظ */}
               <TouchableOpacity
@@ -1839,17 +1836,6 @@ const weightLockStyles = StyleSheet.create({
     marginTop: 8,
     fontWeight: '600',
   },
-  diffRow: {
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#E9FAFB',
-    padding: 12,
-    borderRadius: 12,
-    marginTop: 12,
-  },
-  diffLabel: { fontSize: 12, color: '#193B6B' },
-  diffVal: { fontSize: 18, fontWeight: '800', color: '#26CDD6' },
   saveBtn: {
     backgroundColor: '#26CDD6',
     flexDirection: 'row-reverse',

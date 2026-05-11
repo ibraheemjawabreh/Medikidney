@@ -16,7 +16,13 @@ import * as Haptics from 'expo-haptics';
 import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
 import { useNotificationContext } from '../../context/NotificationContext';
-import { markNotificationsSeen } from '../../utils/notificationBadge';
+import { getVisibleUnreadCount, markNotificationsSeen } from '../../utils/notificationBadge';
+
+const isNoWeightNotification = (notification) =>
+  notification?.notification_type === 'SESSION_NO_WEIGHT';
+
+const hasWeightAfter = (session) =>
+  session?.weight_after != null || session?.weightAfter != null;
 
 const NotificationsScreen = () => {
   const { t } = useLanguage();
@@ -47,7 +53,6 @@ const NotificationsScreen = () => {
 
   const fetchUnreadCount = async () => {
     try {
-      const { getVisibleUnreadCount } = require('../../utils/notificationBadge');
       const count = await getVisibleUnreadCount(api);
       setUnreadCount(count);
     } catch (error) {
@@ -65,13 +70,40 @@ const NotificationsScreen = () => {
       } catch (err) {
         response = await api.get('/notifications/unread');
       }
-      setNotifications(response.data || []);
+      const list = response.data || [];
+      setNotifications(await removeResolvedWeightNotifications(list));
     } catch (error) {
       console.error('Fetch notifications error:', error);
       Alert.alert(t.error, t.notifications.fetchError);
     } finally {
       setLoading(false);
     }
+  };
+
+  const removeResolvedWeightNotifications = async (list) => {
+    if (!Array.isArray(list) || list.length === 0) return [];
+
+    const checked = await Promise.all(
+      list.map(async (notification) => {
+        if (!isNoWeightNotification(notification) || !notification.related_id) {
+          return notification;
+        }
+
+        try {
+          const { data: session } = await api.get(`/dialysis-sessions/${notification.related_id}`);
+          if (hasWeightAfter(session)) {
+            await api.patch(`/notifications/${notification.notification_id}/delete`).catch(() => {});
+            return null;
+          }
+        } catch (error) {
+          console.log('Could not verify weight notification:', error.response?.data || error.message);
+        }
+
+        return notification;
+      })
+    );
+
+    return checked.filter(Boolean);
   };
 
   const onRefresh = useCallback(async () => {
@@ -143,6 +175,15 @@ const NotificationsScreen = () => {
 
       case 'SESSION_NO_WEIGHT':
         console.log('➡️ الانتقال لإدخال الوزن - Session ID:', relatedId);
+        try {
+          const { data: session } = await api.get(`/dialysis-sessions/${relatedId}`);
+          if (hasWeightAfter(session)) {
+            Alert.alert(t.success, t.patientProfile?.weightSaved || 'Weight already entered');
+            break;
+          }
+        } catch (error) {
+          console.log('Could not verify session weight before navigation:', error.response?.data || error.message);
+        }
         navigation.navigate('WeightInput', { sessionId: relatedId });
         break;
 

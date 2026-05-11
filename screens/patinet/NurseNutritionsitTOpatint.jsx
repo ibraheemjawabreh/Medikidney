@@ -459,25 +459,25 @@ const StaffPatientView = ({ route, navigation }) => {
                       <Text style={styles.metricLabel}>السوائل المسحوبة</Text>
                       <Text style={[styles.metricValue, { fontSize: 13, color: '#26CDD6' }]}>
                         {(() => {
-                          // 1. الأولوية: قيمة ultrafiltration_rate من إعدادات الجلسة
                           const settingsArr = session.dialysisSettings || [];
                           const lastSetting = settingsArr.length > 0 ? settingsArr[settingsArr.length - 1] : null;
                           const ufRaw = parseFloat(lastSetting?.ultrafiltration_rate ?? lastSetting?.ultrafiltrationRate);
+                          
                           if (!isNaN(ufRaw) && ufRaw > 0) {
                             const ufLiters = ufRaw > 50 ? (ufRaw / 1000).toFixed(2) : ufRaw.toFixed(2);
                             return `${ufLiters} L`;
                           }
-                          // 2. احتياطي: الفرق بين الوزن قبل وبعد
-                          if (session.weight_before != null && session.weight_after != null) {
-                            return `${Math.abs(session.weight_before - session.weight_after).toFixed(1)} L`;
-                          }
-                          // 3. احتياطي: fluid_removed من الجلسة
+                          
                           if (session.fluid_removed != null && session.fluid_removed > 0) {
                             return `${session.fluid_removed} L`;
                           }
+
+                          if (session.weight_before != null && session.weight_after != null) {
+                            return `${Math.abs(session.weight_before - session.weight_after).toFixed(1)} L`;
+                          }
+                          
                           return '—';
-                        })()
-                        }
+                        })()}
                       </Text>
                     </View>
                   </View>

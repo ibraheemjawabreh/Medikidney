@@ -44,6 +44,31 @@ const showAlert = (title, msg) => {
 };
 
 // ══════════════════════════════════════════════════════════════════
+const getMedicationRecordId = (med) => {
+  if (!med) return null;
+
+  return (
+    med.id ??
+    med.session_medication_id ??
+    med.sessionMedicationId ??
+    med.dialysis_session_medication_id ??
+    med.dialysisSessionMedicationId ??
+    med.medication_record_id ??
+    med.medicationRecordId ??
+    med.record_id ??
+    med.recordId ??
+    med.detail_id ??
+    med.detailId ??
+    med.medication_detail_id ??
+    med.medicationDetailId ??
+    med.med_id ??
+    med.medId ??
+    med.medication_id ??
+    med.medicationId ??
+    null
+  );
+};
+
 const MedicationsTab = ({ route }) => {
   const { t } = useLanguage();
   const sessionId = route?.params?.sessionId;
@@ -51,6 +76,7 @@ const MedicationsTab = ({ route }) => {
   const [meds, setMeds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   const [showCustom, setShowCustom] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(null); // الدواء الشائع المختار
   const [presetDosage, setPresetDosage] = useState('');   // الجرعة المعدلة
@@ -102,21 +128,32 @@ const MedicationsTab = ({ route }) => {
   };
 
   // ── حذف دواء ────────────────────────────────────────────────
-  const deleteMed = async (medicationId) => {
-    const numId = parseInt(medicationId, 10);
-    if (isNaN(numId)) return;
+  const deleteMed = async (med) => {
+    const medicationId = getMedicationRecordId(med);
+    const numId = medicationId == null ? NaN : Number(medicationId);
+    if (!sessionId) {
+      return showAlert(t.error, 'Session ID is missing.');
+    }
+    if (!Number.isFinite(numId)) {
+      console.log("Medication object without deletable id:", med);
+      return showAlert(t.error, 'Medication ID is missing.');
+    }
 
     const confirmed = await confirmAction(t.medications.deleteConfirm, t);
     if (!confirmed) return;
 
     try {
+      setDeletingId(numId);
+      console.log("Deleting medication record:", { sessionId, medicationId: numId, med });
       await api.delete(
         `/dialysis-sessions/${sessionId}/details/medications/${numId}`
       );
-      setMeds(prev => prev.filter(m => parseInt(m.id || m.medicationId, 10) !== numId));
+      await fetchMeds();
     } catch (err) {
       console.log("Delete med err:", err.response?.data || err.message);
       showAlert(t.error, t.medications.deleteFailed);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -339,7 +376,9 @@ const MedicationsTab = ({ route }) => {
         </View>
       ) : (
         meds.map((med, index) => {
-          const medId = med.medication_id || med.medicationId || med.id;
+          const medId = getMedicationRecordId(med);
+          const numericMedId = Number(medId);
+          const isDeleting = Number.isFinite(numericMedId) && deletingId === numericMedId;
           return (
             <View key={medId || index} style={styles.medCard}>
               <View style={styles.medHeader}>
@@ -358,8 +397,16 @@ const MedicationsTab = ({ route }) => {
                   <View style={styles.doseBadge}>
                     <Text style={styles.doseText}>{med.dosage} {med.unit}</Text>
                   </View>
-                  <Pressable onPress={() => deleteMed(medId)} style={styles.deleteBtn}>
-                    <MaterialCommunityIcons name="trash-can-outline" size={18} color="#DE1A1C" />
+                  <Pressable
+                    onPress={() => deleteMed(med)}
+                    style={[styles.deleteBtn, isDeleting && styles.deleteBtnDisabled]}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? (
+                      <ActivityIndicator size="small" color="#DE1A1C" />
+                    ) : (
+                      <MaterialCommunityIcons name="trash-can-outline" size={18} color="#DE1A1C" />
+                    )}
                   </Pressable>
                 </View>
               </View>
@@ -457,6 +504,7 @@ const styles = StyleSheet.create({
   },
   doseText: { color: '#26CDD6', fontSize: 12, fontWeight: '800' },
   deleteBtn: { padding: 5, backgroundColor: '#FBEAEA', borderRadius: 8 },
+  deleteBtnDisabled: { opacity: 0.65 },
   noteRow: {
     flexDirection: 'row-reverse', alignItems: 'center', gap: 6,
     marginTop: 10, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#f3f4f6',

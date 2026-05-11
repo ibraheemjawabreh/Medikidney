@@ -29,12 +29,6 @@ export const getVisibleUnreadCount = async (api) => {
       return new Date(createdAt).getTime() > seenTime;
     }).length;
   } catch (error) {
-    try {
-      const response = await api.get('/notifications/unread-count');
-      return response.data?.unreadCount || 0;
-    } catch (innerError) {
-      // If both endpoints fail, return 0 instead of throwing 404
-      return 0;
-    }
+    return 0;
   }
 };

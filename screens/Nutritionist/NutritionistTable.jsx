@@ -104,7 +104,17 @@ const NutritionistTable = ({ route, navigation }) => {
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-          <Text style={styles.headerTitle}>{programId ? "تعديل البرنامج الغذائي" : "إنشاء برنامج جديد"}</Text>
+          <View style={styles.headerContainer}>
+            <TouchableOpacity 
+              style={styles.backButton} 
+              onPress={() => navigation.goBack()}
+              activeOpacity={0.7}
+            >
+              <Icon name="chevron-right" type="material-community" size={30} color="#193B6B" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>{programId ? "تعديل البرنامج الغذائي" : "إنشاء برنامج جديد"}</Text>
+            <View style={{ width: 40 }} />
+          </View>
 
           <View style={styles.formCard}>
             <Text style={styles.label}>عنوان البرنامج</Text>
@@ -174,7 +184,27 @@ const MealInput = ({ label, value, onChange }) => (
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F1FCFD', padding: 15 },
   loadingContainer: { flex: 1, justifyContent: "center" },
-  headerTitle: { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginVertical: 15 },
+  headerContainer: { 
+    flexDirection: 'row-reverse', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    marginBottom: 10,
+    marginTop: Platform.OS === 'ios' ? 20 : 0
+  },
+  backButton: { 
+    width: 40, 
+    height: 40, 
+    borderRadius: 12, 
+    backgroundColor: '#fff', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#193B6B', flex: 1, textAlign: 'center' },
   formCard: { backgroundColor: '#fff', borderRadius: 20, padding: 20, elevation: 5 },
   label: { textAlign: 'right', fontWeight: 'bold', marginBottom: 5, fontSize: 13, color: '#8296B1' },
   input: { borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 10, textAlign: 'right', backgroundColor: '#f8fafc', marginBottom: 15 },

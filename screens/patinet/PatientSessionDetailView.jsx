@@ -16,13 +16,13 @@ import { useLanguage } from '../../context/LanguageContext';
 // Removed hardcoded translations, now using useLanguage()
 
 const severityColors = {
-  LOW: { bg: "#dcfce7", text: "#166534" },
-  MEDIUM: { bg: "#fef3c7", text: "#92400e" },
+  LOW: { bg: "#E9FAFB", text: "#193B6B" },
+  MEDIUM: { bg: "#FFF7E6", text: "#A32D2F" },
   HIGH: { bg: "#fee2e2", text: "#991b1b" },
 };
 
 // ── Helper Components ─────────────────────────────────────────────────────────
-const SectionHeader = ({ icon, title, color = "#204a42" }) => (
+const SectionHeader = ({ icon, title, color = "#193B6B" }) => (
   <View style={styles.sectionHeader}>
     <View style={[styles.sectionIconCircle, { backgroundColor: color + "18" }]}>
       <Icon name={icon} type="material-community" size={22} color={color} />
@@ -305,7 +305,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#204a42" />
+        <ActivityIndicator size="large" color="#26CDD6" />
         <Text style={styles.loadingText}>{t.patientSessionDetail.loading}</Text>
       </View>
     );
@@ -326,15 +326,15 @@ const PatientSessionDetailView = ({ route, navigation }) => {
   const { session, patient, nurse, schedule, vitalSigns, medications, dialysisSettings, symptoms } = data;
 
   const statusConfig = {
-    COMPLETED: { label: t.patientProfile.status.completed, bg: "#dcfce7", text: "#166534", icon: "check-circle" },
-    IN_PROGRESS: { label: t.patientProfile.status.pending, bg: "#fef3c7", text: "#92400e", icon: "clock-outline" },
-    SCHEDULED: { label: t.patientProfile.status.scheduled || "مجدولة", bg: "#dbeafe", text: "#1e40af", icon: "calendar-clock" },
+    COMPLETED: { label: t.patientProfile.status.completed, bg: "#E9FAFB", text: "#193B6B", icon: "check-circle" },
+    IN_PROGRESS: { label: t.patientProfile.status.pending, bg: "#FBEAEA", text: "#A32D2F", icon: "clock-outline" },
+    SCHEDULED: { label: t.patientProfile.status.scheduled || "مجدولة", bg: "#E9FAFB", text: "#193B6B", icon: "calendar-clock" },
   };
-  const statusStyle = statusConfig[session?.status] || { label: session?.status, bg: "#f1f5f9", text: "#64748b", icon: "help-circle-outline" };
+  const statusStyle = statusConfig[session?.status] || { label: session?.status, bg: "#F1FCFD", text: "#8296B1", icon: "help-circle-outline" };
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#204a42" />
+      <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
 
       {/* ── Header ── */}
       <View style={styles.header}>
@@ -355,11 +355,11 @@ const PatientSessionDetailView = ({ route, navigation }) => {
 
         {/* ── Patient & Nurse Info ── */}
         <View style={styles.card}>
-          <SectionHeader icon="account-circle-outline" title={t.patientSessionDetail.patientNurseInfo} color="#204a42" />
+          <SectionHeader icon="account-circle-outline" title={t.patientSessionDetail.patientNurseInfo} color="#193B6B" />
           <View style={styles.personRow}>
             <View style={styles.personBox}>
-              <View style={[styles.personAvatar, { backgroundColor: "#204a4218" }]}>
-                <Icon name="account" type="material-community" size={28} color="#204a42" />
+              <View style={[styles.personAvatar, { backgroundColor: "#193B6B18" }]}>
+                <Icon name="account" type="material-community" size={28} color="#193B6B" />
               </View>
               <Text style={styles.personRole}>{t.patientSessionDetail.patient}</Text>
               <Text style={styles.personName}>{patient?.full_name || "—"}</Text>
@@ -371,8 +371,8 @@ const PatientSessionDetailView = ({ route, navigation }) => {
             </View>
             <View style={styles.personDivider} />
             <View style={styles.personBox}>
-              <View style={[styles.personAvatar, { backgroundColor: "#05966918" }]}>
-                <Icon name="stethoscope" type="material-community" size={28} color="#059669" />
+              <View style={[styles.personAvatar, { backgroundColor: "#26CDD618" }]}>
+                <Icon name="stethoscope" type="material-community" size={28} color="#26CDD6" />
               </View>
               <Text style={styles.personRole}>{t.patientSessionDetail.nurse}</Text>
               <Text style={styles.personName}>{nurse?.full_name || "—"}</Text>
@@ -388,7 +388,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
 
         {/* ── Session Overview ── */}
         <View style={styles.card}>
-          <SectionHeader icon="calendar-clock" title={t.patientSessionDetail.sessionInfo} color="#3b82f6" />
+          <SectionHeader icon="calendar-clock" title={t.patientSessionDetail.sessionInfo} color="#26CDD6" />
           <InfoRow label={t.patientSessionDetail.date} value={formatDate(session?.date)} />
           <Divider style={styles.rowDivider} />
           <View style={styles.twoCol}>
@@ -417,62 +417,49 @@ const PatientSessionDetailView = ({ route, navigation }) => {
               <View style={styles.weightRow}>
                 <View style={styles.weightBox}>
                   <View style={[styles.weightIconCircle, { backgroundColor: '#eff6ff' }]}>
-                    <Icon name="scale" type="material-community" size={20} color="#3b82f6" />
+                    <Icon name="scale" type="material-community" size={20} color="#26CDD6" />
                   </View>
                   <Text style={styles.weightLabel}>{t.patientSessionDetail.weightBefore}</Text>
-                  <Text style={[styles.weightValue, { color: '#3b82f6' }]}>
+                  <Text style={[styles.weightValue, { color: '#26CDD6' }]}>
                     {session?.weight_before != null ? `${session.weight_before} kg` : '—'}
                   </Text>
                 </View>
 
                 <View style={styles.weightArrow}>
-                  <Icon name="arrow-left" type="material-community" size={20} color="#94a3b8" />
+                  <Icon name="arrow-left" type="material-community" size={20} color="#8296B1" />
                 </View>
 
                 <View style={styles.weightBox}>
                   <View style={[styles.weightIconCircle, { backgroundColor: '#f0fdf4' }]}>
-                    <Icon name="scale" type="material-community" size={20} color="#059669" />
+                    <Icon name="scale" type="material-community" size={20} color="#193B6B" />
                   </View>
                   <Text style={styles.weightLabel}>{t.patientSessionDetail.weightAfter}</Text>
-                  <Text style={[styles.weightValue, { color: '#059669' }]}>
+                  <Text style={[styles.weightValue, { color: '#193B6B' }]}>
                     {session?.weight_after != null ? `${session.weight_after} kg` : '—'}
                   </Text>
                 </View>
               </View>
 
-              {/* كمية السوائل المزالة - تظهر دائماً إذا توفرت قيمة */}
+              {/* كمية السوائل المسحوبة (من إعدادات الجهاز) */}
               {(() => {
-                // 1. الأولوية: ultrafiltration_rate من إعدادات الجهاز (ما أدخله الممرض)
                 const lastSetting = dialysisSettings && dialysisSettings.length > 0
                   ? dialysisSettings[dialysisSettings.length - 1]
                   : null;
-                const ufRaw = parseFloat(lastSetting?.ultrafiltration_rate ?? lastSetting?.ultrafiltrationRate);
-                const hasUF = !isNaN(ufRaw) && ufRaw > 0;
-                const ufLiters = hasUF
-                  ? (ufRaw > 50 ? (ufRaw / 1000).toFixed(2) : ufRaw.toFixed(2))
-                  : null;
+                
+                const ufRaw = lastSetting ? parseFloat(lastSetting.ultrafiltration_rate ?? lastSetting.ultrafiltrationRate) : null;
+                
+                if (ufRaw === null || isNaN(ufRaw) || ufRaw <= 0) return null;
 
-                // 2. احتياطي: الفرق بين الوزن قبل وبعد
-                const weightDiff = (session?.weight_before != null && session?.weight_after != null)
-                  ? Math.abs(session.weight_before - session.weight_after).toFixed(1)
-                  : null;
-
-                const displayValue = ufLiters ?? weightDiff;
-                const isEstimate = !ufLiters && weightDiff != null;
-
-                if (!displayValue) return null;
+                const ufLiters = ufRaw > 50 ? (ufRaw / 1000).toFixed(2) : ufRaw.toFixed(2);
 
                 return (
                   <View style={styles.fluidRemovedRow}>
-                    <Icon name="water-outline" type="material-community" size={16} color="#06b6d4" />
+                    <Icon name="water-percent" type="material-community" size={20} color="#26CDD6" />
                     <Text style={styles.fluidRemovedText}>
                       {t.patientSessionDetail.fluidRemoved}{' '}
                       <Text style={styles.fluidRemovedValue}>
-                        {displayValue} لتر
+                        {ufLiters} لتر
                       </Text>
-                      {isEstimate && (
-                        <Text style={{ fontSize: 11, color: '#94a3b8' }}> (تقريبي)</Text>
-                      )}
                     </Text>
                   </View>
                 );
@@ -484,24 +471,24 @@ const PatientSessionDetailView = ({ route, navigation }) => {
 
         {/* ── Vital Signs ── */}
         <View style={styles.card}>
-          <SectionHeader icon="heart-pulse" title={t.patientSessionDetail.vitalSigns} color="#ef4444" />
+          <SectionHeader icon="heart-pulse" title={t.patientSessionDetail.vitalSigns} color="#DE1A1C" />
           {vitalSigns && vitalSigns.length > 0 ? (
             vitalSigns.map((v, idx) => (
               <View key={v.vital_id || idx}>
                 {idx > 0 && <Divider style={[styles.rowDivider, { marginVertical: 12 }]} />}
                 <Text style={styles.recordTime}>
-                  <Icon name="clock-outline" type="material-community" size={13} color="#94a3b8" />
+                  <Icon name="clock-outline" type="material-community" size={13} color="#8296B1" />
                   {"  "}{formatTime(v.recorded_at)}
                   {"  ·  "}
                   {v.nurse?.full_name || ""}
                 </Text>
                 <View style={styles.vitalsGrid}>
-                  <MetricChip label={t.patientSessionDetail.systolic} value={v.systolic ? `${v.systolic}` : "—"} icon="heart-pulse" color="#ef4444" />
+                  <MetricChip label={t.patientSessionDetail.systolic} value={v.systolic ? `${v.systolic}` : "—"} icon="heart-pulse" color="#DE1A1C" />
                   <MetricChip label={t.patientSessionDetail.diastolic} value={v.diastolic ? `${v.diastolic}` : "—"} icon="heart-outline" color="#f97316" />
                   <MetricChip label={t.patientSessionDetail.pulse} value={v.pulse ? `${v.pulse} bpm` : "—"} icon="pulse" color="#8b5cf6" />
                   <MetricChip label={t.patientSessionDetail.temperature} value={v.temperature ? `${v.temperature}°C` : "—"} icon="thermometer" color="#f59e0b" />
                   {v.oxygen_saturation != null && (
-                    <MetricChip label={t.patientSessionDetail.oxygen} value={`${v.oxygen_saturation}%`} icon="lungs" color="#3b82f6" />
+                    <MetricChip label={t.patientSessionDetail.oxygen} value={`${v.oxygen_saturation}%`} icon="lungs" color="#26CDD6" />
                   )}
                 </View>
               </View>
@@ -516,7 +503,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
 
         {/* ── Dialysis Machine Settings ── */}
         <View style={styles.card}>
-          <SectionHeader icon="cog-outline" title={t.patientSessionDetail.machineSettings} color="#06b6d4" />
+          <SectionHeader icon="cog-outline" title={t.patientSessionDetail.machineSettings} color="#26CDD6" />
           {dialysisSettings && dialysisSettings.length > 0 ? (
             dialysisSettings.map((s, idx) => (
               <View key={s.setting_id || idx}>
@@ -525,13 +512,13 @@ const PatientSessionDetailView = ({ route, navigation }) => {
                   {formatTime(s.recorded_at)}{"  ·  "}{s.nurse?.full_name || ""}
                 </Text>
                 <View style={styles.vitalsGrid}>
-                  <MetricChip label={t.patientSessionDetail.bloodFlow} value={`${s.blood_flow_rate} ml/min`} icon="water-pump" color="#06b6d4" />
-                  <MetricChip label={t.patientSessionDetail.dialysateFlow} value={`${s.dialysate_flow} ml/h`} icon="beaker-outline" color="#0891b2" />
+                  <MetricChip label={t.patientSessionDetail.bloodFlow} value={`${s.blood_flow_rate} ml/min`} icon="water-pump" color="#26CDD6" />
+                  <MetricChip label={t.patientSessionDetail.dialysateFlow} value={`${s.dialysate_flow} ml/h`} icon="beaker-outline" color="#193B6B" />
                   <MetricChip
                     label="كمية السوائل المسحوبة"
                     value={`${(!isNaN(parseFloat(s.ultrafiltration_rate)) && parseFloat(s.ultrafiltration_rate) > 50) ? (parseFloat(s.ultrafiltration_rate) / 1000).toFixed(2) : (s.ultrafiltration_rate || 0)} لتر`}
                     icon="water-percent"
-                    color="#0e7490"
+                    color="#26CDD6"
                   />
                 </View>
               </View>
@@ -546,14 +533,14 @@ const PatientSessionDetailView = ({ route, navigation }) => {
 
         {/* ── Medications ── */}
         <View style={styles.card}>
-          <SectionHeader icon="pill" title={t.patientSessionDetail.medications} color="#059669" />
+          <SectionHeader icon="pill" title={t.patientSessionDetail.medications} color="#26CDD6" />
           {medications && medications.length > 0 ? (
             medications.map((med, idx) => (
               <View key={med.med_id || idx}>
                 {idx > 0 && <Divider style={styles.rowDivider} />}
                 <View style={styles.medicationRow}>
                   <View style={styles.medIconBox}>
-                    <Icon name="pill" type="material-community" size={20} color="#059669" />
+                    <Icon name="pill" type="material-community" size={20} color="#26CDD6" />
                   </View>
                   <View style={styles.medInfo}>
                     <Text style={styles.medName}>{med.medication_name}</Text>
@@ -611,7 +598,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
               <Divider style={styles.rowDivider} />
               {/* Detail List */}
               {symptoms.details.map((sym, idx) => {
-                const sev = severityColors[sym.severity] || { bg: "#f1f5f9", text: "#64748b" };
+                const sev = severityColors[sym.severity] || { bg: "#F1FCFD", text: "#8296B1" };
                 return (
                   <View key={sym.symptom_id || idx} style={styles.symptomRow}>
                     <View style={{ flex: 1 }}>
@@ -645,15 +632,15 @@ const PatientSessionDetailView = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#ecfdf5" },
+  container: { flex: 1, backgroundColor: "#F1FCFD" },
   center: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
-  loadingText: { marginTop: 12, color: "#64748b", fontSize: 14 },
-  errorText: { marginTop: 12, color: "#ef4444", fontSize: 15, textAlign: "center" },
-  retryBtn: { marginTop: 16, backgroundColor: "#204a42", paddingHorizontal: 24, paddingVertical: 10, borderRadius: 10 },
+  loadingText: { marginTop: 12, color: "#8296B1", fontSize: 14 },
+  errorText: { marginTop: 12, color: "#DE1A1C", fontSize: 15, textAlign: "center" },
+  retryBtn: { marginTop: 16, backgroundColor: "#193B6B", paddingHorizontal: 24, paddingVertical: 10, borderRadius: 10 },
 
   // Header
   header: {
-    backgroundColor: "#204a42",
+    backgroundColor: "#193B6B",
     paddingTop: 50,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -666,7 +653,7 @@ const styles = StyleSheet.create({
   backBtn: { padding: 4 },
   headerCenter: { flex: 1, alignItems: "center" },
   headerTitle: { color: "#fff", fontSize: 18, fontWeight: "900" },
-  headerSub: { color: "#94a3b8", fontSize: 13, marginTop: 2 },
+  headerSub: { color: "#BCEFF3", fontSize: 13, marginTop: 2 },
   statusBadgeHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -686,7 +673,7 @@ const styles = StyleSheet.create({
     padding: 18,
     marginBottom: 14,
     elevation: 3,
-    shadowColor: "#1e293b",
+    shadowColor: "#193B6B",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.07,
     shadowRadius: 8,
@@ -703,8 +690,8 @@ const styles = StyleSheet.create({
   personBox: { flex: 1, alignItems: "center" },
   personDivider: { width: 1, backgroundColor: "#e2e8f0", marginHorizontal: 8 },
   personAvatar: { width: 52, height: 52, borderRadius: 26, justifyContent: "center", alignItems: "center", marginBottom: 6 },
-  personRole: { fontSize: 11, color: "#94a3b8", marginBottom: 2 },
-  personName: { fontSize: 13, fontWeight: "700", color: "#1e293b", textAlign: "center" },
+  personRole: { fontSize: 11, color: "#8296B1", marginBottom: 2 },
+  personName: { fontSize: 13, fontWeight: "700", color: "#193B6B", textAlign: "center" },
   bloodBadge: { backgroundColor: "#fee2e2", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, marginTop: 4 },
   bloodText: { fontSize: 12, color: "#991b1b", fontWeight: "bold" },
   allergyRow: { flexDirection: "row-reverse", alignItems: "center", backgroundColor: "#fff7ed", padding: 8, borderRadius: 8, marginTop: 4 },
@@ -715,8 +702,8 @@ const styles = StyleSheet.create({
   infoRow: { paddingVertical: 4 },
   infoRowHighlight: { backgroundColor: "#f0fdf4", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, marginTop: 4 },
   twoCol: { flexDirection: "row-reverse", justifyContent: "space-between" },
-  infoLabel: { fontSize: 11, color: "#94a3b8", textAlign: "right" },
-  infoValue: { fontSize: 15, fontWeight: "700", color: "#1e293b", textAlign: "right" },
+  infoLabel: { fontSize: 11, color: "#8296B1", textAlign: "right" },
+  infoValue: { fontSize: 15, fontWeight: "700", color: "#193B6B", textAlign: "right" },
   notesBox: { flexDirection: "row-reverse", alignItems: "flex-start", backgroundColor: "#f8fafc", padding: 10, borderRadius: 10, marginTop: 8, gap: 6 },
   notesText: { flex: 1, fontSize: 13, color: "#475569", textAlign: "right", lineHeight: 20 },
 
@@ -732,19 +719,19 @@ const styles = StyleSheet.create({
     minWidth: 90,
   },
   metricChipValue: { fontSize: 16, fontWeight: "800", marginTop: 4 },
-  metricChipLabel: { fontSize: 10, color: "#94a3b8", marginTop: 2 },
+  metricChipLabel: { fontSize: 10, color: "#8296B1", marginTop: 2 },
 
-  recordTime: { fontSize: 11, color: "#94a3b8", textAlign: "right", marginBottom: 6 },
+  recordTime: { fontSize: 11, color: "#8296B1", textAlign: "right", marginBottom: 6 },
 
   // Medications
   medicationRow: { flexDirection: "row-reverse", alignItems: "flex-start", paddingVertical: 8 },
   medIconBox: { width: 40, height: 40, borderRadius: 20, backgroundColor: "#f0fdf4", justifyContent: "center", alignItems: "center", marginLeft: 10 },
   medInfo: { flex: 1 },
-  medName: { fontSize: 15, fontWeight: "800", color: "#1e293b", textAlign: "right" },
-  medDosage: { fontSize: 14, color: "#059669", fontWeight: "700", textAlign: "right", marginTop: 2 },
-  medTime: { fontSize: 11, color: "#94a3b8", textAlign: "right", marginTop: 2 },
-  medNotes: { fontSize: 12, color: "#64748b", textAlign: "right", marginTop: 2 },
-  medNurse: { fontSize: 10, color: "#94a3b8", textAlign: "left", maxWidth: 80 },
+  medName: { fontSize: 15, fontWeight: "800", color: "#193B6B", textAlign: "right" },
+  medDosage: { fontSize: 14, color: "#26CDD6", fontWeight: "700", textAlign: "right", marginTop: 2 },
+  medTime: { fontSize: 11, color: "#8296B1", textAlign: "right", marginTop: 2 },
+  medNotes: { fontSize: 12, color: "#8296B1", textAlign: "right", marginTop: 2 },
+  medNurse: { fontSize: 10, color: "#8296B1", textAlign: "left", maxWidth: 80 },
 
   // Symptoms
   breakdownContainer: { flexDirection: "row-reverse", flexWrap: "wrap", gap: 8, marginBottom: 8 },
@@ -752,9 +739,9 @@ const styles = StyleSheet.create({
   breakdownType: { fontSize: 12, fontWeight: "700", color: "#92400e" },
   breakdownCount: { fontSize: 12, color: "#b45309" },
   symptomRow: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "flex-start", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "#f1f5f9" },
-  symptomType: { fontSize: 14, fontWeight: "700", color: "#1e293b", textAlign: "right" },
-  symptomNotes: { fontSize: 12, color: "#64748b", textAlign: "right", marginTop: 2 },
-  symptomTime: { fontSize: 11, color: "#94a3b8", textAlign: "right", marginTop: 2 },
+  symptomType: { fontSize: 14, fontWeight: "700", color: "#193B6B", textAlign: "right" },
+  symptomNotes: { fontSize: 12, color: "#8296B1", textAlign: "right", marginTop: 2 },
+  symptomTime: { fontSize: 11, color: "#8296B1", textAlign: "right", marginTop: 2 },
   severityBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginRight: 8 },
   severityText: { fontSize: 12, fontWeight: "bold" },
   countBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
@@ -762,7 +749,7 @@ const styles = StyleSheet.create({
 
   // Empty state
   emptySmall: { alignItems: "center", paddingVertical: 20 },
-  emptySmallText: { color: "#94a3b8", fontSize: 13, marginTop: 8 },
+  emptySmallText: { color: "#8296B1", fontSize: 13, marginTop: 8 },
 
   // Weight display
   weightRow: {
@@ -788,7 +775,7 @@ const styles = StyleSheet.create({
   },
   weightLabel: {
     fontSize: 11,
-    color: "#94a3b8",
+    color: "#8296B1",
     fontWeight: "600",
   },
   weightValue: {
@@ -817,7 +804,7 @@ const styles = StyleSheet.create({
   fluidRemovedValue: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#06b6d4",
+    color: "#26CDD6",
   },
 });
 
