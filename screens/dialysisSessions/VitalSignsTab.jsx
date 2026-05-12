@@ -350,6 +350,7 @@ const VitalSignsTab = ({ route }) => {
                 placeholderTextColor="#8296B1"
                 keyboardType="numeric" value={form.systolic}
                 onChangeText={t => setField('systolic', t)}
+                allowFontScaling={false}
               />
             </View>
             <Text style={styles.bpSlash}>/</Text>
@@ -360,6 +361,7 @@ const VitalSignsTab = ({ route }) => {
                 placeholderTextColor="#8296B1"
                 keyboardType="numeric" value={form.diastolic}
                 onChangeText={t => setField('diastolic', t)}
+                allowFontScaling={false}
               />
             </View>
           </View>
@@ -375,6 +377,7 @@ const VitalSignsTab = ({ route }) => {
                   placeholderTextColor="#8296B1"
                   keyboardType="numeric" value={form.pulse}
                   onChangeText={t => setField('pulse', t)}
+                  allowFontScaling={false}
                 />
               </View>
             </View>
@@ -388,6 +391,7 @@ const VitalSignsTab = ({ route }) => {
                   placeholderTextColor="#8296B1"
                   keyboardType="numeric" value={form.temperature}
                   onChangeText={t => setField('temperature', t)}
+                  allowFontScaling={false}
                 />
               </View>
             </View>
@@ -402,6 +406,7 @@ const VitalSignsTab = ({ route }) => {
               placeholderTextColor="#8296B1"
               keyboardType="numeric" value={form.oxygen}
               onChangeText={t => setField('oxygen', t)}
+              allowFontScaling={false}
             />
             <Text style={styles.suffix}>%</Text>
           </View>
@@ -501,7 +506,7 @@ const styles = StyleSheet.create({
   inputBox: {
     flexDirection: 'row-reverse', alignItems: 'center',
     backgroundColor: '#f9fafb', borderWidth: 1, borderColor: '#e5e7eb',
-    borderRadius: 10, paddingHorizontal: 10, height: 48,
+    borderRadius: 10, paddingHorizontal: 10, minHeight: 48, paddingVertical: 4,
   },
   inp: {
     flex: 1, textAlign: 'right', fontSize: 16,

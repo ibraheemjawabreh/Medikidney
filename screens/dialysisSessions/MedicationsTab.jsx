@@ -7,6 +7,9 @@ import api from "../../services/api";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLanguage } from '../../context/LanguageContext';
 
+// ── وحدات الأدوية المتاحة ─────────────────────────────────────
+const UNITS = ['IU', 'mg', 'ml', 'mcg', 'g'];
+
 // ── الأدوية الشائعة (أزرار جاهزة) ────────────────────────────
 const PRESET_MEDS = [
   { name: "HEPARIN", icon: "needle", color: "#DE1A1C", dosage: 5000, unit: "IU", label: "هيبارين" },
@@ -80,8 +83,9 @@ const MedicationsTab = ({ route }) => {
   const [showCustom, setShowCustom] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(null); // الدواء الشائع المختار
   const [presetDosage, setPresetDosage] = useState('');   // الجرعة المعدلة
+  const [presetUnit, setPresetUnit] = useState('IU');     // وحدة الدواء الجاهز
   const [presetNotes, setPresetNotes] = useState('');
-  const [customForm, setCustomForm] = useState({ name: '', dosage: '', unit: 'mg', notes: '' });
+  const [customForm, setCustomForm] = useState({ name: '', dosage: '', unit: 'IU', notes: '' });
 
   // ── جلب الأدوية المسجلة ─────────────────────────────────────
   const fetchMeds = async () => {
@@ -203,10 +207,12 @@ const MedicationsTab = ({ route }) => {
                     if (isActive) {
                       setSelectedPreset(null);
                       setPresetDosage('');
+                      setPresetUnit('IU');
                       setPresetNotes('');
                     } else {
                       setSelectedPreset(med);
                       setPresetDosage(String(med.dosage));
+                      setPresetUnit(med.unit);   // ضبط الوحدة الافتراضية من الدواء
                       setPresetNotes('');
                     }
                   }}
@@ -237,7 +243,7 @@ const MedicationsTab = ({ route }) => {
                 {t.medications.dosageLabel} {selectedPreset.label}
               </Text>
 
-              <Text style={styles.fieldLabel}>{t.medications.dosageField} ({selectedPreset.unit}) *</Text>
+              <Text style={styles.fieldLabel}>{t.medications.dosageField} *</Text>
               <View style={styles.inputBox}>
                 <MaterialCommunityIcons name={selectedPreset.icon} size={18} color={selectedPreset.color} style={{ marginLeft: 6 }} />
                 <TextInput
@@ -248,7 +254,24 @@ const MedicationsTab = ({ route }) => {
                   value={presetDosage}
                   onChangeText={setPresetDosage}
                 />
-                <Text style={styles.unitSuffix}>{selectedPreset.unit}</Text>
+                <Text style={styles.unitSuffix}>{presetUnit}</Text>
+              </View>
+
+              {/* ── اختيار الوحدة ── */}
+              <Text style={styles.fieldLabel}>{t.medications.unit}</Text>
+              <View style={styles.unitPicker}>
+                {UNITS.map(u => (
+                  <Pressable
+                    key={u}
+                    style={[
+                      styles.unitChip,
+                      presetUnit === u && { backgroundColor: selectedPreset.color, borderColor: selectedPreset.color },
+                    ]}
+                    onPress={() => setPresetUnit(u)}
+                  >
+                    <Text style={[styles.unitChipText, presetUnit === u && { color: '#fff' }]}>{u}</Text>
+                  </Pressable>
+                ))}
               </View>
 
               <Text style={styles.fieldLabel}>{t.medications.notesOptional}</Text>
@@ -271,11 +294,12 @@ const MedicationsTab = ({ route }) => {
                     name: selectedPreset.name,
                     label: selectedPreset.label,
                     dosage: presetDosage,
-                    unit: selectedPreset.unit,
+                    unit: presetUnit,          // الوحدة المختارة من المستخدم
                     notes: presetNotes,
                   });
                   setSelectedPreset(null);
                   setPresetDosage('');
+                  setPresetUnit('IU');
                   setPresetNotes('');
                 }}
                 disabled={isSubmitting}
@@ -307,33 +331,32 @@ const MedicationsTab = ({ route }) => {
             />
           </View>
 
-          <View style={styles.twoCol}>
-            <View style={{ flex: 2 }}>
-              <Text style={styles.fieldLabel}>{t.medications.dosage}</Text>
-              <View style={styles.inputBox}>
-                <TextInput
-                  style={styles.inp}
-                  placeholder="500"
-                  placeholderTextColor="#8296B1"
-                  keyboardType="numeric"
-                  value={customForm.dosage}
-                  onChangeText={t => setField('dosage', t)}
-                />
-              </View>
-            </View>
-            <View style={{ width: 10 }} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.fieldLabel}>{t.medications.unit}</Text>
-              <View style={styles.inputBox}>
-                <TextInput
-                  style={styles.inp}
-                  placeholder="mg"
-                  placeholderTextColor="#8296B1"
-                  value={customForm.unit}
-                  onChangeText={t => setField('unit', t)}
-                />
-              </View>
-            </View>
+          <Text style={styles.fieldLabel}>{t.medications.dosage}</Text>
+          <View style={styles.inputBox}>
+            <TextInput
+              style={styles.inp}
+              placeholder="500"
+              placeholderTextColor="#8296B1"
+              keyboardType="numeric"
+              value={customForm.dosage}
+              onChangeText={t => setField('dosage', t)}
+            />
+          </View>
+
+          <Text style={styles.fieldLabel}>{t.medications.unit}</Text>
+          <View style={styles.unitPicker}>
+            {UNITS.map(u => (
+              <Pressable
+                key={u}
+                style={[
+                  styles.unitChip,
+                  customForm.unit === u && { backgroundColor: '#26CDD6', borderColor: '#26CDD6' },
+                ]}
+                onPress={() => setField('unit', u)}
+              >
+                <Text style={[styles.unitChipText, customForm.unit === u && { color: '#fff' }]}>{u}</Text>
+              </Pressable>
+            ))}
           </View>
 
           <Text style={styles.fieldLabel}>{t.medications.notesOptional}</Text>
@@ -472,10 +495,21 @@ const styles = StyleSheet.create({
   inputBox: {
     flexDirection: 'row-reverse', alignItems: 'center',
     backgroundColor: '#f9fafb', borderWidth: 1, borderColor: '#e5e7eb',
-    borderRadius: 10, paddingHorizontal: 10, height: 48,
+    borderRadius: 10, paddingHorizontal: 10, minHeight: 48, paddingVertical: 4,
   },
   inp: { flex: 1, textAlign: 'right', fontSize: 15, color: '#193B6B', fontWeight: '600' },
   unitSuffix: { color: '#8296B1', fontSize: 13, fontWeight: '800', marginRight: 6 },
+
+  // منتقي الوحدة
+  unitPicker: {
+    flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8, marginTop: 2,
+  },
+  unitChip: {
+    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+    borderWidth: 1.5, borderColor: '#e5e7eb', backgroundColor: '#f9fafb',
+  },
+  unitChipText: { fontSize: 13, fontWeight: '800', color: '#193B6B' },
+
   saveBtn: {
     backgroundColor: '#26CDD6', padding: 14, borderRadius: 10,
     alignItems: 'center', marginTop: 18, minHeight: 50, justifyContent: 'center',

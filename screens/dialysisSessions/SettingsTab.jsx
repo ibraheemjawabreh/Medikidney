@@ -39,7 +39,38 @@ const SettingsTab = ({ route }) => {
   const [currWeightBefore, setCurrWeightBefore] = useState('—');
   const [monthlyAverageUF, setMonthlyAverageUF] = useState(null);
 
-  const fetchSessionData = async () => {
+  const fetchLatest = async () => {
+    if (!sessionId) return false;
+    try {
+      setLoading(true);
+      const { data } = await api.get(
+        `/dialysis-sessions/${sessionId}/details/dialysis-settings/latest`
+      );
+
+      const obj = data?.data || data;
+      // نتحقق من وجود بيانات (حتى لو لم نجد ID، طالما هناك قيم)
+      if (obj && (extractVal(obj, 'bloodFlowRate') !== '—')) {
+        setSaved(obj);
+        setForm({
+          bloodFlowRate: extractVal(obj, 'bloodFlowRate'),
+          dialysateFlow: extractVal(obj, 'dialysateFlow'),
+          ultrafiltrationRate: extractVal(obj, 'ultrafiltrationRate'),
+        });
+        return true; // يوجد إعدادات محفوظة لهذه الجلسة
+      } else {
+        setSaved(null);
+        return false;
+      }
+    } catch (err) {
+      if (err.response?.status !== 404) console.log("Fetch error:", err.message);
+      setSaved(null);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchSessionData = async (hasSaved = false) => {
     if (!sessionId) return;
     try {
       const sessionRes = await api.get(`/dialysis-sessions/${sessionId}`);
@@ -91,18 +122,17 @@ const SettingsTab = ({ route }) => {
         setMonthlyAverageUF(count > 0 ? (totalUF / count).toFixed(2) : '0.00');
       }
 
-      // حساب السوائل المسحوبة الافتراضية = الوزن الحالي - وزن بعد الجلسة السابقة
+      // ─── حساب السوائل المسحوبة = الوزن الحالي - وزن بعد الجلسة السابقة ────
       const wBefore = currentSession.weight_before ?? currentSession.weight;
       const wAfterPrev = pastSessions.length > 0 ? pastSessions[0].weight_after : null;
       if (wBefore != null && wAfterPrev != null) {
         const diff = parseFloat(wBefore) - parseFloat(wAfterPrev);
         if (!isNaN(diff) && diff > 0) {
           const calculatedUF = diff.toFixed(1);
-          // فقط إذا ما في إعدادات محفوظة مسبقاً
-          setForm(prev => prev.ultrafiltrationRate === '2.5' || prev.ultrafiltrationRate === ''
-            ? { ...prev, ultrafiltrationRate: calculatedUF }
-            : prev
-          );
+          // نضع القيمة المحسوبة دائماً إذا لم تكن هناك إعدادات محفوظة مسبقاً
+          if (!hasSaved) {
+            setForm(prev => ({ ...prev, ultrafiltrationRate: calculatedUF }));
+          }
         }
       }
     } catch (err) {
@@ -110,38 +140,15 @@ const SettingsTab = ({ route }) => {
     }
   };
 
-  const fetchLatest = async () => {
-    if (!sessionId) return;
-    try {
-      setLoading(true);
-      const { data } = await api.get(
-        `/dialysis-sessions/${sessionId}/details/dialysis-settings/latest`
-      );
-
-      const obj = data?.data || data;
-      // نتحقق من وجود بيانات (حتى لو لم نجد ID، طالما هناك قيم)
-      if (obj && (extractVal(obj, 'bloodFlowRate') !== '—')) {
-        setSaved(obj);
-        setForm({
-          bloodFlowRate: extractVal(obj, 'bloodFlowRate'),
-          dialysateFlow: extractVal(obj, 'dialysateFlow'),
-          ultrafiltrationRate: extractVal(obj, 'ultrafiltrationRate'),
-        });
-      } else {
-        setSaved(null);
-      }
-    } catch (err) {
-      if (err.response?.status !== 404) console.log("Fetch error:", err.message);
-      setSaved(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchLatest();
-    fetchSessionData();
+    // تسلسل مضمون: جلب الإعدادات أولاً ← ثم بيانات الجلسة مع علم hasSaved
+    const init = async () => {
+      const hasSaved = await fetchLatest();
+      await fetchSessionData(hasSaved);
+    };
+    init();
   }, [sessionId]);
+
 
   const handleSave = async () => {
     const { bloodFlowRate, dialysateFlow, ultrafiltrationRate } = form;
@@ -292,6 +299,7 @@ const SettingsTab = ({ route }) => {
                       keyboardType="numeric"
                       value={form[f.key]}
                       onChangeText={t => setField(f.key, t)}
+                      allowFontScaling={false}
                     />
                   </View>
                 </View>
@@ -377,10 +385,10 @@ const styles = StyleSheet.create({
   fieldLabelLeft: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
   fieldLabel: { fontSize: 13, fontWeight: '700', color: '#193B6B' },
   fieldHint: { fontSize: 11, color: '#8296B1', fontWeight: '500' },
-  inputBox: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#f9fafb', borderWidth: 1.5, borderColor: '#e5e7eb', borderRadius: 12, paddingHorizontal: 12, height: 52 },
+  inputBox: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#f9fafb', borderWidth: 1.5, borderColor: '#e5e7eb', borderRadius: 12, paddingHorizontal: 12, minHeight: 52, paddingVertical: 4 },
   input: { flex: 1, textAlign: 'right', fontSize: 17, color: '#193B6B', fontWeight: '700' },
   unitLabel: { color: '#8296B1', fontSize: 12, fontWeight: '700', marginLeft: 4 },
-  saveBtn: { backgroundColor: '#26CDD6', borderRadius: 12, height: 52, flexDirection: 'row-reverse', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 8 },
+  saveBtn: { backgroundColor: '#26CDD6', borderRadius: 12, minHeight: 52, flexDirection: 'row-reverse', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 8 },
   saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
   monthlyAvgBox: {
     flexDirection: 'row-reverse',
