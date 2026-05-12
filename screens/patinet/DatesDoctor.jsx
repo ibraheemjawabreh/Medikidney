@@ -1,123 +1,397 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   Text, View, ScrollView, StyleSheet, ActivityIndicator,
-  Alert, Pressable, TextInput, Animated, StatusBar, Platform
+  Alert, Pressable, TextInput, Animated, StatusBar, Platform,
+  FlatList, TouchableOpacity, KeyboardAvoidingView
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
 import api from "../../services/api";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useLanguage } from "../../context/LanguageContext";
 
+// ─── ثوابت الألوان ───────────────────────────────────────────────
+const C = {
+  navy:    "#193B6B",
+  teal:    "#26CDD6",
+  tealBg:  "#E8F9FA",
+  tealMid: "#A8E8EC",
+  light:   "#F1FCFD",
+  white:   "#FFFFFF",
+  muted:   "#8296B1",
+  border:  "#E5E7EB",
+  red:     "#DE1A1C",
+  redBg:   "#FBEAEA",
+  gray:    "#F9FAFB",
+  darkText:"#1A2E45",
+};
+
+// ─── مكوّن StepIndicator ─────────────────────────────────────────
+const StepIndicator = ({ currentStep }) => {
+  const steps = [
+    { icon: "doctor", label: "الطبيب" },
+    { icon: "calendar-month", label: "الموعد" },
+    { icon: "text-box-outline", label: "التفاصيل" },
+    { icon: "check-circle-outline", label: "تأكيد" },
+  ];
+
+  return (
+    <View style={si.wrapper}>
+      {steps.map((s, i) => {
+        const done    = i < currentStep;
+        const active  = i === currentStep;
+        const future  = i > currentStep;
+        return (
+          <React.Fragment key={i}>
+            <View style={si.col}>
+              <View style={[
+                si.circle,
+                done   && si.circleDone,
+                active && si.circleActive,
+                future && si.circleFuture,
+              ]}>
+                {done
+                  ? <MaterialCommunityIcons name="check" size={16} color={C.white} />
+                  : <MaterialCommunityIcons
+                      name={s.icon}
+                      size={16}
+                      color={active ? C.white : C.muted}
+                    />
+                }
+              </View>
+              <Text style={[
+                si.label,
+                active && { color: C.teal, fontWeight: "700" },
+                done   && { color: C.navy },
+                future && { color: C.muted },
+              ]}>{s.label}</Text>
+            </View>
+            {i < steps.length - 1 && (
+              <View style={[si.line, done && si.lineDone]} />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </View>
+  );
+};
+
+const si = StyleSheet.create({
+  wrapper:      { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 20, paddingHorizontal: 10 },
+  col:          { alignItems: "center", width: 60 },
+  circle:       { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", marginBottom: 5 },
+  circleDone:   { backgroundColor: C.navy },
+  circleActive: { backgroundColor: C.teal },
+  circleFuture: { backgroundColor: C.border, borderWidth: 1, borderColor: C.border },
+  label:        { fontSize: 11, textAlign: "center" },
+  line:         { flex: 1, height: 2, backgroundColor: C.border, marginBottom: 22, marginHorizontal: 2 },
+  lineDone:     { backgroundColor: C.navy },
+});
+
+// ─── مكوّن DoctorCard ────────────────────────────────────────────
+const DoctorCard = ({ doctor, selected, onPress, t }) => (
+  <Pressable
+    onPress={onPress}
+    style={[dc.card, selected && dc.cardSelected]}
+  >
+    <View style={[dc.avatar, selected && dc.avatarSelected]}>
+      <MaterialCommunityIcons
+        name="doctor"
+        size={28}
+        color={selected ? C.white : C.teal}
+      />
+    </View>
+    <View style={{ flex: 1 }}>
+      <Text style={[dc.name, selected && { color: C.white }]}>
+        {t.appointments.dr} {doctor.full_name}
+      </Text>
+      {doctor.specialty && (
+        <Text style={[dc.spec, selected && { color: "rgba(255,255,255,0.75)" }]}>
+          {doctor.specialty}
+        </Text>
+      )}
+    </View>
+    {selected && (
+      <MaterialCommunityIcons name="check-circle" size={22} color={C.white} />
+    )}
+  </Pressable>
+);
+
+const dc = StyleSheet.create({
+  card:         { flexDirection: "row", alignItems: "center", gap: 14, backgroundColor: C.white, borderRadius: 16, padding: 16, marginBottom: 10, borderWidth: 1.5, borderColor: C.border },
+  cardSelected: { backgroundColor: C.navy, borderColor: C.navy },
+  avatar:       { width: 52, height: 52, borderRadius: 26, backgroundColor: C.tealBg, alignItems: "center", justifyContent: "center" },
+  avatarSelected:{ backgroundColor: "rgba(255,255,255,0.2)" },
+  name:         { fontSize: 15, fontWeight: "700", color: C.navy, textAlign: "right" },
+  spec:         { fontSize: 12, color: C.muted, marginTop: 2, textAlign: "right" },
+});
+
+// ─── مكوّن DayCard ───────────────────────────────────────────────
+const DayCard = ({ schedule, selected, onPress, formatTime, t }) => {
+  const DAY_AR = {
+    SUNDAY: "الأحد", MONDAY: "الاثنين", TUESDAY: "الثلاثاء",
+    WEDNESDAY: "الأربعاء", THURSDAY: "الخميس", FRIDAY: "الجمعة", SATURDAY: "السبت"
+  };
+  const MONTH_AR = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+
+  const dayLabel = t?.days?.[schedule.weekday] || DAY_AR[schedule.weekday] || schedule.weekday;
+
+  const getDateForDay = (dayName) => {
+    const days = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
+    const target = days.indexOf(dayName.toUpperCase());
+    const d = new Date();
+    const diff = (target - d.getDay() + 7) % 7;
+    d.setDate(d.getDate() + diff);
+    return d;
+  };
+
+  const dateObj   = getDateForDay(schedule.weekday);
+  const dayNum    = dateObj.getDate();
+  const monthName = MONTH_AR[dateObj.getMonth()];
+  const isItToday = dateObj.toISOString().split("T")[0] === new Date().toISOString().split("T")[0];
+
+  return (
+    <Pressable onPress={onPress} style={[dy.card, selected && dy.cardSelected]}>
+      {/* العمود الأيسر — رقم اليوم */}
+      <View style={[dy.dateBox, selected && dy.dateBoxSelected]}>
+        <Text style={[dy.dayNum, selected && dy.dayNumSelected]}>{dayNum}</Text>
+        <Text style={[dy.monthName, selected && dy.monthNameSelected]}>{monthName}</Text>
+      </View>
+
+      {/* الفاصل */}
+      <View style={[dy.divider, selected && dy.dividerSelected]} />
+
+      {/* العمود الأيمن — اسم اليوم والوقت */}
+      <View style={dy.infoCol}>
+        <View style={dy.nameRow}>
+          <Text style={[dy.dayLabel, selected && dy.textW]}>{dayLabel}</Text>
+          {isItToday && (
+            <View style={[dy.todayBadge, selected && dy.todayBadgeSelected]}>
+              <Text style={[dy.todayText, selected && dy.todayTextSelected]}>اليوم</Text>
+            </View>
+          )}
+        </View>
+        <Text style={[dy.timeText, selected && dy.timeTextSelected]}>
+          {formatTime(schedule.startTime)}
+        </Text>
+      </View>
+
+      {/* أيقونة الاختيار */}
+      {selected && (
+        <MaterialCommunityIcons name="check-circle" size={18} color={C.white} style={{ marginRight: 4 }} />
+      )}
+    </Pressable>
+  );
+};
+
+const dy = StyleSheet.create({
+  card: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    backgroundColor: C.white,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginBottom: 10,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    gap: 12,
+  },
+  cardSelected: { backgroundColor: C.navy, borderColor: C.navy },
+
+  dateBox: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: C.tealBg,
+    borderRadius: 10,
+    width: 48,
+    height: 48,
+  },
+  dateBoxSelected: { backgroundColor: "rgba(255,255,255,0.15)" },
+  dayNum:          { fontSize: 18, fontWeight: "700", color: C.teal, lineHeight: 22 },
+  dayNumSelected:  { color: C.white },
+  monthName:       { fontSize: 10, color: C.muted, fontWeight: "600" },
+  monthNameSelected:{ color: "rgba(255,255,255,0.7)" },
+
+  divider:         { width: 1, height: 36, backgroundColor: C.border },
+  dividerSelected: { backgroundColor: "rgba(255,255,255,0.2)" },
+
+  infoCol:  { flex: 1, alignItems: "flex-end", gap: 4 },
+  nameRow:  { flexDirection: "row-reverse", alignItems: "center", gap: 6 },
+  dayLabel: { fontSize: 15, fontWeight: "700", color: C.navy },
+  textW:    { color: C.white },
+  timeText: { fontSize: 12, color: C.muted },
+  timeTextSelected: { color: "rgba(255,255,255,0.75)" },
+
+  todayBadge:        { backgroundColor: C.teal, borderRadius: 20, paddingHorizontal: 7, paddingVertical: 2 },
+  todayBadgeSelected:{ backgroundColor: "rgba(255,255,255,0.25)" },
+  todayText:         { fontSize: 10, fontWeight: "700", color: C.white },
+  todayTextSelected: { color: C.white },
+});
+
+// ─── مكوّن TimeSlot ──────────────────────────────────────────────
+const TimeSlot = ({ slot, selected, onPress, formatTime, t }) => (
+  <Pressable
+    disabled={slot.booked}
+    onPress={onPress}
+    style={[ts.slot, slot.booked && ts.booked, selected && ts.selected]}
+  >
+    <MaterialCommunityIcons
+      name={slot.booked ? "clock-remove-outline" : "clock-outline"}
+      size={15}
+      color={selected ? C.white : slot.booked ? C.muted : C.teal}
+    />
+    <Text style={[ts.text, slot.booked && ts.bookedText, selected && ts.selectedText]}>
+      {formatTime(slot.time)}
+    </Text>
+    {slot.booked && (
+      <Text style={ts.bookedTag}>{t.appointments.booked}</Text>
+    )}
+  </Pressable>
+);
+
+const ts = StyleSheet.create({
+  slot:        { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: C.white, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 14, borderWidth: 1.5, borderColor: C.border, width: "47%", marginBottom: 10 },
+  selected:    { backgroundColor: C.teal, borderColor: C.teal },
+  booked:      { backgroundColor: C.gray, borderColor: C.border, opacity: 0.6 },
+  text:        { fontSize: 13, fontWeight: "600", color: C.navy },
+  selectedText:{ color: C.white },
+  bookedText:  { color: C.muted },
+  bookedTag:   { fontSize: 9, color: C.red, marginRight: "auto" },
+});
+
+// ─── مكوّن SummaryRow ────────────────────────────────────────────
+const SummaryRow = ({ icon, label, value }) => (
+  <View style={sr.row}>
+    <Text style={sr.value}>{value}</Text>
+    <View style={sr.right}>
+      <Text style={sr.label}>{label}</Text>
+      <MaterialCommunityIcons name={icon} size={20} color={C.teal} />
+    </View>
+  </View>
+);
+
+const sr = StyleSheet.create({
+  row:   { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.border },
+  right: { flexDirection: "row", alignItems: "center", gap: 10 },
+  label: { fontSize: 13, color: C.muted, textAlign: "right" },
+  value: { fontSize: 14, fontWeight: "600", color: C.navy, textAlign: "right", flex: 1, marginRight: 16 },
+});
+
+// ─── الشاشة الرئيسية ─────────────────────────────────────────────
 const AppointmentScreen = () => {
   const navigation = useNavigation();
   const { t } = useLanguage();
 
-  const [doctors, setDoctors] = useState([]);
-  const [selectedDoctor, setSelectedDoctor] = useState("");
-  const [schedules, setSchedules] = useState([]);
-  const [selectedDay, setSelectedDay] = useState(null);
-  const [slots, setSlots] = useState([]);
+  // State
+  const [step, setStep]                 = useState(0);
+  const [doctors, setDoctors]           = useState([]);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [schedules, setSchedules]       = useState([]);
+  const [selectedDay, setSelectedDay]   = useState(null);
+  const [slots, setSlots]               = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [reason, setReason] = useState("");
+  const [reason, setReason]             = useState("");
   const [myAppointments, setMyAppointments] = useState([]);
-
-  const [loading, setLoading] = useState(false);
-  const [isWakingUp, setIsWakingUp] = useState(true);
+  const [loading, setLoading]           = useState(false);
+  const [isWakingUp, setIsWakingUp]     = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [errorMsg, setErrorMsg]         = useState("");
+  const [slotBookingAllowed, setSlotBookingAllowed] = useState(true);
 
-  const formatDate = (date) => date.toISOString().split('T')[0];
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim  = useRef(new Animated.Value(0)).current;
+
+  // ── Helpers ──────────────────────────────────────────────────────
+  const formatDate = (date) => date.toISOString().split("T")[0];
 
   const getNextDate = (dayName) => {
-    const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+    const days = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
     const target = days.indexOf(dayName.toUpperCase());
     const d = new Date();
-    d.setDate(d.getDate() + (target + 7 - d.getDay()) % 7);
+    const diff = (target - d.getDay() + 7) % 7;
+    d.setDate(d.getDate() + diff);
     return formatDate(d);
+  };
+
+  const isToday = (dateStr) => dateStr === formatDate(new Date());
+
+  const filterPastSlots = (slotsArr, dateStr) => {
+    if (!isToday(dateStr)) return slotsArr;
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const bufferMinutes = 15;
+    return slotsArr.filter(slot => {
+      const [h, m] = slot.time.split(":").map(Number);
+      return (h * 60 + m) > currentMinutes + bufferMinutes;
+    });
   };
 
   const formatTime = (time) => {
     if (!time) return "";
-    let [h, m] = time.split(":");
-    let hh = parseInt(h);
-    return `${hh % 12 || 12}:${m} ${hh >= 12 ? t.time.pm : t.time.am}`;
+    const [h, m] = time.split(":");
+    const hh = parseInt(h);
+    return `${hh % 12 || 12}:${m} ${hh >= 12 ? (t?.time?.pm || "م") : (t?.time?.am || "ص")}`;
   };
 
+  const animateStep = () => {
+    slideAnim.setValue(30);
+    fadeAnim.setValue(0);
+    Animated.parallel([
+      Animated.timing(slideAnim, { toValue: 0, duration: 280, useNativeDriver: true }),
+      Animated.timing(fadeAnim,  { toValue: 1, duration: 280, useNativeDriver: true }),
+    ]).start();
+  };
+
+  const goToStep = (n) => {
+    setStep(n);
+    animateStep();
+  };
+
+  // ── Data loading ─────────────────────────────────────────────────
   const initData = async () => {
     try {
       const [docsRes, myApptsRes] = await Promise.all([
-        api.get('/reports/booking-doctors'),
-        api.get('/clinic-consultations')
+        api.get("/reports/booking-doctors"),
+        api.get("/clinic-consultations"),
       ]);
-
       setDoctors(Array.isArray(docsRes.data) ? docsRes.data : []);
-      const activeAppts = (myApptsRes.data || []).filter(a => a.status === 'SCHEDULED');
-      setMyAppointments(activeAppts);
-
-      Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }).start();
+      const active = (myApptsRes.data || []).filter(a => a.status === "SCHEDULED");
+      setMyAppointments(active);
     } catch (err) {
       console.log("Init Error:", err);
     } finally {
       setIsWakingUp(false);
+      animateStep();
     }
   };
 
-  useEffect(() => {
-    initData();
-  }, []);
+  useEffect(() => { initData(); }, []);
 
-  const handleCancelAppointment = (apptId) => {
-    if (!apptId) {
-      return Alert.alert(t.error, t.appointments.apptIdNotFound);
-    }
-
-    Alert.alert(
-      t.appointments.cancelTitle,
-      t.appointments.cancelMsg,
-      [
-        { text: t.appointments.cancelBack, style: "cancel" },
-        {
-          text: t.appointments.cancelConfirm,
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setLoading(true);
-              const response = await api.delete(`/clinic-consultations/${apptId}`);
-              if (response.status === 200 || response.status === 204) {
-                Alert.alert(t.success, t.appointments.cancelSuccess);
-                initData();
-                if (selectedDay) handleDaySelect(selectedDay);
-              }
-            } catch (err) {
-              console.error("Delete Error Detail:", err.response?.data || err.message);
-              const errMsg = err.response?.data?.message || t.appointments.cancelFailed;
-              Alert.alert(t.failed, errMsg);
-            } finally {
-              setLoading(false);
-            }
-          }
-        }
-      ]
-    );
-  };
-
-  const handleDoctorChange = async (docId) => {
-    setSelectedDoctor(docId);
+  const handleDoctorSelect = async (doc) => {
+    setSelectedDoctor(doc);
     setSchedules([]);
     setSelectedDay(null);
     setSlots([]);
     setSelectedSlot(null);
     setErrorMsg("");
 
-    if (!docId) return;
-
     try {
       setLoading(true);
-      const res = await api.get('/doctor-schedule', { params: { doctorId: docId } });
-      setSchedules(res.data || []);
-    } catch (e) {
+      const res = await api.get("/doctor-schedule", { params: { doctorId: doc.doctor_id } });
+      const data = res.data || [];
+      setSchedules(data);
+
+      if (data.length === 0) {
+        Alert.alert(
+          "لا توجد مواعيد",
+          `الدكتور ${doc.full_name} لا يملك جدول مواعيد حالياً، يرجى اختيار طبيب آخر.`,
+          [{ text: "حسناً" }]
+        );
+        return;
+      }
+
+      goToStep(1);
+    } catch {
       Alert.alert(t.error, t.appointments.noSchedule);
     } finally {
       setLoading(false);
@@ -133,264 +407,415 @@ const AppointmentScreen = () => {
     try {
       setLoading(true);
       const date = getNextDate(day.weekday);
-      const res = await api.get('/clinic-consultations/availability', {
-        params: { doctorId: selectedDoctor, date }
+      const res = await api.get("/clinic-consultations/availability", {
+        params: { doctorId: selectedDoctor.doctor_id, date },
       });
 
       const { availableSlots = [], bookedSlots = [], bookingAllowed, bookingRestrictionReason } = res.data;
 
       const all = [
         ...availableSlots.map(tm => ({ time: tm, booked: false })),
-        ...bookedSlots.map(tm => ({ time: tm, booked: true }))
+        ...bookedSlots.map(tm =>   ({ time: tm, booked: true  })),
       ].sort((a, b) => a.time.localeCompare(b.time));
 
-      setSlots(all);
-      if (!bookingAllowed) setErrorMsg(bookingRestrictionReason);
-    } catch (e) {
+      // فلترة المواعيد اللي فاتت إذا كان اليوم هو نفس اليوم
+      const filtered = filterPastSlots(all, date);
+
+      // إذا كان اليوم نفسه وكل المواعيد المتاحة راحت
+      if (isToday(date) && filtered.filter(s => !s.booked).length === 0 && all.filter(s => !s.booked).length > 0) {
+        setSlots([]);
+        setErrorMsg("انتهت مواعيد اليوم، يرجى اختيار يوم آخر أو المراجعة غداً.");
+        setSlotBookingAllowed(false);
+        goToStep(2);
+        return;
+      }
+
+      setSlots(filtered);
+      setSlotBookingAllowed(bookingAllowed !== false);
+      if (!bookingAllowed) setErrorMsg(bookingRestrictionReason || "");
+      goToStep(2);
+    } catch {
       setErrorMsg(t.appointments.fetchError);
+      goToStep(2);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSlotSelect = (s) => {
+    setSelectedSlot(s.time);
+    goToStep(3);
+  };
+
+  const handleCancelAppointment = (apptId) => {
+    if (!apptId) return Alert.alert(t.error, t.appointments.apptIdNotFound);
+    Alert.alert(
+      t.appointments.cancelTitle,
+      t.appointments.cancelMsg,
+      [
+        { text: t.appointments.cancelBack, style: "cancel" },
+        {
+          text: t.appointments.cancelConfirm,
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              const res = await api.delete(`/clinic-consultations/${apptId}`);
+              if (res.status === 200 || res.status === 204) {
+                Alert.alert(t.success, t.appointments.cancelSuccess);
+                initData();
+              }
+            } catch (err) {
+              Alert.alert(t.failed, err.response?.data?.message || t.appointments.cancelFailed);
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const confirmBooking = async () => {
     if (!reason.trim()) return Alert.alert(t.error, t.appointments.reasonRequired);
 
     const date = getNextDate(selectedDay.weekday);
-
-    const hasApptSameDay = myAppointments.some(appt => appt.appt_date === date);
-    if (hasApptSameDay) {
+    if (myAppointments.some(a => a.appt_date === date)) {
       return Alert.alert(t.appointments.sorry, t.appointments.sameDayError);
     }
 
     try {
       setBookingLoading(true);
-      await api.post('/clinic-consultations/book', {
-        doctorId: Number(selectedDoctor),
-        apptDate: date,
-        apptTime: `${date}T${selectedSlot}`,
-        visitReason: reason
+      await api.post("/clinic-consultations/book", {
+        doctorId:    Number(selectedDoctor.doctor_id),
+        apptDate:    date,
+        apptTime:    `${date}T${selectedSlot}`,
+        visitReason: reason,
       });
 
       Alert.alert(t.success, t.appointments.bookSuccess, [
         {
-          text: t.appointments.bookSuccessBtn, onPress: () => {
+          text: t.appointments.bookSuccessBtn,
+          onPress: () => {
             initData();
-            handleDaySelect(selectedDay);
-          }
-        }
+            // Reset all
+            setStep(0);
+            setSelectedDoctor(null);
+            setSchedules([]);
+            setSelectedDay(null);
+            setSlots([]);
+            setSelectedSlot(null);
+            setReason("");
+            animateStep();
+          },
+        },
       ]);
     } catch (err) {
-      const errMsg = err.response?.data?.message || err.response?.data?.error || "";
-      if (err.response?.status === 400 && (errMsg.includes("already") || errMsg.includes("same day") || errMsg.includes("موعد") || errMsg.includes("مسبق"))) {
-        Alert.alert(t.appointments.sorry, t.appointments.sameDayError);
-      } else {
-        Alert.alert(t.failed, errMsg || t.appointments.bookFailed);
-      }
+      const msg = err.response?.data?.message || err.response?.data?.error || "";
+      const isSameDay = err.response?.status === 400 &&
+        (msg.includes("already") || msg.includes("same day") || msg.includes("موعد") || msg.includes("مسبق"));
+      Alert.alert(isSameDay ? t.appointments.sorry : t.failed, isSameDay ? t.appointments.sameDayError : msg || t.appointments.bookFailed);
     } finally {
       setBookingLoading(false);
     }
   };
 
+  // ── الشاشات ───────────────────────────────────────────────────────
+  const DAY_AR = {
+    SUNDAY: "الأحد", MONDAY: "الاثنين", TUESDAY: "الثلاثاء",
+    WEDNESDAY: "الأربعاء", THURSDAY: "الخميس", FRIDAY: "الجمعة", SATURDAY: "السبت"
+  };
+
+  const renderStep0 = () => (
+    <View>
+      <Text style={s.sectionTitle}>اختر الطبيب</Text>
+      {loading
+        ? <ActivityIndicator color={C.teal} style={{ marginTop: 30 }} />
+        : doctors.map(doc => (
+            <DoctorCard
+              key={doc.doctor_id}
+              doctor={doc}
+              selected={selectedDoctor?.doctor_id === doc.doctor_id}
+              onPress={() => handleDoctorSelect(doc)}
+              t={t}
+            />
+          ))
+      }
+    </View>
+  );
+
+  const renderStep1 = () => (
+    <View>
+      {/* Doctor summary pill */}
+      <Pressable onPress={() => goToStep(0)} style={s.summaryPill}>
+        <MaterialCommunityIcons name="pencil-outline" size={15} color={C.teal} />
+        <Text style={s.summaryPillText}>د. {selectedDoctor?.full_name}</Text>
+        <MaterialCommunityIcons name="chevron-left" size={16} color={C.muted} />
+      </Pressable>
+
+      <Text style={s.sectionTitle}>اختر اليوم</Text>
+      <View style={{ gap: 0 }}>
+        {schedules.map((sc, i) => (
+          <DayCard
+            key={i}
+            schedule={sc}
+            selected={selectedDay?.schedule_id === sc.schedule_id}
+            onPress={() => handleDaySelect(sc)}
+            formatTime={formatTime}
+            t={t}
+          />
+        ))}
+      </View>
+      {loading && <ActivityIndicator color={C.teal} style={{ marginTop: 20 }} />}
+    </View>
+  );
+
+  const renderStep2 = () => (
+    <View>
+      {/* Breadcrumbs */}
+      <View style={s.breadRow}>
+        <Pressable onPress={() => goToStep(1)} style={s.summaryPill}>
+          <MaterialCommunityIcons name="pencil-outline" size={14} color={C.teal} />
+          <Text style={s.summaryPillText}>
+            {(() => {
+              const DAY_AR2 = { SUNDAY:"الأحد", MONDAY:"الاثنين", TUESDAY:"الثلاثاء", WEDNESDAY:"الأربعاء", THURSDAY:"الخميس", FRIDAY:"الجمعة", SATURDAY:"السبت" };
+              const MONTH_AR2 = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+              const days2 = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
+              const target = days2.indexOf(selectedDay?.weekday?.toUpperCase());
+              const d = new Date();
+              const diff = (target - d.getDay() + 7) % 7;
+              d.setDate(d.getDate() + diff);
+              const dayName = t?.days?.[selectedDay?.weekday] || DAY_AR2[selectedDay?.weekday] || "";
+              return `${dayName} ${d.getDate()} ${MONTH_AR2[d.getMonth()]}`;
+            })()}
+          </Text>
+        </Pressable>
+        <Pressable onPress={() => goToStep(0)} style={[s.summaryPill, { backgroundColor: C.gray }]}>
+          <Text style={[s.summaryPillText, { color: C.muted }]}>د. {selectedDoctor?.full_name}</Text>
+        </Pressable>
+      </View>
+
+      <Text style={s.sectionTitle}>اختر الوقت</Text>
+
+      {errorMsg
+        ? <View style={s.errorBox}><Text style={s.errorText}>{errorMsg}</Text></View>
+        : loading
+          ? <ActivityIndicator color={C.teal} style={{ marginTop: 30 }} />
+          : slots.length === 0
+            ? <View style={s.emptyBox}><MaterialCommunityIcons name="calendar-remove-outline" size={40} color={C.muted} /><Text style={s.emptyText}>لا توجد مواعيد متاحة</Text></View>
+            : <View style={s.slotsGrid}>
+                {slots.map((sl, i) => (
+                  <TimeSlot
+                    key={i}
+                    slot={sl}
+                    selected={selectedSlot === sl.time}
+                    onPress={() => handleSlotSelect(sl)}
+                    formatTime={formatTime}
+                    t={t}
+                  />
+                ))}
+              </View>
+      }
+    </View>
+  );
+
+  const renderStep3 = () => {
+    const date = selectedDay ? getNextDate(selectedDay.weekday) : "";
+    const dayLabel = t?.days?.[selectedDay?.weekday] || DAY_AR[selectedDay?.weekday] || "";
+    return (
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <View style={s.confirmCard}>
+          <Text style={s.confirmTitle}>ملخص الحجز</Text>
+          <SummaryRow icon="doctor"          label="الطبيب"  value={`د. ${selectedDoctor?.full_name}`} />
+          <SummaryRow icon="calendar-month"  label="اليوم"   value={`${dayLabel} — ${date}`} />
+          <SummaryRow icon="clock-outline"   label="الوقت"   value={formatTime(selectedSlot)} />
+        </View>
+
+        <Text style={s.inputLabel}>سبب الزيارة *</Text>
+        <TextInput
+          style={s.reasonInput}
+          placeholder="اكتب سبب الزيارة هنا..."
+          placeholderTextColor={C.muted}
+          value={reason}
+          onChangeText={setReason}
+          multiline
+          textAlign="right"
+          textAlignVertical="top"
+          color={C.darkText}
+          fontSize={14}
+        />
+
+        <Pressable
+          onPress={confirmBooking}
+          disabled={bookingLoading || !reason.trim()}
+          style={[s.confirmBtn, (!reason.trim()) && { opacity: 0.5 }]}
+        >
+          {bookingLoading
+            ? <ActivityIndicator color={C.white} />
+            : <>
+                <MaterialCommunityIcons name="calendar-check" size={20} color={C.white} />
+                <Text style={s.confirmBtnText}>{t.appointments.confirmBtn || "تأكيد الحجز"}</Text>
+              </>
+          }
+        </Pressable>
+      </KeyboardAvoidingView>
+    );
+  };
+
+  // ── Loading screen ───────────────────────────────────────────────
   if (isWakingUp) return (
-    <View style={styles.center}>
-      <ActivityIndicator size="large" color="#26CDD6" />
-      <Text style={styles.loadingText}>{t.appointments.systemLoading}</Text>
+    <View style={s.center}>
+      <ActivityIndicator size="large" color={C.teal} />
+      <Text style={s.loadingText}>{t.appointments.systemLoading}</Text>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
+    <View style={s.container}>
+      <StatusBar barStyle="light-content" backgroundColor={C.navy} />
 
-      <View style={styles.header}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View style={{ width: 40 }} />
-          <View style={{ alignItems: 'center' }}>
-            <Text style={styles.headerTitle}>{t.appointments.title}</Text>
-            <Text style={styles.headerSub}>{t.appointments.headerSub}</Text>
-          </View>
-          <Pressable onPress={() => navigation.goBack()} style={{ padding: 5 }}>
-            <MaterialCommunityIcons name="arrow-right" size={28} color="#fff" />
-          </Pressable>
+      {/* Header */}
+      <View style={s.header}>
+        <Pressable onPress={() => navigation.goBack()} style={s.backBtn}>
+          <MaterialCommunityIcons name="arrow-right" size={24} color={C.white} />
+        </Pressable>
+        <View style={{ alignItems: "center" }}>
+          <Text style={s.headerTitle}>{t.appointments.title}</Text>
+          <Text style={s.headerSub}>{t.appointments.headerSub}</Text>
         </View>
+        <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <Animated.View style={{ opacity: fadeAnim }}>
+      <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
 
-          {myAppointments.length > 0 && (
-            <View style={styles.myApptsSection}>
-              <Text style={styles.label}>{t.appointments.myAppointments}</Text>
-              {myAppointments.map((appt) => {
-                const isCompleted = appt.status === 'COMPLETED';
-                return (
-                  <View key={appt.appointment_id} style={styles.myApptCard}>
-                    {isCompleted ? (
-                      <View style={styles.completedBadge}>
-                        <MaterialCommunityIcons name="check-circle-outline" size={20} color="#26CDD6" />
-                      </View>
-                    ) : (
-                      <Pressable
-                        onPress={() => handleCancelAppointment(appt.appointment_id)}
-                        style={styles.deleteBtn}
-                      >
-                        <MaterialCommunityIcons name="trash-can-outline" size={22} color="#DE1A1C" />
-                      </Pressable>
-                    )}
-                    <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                      <Text style={styles.docName}>{t.appointments.dr} {appt.doctor?.full_name}</Text>
-                      <Text style={styles.apptDateText}>{appt.appt_date} | {formatTime(appt.appt_time)}</Text>
-                      {isCompleted && (
-                        <Text style={styles.completedText}>{t.patientProfile?.status?.completed || 'مكتمل'}</Text>
-                      )}
-                    </View>
+        {/* مواعيدي الحالية */}
+        {myAppointments.length > 0 && (
+          <View style={s.myApptsSection}>
+            <Text style={s.myApptsTitle}>
+              <MaterialCommunityIcons name="calendar-clock" size={16} color={C.navy} /> مواعيدي
+            </Text>
+            {myAppointments.map(appt => (
+              <View key={appt.appointment_id} style={s.apptCard}>
+                <View style={s.apptCardLeft}>
+                  <View style={s.apptIconCircle}>
+                    <MaterialCommunityIcons name="stethoscope" size={20} color={C.teal} />
                   </View>
-                );
-              })}
-            </View>
-          )}
-
-          <View style={styles.divider} />
-
-          <View style={styles.card}>
-            <Text style={styles.label}>{t.appointments.step1}</Text>
-            <View style={styles.pickerBox}>
-              <Picker
-                selectedValue={selectedDoctor}
-                onValueChange={handleDoctorChange}
-                style={styles.picker}
-              >
-                <Picker.Item label={t.appointments.selectDoctor} value="" />
-                {doctors.map(d => <Picker.Item key={d.doctor_id} label={`${t.appointments.dr} ${d.full_name}`} value={d.doctor_id.toString()} />)}
-              </Picker>
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder={t.appointments.visitReason}
-              value={reason}
-              onChangeText={setReason}
-              multiline
-            />
-          </View>
-
-          {schedules.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.label}>{t.appointments.step2}</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.daysContainer}>
-                {schedules.map((s, idx) => (
-                  <Pressable
-                    key={idx}
-                    onPress={() => handleDaySelect(s)}
-                    style={[styles.dayCard, selectedDay?.schedule_id === s.schedule_id && styles.activeDay]}
-                  >
-                    <Text style={[styles.dayText, selectedDay?.schedule_id === s.schedule_id && styles.activeText]}>
-                      {t.days[s.weekday] || s.weekday}
-                    </Text>
-                    <Text style={styles.smallTime}>{formatTime(s.startTime)}</Text>
+                  <Pressable onPress={() => handleCancelAppointment(appt.appointment_id)} style={s.cancelBtn}>
+                    <MaterialCommunityIcons name="trash-can-outline" size={18} color={C.red} />
                   </Pressable>
-                ))}
-              </ScrollView>
-            </View>
-          )}
-
-          {loading ? (
-            <ActivityIndicator style={{ marginTop: 20 }} color="#26CDD6" />
-          ) : slots.length > 0 ? (
-            <View style={styles.section}>
-              <Text style={styles.label}>{t.appointments.step3}</Text>
-              <View style={styles.grid}>
-                {slots.map((s, i) => (
-                  <Pressable
-                    key={i}
-                    disabled={s.booked}
-                    onPress={() => setSelectedSlot(s.time)}
-                    style={[
-                      styles.slot,
-                      s.booked && styles.bookedSlot,
-                      selectedSlot === s.time && styles.activeSlot
-                    ]}
-                  >
-                    <Text style={[styles.slotText, selectedSlot === s.time && styles.activeText, s.booked && styles.bookedText]}>
-                      {formatTime(s.time)}
-                    </Text>
-                    {s.booked && <Text style={styles.bookedLabel}>{t.appointments.booked}</Text>}
-                  </Pressable>
-                ))}
+                </View>
+                <View style={{ flex: 1, alignItems: "flex-end" }}>
+                  <Text style={s.apptDoc}>د. {appt.doctor?.full_name}</Text>
+                  <Text style={s.apptDate}>{appt.appt_date} — {formatTime(appt.appt_time)}</Text>
+                  <View style={s.statusChip}>
+                    <Text style={s.statusChipText}>مجدول</Text>
+                  </View>
+                </View>
               </View>
-            </View>
-          ) : errorMsg ? (
-            <View style={styles.errorBox}><Text style={styles.errorText}>{errorMsg}</Text></View>
-          ) : null}
+            ))}
+          </View>
+        )}
 
+        {/* Step indicator */}
+        <StepIndicator currentStep={step} />
+
+        {/* Step content */}
+        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+          {step === 0 && renderStep0()}
+          {step === 1 && renderStep1()}
+          {step === 2 && renderStep2()}
+          {step === 3 && renderStep3()}
         </Animated.View>
       </ScrollView>
-
-      {selectedSlot && (
-        <View style={styles.footer}>
-          <Pressable
-            onPress={confirmBooking}
-            disabled={bookingLoading}
-            style={styles.confirmBtn}
-          >
-            {bookingLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>{t.appointments.confirmBtn}</Text>}
-          </Pressable>
-        </View>
-      )}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F1FCFD" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  header: { backgroundColor: "#193B6B", padding: 30, paddingTop: 60, borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
-  headerTitle: { fontSize: 22, color: "#fff", fontWeight: "bold", textAlign: "center" },
-  headerSub: { color: "#BCEFF3", textAlign: "center", fontSize: 12 },
-  scroll: { padding: 16, paddingBottom: 120 },
-  myApptsSection: { marginBottom: 10 },
-  myApptCard: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 8,
-    alignItems: 'center',
-    borderRightWidth: 4,
-    borderRightColor: '#26CDD6',
-    elevation: 2
+const s = StyleSheet.create({
+  container:    { flex: 1, backgroundColor: C.light },
+  center:       { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: C.light },
+  loadingText:  { marginTop: 12, color: C.muted, fontSize: 14 },
+
+  header: {
+    backgroundColor: C.navy,
+    paddingTop: Platform.OS === "ios" ? 58 : 50,
+    paddingBottom: 22,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
-  deleteBtn: { padding: 8, backgroundColor: '#FBEAEA', borderRadius: 8 },
-  completedBadge: { padding: 8, backgroundColor: '#F1FCFD', borderRadius: 8 },
-  completedText: { fontSize: 11, color: '#26CDD6', fontWeight: '600', marginTop: 2 },
-  docName: { fontWeight: 'bold', color: '#193B6B', fontSize: 14 },
-  apptDateText: { color: '#8296B1', fontSize: 12 },
-  divider: { height: 1, backgroundColor: '#D1D5DB', marginVertical: 15 },
-  card: { backgroundColor: "#fff", borderRadius: 15, padding: 15, elevation: 2 },
-  label: { fontSize: 15, fontWeight: "bold", color: "#193B6B", marginBottom: 10, textAlign: "right" },
-  pickerBox: { backgroundColor: "#F9FAFB", borderRadius: 10, borderWidth: 1, borderColor: "#E5E7EB", marginBottom: 10 },
-  picker: { height: 50 },
-  input: { backgroundColor: "#F9FAFB", borderRadius: 10, padding: 12, textAlign: "right", minHeight: 60, borderWidth: 1, borderColor: "#E5E7EB" },
-  section: { marginTop: 20 },
-  daysContainer: { flexDirection: "row-reverse" },
-  dayCard: { backgroundColor: "#fff", padding: 15, borderRadius: 12, marginLeft: 10, alignItems: "center", borderWidth: 1, borderColor: "#E5E7EB", minWidth: 90 },
-  activeDay: { backgroundColor: "#26CDD6", borderColor: "#26CDD6" },
-  dayText: { fontWeight: "bold", color: "#193B6B" },
-  activeText: { color: "#fff" },
-  smallTime: { fontSize: 10, color: "#8296B1" },
-  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "flex-end", gap: 8 },
-  slot: { backgroundColor: "#fff", width: "30%", padding: 12, borderRadius: 10, alignItems: "center", borderWidth: 1, borderColor: "#E5E7EB" },
-  activeSlot: { backgroundColor: "#26CDD6", borderColor: "#26CDD6" },
-  bookedSlot: { backgroundColor: "#F3F4F6", borderColor: "#D1D5DB" },
-  slotText: { fontSize: 13, fontWeight: "600" },
-  bookedText: { color: "#8296B1" },
-  bookedLabel: { fontSize: 8, color: "#DE1A1C" },
-  footer: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 20, backgroundColor: "#fff", borderTopWidth: 1, borderColor: "#E5E7EB" },
-  confirmBtn: { backgroundColor: "#26CDD6", padding: 16, borderRadius: 12, alignItems: "center" },
-  btnText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  errorBox: { marginTop: 20, padding: 15, backgroundColor: "#FBEAEA", borderRadius: 10 },
-  errorText: { color: "#DE1A1C", textAlign: "center", fontSize: 13 },
-  loadingText: { marginTop: 10, color: "#8296B1" }
+  backBtn:      { width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.15)", alignItems: "center", justifyContent: "center" },
+  headerTitle:  { fontSize: 18, color: C.white, fontWeight: "700", textAlign: "center" },
+  headerSub:    { fontSize: 12, color: "rgba(188,239,243,0.85)", marginTop: 2 },
+
+  scroll:       { padding: 16, paddingBottom: 80 },
+  sectionTitle: { fontSize: 16, fontWeight: "700", color: C.navy, textAlign: "right", marginBottom: 14, marginTop: 4 },
+
+  // My appointments
+  myApptsSection: { marginBottom: 6 },
+  myApptsTitle:   { fontSize: 14, fontWeight: "700", color: C.navy, textAlign: "right", marginBottom: 10 },
+  apptCard: {
+    flexDirection: "row",
+    backgroundColor: C.white,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 10,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: C.border,
+    gap: 14,
+  },
+  apptCardLeft: { alignItems: "center", gap: 8 },
+  apptIconCircle: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.tealBg, alignItems: "center", justifyContent: "center" },
+  cancelBtn:    { width: 34, height: 34, borderRadius: 10, backgroundColor: C.redBg, alignItems: "center", justifyContent: "center" },
+  apptDoc:      { fontSize: 14, fontWeight: "700", color: C.navy },
+  apptDate:     { fontSize: 12, color: C.muted, marginTop: 3 },
+  statusChip:   { marginTop: 6, backgroundColor: C.tealBg, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 },
+  statusChipText:{ fontSize: 11, color: C.teal, fontWeight: "600" },
+
+  // Breadcrumb / summary pill
+  breadRow:     { flexDirection: "row", justifyContent: "flex-end", gap: 8, marginBottom: 16, flexWrap: "wrap" },
+  summaryPill:  { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: C.tealBg, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 7, alignSelf: "flex-end", marginBottom: 16 },
+  summaryPillText: { fontSize: 13, color: C.navy, fontWeight: "600" },
+
+  // Slots
+  slotsGrid:    { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
+
+  // Step 3 — confirm
+  confirmCard:  { backgroundColor: C.white, borderRadius: 18, padding: 18, marginBottom: 20, borderWidth: 1, borderColor: C.border },
+  confirmTitle: { fontSize: 15, fontWeight: "700", color: C.navy, textAlign: "right", marginBottom: 10 },
+
+  inputLabel:   { fontSize: 13, fontWeight: "700", color: C.navy, textAlign: "right", marginBottom: 8 },
+  reasonInput:  {
+    backgroundColor: C.white,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    padding: 14,
+    minHeight: 100,
+    marginBottom: 20,
+    fontSize: 14,
+    color: C.darkText,
+  },
+  confirmBtn:   {
+    backgroundColor: C.teal,
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+  },
+  confirmBtnText: { color: C.white, fontSize: 16, fontWeight: "700" },
+
+  // Empty / error
+  emptyBox:   { alignItems: "center", paddingVertical: 40, gap: 12 },
+  emptyText:  { color: C.muted, fontSize: 14 },
+  errorBox:   { backgroundColor: C.redBg, borderRadius: 12, padding: 16, alignItems: "center" },
+  errorText:  { color: C.red, fontSize: 14, textAlign: "center" },
 });
 
 export default AppointmentScreen;
