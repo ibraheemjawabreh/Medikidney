@@ -1,25 +1,55 @@
 import { Button, Input } from "@rneui/base";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, StyleSheet, Text, FlatList, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
 import api from "../../services/api";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLanguage } from '../../context/LanguageContext';
 
+const normalizePatient = (patient) => ({
+  ...patient,
+  id: patient.id ?? patient.patient_id ?? patient.user_id,
+  name: patient.name ?? patient.full_name ?? patient.patientName ?? "",
+});
+
 const SearchPatient = ({ navigation }) => {
   const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
-  const [patients, setPatients] = useState([]); // سميتها جمع لأنها قائمة
+  const [allPatients, setAllPatients] = useState([]);
+  const [patients, setPatients] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSearch = async (queryText) => {
-    if (!queryText) return;
+  const filterPatients = (queryText, source = allPatients) => {
+    const trimmedQuery = queryText.trim().toLowerCase();
+
+    if (!trimmedQuery) {
+      setPatients(source);
+      return;
+    }
+
+    setPatients(
+      source.filter((patient) =>
+        patient.name?.toLowerCase().includes(trimmedQuery) ||
+        String(patient.id ?? "").includes(trimmedQuery)
+      )
+    );
+  };
+
+  const fetchPatients = async (queryText = "", shouldUpdateAll = false) => {
     try {
       setIsLoading(true);
       const response = await api.get(
-        `/users/profile/patients/search?name=${queryText}`
+        `/users/profile/patients/search?name=${encodeURIComponent(queryText.trim())}`
       );
-      setPatients(response.data);
+      const normalizedPatients = (Array.isArray(response.data) ? response.data : [])
+        .map(normalizePatient)
+        .filter((patient) => patient.id);
+
+      if (shouldUpdateAll || !queryText.trim()) {
+        setAllPatients(normalizedPatients);
+      }
+
+      setPatients(normalizedPatients);
     } catch (err) {
       console.log("Search Error:", err);
       setError(t.searchPatient.fetchError || "حدث خطأ أثناء البحث");
@@ -28,14 +58,29 @@ const SearchPatient = ({ navigation }) => {
     }
   };
 
+  useEffect(() => {
+    fetchPatients("", true);
+  }, []);
+
+  const handleSearch = (queryText) => {
+    if (allPatients.length > 0) {
+      filterPatients(queryText);
+      return;
+    }
+
+    fetchPatients(queryText);
+  };
+
   const handleChangeSearch = (text) => {
     setSearch(text);
     setError("");
-    if (text.length >= 2) {
-      handleSearch(text);
-    } else {
-      setPatients([]);
+
+    if (allPatients.length > 0) {
+      filterPatients(text);
+      return;
     }
+
+    fetchPatients(text);
   };
 
   return (
@@ -87,7 +132,6 @@ const SearchPatient = ({ navigation }) => {
                 <TouchableOpacity
                   style={styles.patientItemCard}
                   onPress={() => {
-                    setPatients([]);
                     navigation.navigate("StaffPatientView", { patientId: item.id });
                   }}
                 >
@@ -102,7 +146,7 @@ const SearchPatient = ({ navigation }) => {
               )}
             />
           </View>
-        ) : search.length > 2 && !isLoading ? (
+        ) : !isLoading ? (
           <View style={styles.emptyState}>
             <MaterialCommunityIcons name="account-search-outline" size={60} color="#cbd5e1" />
             <Text style={styles.emptyText}>{t.searchPatient.noResults}</Text>
@@ -119,7 +163,7 @@ export default SearchPatient;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F1FCFD", // نفس خلفية تسجيل الدخول (Emerald-50/100)
+    backgroundColor: "#F1FCFD",
   },
   innerContainer: {
     flex: 1,
@@ -133,12 +177,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "900",
-    color: "#193B6B", // Slate-900
+    color: "#193B6B",
     textAlign: 'right',
   },
   headerSubtitle: {
     fontSize: 14,
-    color: "#8296B1", // Slate-500
+    color: "#8296B1",
     fontWeight: "500",
     textAlign: 'right',
     marginTop: 4,
@@ -170,7 +214,7 @@ const styles = StyleSheet.create({
     color: "#193B6B",
   },
   mainButton: {
-    backgroundColor: "#193B6B", // Slate-900 مثل زر الدخول
+    backgroundColor: "#193B6B",
     borderRadius: 15,
     height: 55,
   },
@@ -215,7 +259,7 @@ const styles = StyleSheet.create({
   },
   patientId: {
     fontSize: 12,
-    color: "#26CDD6", // Emerald-600 لتعطي طابع طبي
+    color: "#26CDD6",
     fontWeight: '600',
     marginTop: 2,
   },

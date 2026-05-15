@@ -417,10 +417,7 @@ const PatientProfile = ({ navigation, route }) => {
             Alert.alert('⚠️ تنبيه', 'يجب إدخال وزنك بعد الجلسة قبل المتابعة.');
           }}
         >
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={weightLockStyles.overlay}
-          >
+          <View style={weightLockStyles.overlay}>
             <View style={weightLockStyles.sheet}>
               {/* الأيقونة */}
               <View style={weightLockStyles.iconWrap}>
@@ -482,7 +479,7 @@ const PatientProfile = ({ navigation, route }) => {
                 }
               </TouchableOpacity>
             </View>
-          </KeyboardAvoidingView>
+          </View>
         </Modal>
       )}
 

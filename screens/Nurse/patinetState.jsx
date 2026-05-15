@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from "react";
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
   ActivityIndicator, RefreshControl, Alert,
-  Modal, TextInput, KeyboardAvoidingView, Platform,
+  Modal, TextInput,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -197,10 +197,7 @@ const PatientState = ({ route }) => {
         animationType="slide"
         onRequestClose={() => setWeightModalVisible(false)}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={mStyles.overlay}
-        >
+        <View style={mStyles.overlay}>
           <View style={mStyles.sheet}>
             {/* العنوان */}
             <View style={mStyles.sheetHeader}>
@@ -254,7 +251,7 @@ const PatientState = ({ route }) => {
               </Pressable>
             </View>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </Modal>
 
       {/* ── Header ──────────────────────────────────────── */}

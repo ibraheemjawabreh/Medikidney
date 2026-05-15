@@ -842,7 +842,7 @@ const styles = StyleSheet.create({
   },
   tabBar: { backgroundColor: "#fff", elevation: 2, borderBottomWidth: 1, borderColor: '#e2e8f0' },
   tabIndicator: { backgroundColor: "#193B6B", height: 3, borderRadius: 3 },
-  tabTitle: { fontSize: 11, fontWeight: "bold", marginTop: 3, textAlign: 'center' },
+  tabTitle: { fontSize: 10, fontWeight: "bold", marginTop: 3, textAlign: 'center', width: '100%', flexShrink: 1 },
   tabViewContent: { flex: 1, width: width },
   scrollPadding: { padding: 20 },
   subTabContainer: { flexDirection: 'row-reverse', backgroundColor: '#f1f5f9', margin: 15, borderRadius: 12, padding: 4 },
