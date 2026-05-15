@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import {
   Text, View, ScrollView, StyleSheet,
-  ActivityIndicator, Pressable, Alert,
+  ActivityIndicator, Pressable, Alert, TextInput,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -25,6 +25,7 @@ const SelectPatient = () => {
   const [confirmedIds, setConfirmedIds] = useState([]);
 
   const [myNurseId, setMyNurseId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // ─── جلب البيانات وبناء الحالة ─────────────────────────────
   const fetchData = async () => {
@@ -130,6 +131,13 @@ const SelectPatient = () => {
 
   const currentShift = shifts.find(s => s.shiftNumber === activeShift);
 
+  // ─── فلترة المرضى بناءً على البحث ────────────────────────────
+  const filteredPatients = searchQuery.trim()
+    ? (currentShift?.patients ?? []).filter(p =>
+        p.patientName?.toLowerCase().includes(searchQuery.trim().toLowerCase())
+      )
+    : currentShift?.patients ?? [];
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -174,18 +182,39 @@ const SelectPatient = () => {
             </Pressable>
           ))}
         </ScrollView>
+
+        {/* ── مربع البحث ── */}
+        <View style={styles.searchContainer}>
+          <MaterialCommunityIcons name="magnify" size={20} color="#8296B1" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder={t.selectPatient.searchPlaceholder ?? 'ابحث عن مريض...'}
+            placeholderTextColor="#8296B1"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+            clearButtonMode="while-editing"
+          />
+          {searchQuery.length > 0 && (
+            <Pressable onPress={() => setSearchQuery('')} hitSlop={8}>
+              <MaterialCommunityIcons name="close-circle" size={18} color="#8296B1" />
+            </Pressable>
+          )}
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
         {loading ? (
           <ActivityIndicator size="large" color="#26CDD6" style={{ marginTop: 60 }} />
-        ) : !currentShift?.patients || currentShift.patients.length === 0 ? (
+        ) : filteredPatients.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <MaterialCommunityIcons name="file-document-outline" size={60} color="#cbd5e1" />
-            <Text style={styles.emptyText}>{t.selectPatient.noPatients}</Text>
+            <MaterialCommunityIcons name="account-search-outline" size={60} color="#cbd5e1" />
+            <Text style={styles.emptyText}>
+              {searchQuery ? (t.selectPatient.noSearchResults ?? 'لا توجد نتائج للبحث') : t.selectPatient.noPatients}
+            </Text>
           </View>
         ) : (
-          currentShift.patients.map(patient => {
+          filteredPatients.map(patient => {
             const isSelected = selectedIds.includes(patient.patientId);
             const isConfirmed = confirmedIds.includes(patient.patientId);
             const isTakenByOther = patient.assignedNurseId !== null && patient.assignedNurseId !== myNurseId;
@@ -271,6 +300,29 @@ const styles = StyleSheet.create({
   countBadge: { backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 10, paddingHorizontal: 6 },
   activeCountBadge: { backgroundColor: "#193B6B" },
   countText: { fontSize: 11, fontWeight: "bold", color: "#fff" },
+  searchContainer: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 14,
+    marginTop: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    gap: 8,
+  },
+  searchIcon: {
+    opacity: 0.8,
+  },
+  searchInput: {
+    flex: 1,
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+    textAlign: 'right',
+    paddingVertical: 10,
+  },
   scroll: { padding: 16, paddingBottom: 120 },
   emptyContainer: {
     flex: 1,

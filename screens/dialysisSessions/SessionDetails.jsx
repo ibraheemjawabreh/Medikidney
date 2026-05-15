@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Pressable, ScrollView, TextInput,
-  Alert, ActivityIndicator, Modal, KeyboardAvoidingView, Platform,
+  Alert, ActivityIndicator, Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import VitalSignsTab from './VitalSignsTab';
@@ -158,10 +158,7 @@ const SessionDetails = ({ route, navigation }) => {
         animationType="slide"
         onRequestClose={() => !isFinishing && setEndModalVisible(false)}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={modalStyles.overlay}
-        >
+        <View style={modalStyles.overlay}>
           <View style={modalStyles.sheet}>
 
             {/* ── مرحلة الاختيار ── */}
@@ -287,7 +284,7 @@ const SessionDetails = ({ route, navigation }) => {
             )}
 
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </Modal>
 
       {/* Header مع التايمر */}
