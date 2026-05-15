@@ -39,7 +39,7 @@ const ConsultationDetails = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-right" type="material-community" size={28} color="#fff" />
@@ -50,7 +50,6 @@ const ConsultationDetails = ({ route, navigation }) => {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
-        {/* Main Card */}
         <View style={styles.mainCard}>
           <View style={styles.docRow}>
             <View style={styles.avatar}>
@@ -88,7 +87,6 @@ const ConsultationDetails = ({ route, navigation }) => {
           )}
         </View>
 
-        {/* Sections */}
         <View style={styles.sectionsWrapper}>
           <InfoSection
             title={t.appointments?.diagnosis || 'التشخيص الطبي'}

@@ -1,13 +1,11 @@
 import * as yup from 'yup';
 
-
 const LoginValidation = yup.object().shape({
   username: yup
     .string()
     .trim("لا يسمح بفراغات في البداية أو النهاية")
     .required("رجاء ادخل اسم المستخدم")
-    .min(3, "اسم المستخدم قصير جدا")
-    .max(30, "اسم المستخدم طويل جدا"),
+  ,
 
   password: yup
     .string()

@@ -1,4 +1,4 @@
-// screens/dialysisSessions/SymptomsTab.jsx
+
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -32,17 +32,15 @@ const SymptomsTab = ({ route }) => {
   const [history, setHistory] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ── جلب البيانات الحالية (الأعراض والملاحظات) ────────────────
   const fetchData = async () => {
     try {
       setLoading(true);
-      // جلب الأعراض المسجلة
+      
       const sympRes = await api.get(
         `/dialysis-sessions/${sessionId}/details/symptoms`
       );
       setHistory(Array.isArray(sympRes.data) ? sympRes.data : sympRes.data?.data || []);
 
-      // جلب الملاحظات العامة للجلسة
       const sessionRes = await api.get(`/dialysis-sessions/${sessionId}`);
       if (sessionRes.data?.notes) setNote(sessionRes.data.notes);
 
@@ -55,14 +53,12 @@ const SymptomsTab = ({ route }) => {
 
   useEffect(() => { fetchData(); }, [sessionId]);
 
-  // ── تبديل اختيار عرض ─────────────────────────────────────────
   const toggleSymptom = (id) => {
     setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
 
-  // ── حفظ الكل (الأعراض والملاحظات) ──────────────────────────
   const handleSaveAll = async () => {
     if (selectedIds.length === 0 && !note.trim()) {
       return Alert.alert(t.error, t.symptoms.required);
@@ -72,22 +68,20 @@ const SymptomsTab = ({ route }) => {
       setIsSubmitting(true);
       const promises = [];
 
-      // إرسال الأعراض المختارة
       selectedIds.forEach(type => {
         promises.push(
           api.post(`/dialysis-sessions/${sessionId}/details/symptoms`, {
-            symptomType: type, // القيمة هنا ستكون مثلاً 'LOW_BP'
-            severity: "MILD",  // قيمة مسموحة حسب رسالة الخطأ
+            symptomType: type, 
+            severity: "MILD",  
             notes: "تم تسجيل العرض"
           })
         );
       });
 
-      // إرسال الملاحظة العامة كنوع 'OTHER'
       if (note.trim()) {
         promises.push(
           api.post(`/dialysis-sessions/${sessionId}/details/symptoms`, {
-            symptomType: "OTHER", // استخدمنا القيمة المسموحة للملاحظات
+            symptomType: "OTHER", 
             severity: "MILD",
             notes: note
           })
@@ -102,16 +96,13 @@ const SymptomsTab = ({ route }) => {
       fetchData();
 
     } catch (err) {
-      // طباعة الخطأ القادم من السيرفر للتأكد
+      
       console.log("Detailed Error:", err.response?.data);
       Alert.alert(t.error, t.symptoms.saveFailed);
     } finally {
       setIsSubmitting(false);
     }
   };
-
-
-
 
   const handleDeleteSymptom = async (id) => {
     try {
@@ -131,7 +122,6 @@ const SymptomsTab = ({ route }) => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
-      {/* ── قسم الاختيارات ── */}
       <Text style={styles.sectionTitle}>{t.symptoms.title}</Text>
       <View style={styles.grid}>
         {symptomsList.map((item) => {
@@ -158,7 +148,6 @@ const SymptomsTab = ({ route }) => {
         })}
       </View>
 
-      {/* ── قسم الملاحظات ── */}
       <Text style={[styles.sectionTitle, { marginTop: 25 }]}>{t.symptoms.nurseNotes}</Text>
       <View style={styles.noteBox}>
         <TextInput
@@ -188,16 +177,14 @@ const SymptomsTab = ({ route }) => {
         )}
       </Pressable>
 
-      {/* ── سجل الأعراض الحالية ── */}
       {history.length > 0 && (
         <View style={styles.historySection}>
           <Text style={styles.historyTitle}>{t.symptoms.historyTitle} ({history.length})</Text>
           {history.map((h, i) => {
-            // 1. التأكد من جلب النوع الصحيح (السيرفر غالباً يرسلها symptomType)
+            
             const typeKey = h.symptomType || h.symptom_type;
             const noteContent = h.notes || h.note || "";
 
-            // 2. البحث في المصفوفة المحلية
             const symptomInfo = symptomsList.find(s => s.id === typeKey);
 
             return (

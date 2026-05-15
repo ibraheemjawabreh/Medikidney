@@ -1,0 +1,1530 @@
+﻿C:\Users\Ele\Desktop\medikidney_App\components\AnimatedSplashScreen.jsx:43:7: Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  41 |   useEffect(() => {
+  42 |     if (isAppReady) {
+> 43 |       triggerAnimation();
+     |       ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  44 |     }
+  45 |   }, [isAppReady]);
+  46 | [Error/react-hooks/set-state-in-effect]
+C:\Users\Ele\Desktop\medikidney_App\components\AnimatedSplashScreen.jsx:45:6: React Hook useEffect has a missing dependency: 'triggerAnimation'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\components\AnimatedSplashScreen.jsx:60:24: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  58 |             {
+  59 |               backgroundColor: '#ffffff', // ┘┘╪│ ┘┘ê┘ ╪«┘┘┘è╪ر ╪د┘┘ splash ╪د┘╪د┘╪ز╪▒╪د╪╢┘è
+> 60 |               opacity: animation.interpolate({
+     |                        ^^^^^^^^^ Passing a ref to a function may read its value during render
+  61 |                 inputRange: [0, 0.7, 1],
+  62 |                 outputRange: [1, 1, 0], // ╪د┘╪┤╪د╪┤╪ر ╪ز╪«╪ز┘┘è ┘┘è ╪د┘╪س┘╪س ╪د┘╪ث╪«┘è╪▒
+  63 |               }), [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\AnimatedSplashScreen.jsx:60:24: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  58 |             {
+  59 |               backgroundColor: '#ffffff', // ┘┘╪│ ┘┘ê┘ ╪«┘┘┘è╪ر ╪د┘┘ splash ╪د┘╪د┘╪ز╪▒╪د╪╢┘è
+> 60 |               opacity: animation.interpolate({
+     |                        ^^^^^^^^^^^^^^^^^^^^^ Passing a ref to a function may read its value during render
+  61 |                 inputRange: [0, 0.7, 1],
+  62 |                 outputRange: [1, 1, 0], // ╪د┘╪┤╪د╪┤╪ر ╪ز╪«╪ز┘┘è ┘┘è ╪د┘╪س┘╪س ╪د┘╪ث╪«┘è╪▒
+  63 |               }), [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\AnimatedSplashScreen.jsx:77:26: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  75 |               transform: [
+  76 |                 {
+> 77 |                   scale: animation.interpolate({
+     |                          ^^^^^^^^^ Passing a ref to a function may read its value during render
+  78 |                     inputRange: [0, 1],
+  79 |                     outputRange: [1, 1.15], // ╪ز┘â╪ذ┘è╪▒ ╪«┘┘è┘ ┘ê╪ث┘┘è┘é ╪ش╪»╪د┘ï
+  80 |                   }), [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\AnimatedSplashScreen.jsx:77:26: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  75 |               transform: [
+  76 |                 {
+> 77 |                   scale: animation.interpolate({
+     |                          ^^^^^^^^^^^^^^^^^^^^^ Passing a ref to a function may read its value during render
+  78 |                     inputRange: [0, 1],
+  79 |                     outputRange: [1, 1.15], // ╪ز┘â╪ذ┘è╪▒ ╪«┘┘è┘ ┘ê╪ث┘┘è┘é ╪ش╪»╪د┘ï
+  80 |                   }), [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\AnimatedSplashScreen.jsx:83:24: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  81 |                 },
+  82 |               ],
+> 83 |               opacity: animation.interpolate({
+     |                        ^^^^^^^^^ Passing a ref to a function may read its value during render
+  84 |                 inputRange: [0, 0.5, 1],
+  85 |                 outputRange: [1, 0.8, 0], // ╪د┘┘┘ê╪ش┘ê ┘è╪«╪ز┘┘è ╪ذ┘╪╣┘ê┘à╪ر
+  86 |               }), [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\AnimatedSplashScreen.jsx:83:24: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  81 |                 },
+  82 |               ],
+> 83 |               opacity: animation.interpolate({
+     |                        ^^^^^^^^^^^^^^^^^^^^^ Passing a ref to a function may read its value during render
+  84 |                 inputRange: [0, 0.5, 1],
+  85 |                 outputRange: [1, 0.8, 0], // ╪د┘┘┘ê╪ش┘ê ┘è╪«╪ز┘┘è ╪ذ┘╪╣┘ê┘à╪ر
+  86 |               }), [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\SessionTimer.jsx:16:21: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  14 |   const [ready, setReady] = useState(false);
+  15 |   const timerRef = useRef(null);
+> 16 |   const pulseAnim = useRef(new Animated.Value(1)).current;
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  17 |
+  18 |   const sessionId = session?.session_id || session?.id;
+  19 | [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\SessionTimer.jsx:16:21: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  14 |   const [ready, setReady] = useState(false);
+  15 |   const timerRef = useRef(null);
+> 16 |   const pulseAnim = useRef(new Animated.Value(1)).current;
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  17 |
+  18 |   const sessionId = session?.session_id || session?.id;
+  19 | [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\SessionTimer.jsx:16:21: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  14 |   const [ready, setReady] = useState(false);
+  15 |   const timerRef = useRef(null);
+> 16 |   const pulseAnim = useRef(new Animated.Value(1)).current;
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  17 |
+  18 |   const sessionId = session?.session_id || session?.id;
+  19 | [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\SessionTimer.jsx:16:21: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  14 |   const [ready, setReady] = useState(false);
+  15 |   const timerRef = useRef(null);
+> 16 |   const pulseAnim = useRef(new Animated.Value(1)).current;
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  17 |
+  18 |   const sessionId = session?.session_id || session?.id;
+  19 | [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\SessionTimer.jsx:16:21: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  14 |   const [ready, setReady] = useState(false);
+  15 |   const timerRef = useRef(null);
+> 16 |   const pulseAnim = useRef(new Animated.Value(1)).current;
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  17 |
+  18 |   const sessionId = session?.session_id || session?.id;
+  19 | [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\SessionTimer.jsx:16:21: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  14 |   const [ready, setReady] = useState(false);
+  15 |   const timerRef = useRef(null);
+> 16 |   const pulseAnim = useRef(new Animated.Value(1)).current;
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  17 |
+  18 |   const sessionId = session?.session_id || session?.id;
+  19 | [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\SessionTimer.jsx:16:21: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  14 |   const [ready, setReady] = useState(false);
+  15 |   const timerRef = useRef(null);
+> 16 |   const pulseAnim = useRef(new Animated.Value(1)).current;
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  17 |
+  18 |   const sessionId = session?.session_id || session?.id;
+  19 | [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\SessionTimer.jsx:16:21: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  14 |   const [ready, setReady] = useState(false);
+  15 |   const timerRef = useRef(null);
+> 16 |   const pulseAnim = useRef(new Animated.Value(1)).current;
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  17 |
+  18 |   const sessionId = session?.session_id || session?.id;
+  19 | [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\components\SessionTimer.jsx:31:6: React Hook useEffect has missing dependencies: 'pulseAnim' and 'remaining'. Either include them or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\components\SessionTimer.jsx:31:14: React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\context\LanguageContext.js:3:10: 'I18nManager' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\hooks\useNotifications.js:25:5: Error: Cannot access variable before it is declared
+
+`requestAndStoreDeviceToken` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  23 |   useEffect(() => {
+  24 |     // ┘╪د ┘╪│╪ش┘ device token ┘ç┘╪د - ┘┘é╪╖ ╪د╪ص┘╪╕┘ç ┘à╪ص┘┘è╪د┘ï
+> 25 |     requestAndStoreDeviceToken();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ `requestAndStoreDeviceToken` accessed before it is declared
+  26 |
+  27 |     // ╪ز╪ص┘é┘é ┘à┘ ╪د┘╪ح╪┤╪╣╪د╪▒╪د╪ز ╪د┘╪ث┘ê┘┘è╪ر (╪╣┘╪»┘à╪د ┘è╪ز┘à ┘╪ز╪ص ╪د┘╪ز╪╖╪ذ┘è┘é ┘à┘ ╪ح╪┤╪╣╪د╪▒)
+  28 |     const checkInitialNotification = async () => {
+
+   77 |   };
+   78 |
+>  79 |   const requestAndStoreDeviceToken = async () => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  80 |     try {
+      | ^^^^^^^^^
+>  81 |       const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      ظخ
+      | ^^^^^^^^^
+> 109 |     }
+      | ^^^^^^^^^
+> 110 |   };
+      | ^^^^^ `requestAndStoreDeviceToken` is declared here
+  111 |
+  112 |   // ╪»╪د┘╪ر ┘┘╪ح╪▒╪│╪د┘ ╪ذ╪╣╪» ╪ز╪│╪ش┘è┘ ╪د┘╪»╪«┘ê┘ - ╪د╪│╪ز╪»╪╣┘ç╪د ┘à┘ login screen
+  113 |   const registerDeviceTokenAfterLogin = async () => { [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\hooks\useNotifications.js:35:9: Error: Cannot access variable before it is declared
+
+`handleNotificationPress` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  33 |         const notificationType = data?.notificationType || data?.type;
+  34 |         const relatedId = data?.relatedId || data?.id;
+> 35 |         handleNotificationPress(notificationType, relatedId, navigation);
+     |         ^^^^^^^^^^^^^^^^^^^^^^^ `handleNotificationPress` accessed before it is declared
+  36 |       }
+  37 |     };
+  38 |     
+
+  131 |   const registerForPushNotifications = registerDeviceTokenAfterLogin;
+  132 |
+> 133 |   const handleNotificationPress = (notificationType, relatedId, navigation) => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 134 |     // ╪د┘┘é┘ ╪د┘┘à╪│╪ز╪«╪»┘à ┘┘╪╡┘╪ص╪ر ╪د┘┘à┘╪د╪│╪ذ╪ر ╪ص╪│╪ذ ┘┘ê╪╣ ╪د┘╪ح╪┤╪╣╪د╪▒
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 135 |     if (!navigation || !navigation.isReady()) {
+      ظخ
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 212 |     }
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 213 |   };
+      | ^^^^^ `handleNotificationPress` is declared here
+  214 |
+  215 |   return { requestAndStoreDeviceToken, registerForPushNotifications, registerDeviceTokenAfterLogin };
+  216 | }; [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\hooks\useNotifications.js:49:9: Error: Cannot access variable before it is declared
+
+`syncUnreadCount` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  47 |           data: notification.request.content.data,
+  48 |         });
+> 49 |         syncUnreadCount();
+     |         ^^^^^^^^^^^^^^^ `syncUnreadCount` accessed before it is declared
+  50 |       });
+  51 |
+  52 |     // ╪د╪│╪ز┘à╪╣ ┘┘┘é╪▒ ╪د┘┘à╪│╪ز╪«╪»┘à ╪╣┘┘ë ╪د┘╪ح╪┤╪╣╪د╪▒
+
+  68 |   }, [navigation, updateUnreadCount]);
+  69 |
+> 70 |   const syncUnreadCount = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 71 |     try {
+     | ^^^^^^^^^
+> 72 |       const count = await getVisibleUnreadCount(api);
+     | ^^^^^^^^^
+> 73 |       updateUnreadCount(count);
+     | ^^^^^^^^^
+> 74 |     } catch (error) {
+     | ^^^^^^^^^
+> 75 |       console.warn('Unable to sync unread notification count:', error?.message);
+     | ^^^^^^^^^
+> 76 |     }
+     | ^^^^^^^^^
+> 77 |   };
+     | ^^^^^ `syncUnreadCount` is declared here
+  78 |
+  79 |   const requestAndStoreDeviceToken = async () => {
+  80 |     try { [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\hooks\useNotifications.js:68:6: React Hook useEffect has a missing dependency: 'syncUnreadCount'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nurse\DailySchedules.jsx:43:8: React Hook useCallback has a missing dependency: 'fetchTodaySchedules'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nurse\NurseTasks.jsx:1:38: 'useCallback' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nurse\NurseTasks.jsx:9:10: 'useNavigation' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nurse\NurseTasks.jsx:9:25: 'useFocusEffect' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nurse\NurseTasks.jsx:78:13: 'token' is assigned a value but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nurse\patinetState.jsx:1:40: 'useRef' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nurse\patinetState.jsx:23:10: 'myNurseId' is assigned a value but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nurse\patinetState.jsx:61:48: React Hook useCallback has an unnecessary dependency: 'selectedPatientIds'. Either exclude it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nurse\selectPatinet.jsx:7:8: 'AsyncStorage' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nurse\selectPatinet.jsx:63:59: React Hook useCallback has a missing dependency: 'fetchData'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nutritionist\NutritionistTable.jsx:4:34: 'StatusBar' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nutritionist\NutritionistTable.jsx:26:51: Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  24 |
+  25 |   const [startDate, setStartDate] = useState(new Date());
+> 26 |   const [endDate, setEndDate] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+     |                                                   ^^^^^^^^^^ Cannot call impure function
+  27 |
+  28 |   const [showStartPicker, setShowStartPicker] = useState(false);
+  29 |   const [showEndPicker, setShowEndPicker] = useState(false); [Error/react-hooks/purity]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nutritionist\NutritionistTable.jsx:35:5: Error: Cannot access variable before it is declared
+
+`fetchCurrentPlan` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  33 |
+  34 |   useEffect(() => {
+> 35 |     fetchCurrentPlan();
+     |     ^^^^^^^^^^^^^^^^ `fetchCurrentPlan` accessed before it is declared
+  36 |   }, [patientId]);
+  37 |
+  38 |   const fetchCurrentPlan = async () => {
+
+  36 |   }, [patientId]);
+  37 |
+> 38 |   const fetchCurrentPlan = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 39 |     try {
+     | ^^^^^^^^^
+> 40 |       const response = await api.get(`/nutrition-programs?patientId=${patientId}`);
+     ظخ
+     | ^^^^^^^^^
+> 58 |     } catch (error) { console.log(error); } finally { setLoading(false); }
+     | ^^^^^^^^^
+> 59 |   };
+     | ^^^^^ `fetchCurrentPlan` is declared here
+  60 |
+  61 |   const handleSave = async () => {
+  62 |     try { [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\screens\Nutritionist\NutritionistTable.jsx:36:6: React Hook useEffect has a missing dependency: 'fetchCurrentPlan'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\Sessions\ShowSessions.jsx:41:7: Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  39 |   useEffect(() => {
+  40 |     if (sessionId) {
+> 41 |       fetchSessionDetails();
+     |       ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  42 |     } else {
+  43 |       setLoading(false);
+  44 |     } [Error/react-hooks/set-state-in-effect]
+C:\Users\Ele\Desktop\medikidney_App\screens\Sessions\ShowSessions.jsx:45:6: React Hook useEffect has a missing dependency: 'fetchSessionDetails'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\SettingsWithProfile\SettingWithProfile.jsx:12:10: 'loading' is assigned a value but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\SettingsWithProfile\SettingWithProfile.jsx:16:5: Error: Cannot access variable before it is declared
+
+`getProfile` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  14 |
+  15 |   useEffect(() => {
+> 16 |     getProfile();
+     |     ^^^^^^^^^^ `getProfile` accessed before it is declared
+  17 |   }, []);
+  18 |
+  19 |   const getProfile = async () => {
+
+  17 |   }, []);
+  18 |
+> 19 |   const getProfile = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 20 |     try {
+     | ^^^^^^^^^
+> 21 |       setLoading(true);
+     ظخ
+     | ^^^^^^^^^
+> 29 |     }
+     | ^^^^^^^^^
+> 30 |   };
+     | ^^^^^ `getProfile` is declared here
+  31 |
+  32 |   const handleLogout = async () => {
+  33 |     try { [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\screens\SettingsWithProfile\SettingWithProfile.jsx:17:6: React Hook useEffect has a missing dependency: 'getProfile'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\SettingsWithProfile\SettingWithProfile.jsx:130:10: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  128 |         <Text style={styles.sectionTitle}>{t.settings.title}</Text>
+  129 |
+> 130 |         <SettingItem
+      |          ^^^^^^^^^^^ This component is created during render
+  131 |           icon="lock"
+  132 |           title={t.settings.changePassword}
+  133 |           onPress={() => navigation.navigate("ChangePassword")}
+
+  74 |   };
+  75 |
+> 76 |   const SettingItem = ({ icon, title, onPress, rightElement }) => (
+     |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 77 |     <TouchableOpacity style={styles.item} onPress={onPress}>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 78 |       {rightElement ? rightElement : <Icon name="chevron-left" size={18} color="#8296B1" />}
+     ظخ
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 85 |     </TouchableOpacity>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 86 |   );
+     | ^^^^ The component is created during render here
+  87 |
+  88 |   if (!userData) {
+  89 |     return ( [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\SettingsWithProfile\SettingWithProfile.jsx:157:10: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  155 |         </TouchableOpacity>
+  156 |
+> 157 |         <SettingItem
+      |          ^^^^^^^^^^^ This component is created during render
+  158 |           icon="info"
+  159 |           title={t.settings.aboutApp}
+  160 |           onPress={() => navigation.navigate("AboutApp")}
+
+  74 |   };
+  75 |
+> 76 |   const SettingItem = ({ icon, title, onPress, rightElement }) => (
+     |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 77 |     <TouchableOpacity style={styles.item} onPress={onPress}>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 78 |       {rightElement ? rightElement : <Icon name="chevron-left" size={18} color="#8296B1" />}
+     ظخ
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 85 |     </TouchableOpacity>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 86 |   );
+     | ^^^^ The component is created during render here
+  87 |
+  88 |   if (!userData) {
+  89 |     return ( [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\aboutApplication\ApoutApplication.jsx:1:10: 'Button' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\dialysisSessions\MedicationsTab.jsx:109:21: Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  107 |   };
+  108 |
+> 109 |   useEffect(() => { fetchMeds(); }, [sessionId]);
+      |                     ^^^^^^^^^ Avoid calling setState() directly within an effect
+  110 |
+  111 |   // ظ¤ظ¤ ╪ح╪▒╪│╪د┘ ╪»┘ê╪د╪ة (┘à┘ ╪د┘╪ث╪▓╪▒╪د╪▒ ╪د┘╪ش╪د┘ç╪▓╪ر ╪ث┘ê ╪د┘┘à╪«╪╡╪╡) ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤
+  112 |   const postMed = async (medData) => { [Error/react-hooks/set-state-in-effect]
+C:\Users\Ele\Desktop\medikidney_App\screens\dialysisSessions\MedicationsTab.jsx:109:37: React Hook useEffect has a missing dependency: 'fetchMeds'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\dialysisSessions\SessionDetails.jsx:3:38: 'ScrollView' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\dialysisSessions\SettingsTab.jsx:8:8: 'AsyncStorage' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\dialysisSessions\SettingsTab.jsx:150:6: React Hook useEffect has missing dependencies: 'fetchLatest' and 'fetchSessionData'. Either include them or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\dialysisSessions\SymptomsTab.jsx:6:41: 'Platform' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\dialysisSessions\SymptomsTab.jsx:56:21: Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  54 |   };
+  55 |
+> 56 |   useEffect(() => { fetchData(); }, [sessionId]);
+     |                     ^^^^^^^^^ Avoid calling setState() directly within an effect
+  57 |
+  58 |   // ظ¤ظ¤ ╪ز╪ذ╪»┘è┘ ╪د╪«╪ز┘è╪د╪▒ ╪╣╪▒╪╢ ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤
+  59 |   const toggleSymptom = (id) => { [Error/react-hooks/set-state-in-effect]
+C:\Users\Ele\Desktop\medikidney_App\screens\dialysisSessions\SymptomsTab.jsx:56:37: React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\dialysisSessions\VitalSignsTab.jsx:11:7: 'validateWeight' is assigned a value but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\dialysisSessions\VitalSignsTab.jsx:207:5: Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  205 |
+  206 |   useEffect(() => {
+> 207 |     fetchVitals();
+      |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  208 |   }, [sessionId]);
+  209 |
+  210 |   // ظ¤ظ¤ ╪ص┘╪╕ ┘é╪▒╪د╪ة╪ر ╪ش╪»┘è╪»╪ر ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ [Error/react-hooks/set-state-in-effect]
+C:\Users\Ele\Desktop\medikidney_App\screens\dialysisSessions\VitalSignsTab.jsx:208:6: React Hook useEffect has a missing dependency: 'fetchVitals'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\notifications\NotificationsScreen.jsx:38:13: Error: Cannot access variable before it is declared
+
+`fetchNotifications` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  36 |   useEffect(() => {
+  37 |     const initPage = async () => {
+> 38 |       await fetchNotifications();
+     |             ^^^^^^^^^^^^^^^^^^ `fetchNotifications` accessed before it is declared
+  39 |       await fetchUnreadCount();
+  40 |       try {
+  41 |         await markNotificationsSeen();
+
+  61 |   };
+  62 |
+> 63 |   const fetchNotifications = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 64 |     try {
+     | ^^^^^^^^^
+> 65 |       setLoading(true);
+     ظخ
+     | ^^^^^^^^^
+> 80 |     }
+     | ^^^^^^^^^
+> 81 |   };
+     | ^^^^^ `fetchNotifications` is declared here
+  82 |
+  83 |   const removeResolvedWeightNotifications = async (list) => {
+  84 |     if (!Array.isArray(list) || list.length === 0) return []; [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\screens\notifications\NotificationsScreen.jsx:39:13: Error: Cannot access variable before it is declared
+
+`fetchUnreadCount` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  37 |     const initPage = async () => {
+  38 |       await fetchNotifications();
+> 39 |       await fetchUnreadCount();
+     |             ^^^^^^^^^^^^^^^^ `fetchUnreadCount` accessed before it is declared
+  40 |       try {
+  41 |         await markNotificationsSeen();
+  42 |         setUnreadCount(0);
+
+  52 |
+  53 |
+> 54 |   const fetchUnreadCount = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 55 |     try {
+     | ^^^^^^^^^
+> 56 |       const count = await getVisibleUnreadCount(api);
+     | ^^^^^^^^^
+> 57 |       setUnreadCount(count);
+     | ^^^^^^^^^
+> 58 |     } catch (error) {
+     | ^^^^^^^^^
+> 59 |       setUnreadCount(0);
+     | ^^^^^^^^^
+> 60 |     }
+     | ^^^^^^^^^
+> 61 |   };
+     | ^^^^^ `fetchUnreadCount` is declared here
+  62 |
+  63 |   const fetchNotifications = async () => {
+  64 |     try { [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\screens\notifications\NotificationsScreen.jsx:50:6: React Hook useEffect has missing dependencies: 'fetchNotifications' and 'resetUnreadCount'. Either include them or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\notifications\NotificationsScreen.jsx:116:6: React Hook useCallback has missing dependencies: 'fetchNotifications' and 'resetUnreadCount'. Either include them or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\ConsultationDetails.jsx:93:12: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  91 |         {/* Sections */}
+  92 |         <View style={styles.sectionsWrapper}>
+> 93 |           <InfoSection
+     |            ^^^^^^^^^^^ This component is created during render
+  94 |             title={t.appointments?.diagnosis || '╪د┘╪ز╪┤╪«┘è╪╡ ╪د┘╪╖╪ذ┘è'}
+  95 |             content={consultation.diagnosis}
+  96 |             icon="clipboard-pulse"
+
+  23 |   };
+  24 |
+> 25 |   const InfoSection = ({ title, content, icon, color, bgColor }) => {
+     |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 26 |     if (!content) return null;
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 27 |     return (
+     ظخ
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 37 |     );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 38 |   };
+     | ^^^^ The component is created during render here
+  39 |
+  40 |   return (
+  41 |     <View style={styles.container}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\ConsultationDetails.jsx:101:12: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+   99 |           />
+  100 |
+> 101 |           <InfoSection
+      |            ^^^^^^^^^^^ This component is created during render
+  102 |             title={t.appointments?.treatmentPlan || '╪د┘╪«╪╖╪ر ╪د┘╪╣┘╪د╪ش┘è╪ر'}
+  103 |             content={consultation.treatment_plan}
+  104 |             icon="medical-bag"
+
+  23 |   };
+  24 |
+> 25 |   const InfoSection = ({ title, content, icon, color, bgColor }) => {
+     |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 26 |     if (!content) return null;
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 27 |     return (
+     ظخ
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 37 |     );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 38 |   };
+     | ^^^^ The component is created during render here
+  39 |
+  40 |   return (
+  41 |     <View style={styles.container}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\ConsultationDetails.jsx:109:12: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  107 |           />
+  108 |
+> 109 |           <InfoSection
+      |            ^^^^^^^^^^^ This component is created during render
+  110 |             title={t.appointments?.medications || '╪د┘╪ث╪»┘ê┘è╪ر ╪د┘┘à┘ê╪╡┘ê┘╪ر'}
+  111 |             content={consultation.medications}
+  112 |             icon="pill"
+
+  23 |   };
+  24 |
+> 25 |   const InfoSection = ({ title, content, icon, color, bgColor }) => {
+     |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 26 |     if (!content) return null;
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 27 |     return (
+     ظخ
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 37 |     );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 38 |   };
+     | ^^^^ The component is created during render here
+  39 |
+  40 |   return (
+  41 |     <View style={styles.container}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\ConsultationDetails.jsx:117:12: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  115 |           />
+  116 |
+> 117 |           <InfoSection
+      |            ^^^^^^^^^^^ This component is created during render
+  118 |             title={t.appointments?.doctorNotes || '┘à┘╪د╪ص╪╕╪د╪ز ╪د┘╪╖╪ذ┘è╪ذ'}
+  119 |             content={consultation.notes}
+  120 |             icon="note-text-outline"
+
+  23 |   };
+  24 |
+> 25 |   const InfoSection = ({ title, content, icon, color, bgColor }) => {
+     |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 26 |     if (!content) return null;
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 27 |     return (
+     ظخ
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 37 |     );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 38 |   };
+     | ^^^^ The component is created during render here
+  39 |
+  40 |   return (
+  41 |     <View style={styles.container}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\DatesDoctor.jsx:5:3: 'FlatList' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\DatesDoctor.jsx:5:13: 'TouchableOpacity' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\DatesDoctor.jsx:299:10: 'slotBookingAllowed' is assigned a value but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\DatesDoctor.jsx:301:21: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  299 |   const [slotBookingAllowed, setSlotBookingAllowed] = useState(true);
+  300 |
+> 301 |   const slideAnim = useRef(new Animated.Value(0)).current;
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  302 |   const fadeAnim  = useRef(new Animated.Value(0)).current;
+  303 |
+  304 |   // ظ¤ظ¤ Helpers ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\DatesDoctor.jsx:301:21: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  299 |   const [slotBookingAllowed, setSlotBookingAllowed] = useState(true);
+  300 |
+> 301 |   const slideAnim = useRef(new Animated.Value(0)).current;
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  302 |   const fadeAnim  = useRef(new Animated.Value(0)).current;
+  303 |
+  304 |   // ظ¤ظ¤ Helpers ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\DatesDoctor.jsx:301:21: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  299 |   const [slotBookingAllowed, setSlotBookingAllowed] = useState(true);
+  300 |
+> 301 |   const slideAnim = useRef(new Animated.Value(0)).current;
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  302 |   const fadeAnim  = useRef(new Animated.Value(0)).current;
+  303 |
+  304 |   // ظ¤ظ¤ Helpers ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\DatesDoctor.jsx:302:21: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  300 |
+  301 |   const slideAnim = useRef(new Animated.Value(0)).current;
+> 302 |   const fadeAnim  = useRef(new Animated.Value(0)).current;
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  303 |
+  304 |   // ظ¤ظ¤ Helpers ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤
+  305 |   const formatDate = (date) => date.toISOString().split("T")[0]; [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\DatesDoctor.jsx:368:21: Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  366 |   };
+  367 |
+> 368 |   useEffect(() => { initData(); }, []);
+      |                     ^^^^^^^^ Avoid calling setState() directly within an effect
+  369 |
+  370 |   const handleDoctorSelect = async (doc) => {
+  371 |     setSelectedDoctor(doc); [Error/react-hooks/set-state-in-effect]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\DatesDoctor.jsx:368:36: React Hook useEffect has a missing dependency: 'initData'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\DatesDoctor.jsx:539:30: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  537 |               doctor={doc}
+  538 |               selected={selectedDoctor?.doctor_id === doc.doctor_id}
+> 539 |               onPress={() => handleDoctorSelect(doc)}
+      |                              ^^^^^^^^^^^^^^^^^^ Passing a ref to a function may read its value during render
+  540 |               t={t}
+  541 |             />
+  542 |           )) [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\DatesDoctor.jsx:563:28: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  561 |             schedule={sc}
+  562 |             selected={selectedDay?.schedule_id === sc.schedule_id}
+> 563 |             onPress={() => handleDaySelect(sc)}
+      |                            ^^^^^^^^^^^^^^^ Passing a ref to a function may read its value during render
+  564 |             formatTime={formatTime}
+  565 |             t={t}
+  566 |           /> [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\DatesDoctor.jsx:612:36: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  610 |                     slot={sl}
+  611 |                     selected={selectedSlot === sl.time}
+> 612 |                     onPress={() => handleSlotSelect(sl)}
+      |                                    ^^^^^^^^^^^^^^^^ Passing a ref to a function may read its value during render
+  613 |                     formatTime={formatTime}
+  614 |                     t={t}
+  615 |                   /> [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\DatesDoctor.jsx:723:31: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  721 |
+  722 |         {/* Step content */}
+> 723 |         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+      |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  724 |           {step === 0 && renderStep0()}
+  725 |           {step === 1 && renderStep1()}
+  726 |           {step === 2 && renderStep2()} [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\NurseNutritionsitTOpatint.jsx:1:17: 'useEffect' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\NurseNutritionsitTOpatint.jsx:98:13: 'token' is assigned a value but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\NurseNutritionsitTOpatint.jsx:150:6: React Hook useCallback has missing dependencies: 't.patientProfile.errorTitle', 't.staffPatientView.errorNoPatientId', and 't.staffPatientView.errorUpdateProfile'. Either include them or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\NurseNutritionsitTOpatint.jsx:362:20: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  360 |
+  361 |                   <Text style={[styles.sectionHeading, { fontSize: 16, marginBottom: 10 }]}>{t.staffPatientView.dailyMeals}</Text>
+> 362 |                   <MealItem label={t.staffPatientView.breakfast} content={nutritionPlan.breakfast} icon="coffee-outline" color="#A32D2F" />
+      |                    ^^^^^^^^ This component is created during render
+  363 |                   <MealItem label={t.staffPatientView.lunch} content={nutritionPlan.lunch} icon="food-turkey" color="#DE1A1C" />
+  364 |                   <MealItem label={t.staffPatientView.dinner} content={nutritionPlan.dinner} icon="weather-night" color="#26CDD6" />
+  365 |
+
+  199 |   );
+  200 |
+> 201 |   const MealItem = ({ label, content, icon, color }) => (
+      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 202 |     <View style={styles.mealBox}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 203 |       <View style={[styles.mealIconCircle, { backgroundColor: color + '20' }]}>
+      ظخ
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 210 |     </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 211 |   );
+      | ^^^^ The component is created during render here
+  212 |
+  213 |   const MedicalCard = ({ id, type, title, date, doctor, description, status, hasFile, typeIcon }) => (
+  214 |     <View style={styles.reportCard}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\NurseNutritionsitTOpatint.jsx:363:20: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  361 |                   <Text style={[styles.sectionHeading, { fontSize: 16, marginBottom: 10 }]}>{t.staffPatientView.dailyMeals}</Text>
+  362 |                   <MealItem label={t.staffPatientView.breakfast} content={nutritionPlan.breakfast} icon="coffee-outline" color="#A32D2F" />
+> 363 |                   <MealItem label={t.staffPatientView.lunch} content={nutritionPlan.lunch} icon="food-turkey" color="#DE1A1C" />
+      |                    ^^^^^^^^ This component is created during render
+  364 |                   <MealItem label={t.staffPatientView.dinner} content={nutritionPlan.dinner} icon="weather-night" color="#26CDD6" />
+  365 |
+  366 |                   {(nutritionPlan.meal_notes || nutritionPlan.mealNotes) && (
+
+  199 |   );
+  200 |
+> 201 |   const MealItem = ({ label, content, icon, color }) => (
+      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 202 |     <View style={styles.mealBox}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 203 |       <View style={[styles.mealIconCircle, { backgroundColor: color + '20' }]}>
+      ظخ
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 210 |     </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 211 |   );
+      | ^^^^ The component is created during render here
+  212 |
+  213 |   const MedicalCard = ({ id, type, title, date, doctor, description, status, hasFile, typeIcon }) => (
+  214 |     <View style={styles.reportCard}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\NurseNutritionsitTOpatint.jsx:364:20: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  362 |                   <MealItem label={t.staffPatientView.breakfast} content={nutritionPlan.breakfast} icon="coffee-outline" color="#A32D2F" />
+  363 |                   <MealItem label={t.staffPatientView.lunch} content={nutritionPlan.lunch} icon="food-turkey" color="#DE1A1C" />
+> 364 |                   <MealItem label={t.staffPatientView.dinner} content={nutritionPlan.dinner} icon="weather-night" color="#26CDD6" />
+      |                    ^^^^^^^^ This component is created during render
+  365 |
+  366 |                   {(nutritionPlan.meal_notes || nutritionPlan.mealNotes) && (
+  367 |                     <View style={styles.notesBox}>
+
+  199 |   );
+  200 |
+> 201 |   const MealItem = ({ label, content, icon, color }) => (
+      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 202 |     <View style={styles.mealBox}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 203 |       <View style={[styles.mealIconCircle, { backgroundColor: color + '20' }]}>
+      ظخ
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 210 |     </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 211 |   );
+      | ^^^^ The component is created during render here
+  212 |
+  213 |   const MedicalCard = ({ id, type, title, date, doctor, description, status, hasFile, typeIcon }) => (
+  214 |     <View style={styles.reportCard}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\NurseNutritionsitTOpatint.jsx:375:20: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  373 |                   <Divider style={{ marginVertical: 15 }} />
+  374 |
+> 375 |                   <InfoItem label={t.staffPatientView.allowedItems} value={nutritionPlan.allowed_items || nutritionPlan.allowedItems} icon="check-decagram" color="#26CDD6" />
+      |                    ^^^^^^^^ This component is created during render
+  376 |                   <InfoItem label={t.staffPatientView.forbiddenItems} value={nutritionPlan.forbidden_items || nutritionPlan.forbiddenItems} icon="alert-octagon" color="#DE1A1C" />
+  377 |                 </View>
+  378 |               </View>
+
+  189 |
+  190 |   // --- Sub-Components ---
+> 191 |   const InfoItem = ({ label, value, icon, color = "#26CDD6" }) => (
+      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 192 |     <View style={styles.infoBox}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 193 |       <Icon name={icon} type="material-community" size={22} color={color} />
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 194 |       <View style={{ marginRight: 12, flex: 1 }}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 195 |         <Text style={styles.infoLabel}>{label}</Text>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 196 |         <Text style={styles.infoTextValue}>{value || t.staffPatientView.notSpecified}</Text>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 197 |       </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 198 |     </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 199 |   );
+      | ^^^^ The component is created during render here
+  200 |
+  201 |   const MealItem = ({ label, content, icon, color }) => (
+  202 |     <View style={styles.mealBox}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\NurseNutritionsitTOpatint.jsx:376:20: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  374 |
+  375 |                   <InfoItem label={t.staffPatientView.allowedItems} value={nutritionPlan.allowed_items || nutritionPlan.allowedItems} icon="check-decagram" color="#26CDD6" />
+> 376 |                   <InfoItem label={t.staffPatientView.forbiddenItems} value={nutritionPlan.forbidden_items || nutritionPlan.forbiddenItems} icon="alert-octagon" color="#DE1A1C" />
+      |                    ^^^^^^^^ This component is created during render
+  377 |                 </View>
+  378 |               </View>
+  379 |             ) : (
+
+  189 |
+  190 |   // --- Sub-Components ---
+> 191 |   const InfoItem = ({ label, value, icon, color = "#26CDD6" }) => (
+      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 192 |     <View style={styles.infoBox}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 193 |       <Icon name={icon} type="material-community" size={22} color={color} />
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 194 |       <View style={{ marginRight: 12, flex: 1 }}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 195 |         <Text style={styles.infoLabel}>{label}</Text>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 196 |         <Text style={styles.infoTextValue}>{value || t.staffPatientView.notSpecified}</Text>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 197 |       </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 198 |     </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 199 |   );
+      | ^^^^ The component is created during render here
+  200 |
+  201 |   const MealItem = ({ label, content, icon, color }) => (
+  202 |     <View style={styles.mealBox}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatientSessionDetailView.jsx:72:24: React Hook "useCallback" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [Error/react-hooks/rules-of-hooks]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatientSessionDetailView.jsx:278:6: React Hook useCallback has a missing dependency: 't.patientSessionDetail.fetchError'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatientSessionDetailView.jsx:280:3: React Hook "useFocusEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [Error/react-hooks/rules-of-hooks]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatientSessionDetailView.jsx:280:18: React Hook "useCallback" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [Error/react-hooks/rules-of-hooks]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatientSessionScreen.jsx:8:14: 'Platform' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatientSessionScreen.jsx:106:5: Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  104 |       ? Math.floor((Date.now() - startTimestamp) / 1000)
+  105 |       : 0;
+> 106 |     setElapsed(Math.max(0, base));
+      |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  107 |
+  108 |     timerRef.current = setInterval(() => {
+  109 |       setElapsed(prev => prev + 1); [Error/react-hooks/set-state-in-effect]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatientSessionScreen.jsx:132:6: React Hook useEffect has missing dependencies: 't.patientSessionScreen.alertMessage', 't.patientSessionScreen.alertTitle', and 't.patientSessionScreen.ok'. Either include them or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatientSessionScreen.jsx:144:6: React Hook useEffect has missing dependencies: 't.patientSessionScreen.lockAlertMessage' and 't.patientSessionScreen.lockAlertTitle'. Either include them or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatientSessionScreen.jsx:147:9: 'handleSessionEnd' is assigned a value but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatientSessionStatistics.jsx:18:9: 'width' is assigned a value but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatientSessionStatistics.jsx:34:7: 'TrendIcon' is assigned a value but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatientSessionStatistics.jsx:269:6: React Hook useCallback has a missing dependency: 't.patientSessionStats.fetchError'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetControolPanal.jsx:9:8: 'WeightInput' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:15:3: 'KeyboardAvoidingView' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:16:3: 'Platform' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:92:11: Error: Cannot access variable before it is declared
+
+`fetchNutritionPlan` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  90 |         const pId = patientInfo.patient_id;
+  91 |         await Promise.all([
+> 92 |           fetchNutritionPlan(pId),
+     |           ^^^^^^^^^^^^^^^^^^ `fetchNutritionPlan` accessed before it is declared
+  93 |           fetchSessions(pId),
+  94 |           fetchPrescriptions(pId),
+  95 |           fetchMedicalTests(pId),
+
+  190 |   };
+  191 |
+> 192 |   const fetchNutritionPlan = async (id) => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 193 |     try {
+      | ^^^^^^^^^
+> 194 |       const response = await api.get(`/nutrition-programs?patientId=${id}`);
+      ظخ
+      | ^^^^^^^^^
+> 203 |     }
+      | ^^^^^^^^^
+> 204 |   };
+      | ^^^^^ `fetchNutritionPlan` is declared here
+  205 |
+  206 |   const fetchSessions = async (id) => {
+  207 |     try { [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:93:11: Error: Cannot access variable before it is declared
+
+`fetchSessions` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  91 |         await Promise.all([
+  92 |           fetchNutritionPlan(pId),
+> 93 |           fetchSessions(pId),
+     |           ^^^^^^^^^^^^^ `fetchSessions` accessed before it is declared
+  94 |           fetchPrescriptions(pId),
+  95 |           fetchMedicalTests(pId),
+  96 |           fetchRadiology(pId),
+
+  204 |   };
+  205 |
+> 206 |   const fetchSessions = async (id) => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 207 |     try {
+      | ^^^^^^^^^
+> 208 |       const response = await api.get(`/dialysis-sessions?patientId=${id}`);
+      ظخ
+      | ^^^^^^^^^
+> 227 |     }
+      | ^^^^^^^^^
+> 228 |   };
+      | ^^^^^ `fetchSessions` is declared here
+  229 |
+  230 |   // ظ¤ظ¤ ╪ص┘╪╕ ╪د┘┘ê╪▓┘ ╪ذ╪╣╪» ╪د┘╪ش┘╪│╪ر (┘à┘ ╪د┘┘à╪▒┘è╪╢) ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤ظ¤
+  231 |   const handleSaveWeightAfter = async () => { [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:94:11: Error: Cannot access variable before it is declared
+
+`fetchPrescriptions` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  92 |           fetchNutritionPlan(pId),
+  93 |           fetchSessions(pId),
+> 94 |           fetchPrescriptions(pId),
+     |           ^^^^^^^^^^^^^^^^^^ `fetchPrescriptions` accessed before it is declared
+  95 |           fetchMedicalTests(pId),
+  96 |           fetchRadiology(pId),
+  97 |           fetchMyAppointments(),
+
+  262 |   };
+  263 |
+> 264 |   const fetchPrescriptions = async (id) => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 265 |     try {
+      | ^^^^^^^^^
+> 266 |       const response = await api.get(`/prescriptions?patientId=${id}`);
+      | ^^^^^^^^^
+> 267 |       setPrescriptions(Array.isArray(response.data) ? response.data : []);
+      | ^^^^^^^^^
+> 268 |     } catch (e) {
+      | ^^^^^^^^^
+> 269 |       setPrescriptions([]);
+      | ^^^^^^^^^
+> 270 |     }
+      | ^^^^^^^^^
+> 271 |   };
+      | ^^^^^ `fetchPrescriptions` is declared here
+  272 |
+  273 |   const fetchMedicalTests = async (id) => {
+  274 |     try { [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:95:11: Error: Cannot access variable before it is declared
+
+`fetchMedicalTests` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  93 |           fetchSessions(pId),
+  94 |           fetchPrescriptions(pId),
+> 95 |           fetchMedicalTests(pId),
+     |           ^^^^^^^^^^^^^^^^^ `fetchMedicalTests` accessed before it is declared
+  96 |           fetchRadiology(pId),
+  97 |           fetchMyAppointments(),
+  98 |           fetchUnreadCount(),
+
+  271 |   };
+  272 |
+> 273 |   const fetchMedicalTests = async (id) => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 274 |     try {
+      | ^^^^^^^^^
+> 275 |       const response = await api.get(`/medical-tests?patientId=${id}`);
+      | ^^^^^^^^^
+> 276 |       setMedicalTests(Array.isArray(response.data) ? response.data : []);
+      | ^^^^^^^^^
+> 277 |     } catch (e) {
+      | ^^^^^^^^^
+> 278 |       setMedicalTests([]);
+      | ^^^^^^^^^
+> 279 |     }
+      | ^^^^^^^^^
+> 280 |   };
+      | ^^^^^ `fetchMedicalTests` is declared here
+  281 |
+  282 |   const fetchRadiology = async (id) => {
+  283 |     try { [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:96:11: Error: Cannot access variable before it is declared
+
+`fetchRadiology` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  94 |           fetchPrescriptions(pId),
+  95 |           fetchMedicalTests(pId),
+> 96 |           fetchRadiology(pId),
+     |           ^^^^^^^^^^^^^^ `fetchRadiology` accessed before it is declared
+  97 |           fetchMyAppointments(),
+  98 |           fetchUnreadCount(),
+  99 |         ]);
+
+  280 |   };
+  281 |
+> 282 |   const fetchRadiology = async (id) => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 283 |     try {
+      | ^^^^^^^^^
+> 284 |       const response = await api.get(`/radiology-requests?patientId=${id}`);
+      | ^^^^^^^^^
+> 285 |       setRadiology(Array.isArray(response.data) ? response.data : []);
+      | ^^^^^^^^^
+> 286 |     } catch (e) {
+      | ^^^^^^^^^
+> 287 |       setRadiology([]);
+      | ^^^^^^^^^
+> 288 |     }
+      | ^^^^^^^^^
+> 289 |   };
+      | ^^^^^ `fetchRadiology` is declared here
+  290 |
+  291 |   const formatDate = (date) => {
+  292 |     if (!date) return t.patientProfile.status.pending; [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:97:11: Error: Cannot access variable before it is declared
+
+`fetchMyAppointments` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+   95 |           fetchMedicalTests(pId),
+   96 |           fetchRadiology(pId),
+>  97 |           fetchMyAppointments(),
+      |           ^^^^^^^^^^^^^^^^^^^ `fetchMyAppointments` accessed before it is declared
+   98 |           fetchUnreadCount(),
+   99 |         ]);
+  100 |       }
+
+  163 |   }, [route?.params]);
+  164 |
+> 165 |   const fetchMyAppointments = async () => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 166 |     try {
+      | ^^^^^^^^^
+> 167 |       const response = await api.get(`/clinic-consultations`);
+      | ^^^^^^^^^
+> 168 |       const activeAppts = (response.data || []).filter(a => a.status !== "CANCELLED");
+      | ^^^^^^^^^
+> 169 |       setMyAppointments(activeAppts);
+      | ^^^^^^^^^
+> 170 |     } catch (e) {
+      | ^^^^^^^^^
+> 171 |       setMyAppointments([]);
+      | ^^^^^^^^^
+> 172 |     }
+      | ^^^^^^^^^
+> 173 |   };
+      | ^^^^^ `fetchMyAppointments` is declared here
+  174 |
+  175 |   const fetchUnreadCount = async () => {
+  176 |     try { [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:98:11: Error: Cannot access variable before it is declared
+
+`fetchUnreadCount` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+   96 |           fetchRadiology(pId),
+   97 |           fetchMyAppointments(),
+>  98 |           fetchUnreadCount(),
+      |           ^^^^^^^^^^^^^^^^ `fetchUnreadCount` accessed before it is declared
+   99 |         ]);
+  100 |       }
+  101 |     } catch (error) {
+
+  173 |   };
+  174 |
+> 175 |   const fetchUnreadCount = async () => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 176 |     try {
+      | ^^^^^^^^^
+> 177 |       const count = await getVisibleUnreadCount(api);
+      | ^^^^^^^^^
+> 178 |       updateUnreadCount(count);
+      | ^^^^^^^^^
+> 179 |     } catch (error) {
+      | ^^^^^^^^^
+> 180 |       console.error('Fetch unread count error (PatinetProfile):', error);
+      | ^^^^^^^^^
+> 181 |       updateUnreadCount(0);
+      | ^^^^^^^^^
+> 182 |     }
+      | ^^^^^^^^^
+> 183 |   };
+      | ^^^^^ `fetchUnreadCount` is declared here
+  184 |
+  185 |   const formatTime = (timeStr) => {
+  186 |     if (!timeStr) return ""; [Error/react-hooks/immutability]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:107:6: React Hook useCallback has missing dependencies: 'fetchSessions', 'fetchUnreadCount', 't.error', and 't.patientProfile.fetchError'. Either include them or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:109:9: 'ultrafiltrationAverage' is assigned a value but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:151:6: React Hook useCallback has a missing dependency: 'fetchUnreadCount'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:157:7: Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  155 |     const newParams = route?.params || {};
+  156 |     if (newParams.initialTab !== undefined) {
+> 157 |       setTabIndex(newParams.initialTab);
+      |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  158 |     }
+  159 |     if (newParams.initialSubTab !== undefined) {
+  160 |       setSubTabIndex(newParams.initialSubTab); [Error/react-hooks/set-state-in-effect]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:593:20: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  591 |                   <Divider style={{ marginVertical: 15 }} />
+  592 |
+> 593 |                   <MealItem label={t.patientProfile.meals.breakfast} content={nutritionPlan.breakfast} icon="coffee-outline" color="#A32D2F" />
+      |                    ^^^^^^^^ This component is created during render
+  594 |                   <MealItem label={t.patientProfile.meals.lunch} content={nutritionPlan.lunch} icon="food-turkey" color="#DE1A1C" />
+  595 |                   <MealItem label={t.patientProfile.meals.dinner} content={nutritionPlan.dinner} icon="weather-night" color="#26CDD6" />
+  596 |
+
+  348 |   );
+  349 |
+> 350 |   const MealItem = ({ label, content, icon, color }) => (
+      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 351 |     <View style={styles.mealBox}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 352 |       <View style={[styles.mealIconCircle, { backgroundColor: color + "20" }]}>
+      ظخ
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 359 |     </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 360 |   );
+      | ^^^^ The component is created during render here
+  361 |
+  362 |   const MedicalCard = ({ id, type, title, date, doctor, description, status, hasFile, typeIcon }) => {
+  363 |     const isPending = status === "PENDING" || status === "pending"; [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:594:20: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  592 |
+  593 |                   <MealItem label={t.patientProfile.meals.breakfast} content={nutritionPlan.breakfast} icon="coffee-outline" color="#A32D2F" />
+> 594 |                   <MealItem label={t.patientProfile.meals.lunch} content={nutritionPlan.lunch} icon="food-turkey" color="#DE1A1C" />
+      |                    ^^^^^^^^ This component is created during render
+  595 |                   <MealItem label={t.patientProfile.meals.dinner} content={nutritionPlan.dinner} icon="weather-night" color="#26CDD6" />
+  596 |
+  597 |                   <Divider style={{ marginVertical: 15 }} />
+
+  348 |   );
+  349 |
+> 350 |   const MealItem = ({ label, content, icon, color }) => (
+      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 351 |     <View style={styles.mealBox}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 352 |       <View style={[styles.mealIconCircle, { backgroundColor: color + "20" }]}>
+      ظخ
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 359 |     </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 360 |   );
+      | ^^^^ The component is created during render here
+  361 |
+  362 |   const MedicalCard = ({ id, type, title, date, doctor, description, status, hasFile, typeIcon }) => {
+  363 |     const isPending = status === "PENDING" || status === "pending"; [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:595:20: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  593 |                   <MealItem label={t.patientProfile.meals.breakfast} content={nutritionPlan.breakfast} icon="coffee-outline" color="#A32D2F" />
+  594 |                   <MealItem label={t.patientProfile.meals.lunch} content={nutritionPlan.lunch} icon="food-turkey" color="#DE1A1C" />
+> 595 |                   <MealItem label={t.patientProfile.meals.dinner} content={nutritionPlan.dinner} icon="weather-night" color="#26CDD6" />
+      |                    ^^^^^^^^ This component is created during render
+  596 |
+  597 |                   <Divider style={{ marginVertical: 15 }} />
+  598 |
+
+  348 |   );
+  349 |
+> 350 |   const MealItem = ({ label, content, icon, color }) => (
+      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 351 |     <View style={styles.mealBox}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 352 |       <View style={[styles.mealIconCircle, { backgroundColor: color + "20" }]}>
+      ظخ
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 359 |     </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 360 |   );
+      | ^^^^ The component is created during render here
+  361 |
+  362 |   const MedicalCard = ({ id, type, title, date, doctor, description, status, hasFile, typeIcon }) => {
+  363 |     const isPending = status === "PENDING" || status === "pending"; [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:599:20: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  597 |                   <Divider style={{ marginVertical: 15 }} />
+  598 |
+> 599 |                   <InfoItem label="╪د┘┘à╪│┘à┘ê╪ص╪د╪ز" value={nutritionPlan.allowed_items || nutritionPlan.allowedItems} icon="check-decagram" color="#26CDD6" />
+      |                    ^^^^^^^^ This component is created during render
+  600 |                   <InfoItem label="╪د┘┘à┘à┘┘ê╪╣╪د╪ز" value={nutritionPlan.forbidden_items || nutritionPlan.forbiddenItems} icon="alert-octagon" color="#DE1A1C" />
+  601 |                 </View>
+  602 |               </View>
+
+  338 |   );
+  339 |
+> 340 |   const InfoItem = ({ label, value, icon, color = "#26CDD6" }) => (
+      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 341 |     <View style={styles.infoBox}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 342 |       <Icon name={icon} type="material-community" size={22} color={color} />
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 343 |       <View style={{ marginRight: 12, flex: 1 }}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 344 |         <Text style={styles.infoLabel}>{label}</Text>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 345 |         <Text style={styles.infoTextValue}>{value || t.unknown}</Text>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 346 |       </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 347 |     </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 348 |   );
+      | ^^^^ The component is created during render here
+  349 |
+  350 |   const MealItem = ({ label, content, icon, color }) => (
+  351 |     <View style={styles.mealBox}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:600:20: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  598 |
+  599 |                   <InfoItem label="╪د┘┘à╪│┘à┘ê╪ص╪د╪ز" value={nutritionPlan.allowed_items || nutritionPlan.allowedItems} icon="check-decagram" color="#26CDD6" />
+> 600 |                   <InfoItem label="╪د┘┘à┘à┘┘ê╪╣╪د╪ز" value={nutritionPlan.forbidden_items || nutritionPlan.forbiddenItems} icon="alert-octagon" color="#DE1A1C" />
+      |                    ^^^^^^^^ This component is created during render
+  601 |                 </View>
+  602 |               </View>
+  603 |             ) : (
+
+  338 |   );
+  339 |
+> 340 |   const InfoItem = ({ label, value, icon, color = "#26CDD6" }) => (
+      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 341 |     <View style={styles.infoBox}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 342 |       <Icon name={icon} type="material-community" size={22} color={color} />
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 343 |       <View style={{ marginRight: 12, flex: 1 }}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 344 |         <Text style={styles.infoLabel}>{label}</Text>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 345 |         <Text style={styles.infoTextValue}>{value || t.unknown}</Text>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 346 |       </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 347 |     </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 348 |   );
+      | ^^^^ The component is created during render here
+  349 |
+  350 |   const MealItem = ({ label, content, icon, color }) => (
+  351 |     <View style={styles.mealBox}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:776:25: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  774 |                       </View>
+  775 |                     );
+> 776 |                   }) : <EmptyBox icon="pill-off" text={t.medications.noMeds} />}
+      |                         ^^^^^^^^ This component is created during render
+  777 |                 </View>
+  778 |               )}
+  779 |
+
+  331 |
+  332 |   // ظ¤ظ¤ظ¤ ┘à┘â┘ê┘╪د╪ز ╪╣╪▒╪╢ ╪ذ╪│┘è╪╖╪ر (╪ز╪│╪ز╪«╪»┘à formatDate ┘ê t ┘à┘ ╪د┘┘à┘â┘ê┘ ╪د┘╪ث╪ذ) ظ¤ظ¤ظ¤
+> 333 |   const EmptyBox = ({ icon, text }) => (
+      |                    ^^^^^^^^^^^^^^^^^^^^^
+> 334 |     <View style={styles.emptyState}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 335 |       <Icon name={icon} type="material-community" size={60} color="#cbd5e1" />
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 336 |       <Text style={styles.emptyText}>{text}</Text>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 337 |     </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 338 |   );
+      | ^^^^ The component is created during render here
+  339 |
+  340 |   const InfoItem = ({ label, value, icon, color = "#26CDD6" }) => (
+  341 |     <View style={styles.infoBox}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:794:23: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  792 |                     typeIcon="test-tube"
+  793 |                   />
+> 794 |                 )) : <EmptyBox icon="test-tube-off" text={t.medications.noLabTests || '┘╪د ╪ز┘ê╪ش╪» ┘╪ص┘ê╪╡╪د╪ز ┘à╪«╪ز╪ذ╪▒┘è╪ر'} />
+      |                       ^^^^^^^^ This component is created during render
+  795 |               )}
+  796 |
+  797 |               {subTabIndex === 2 && (
+
+  331 |
+  332 |   // ظ¤ظ¤ظ¤ ┘à┘â┘ê┘╪د╪ز ╪╣╪▒╪╢ ╪ذ╪│┘è╪╖╪ر (╪ز╪│╪ز╪«╪»┘à formatDate ┘ê t ┘à┘ ╪د┘┘à┘â┘ê┘ ╪د┘╪ث╪ذ) ظ¤ظ¤ظ¤
+> 333 |   const EmptyBox = ({ icon, text }) => (
+      |                    ^^^^^^^^^^^^^^^^^^^^^
+> 334 |     <View style={styles.emptyState}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 335 |       <Icon name={icon} type="material-community" size={60} color="#cbd5e1" />
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 336 |       <Text style={styles.emptyText}>{text}</Text>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 337 |     </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 338 |   );
+      | ^^^^ The component is created during render here
+  339 |
+  340 |   const InfoItem = ({ label, value, icon, color = "#26CDD6" }) => (
+  341 |     <View style={styles.infoBox}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\PatinetProfile.jsx:811:23: Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  809 |                     typeIcon="file-image-outline"
+  810 |                   />
+> 811 |                 )) : <EmptyBox icon="radiology-box-outline" text={t.medications.noRadiology || '┘╪د ╪ز┘ê╪ش╪» ╪╡┘ê╪▒ ╪ث╪┤╪╣╪ر'} />
+      |                       ^^^^^^^^ This component is created during render
+  812 |               )}
+  813 |             </ScrollView>
+  814 |           </View>
+
+  331 |
+  332 |   // ظ¤ظ¤ظ¤ ┘à┘â┘ê┘╪د╪ز ╪╣╪▒╪╢ ╪ذ╪│┘è╪╖╪ر (╪ز╪│╪ز╪«╪»┘à formatDate ┘ê t ┘à┘ ╪د┘┘à┘â┘ê┘ ╪د┘╪ث╪ذ) ظ¤ظ¤ظ¤
+> 333 |   const EmptyBox = ({ icon, text }) => (
+      |                    ^^^^^^^^^^^^^^^^^^^^^
+> 334 |     <View style={styles.emptyState}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 335 |       <Icon name={icon} type="material-community" size={60} color="#cbd5e1" />
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 336 |       <Text style={styles.emptyText}>{text}</Text>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 337 |     </View>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 338 |   );
+      | ^^^^ The component is created during render here
+  339 |
+  340 |   const InfoItem = ({ label, value, icon, color = "#26CDD6" }) => (
+  341 |     <View style={styles.infoBox}> [Error/react-hooks/static-components]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\patientInformation.jsx:8:3: 'ScrollView' is defined but never used. [Warning/no-unused-vars]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\patientInformation.jsx:102:24: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  100 |   const scrollY = useRef(new Animated.Value(0)).current;
+  101 |
+> 102 |   const headerHeight = scrollY.interpolate({
+      |                        ^^^^^^^ Passing a ref to a function may read its value during render
+  103 |     inputRange: [0, 80],
+  104 |     outputRange: [1, 0.88],
+  105 |     extrapolate: "clamp", [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\patientInformation.jsx:102:24: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  100 |   const scrollY = useRef(new Animated.Value(0)).current;
+  101 |
+> 102 |   const headerHeight = scrollY.interpolate({
+      |                        ^^^^^^^^^^^^^^^^^^^ Passing a ref to a function may read its value during render
+  103 |     inputRange: [0, 80],
+  104 |     outputRange: [1, 0.88],
+  105 |     extrapolate: "clamp", [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\patientInformation.jsx:119:18: Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  117 |   const calcAge = (birth) => {
+  118 |     if (!birth) return null;
+> 119 |     const diff = Date.now() - new Date(birth).getTime();
+      |                  ^^^^^^^^^^ Cannot call impure function
+  120 |     return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+  121 |   };
+  122 | [Error/react-hooks/purity]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\patientInformation.jsx:145:6: React Hook useEffect has missing dependencies: 'navigation', 't.error', and 't.patientInfo.fetchError'. Either include them or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\patientInformation.jsx:227:11: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  225 |         showsVerticalScrollIndicator={false}
+  226 |         onScroll={Animated.event(
+> 227 |           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+      |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Passing a ref to a function may read its value during render
+  228 |           { useNativeDriver: true }
+  229 |         )}
+  230 |         scrollEventThrottle={16} [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\patientInformation.jsx:227:12: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  225 |         showsVerticalScrollIndicator={false}
+  226 |         onScroll={Animated.event(
+> 227 |           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+      |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  228 |           { useNativeDriver: true }
+  229 |         )}
+  230 |         scrollEventThrottle={16} [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\patientInformation.jsx:227:27: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  225 |         showsVerticalScrollIndicator={false}
+  226 |         onScroll={Animated.event(
+> 227 |           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+      |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  228 |           { useNativeDriver: true }
+  229 |         )}
+  230 |         scrollEventThrottle={16} [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\patientInformation.jsx:227:44: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  225 |         showsVerticalScrollIndicator={false}
+  226 |         onScroll={Animated.event(
+> 227 |           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+      |                                            ^^^^^^^^^^^^^^ Cannot access ref value during render
+  228 |           { useNativeDriver: true }
+  229 |         )}
+  230 |         scrollEventThrottle={16} [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\patientInformation.jsx:227:49: Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+  225 |         showsVerticalScrollIndicator={false}
+  226 |         onScroll={Animated.event(
+> 227 |           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+      |                                                 ^^^^^^^ Cannot access ref value during render
+  228 |           { useNativeDriver: true }
+  229 |         )}
+  230 |         scrollEventThrottle={16} [Error/react-hooks/refs]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\searchPatinet.jsx:62:5: Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  60 |
+  61 |   useEffect(() => {
+> 62 |     fetchPatients("", true);
+     |     ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  63 |   }, []);
+  64 |
+  65 |   const handleSearch = (queryText) => { [Error/react-hooks/set-state-in-effect]
+C:\Users\Ele\Desktop\medikidney_App\screens\patinet\searchPatinet.jsx:63:6: React Hook useEffect has a missing dependency: 'fetchPatients'. Either include it or remove the dependency array. [Warning/react-hooks/exhaustive-deps]
+
+131 problems

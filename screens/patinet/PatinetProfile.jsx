@@ -25,7 +25,6 @@ import { getVisibleUnreadCount } from '../../utils/notificationBadge';
 
 const { width } = Dimensions.get("window");
 
-// ─── بيانات ثابتة خارج المكون (لا تتغير) ───────────────────────
 const STATUS_CONFIG = {
   COMPLETED:   { label: 'مكتملة', bg: '#E9FAFB', text: '#193B6B', icon: 'check-circle-outline', borderColor: '#26CDD6' },
   IN_PROGRESS: { label: 'جارية',  bg: '#FBEAEA', text: '#A32D2F', icon: 'progress-clock',       borderColor: '#A32D2F' },
@@ -33,7 +32,6 @@ const STATUS_CONFIG = {
 };
 const DEFAULT_STATUS = { label: '', bg: '#f1f5f9', text: '#8296B1', icon: 'help-circle-outline', borderColor: '#8296B1' };
 
-// حساب كمية السوائل المسحوبة — الأولوية المطلقة لإعدادات الجهاز (UF rate)
 const getFluidRemoved = (session) => {
   const settings = session.dialysisSettings || [];
   const last = settings[settings.length - 1];
@@ -55,8 +53,7 @@ const getFluidRemoved = (session) => {
 const PatientProfile = ({ navigation, route }) => {
   const { t } = useLanguage();
   const { unreadCount, updateUnreadCount } = useNotificationContext();
-  
-  // استقبل الـ initialTab و initialSubTab من الإشعار
+
   const params = route?.params || {};
   const initialTab = params.initialTab !== undefined ? params.initialTab : 0;
   const initialSubTab = params.initialSubTab !== undefined ? params.initialSubTab : 0;
@@ -72,7 +69,6 @@ const PatientProfile = ({ navigation, route }) => {
   const [radiology, setRadiology] = useState([]);
   const [myAppointments, setMyAppointments] = useState([]);
 
-  // ─── حالة إدخال الوزن بعد الجلسة (lock) ───────────────────
   const [pendingWeightSession, setPendingWeightSession] = useState(null);
   const [weightAfterInput, setWeightAfterInput] = useState('');
   const [weightAfterError, setWeightAfterError] = useState('');
@@ -130,7 +126,7 @@ const PatientProfile = ({ navigation, route }) => {
         const settingsWithUF = session.dialysisSettings?.filter(s => s.ultrafiltration_rate != null) || [];
         if (settingsWithUF.length > 0) {
           const rate = parseFloat(settingsWithUF[settingsWithUF.length - 1].ultrafiltration_rate);
-          // If rate is large (e.g. 500 ml/h), assume it needs converting to liters for average consistency
+          
           ufValue = rate > 50 ? rate / 1000 : rate;
         }
       }
@@ -146,11 +142,10 @@ const PatientProfile = ({ navigation, route }) => {
 
   useFocusEffect(useCallback(() => { 
     fetchPatientData();
-    // جلب عدد الإشعارات غير المقروءة عند العودة للصفحة
+    
     fetchUnreadCount();
   }, [fetchPatientData]));
 
-  // استقبل تحديثات الـ tabs من الإشعار
   useEffect(() => {
     const newParams = route?.params || {};
     if (newParams.initialTab !== undefined) {
@@ -211,7 +206,6 @@ const PatientProfile = ({ navigation, route }) => {
       console.log("Sessions list length:", sessionsList.length);
       setSessions(sessionsList);
 
-      // ── التحقق: هل في جلسة مكتملة بدون وزن بعد؟ ──
       const needsWeight = sessionsList.find(
         s => s.status === 'COMPLETED' && s.weight_after == null
       );
@@ -227,7 +221,6 @@ const PatientProfile = ({ navigation, route }) => {
     }
   };
 
-  // ── حفظ الوزن بعد الجلسة (من المريض) ─────────────────────────
   const handleSaveWeightAfter = async () => {
     const num = parseFloat(weightAfterInput);
     if (!weightAfterInput.trim()) {
@@ -249,7 +242,7 @@ const PatientProfile = ({ navigation, route }) => {
       Alert.alert(t.success, t.patientProfile.weightSaved);
       setPendingWeightSession(null);
       setWeightAfterInput('');
-      // إعادة جلب الجلسات
+      
       if (patient?.patient_id) {
         fetchSessions(patient.patient_id);
       }
@@ -329,7 +322,6 @@ const PatientProfile = ({ navigation, route }) => {
     }
   };
 
-  // ─── مكونات عرض بسيطة (تستخدم formatDate و t من المكون الأب) ───
   const EmptyBox = ({ icon, text }) => (
     <View style={styles.emptyState}>
       <Icon name={icon} type="material-community" size={60} color="#cbd5e1" />
@@ -407,7 +399,6 @@ const PatientProfile = ({ navigation, route }) => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
 
-      {/* ══════ شاشة إدخال الوزن بعد الجلسة (lock) ══════════════ */}
       {pendingWeightSession && (
         <Modal
           visible={true}
@@ -419,7 +410,7 @@ const PatientProfile = ({ navigation, route }) => {
         >
           <View style={weightLockStyles.overlay}>
             <View style={weightLockStyles.sheet}>
-              {/* الأيقونة */}
+              
               <View style={weightLockStyles.iconWrap}>
                 <View style={weightLockStyles.iconCircle}>
                   <MaterialCommunityIcons name="scale" size={40} color="#A32D2F" />
@@ -431,7 +422,6 @@ const PatientProfile = ({ navigation, route }) => {
                 {t.patientProfile.weightAfterSubtitle}
               </Text>
 
-              {/* معلومات الجلسة */}
               <View style={weightLockStyles.sessionInfo}>
                 <Text style={weightLockStyles.sessionInfoText}>
                   جلسة #{pendingWeightSession.session_id || pendingWeightSession.id}
@@ -445,7 +435,6 @@ const PatientProfile = ({ navigation, route }) => {
                 )}
               </View>
 
-              {/* حقل الإدخال */}
               <View style={[weightLockStyles.inputRow, weightAfterError ? weightLockStyles.inputErr : null]}>
                 <MaterialCommunityIcons name="scale" size={22} color="#26CDD6" />
                 <TextInput
@@ -463,7 +452,6 @@ const PatientProfile = ({ navigation, route }) => {
                 <Text style={weightLockStyles.errText}>{weightAfterError}</Text>
               ) : null}
 
-              {/* زر الحفظ */}
               <TouchableOpacity
                 style={[weightLockStyles.saveBtn, isSavingWeight && { backgroundColor: '#BCEFF3' }]}
                 onPress={handleSaveWeightAfter}
@@ -532,7 +520,6 @@ const PatientProfile = ({ navigation, route }) => {
         </View>
       </View>
 
-      {/* ── التابات الرئيسية ── */}
       <Tab value={tabIndex} onChange={setTabIndex} indicatorStyle={styles.tabIndicator} containerStyle={styles.tabBar} variant="default">
         {[
           { title: t.patientProfile.tabs.nutrition,    icon: 'food-apple'      },
@@ -613,8 +600,6 @@ const PatientProfile = ({ navigation, route }) => {
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
             <Text style={styles.sectionHeading}>{t.patientProfile.tabs.sessions}</Text>
 
-
-
             {sessions.length > 0 ? sessions.map((session, index) => {
               const sc = STATUS_CONFIG[session.status] || { ...DEFAULT_STATUS, label: session.status };
 
@@ -636,7 +621,7 @@ const PatientProfile = ({ navigation, route }) => {
                         startTime: session.created_at || session.start_time,
                       });
                     } else {
-                      // التحقق من وجود patient_id قبل الانتقال
+                      
                       if (!patient?.patient_id) {
                         Alert.alert(t.error, "خطأ: معرف المريض غير موجود");
                         return;
@@ -716,7 +701,7 @@ const PatientProfile = ({ navigation, route }) => {
 
         <TabView.Item style={styles.tabViewContent}>
           <View style={{ flex: 1 }}>
-            {/* ── السب-تابات: أدوية / مختبر / أشعة ── */}
+            
             <View style={styles.subTabContainer}>
               {[t.medications.title, 'المختبر', 'الأشعة'].map((label, i) => (
                 <TouchableOpacity
@@ -736,12 +721,11 @@ const PatientProfile = ({ navigation, route }) => {
                 <View>
                   <Text style={styles.sectionHeading}>{t.medications.title}</Text>
 
-                  {/* قائمة الوصفات أو رسالة فارغة */}
                   {prescriptions.length > 0 ? prescriptions.map((item, idx) => {
                     const isDispensed = item.dispense_status === "DISPENSED";
                     return (
                       <View key={idx} style={styles.prescriptionCard}>
-                        {/* هيدر الوصفة: اسم الدكتور + التاريخ + حالة الصرف */}
+                        
                         <View style={styles.prescriptionHeader}>
                           <View style={{ alignItems: "flex-end" }}>
                             <Text style={styles.prescriptionDoctor}>د. {item.doctor?.full_name}</Text>
@@ -756,7 +740,6 @@ const PatientProfile = ({ navigation, route }) => {
 
                         <Divider style={{ marginVertical: 10 }} />
 
-                        {/* قائمة الأدوية */}
                         {item.details?.map((drug, dIdx) => (
                           <View
                             key={dIdx}
@@ -832,7 +815,6 @@ const PatientProfile = ({ navigation, route }) => {
                 {t.appointments?.completedTitle || 'سجل المواعيد المكتملة'}
               </Text>
 
-              {/* قائمة المواعيد المكتملة */}
               {(() => {
                 const completed = myAppointments.filter(a => a.status === 'COMPLETED');
                 if (completed.length === 0) {
@@ -850,7 +832,7 @@ const PatientProfile = ({ navigation, route }) => {
                     activeOpacity={0.7}
                     onPress={() => navigation.navigate('ConsultationDetails', { consultation: appt })}
                   >
-                    {/* معلومات الدكتور والنوع */}
+                    
                     <View style={styles.completedApptHeader}>
                       <View style={styles.completedApptDocRow}>
                         <View style={styles.completedApptAvatar}>
@@ -869,7 +851,6 @@ const PatientProfile = ({ navigation, route }) => {
                       </View>
                     </View>
 
-                    {/* التاريخ والوقت */}
                     <View style={styles.completedApptDateRow}>
                       <View style={styles.completedApptDateItem}>
                         <Icon name="calendar" type="material-community" size={15} color="#8296B1" />
@@ -881,7 +862,6 @@ const PatientProfile = ({ navigation, route }) => {
                       </View>
                     </View>
 
-                    {/* رابط عرض التفاصيل */}
                     <View style={styles.cardFooter}>
                       <Text style={styles.viewDetailsText}>عرض التفاصيل الكاملة</Text>
                       <Icon name="chevron-left" type="material-community" size={18} color="#26CDD6" />
@@ -1562,7 +1542,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
-  // ── Ultrafiltration Stats Card ──
   ufStatsCard: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
@@ -1617,7 +1596,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  // ── Completed Appointment Cards ──
   completedApptCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
@@ -1735,7 +1713,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// ── styles لشاشة إدخال الوزن (lock) ──────────────────────────────────────
 const weightLockStyles = StyleSheet.create({
   overlay: {
     flex: 1,

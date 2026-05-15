@@ -1,6 +1,6 @@
 const translations = {
   ar: {
-    // ─── عام ───────────────────────────────────────────
+    
     appName: 'MediKidney',
     loading: 'جاري التحميل...',
     error: 'خطأ',
@@ -14,7 +14,6 @@ const translations = {
     success: 'تم ✅',
     failed: 'فشل',
 
-    // ─── صفحة تسجيل الدخول ─────────────────────────────
     login: {
       subtitle: 'سجل دخولك للوصول إلى MediKidney',
       username: 'اسم المستخدم',
@@ -26,7 +25,6 @@ const translations = {
       forgotPassword: 'نسيت كلمة المرور؟',
     },
 
-    // ─── صفحة الإعدادات ─────────────────────────────────
     settings: {
       title: 'الإعدادات العامة',
       changePassword: 'تغيير كلمة المرور',
@@ -45,26 +43,22 @@ const translations = {
       switchLang: 'English 🇬🇧',
     },
 
-    // ─── تاب بار المريض ─────────────────────────────────
     patientTabs: {
       profile: 'ملفي',
       settings: 'الإعدادات',
     },
 
-    // ─── تاب بار الممرض ─────────────────────────────────
     nurseTabs: {
       sessions: 'جلسات اليوم',
       search: 'بحث',
       settings: 'الإعدادات',
     },
 
-    // ─── تاب بار المغذي ─────────────────────────────────
     nutritionistTabs: {
       home: 'الرئيسية',
       settings: 'الإعدادات',
     },
 
-    // ─── ملف المريض ─────────────────────────────────────
     patientProfile: {
       headerSub: 'مشروع MediKidney الطبي',
       tabs: {
@@ -105,7 +99,6 @@ const translations = {
       weightBefore: 'وزنك قبل الجلسة',
     },
 
-    // ─── صفحة المواعيد ──────────────────────────────────
     appointments: {
       title: 'إدارة المواعيد',
       headerSub: 'مشروع MediKidney الطبي',
@@ -136,7 +129,6 @@ const translations = {
       dr: 'د.',
     },
 
-    // ─── بحث المريض ─────────────────────────────────────
     searchPatient: {
       title: 'البحث عن مريض',
       placeholder: 'ابحث عن طريق الاسم  ...',
@@ -144,7 +136,6 @@ const translations = {
       fetchError: 'حدث خطأ أثناء البحث',
     },
 
-    // ─── معلومات المريض ─────────────────────────────────
     patientInfo: {
       title: 'ملف المريض',
       loading: 'جاري تحميل البيانات...',
@@ -175,7 +166,6 @@ const translations = {
       nonSmoker: 'غير مدخن',
     },
 
-    // ─── تفاصيل جلسة المريض ──────────────────────────────
     patientSessionDetail: {
       title: 'تفاصيل الجلسة',
       loading: 'جاري تحميل بيانات الجلسة...',
@@ -217,7 +207,6 @@ const translations = {
       noSymptoms: 'لا توجد أعراض مسجلة في هذه الجلسة',
     },
 
-    // ─── شاشة جلسة المريض الحية ────────────────────────
     patientSessionScreen: {
       alertTitle: '⏰ تنبيه',
       alertMessage: 'مضت ساعتان على انتهاء الجلسة. يرجى إدخال وزنك بعد الجلسة.',
@@ -250,7 +239,6 @@ const translations = {
       returnBtn: 'العودة',
     },
 
-    // ─── إحصائيات الجلسات ─────────────────────────────
     patientSessionStats: {
       title: 'إحصائيات الجلسات',
       loading: 'جاري تحميل الإحصائيات...',
@@ -287,7 +275,6 @@ const translations = {
       lastSessions: 'آخر {n} جلسات',
     },
 
-    // ─── عرض المريض للطاقم ──────────────────────────────
     staffPatientView: {
       errorNoPatientId: 'لم يتم تمرير رقم المريض',
       errorUpdateProfile: 'فشل في تحديث بيانات الملف الشخصي',
@@ -344,7 +331,6 @@ const translations = {
       notSpecified: 'غير محدد',
     },
 
-    // ─── إعدادات جهاز الغسيل ─────────────────────────────
     deviceSettings: {
       title: 'إعدادات جهاز الغسيل',
       fields: {
@@ -369,7 +355,6 @@ const translations = {
       save: 'حفظ الإعدادات',
     },
 
-    // ─── الأعراض والشدة ────────────────────────────────
     symptomsDict: {
       CHEST_PAIN: "ألم في الصدر",
       LOW_BP: "انخفاض ضغط الدم",
@@ -389,7 +374,6 @@ const translations = {
       SEVERE: "شديد",
     },
 
-    // ─── تغيير كلمة المرور ──────────────────────────────
     changePassword: {
       title: 'تغيير كلمة المرور',
       oldPassword: 'كلمة المرور القديمة',
@@ -400,12 +384,10 @@ const translations = {
       failed: 'فشل تغيير كلمة المرور',
     },
 
-    // ─── عن التطبيق ─────────────────────────────────────
     aboutApp: {
       title: 'عن تطبيق MediKidney',
     },
 
-    // ─── أيام الأسبوع ────────────────────────────────────
     days: {
       SUNDAY: 'الأحد',
       MONDAY: 'الاثنين',
@@ -416,10 +398,8 @@ const translations = {
       SATURDAY: 'السبت',
     },
 
-    // ─── تنسيق الوقت ────────────────────────────────────
     time: { am: 'ص', pm: 'م' },
 
-    // ─── تغيير كلمة المرور الكاملة ─────────────────────
     changePasswordScreen: {
       header: 'أمن الحساب',
       subtitle: 'تأكد من اختيار كلمة مرور قوية لحماية بياناتك الطبية',
@@ -435,7 +415,6 @@ const translations = {
       failedMsg: 'حدث خطأ ما',
     },
 
-    // ─── الإشعارات ──────────────────────────────────────
     notifications: {
       title: 'الإشعارات',
       newSingular: 'إشعار جديد',
@@ -453,7 +432,6 @@ const translations = {
       markAllError: 'فشل تحديد الإشعارات كمقروءة',
     },
 
-    // ─── جلسة الغسيل — الخطوات ──────────────────────────
     sessionDetails: {
       steps: {
         vitals: 'العلامات الحيوية',
@@ -485,7 +463,6 @@ const translations = {
       previous: 'السابق',
     },
 
-    // ─── العلامات الحيوية ────────────────────────────────
     vitalSigns: {
       title: 'العلامات الحيوية',
       newReading: 'قراءة جديدة',
@@ -514,7 +491,6 @@ const translations = {
       dayAgo: 'منذ {n} يوم',
     },
 
-    // ─── الأدوية ─────────────────────────────────────────
     medications: {
       title: 'الأدوية',
       customMed: 'دواء مخصص',
@@ -541,7 +517,6 @@ const translations = {
       saveFailed: 'فشل في تسجيل الدواء',
     },
 
-    // ─── إعدادات الجهاز ──────────────────────────────────
     deviceSettings: {
       title: 'إعدادات جهاز الغسيل',
       currentSettings: 'الإعدادات الحالية',
@@ -566,7 +541,6 @@ const translations = {
       },
     },
 
-    // ─── الأعراض ─────────────────────────────────────────
     symptoms: {
       title: 'الأعراض الظاهرة الآن',
       nurseNotes: 'ملاحظات الممرض',
@@ -593,7 +567,6 @@ const translations = {
       },
     },
 
-    // ─── ملاحظات ─────────────────────────────────────────
     notes: {
       placeholder: 'اكتب ملاحظاتك هنا...',
       saveBtn: 'حفظ الملاحظة',
@@ -602,7 +575,6 @@ const translations = {
       saveFailed: 'فشل حفظ الملاحظة',
     },
 
-    // ─── اختيار المرضى (الممرض) ──────────────────────────
     selectPatient: {
       title: 'جلسات اليوم',
       dialysisStatus: 'حالة الغسيل',
@@ -623,9 +595,8 @@ const translations = {
     },
   },
 
-  // ═══════════════════════════════════════════════════════
   en: {
-    // ─── General ────────────────────────────────────────
+    
     appName: 'MediKidney',
     loading: 'Loading...',
     error: 'Error',
@@ -639,7 +610,6 @@ const translations = {
     success: 'Done ✅',
     failed: 'Failed',
 
-    // ─── Login Screen ───────────────────────────────────
     login: {
       subtitle: 'Sign in to access MediKidney',
       username: 'Username',
@@ -651,7 +621,6 @@ const translations = {
       forgotPassword: 'Forgot your password?',
     },
 
-    // ─── Settings Screen ────────────────────────────────
     settings: {
       title: 'General Settings',
       changePassword: 'Change Password',
@@ -670,26 +639,22 @@ const translations = {
       switchLang: 'العربية 🇸🇦',
     },
 
-    // ─── Patient Tab Bar ────────────────────────────────
     patientTabs: {
       profile: 'My Profile',
       settings: 'Settings',
     },
 
-    // ─── Nurse Tab Bar ──────────────────────────────────
     nurseTabs: {
       sessions: "Today's Sessions",
       search: 'Search',
       settings: 'Settings',
     },
 
-    // ─── Nutritionist Tab Bar ───────────────────────────
     nutritionistTabs: {
       home: 'Home',
       settings: 'Settings',
     },
 
-    // ─── Patient Profile ────────────────────────────────
     patientProfile: {
       headerSub: 'MediKidney Medical Project',
       tabs: {
@@ -730,7 +695,6 @@ const translations = {
       weightBefore: 'Your weight before the session',
     },
 
-    // ─── Appointments Screen ────────────────────────────
     appointments: {
       title: 'Appointment Management',
       headerSub: 'MediKidney Medical Project',
@@ -761,7 +725,6 @@ const translations = {
       dr: 'Dr.',
     },
 
-    // ─── Search Patient ─────────────────────────────────
     searchPatient: {
       title: 'Search for Patient',
       placeholder: 'Search by name or ID...',
@@ -769,7 +732,6 @@ const translations = {
       fetchError: 'An error occurred while searching',
     },
 
-    // ─── Patient Information ────────────────────────────
     patientInfo: {
       title: 'Patient Profile',
       loading: 'Loading data...',
@@ -800,7 +762,6 @@ const translations = {
       nonSmoker: 'Non-Smoker',
     },
 
-    // ─── Patient Session Detail ─────────────────────────
     patientSessionDetail: {
       title: 'Session Details',
       loading: 'Loading session data...',
@@ -842,7 +803,6 @@ const translations = {
       noSymptoms: 'No symptoms recorded for this session',
     },
 
-    // ─── Patient Session Live Screen ───────────────────
     patientSessionScreen: {
       alertTitle: '⏰ Alert',
       alertMessage: 'Two hours have passed since the session ended. Please enter your weight after the session.',
@@ -875,7 +835,6 @@ const translations = {
       returnBtn: 'Return',
     },
 
-    // ─── Patient Session Statistics ───────────────────
     patientSessionStats: {
       title: 'Session Statistics',
       loading: 'Loading statistics...',
@@ -912,7 +871,6 @@ const translations = {
       lastSessions: 'Last {n} sessions',
     },
 
-    // ─── Staff Patient View ─────────────────────────────
     staffPatientView: {
       errorNoPatientId: 'Patient ID not provided',
       errorUpdateProfile: 'Failed to update profile data',
@@ -969,7 +927,6 @@ const translations = {
       notSpecified: 'Not Specified',
     },
 
-    // ─── Dialysis Device Settings ────────────────────────
     deviceSettings: {
       title: 'Device Settings',
       fields: {
@@ -994,7 +951,6 @@ const translations = {
       save: 'Save Settings',
     },
 
-    // ─── Symptoms & Severity ────────────────────────────
     symptomsDict: {
       CHEST_PAIN: "Chest Pain",
       LOW_BP: "Low Blood Pressure",
@@ -1014,7 +970,6 @@ const translations = {
       SEVERE: "Severe",
     },
 
-    // ─── Change Password ────────────────────────────────
     changePassword: {
       title: 'Change Password',
       oldPassword: 'Old Password',
@@ -1025,12 +980,10 @@ const translations = {
       failed: 'Failed to change password',
     },
 
-    // ─── About App ──────────────────────────────────────
     aboutApp: {
       title: 'About MediKidney',
     },
 
-    // ─── Days of the week ───────────────────────────────
     days: {
       SUNDAY: 'Sunday',
       MONDAY: 'Monday',
@@ -1041,7 +994,6 @@ const translations = {
       SATURDAY: 'Saturday',
     },
 
-    // ─── Time format ────────────────────────────────────
     time: { am: 'AM', pm: 'PM' },
 
     changePasswordScreen: {

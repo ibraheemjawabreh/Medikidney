@@ -1,4 +1,4 @@
-// screens/dialysisSessions/SettingsTab.jsx
+
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -48,7 +48,7 @@ const SettingsTab = ({ route }) => {
       );
 
       const obj = data?.data || data;
-      // نتحقق من وجود بيانات (حتى لو لم نجد ID، طالما هناك قيم)
+      
       if (obj && (extractVal(obj, 'bloodFlowRate') !== '—')) {
         setSaved(obj);
         setForm({
@@ -56,7 +56,7 @@ const SettingsTab = ({ route }) => {
           dialysateFlow: extractVal(obj, 'dialysateFlow'),
           ultrafiltrationRate: extractVal(obj, 'ultrafiltrationRate'),
         });
-        return true; // يوجد إعدادات محفوظة لهذه الجلسة
+        return true; 
       } else {
         setSaved(null);
         return false;
@@ -122,14 +122,13 @@ const SettingsTab = ({ route }) => {
         setMonthlyAverageUF(count > 0 ? (totalUF / count).toFixed(2) : '0.00');
       }
 
-      // ─── حساب السوائل المسحوبة = الوزن الحالي - وزن بعد الجلسة السابقة ────
       const wBefore = currentSession.weight_before ?? currentSession.weight;
       const wAfterPrev = pastSessions.length > 0 ? pastSessions[0].weight_after : null;
       if (wBefore != null && wAfterPrev != null) {
         const diff = parseFloat(wBefore) - parseFloat(wAfterPrev);
         if (!isNaN(diff) && diff > 0) {
           const calculatedUF = diff.toFixed(1);
-          // نضع القيمة المحسوبة دائماً إذا لم تكن هناك إعدادات محفوظة مسبقاً
+          
           if (!hasSaved) {
             setForm(prev => ({ ...prev, ultrafiltrationRate: calculatedUF }));
           }
@@ -141,14 +140,13 @@ const SettingsTab = ({ route }) => {
   };
 
   useEffect(() => {
-    // تسلسل مضمون: جلب الإعدادات أولاً ← ثم بيانات الجلسة مع علم hasSaved
+    
     const init = async () => {
       const hasSaved = await fetchLatest();
       await fetchSessionData(hasSaved);
     };
     init();
   }, [sessionId]);
-
 
   const handleSave = async () => {
     const { bloodFlowRate, dialysateFlow, ultrafiltrationRate } = form;
@@ -168,7 +166,6 @@ const SettingsTab = ({ route }) => {
         payload
       );
 
-      // تحديث الحالة فوراً بالقيم المسجلة لضمان الظهور السريع
       const newObj = res.data?.data || res.data || payload;
       setSaved(newObj);
 

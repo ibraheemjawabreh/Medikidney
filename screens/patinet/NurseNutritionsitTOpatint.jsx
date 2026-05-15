@@ -41,7 +41,6 @@ const StaffPatientView = ({ route, navigation }) => {
   const isAdmin = userRole === "ADMIN";
   const canEditNutrition = isNutritionist || isAdmin;
 
-  // --- Functions (Fetch Data) ---
   const fetchMedicalTests = async (id) => {
     try {
       const response = await api.get(`/medical-tests?patientId=${id}`);
@@ -104,7 +103,7 @@ const StaffPatientView = ({ route, navigation }) => {
       if (storedUser) {
         try {
           const parsed = JSON.parse(storedUser);
-          // هذا السطر هو "السر"؛ يفحص كل الاحتمالات الممكنة لمكان وجود الرتبة في الـ JSON
+          
           finalRole = parsed.role || parsed.user?.role || parsed.data?.user?.role || storedRole || "GUEST";
         } catch (e) {
           finalRole = storedRole || "GUEST";
@@ -113,11 +112,9 @@ const StaffPatientView = ({ route, navigation }) => {
         finalRole = storedRole;
       }
 
-      // تنظيف النص وتحويله لكبير لضمان نجاح المقارنة userRole === "NUTRITIONIST"
       const roleUpper = String(finalRole).trim().toUpperCase();
       setUserRole(roleUpper);
 
-      // ... تكملة كود جلب بيانات المريض
       if (!patientId) {
         Alert.alert(t.patientProfile.errorTitle || "Error", t.staffPatientView.errorNoPatientId);
         navigation.goBack();
@@ -187,7 +184,6 @@ const StaffPatientView = ({ route, navigation }) => {
     }
   };
 
-  // --- Sub-Components ---
   const InfoItem = ({ label, value, icon, color = "#26CDD6" }) => (
     <View style={styles.infoBox}>
       <Icon name={icon} type="material-community" size={22} color={color} />
@@ -292,8 +288,6 @@ const StaffPatientView = ({ route, navigation }) => {
         </View>
       </View>
 
-
-
       <Tab value={tabIndex} onChange={setTabIndex} indicatorStyle={styles.tabIndicator} containerStyle={styles.tabBar} variant="default">
         <Tab.Item
           title={t.staffPatientView.tabs.nutrition}
@@ -321,9 +315,8 @@ const StaffPatientView = ({ route, navigation }) => {
         />
       </Tab>
 
-      {/* ── Tab Content ── */}
       <View style={{ flex: 1 }}>
-        {/* TAB 0: Nutrition */}
+        
         {tabIndex === 0 && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding} style={{ flex: 1 }}>
             <View style={styles.sectionHeaderRow}>
@@ -392,7 +385,6 @@ const StaffPatientView = ({ route, navigation }) => {
           </ScrollView>
         )}
 
-        {/* TAB 1: Sessions */}
         {tabIndex === 1 && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding} style={{ flex: 1 }}>
             <View style={styles.sectionHeaderRow}>
@@ -421,7 +413,7 @@ const StaffPatientView = ({ route, navigation }) => {
                   }}
                   activeOpacity={0.75}
                 >
-                  {/* Card Header */}
+                  
                   <View style={styles.sessionHeader}>
                     <View style={styles.sessionDateBox}>
                       <Icon name="calendar-range" type="material-community" size={15} color="#8296B1" />
@@ -436,7 +428,6 @@ const StaffPatientView = ({ route, navigation }) => {
                     </View>
                   </View>
 
-                  {/* Card Metrics */}
                   <View style={styles.sessionMetricsRow}>
                     <View style={styles.sessionMetricBox}>
                       <Icon name="scale" type="material-community" size={14} color="#26CDD6" />
@@ -482,12 +473,10 @@ const StaffPatientView = ({ route, navigation }) => {
                     </View>
                   </View>
 
-                  {/* تايمر للجلسة الجارية */}
                   {(session.status === 'IN_PROGRESS' || session.status === 'PENDING') && (
                     <SessionTimer session={session} />
                   )}
 
-                  {/* Tap hint */}
                   <View style={styles.sessionTapHint}>
                     <Icon name="chevron-left" type="material-community" size={16} color="#8296B1" />
                     <Text style={styles.sessionTapHintText}>{t.staffPatientView.tapDetailsHint}</Text>
@@ -498,8 +487,6 @@ const StaffPatientView = ({ route, navigation }) => {
           </ScrollView>
         )}
 
-
-        {/* TAB 2: Medical Tests */}
         {tabIndex === 2 && (
           <View style={{ flex: 1 }}>
             <View style={styles.subTabContainer}>
@@ -593,7 +580,6 @@ const StaffPatientView = ({ route, navigation }) => {
           </View>
         )}
 
-        {/* TAB 3: استشارات العيادة المكتملة */}
         {tabIndex === 3 && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding} style={{ flex: 1 }}>
             <Text style={styles.sectionHeading}>{t.appointments?.completedTitle || 'سجل استشارات العيادة'}</Text>
@@ -912,7 +898,6 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 11, fontWeight: 'bold' },
   downloadBtn: { backgroundColor: '#193B6B', borderRadius: 10, marginTop: 10, height: 48 },
 
-  // ── Completed Consultations Cards ──
   consultCard: {
     backgroundColor: '#fff',
     borderRadius: 16,

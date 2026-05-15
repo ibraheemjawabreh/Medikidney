@@ -1,4 +1,4 @@
-// screens/patinet/patientInformation.jsx
+
 
 import React, { useEffect, useState, useRef } from "react";
 import {
@@ -19,12 +19,10 @@ import { Icon, Divider } from "@rneui/base";
 import api from "../../services/api";
 import { useLanguage } from '../../context/LanguageContext';
 
-// تفعيل LayoutAnimation على Android
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-// ─── مكوّن سطر معلومة واحدة ──────────────────────────────────────────────────
 const InfoRow = ({ label, value, icon, color = "#26CDD6", isLast = false }) => (
   <View>
     <View style={styles.infoRow}>
@@ -42,7 +40,6 @@ const InfoRow = ({ label, value, icon, color = "#26CDD6", isLast = false }) => (
   </View>
 );
 
-// ─── مكوّن بطاقة قسم قابلة للطي ──────────────────────────────────────────────
 const SectionCard = ({ title, icon, accentColor = "#193B6B", children, defaultOpen = true }) => {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -77,7 +74,6 @@ const SectionCard = ({ title, icon, accentColor = "#193B6B", children, defaultOp
   );
 };
 
-// ─── شريط حالة (بادج) ─────────────────────────────────────────────────────────
 const StatusBadge = ({ value, trueLabel, falseLabel, trueColor, falseColor }) => {
   const isTrue = value === true || value === "true";
   return (
@@ -89,7 +85,6 @@ const StatusBadge = ({ value, trueLabel, falseLabel, trueColor, falseColor }) =>
   );
 };
 
-// ─── المكوّن الرئيسي ──────────────────────────────────────────────────────────
 const PatinetInfo = ({ route, navigation }) => {
   const { t } = useLanguage();
   const { patientId } = route.params || {};
@@ -124,14 +119,13 @@ const PatinetInfo = ({ route, navigation }) => {
     const fetchPatient = async () => {
       try {
         setLoading(true);
-        // إذا patientId موجود (عرض موظف) — جيب بيانات مريض محدد بالـ ID
-        // إذا لا (عرض المريض لنفسه) — جيب بيانات المريض الحالي
+
         const endpoint = patientId
           ? `/users/profile/patients/${patientId}`
           : `/users/profile`;
 
         const { data } = await api.get(endpoint);
-        // PatientProfile يرجع { patient: {...} }, StaffView يرجع البيانات مباشرة
+        
         setPatient(patientId ? data : data.patient);
       } catch (err) {
         console.log("Fetch error:", err.message);
@@ -144,7 +138,6 @@ const PatinetInfo = ({ route, navigation }) => {
     fetchPatient();
   }, [patientId]);
 
-  // ── شاشة التحميل ──
   if (loading) {
     return (
       <View style={styles.loadingBox}>
@@ -164,23 +157,20 @@ const PatinetInfo = ({ route, navigation }) => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
 
-      {/* ── الهيدر ── */}
       <Animated.View style={[styles.header, { transform: [{ scaleY: headerHeight }] }]}>
-        {/* زر رجوع */}
+        
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Icon name="arrow-right" type="material-community" size={26} color="#fff" />
         </TouchableOpacity>
 
-        {/* عنوان الصفحة */}
         <Text style={styles.headerPageTitle}>{t.patientInfo.title}</Text>
 
-        {/* الأفاتار + الاسم */}
         <View style={styles.avatarSection}>
           <View style={styles.avatarWrap}>
             <View style={styles.avatarCircle}>
               <Icon name="account" type="material-community" size={52} color="#cbd5e1" />
             </View>
-            {/* شارة فصيلة الدم */}
+            
             {patient.blood_type && (
               <View style={styles.bloodBadge}>
                 <Icon name="water-plus" type="material-community" size={10} color="#fff" />
@@ -198,7 +188,6 @@ const PatinetInfo = ({ route, navigation }) => {
           </View>
         </View>
 
-        {/* شريط إحصائيات سريعة */}
         <View style={styles.quickStats}>
           <View style={styles.qStat}>
             <Text style={styles.qStatVal}>#{patient.patient_id}</Text>
@@ -217,9 +206,6 @@ const PatinetInfo = ({ route, navigation }) => {
         </View>
       </Animated.View>
 
-
-
-      {/* ── المحتوى ── */}
       <Animated.ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -229,7 +215,7 @@ const PatinetInfo = ({ route, navigation }) => {
         )}
         scrollEventThrottle={16}
       >
-        {/* ── البيانات الشخصية ── */}
+        
         <SectionCard title={t.patientInfo.personalData} icon="account-details-outline" accentColor="#193B6B" defaultOpen={true}>
           <InfoRow label={t.patientInfo.fullName} value={patient.full_name} icon="account" color="#193B6B" />
           <InfoRow label={t.patientInfo.nationalId} value={patient.national_id} icon="card-account-details-outline" color="#26CDD6" />
@@ -254,14 +240,12 @@ const PatinetInfo = ({ route, navigation }) => {
           <InfoRow label={t.patientInfo.address} value={patient.address} icon="map-marker-outline" color="#26CDD6" isLast />
         </SectionCard>
 
-        {/* ── معلومات التواصل ── */}
         <SectionCard title={t.patientInfo.contactInfo} icon="phone-outline" accentColor="#26CDD6" defaultOpen={true}>
           <InfoRow label={t.patientInfo.phone} value={patient.phone_number || patient.phone} icon="phone" color="#26CDD6" />
           <InfoRow label={t.patientInfo.emergencyPhone} value={patient.emergency_contact} icon="phone-alert" color="#DE1A1C" />
           <InfoRow label={t.patientInfo.email} value={patient.email} icon="email-outline" color="#8296B1" isLast />
         </SectionCard>
 
-        {/* ── التاريخ الطبي ── */}
         <SectionCard title={t.patientInfo.medicalHistory} icon="medical-bag" accentColor="#DE1A1C" defaultOpen={true}>
           <InfoRow label={t.patientInfo.bloodType} value={patient.blood_type} icon="water-plus" color="#DE1A1C" />
           <InfoRow label={t.patientInfo.chronicDiseases} value={patient.chronic_diseases} icon="heart-pulse" color="#A32D2F" />
@@ -269,7 +253,6 @@ const PatinetInfo = ({ route, navigation }) => {
           <InfoRow label={t.patientInfo.medicalNotes} value={patient.medical_history_notes} icon="file-document-outline" color="#8296B1" />
           <InfoRow label={t.patientInfo.generalNotes} value={patient.notes} icon="note-text-outline" color="#8296B1" />
 
-          {/* حالة التدخين — تُعرض كبادج */}
           <View style={styles.infoRow}>
             <View style={[styles.infoIconBox, { backgroundColor: (isSmoker ? "#DE1A1C" : "#26CDD6") + "18" }]}>
               <Icon name="smoking" type="material-community" size={19} color={isSmoker ? "#DE1A1C" : "#26CDD6"} />
@@ -295,13 +278,11 @@ const PatinetInfo = ({ route, navigation }) => {
 
 export default PatinetInfo;
 
-// ─── الستايلات ────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F1FCFD" },
   loadingBox: { flex: 1, justifyContent: "center", alignItems: "center", gap: 14, backgroundColor: "#f1f5f9" },
   loadingText: { color: "#8296B1", fontSize: 14, fontWeight: "600" },
 
-  // ── الهيدر ──
   header: {
     backgroundColor: "#193B6B",
     paddingTop: 50,
@@ -331,7 +312,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
 
-  // الأفاتار
   avatarSection: { flexDirection: "row-reverse", alignItems: "center", marginBottom: 20 },
   avatarWrap: { position: "relative", marginLeft: 16 },
   avatarCircle: {
@@ -364,7 +344,6 @@ const styles = StyleSheet.create({
   headerName: { color: "#fff", fontSize: 20, fontWeight: "900", textAlign: "right" },
   headerSub: { color: "#BCEFF3", fontSize: 13, marginTop: 4, textAlign: "right" },
 
-  // إحصائيات
   quickStats: {
     flexDirection: "row-reverse",
     backgroundColor: "rgba(255,255,255,0.08)",
@@ -379,12 +358,8 @@ const styles = StyleSheet.create({
   qStatLabel: { color: "#8296B1", fontSize: 10, fontWeight: "600" },
   qDivider: { width: 1, height: 32, backgroundColor: "rgba(255,255,255,0.15)" },
 
-
-
-  // ── المحتوى ──
   scrollContent: { padding: 16, paddingBottom: 40 },
 
-  // بطاقة قسم
   sectionCard: {
     backgroundColor: "#fff",
     borderRadius: 20,
@@ -415,7 +390,6 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 15, fontWeight: "800" },
   sectionBody: { paddingHorizontal: 16, paddingVertical: 12 },
 
-  // سطر معلومة
   infoRow: {
     flexDirection: "row-reverse",
     alignItems: "center",
@@ -434,7 +408,6 @@ const styles = StyleSheet.create({
   infoValue: { fontSize: 15, color: "#193B6B", fontWeight: "700", textAlign: "right", lineHeight: 20 },
   rowDivider: { marginVertical: 2, backgroundColor: "#f8fafc", marginHorizontal: -4 },
 
-  // بادج
   badge: { alignSelf: "flex-end", marginTop: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
   badgeText: { fontSize: 13, fontWeight: "800" },
 });

@@ -36,8 +36,6 @@ import PatientSessionScreen from '../screens/patinet/PatientSessionScreen'
 import NotificationsScreen from '../screens/notifications/NotificationsScreen'
 import ConsultationDetails from '../screens/patinet/ConsultationDetails'
 
-
-
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
@@ -70,17 +68,13 @@ const AppNavigator = () => {
       <Stack.Screen name='SettingsTab' component={SettingsTab} />
       <Stack.Screen name='SymptomsTab' component={SymptomsTab} />
       <Stack.Screen name='VitalSignsTab' component={VitalSignsTab} />
-      {/* <Stack.Screen name='NurseStack' component={NurseStack} />  */}
+      
       <Stack.Screen name='PatientSessionStatistics' component={PatientSessionStatistics} />
       <Stack.Screen name='PatinetInfo' component={PatinetInfo} />
       <Stack.Screen name='PatientSessionDetailView' component={PatientSessionDetailView} />
       <Stack.Screen name='PatientSessionScreen' component={PatientSessionScreen} options={{ gestureEnabled: false }} />
       <Stack.Screen name='Notifications' component={NotificationsScreen} />
       <Stack.Screen name='ConsultationDetails' component={ConsultationDetails} options={{ headerShown: false }} />
-
-
-
-
 
     </Stack.Navigator>
   );

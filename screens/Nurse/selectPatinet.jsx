@@ -18,16 +18,13 @@ const SelectPatient = () => {
   const [shifts, setShifts] = useState([]);
   const [activeShift, setActiveShift] = useState(1);
 
-  // 1. selectedIds: ما يختاره الممرض الآن (UI فقط)
   const [selectedIds, setSelectedIds] = useState([]);
 
-  // 2. confirmedIds: ما هو محجوز فعلياً للممرض في قاعدة البيانات
   const [confirmedIds, setConfirmedIds] = useState([]);
 
   const [myNurseId, setMyNurseId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // ─── جلب البيانات وبناء الحالة ─────────────────────────────
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -43,14 +40,13 @@ const SelectPatient = () => {
       if (scheduleRes.data.shifts?.length > 0) {
         setActiveShift(scheduleRes.data.shifts[0].shiftNumber);
 
-        // استخراج المرضى المحجوزين فعلياً لهذا الممرض من الـ API
         const assignedToMe = scheduleRes.data.shifts
           .flatMap(s => s.patients)
           .filter(p => p.assignedNurseId === nurseId)
           .map(p => p.patientId);
 
-        setConfirmedIds(assignedToMe); // هؤلاء فقط من يظهر عددهم في "حالة الغسيل"
-        setSelectedIds(assignedToMe); // نجعلهم محددين تلقائياً في القائمة
+        setConfirmedIds(assignedToMe); 
+        setSelectedIds(assignedToMe); 
       }
 
     } catch (e) {
@@ -62,9 +58,8 @@ const SelectPatient = () => {
 
   useFocusEffect(useCallback(() => { void fetchData(); }, []));
 
-  // ─── اختيار مريض (تحديد جديد فقط) ──────────────────────────
   const togglePatient = (patient) => {
-    // إذا كان المريض مخصصاً لأي شخص (أنا أو غيري) -> لا يمكن التعديل هنا
+    
     if (patient.assignedNurseId !== null) {
       const msg = patient.assignedNurseId === myNurseId
         ? t.selectPatient.alreadyAdded
@@ -83,13 +78,12 @@ const SelectPatient = () => {
     );
   };
 
-  // ─── الضغط على متابعة (تأكيد الإضافات الجديدة فقط) ───────────
   const handleProceed = async () => {
-    // تصفية المرضى الذين لم يكونوا مؤكدين سابقاً (إضافات جديدة)
+    
     const newOnly = selectedIds.filter(id => !confirmedIds.includes(id));
 
     if (!newOnly.length) {
-      // إذا لم يضف أي مريض جديد، فقط ننتقل للشاشة التالية
+      
       return navigation.navigate("PatientState", { selectedPatientIds: selectedIds });
     }
 
@@ -110,7 +104,6 @@ const SelectPatient = () => {
         }
       }
 
-      // بعد النجاح، نحدث قائمة "المؤكدين"
       setConfirmedIds([...selectedIds]);
       navigation.navigate("PatientState", { selectedPatientIds: selectedIds });
 
@@ -121,7 +114,6 @@ const SelectPatient = () => {
     }
   };
 
-  // ─── زر حالة الغسيل ─────────────────────────────────────
   const goToStatus = () => {
     if (confirmedIds.length === 0) {
       return Alert.alert(t.error, t.selectPatient.confirmFirst);
@@ -131,7 +123,6 @@ const SelectPatient = () => {
 
   const currentShift = shifts.find(s => s.shiftNumber === activeShift);
 
-  // ─── فلترة المرضى بناءً على البحث ────────────────────────────
   const filteredPatients = searchQuery.trim()
     ? (currentShift?.patients ?? []).filter(p =>
         p.patientName?.toLowerCase().includes(searchQuery.trim().toLowerCase())
@@ -144,7 +135,6 @@ const SelectPatient = () => {
         <View style={styles.headerTop}>
           <Text style={styles.headerTitle}>{t.selectPatient.title}</Text>
 
-          {/* زر حالة الغسيل - يعتمد فقط على confirmedIds */}
           <Pressable
             onPress={goToStatus}
             style={[
@@ -183,7 +173,6 @@ const SelectPatient = () => {
           ))}
         </ScrollView>
 
-        {/* ── مربع البحث ── */}
         <View style={styles.searchContainer}>
           <MaterialCommunityIcons name="magnify" size={20} color="#8296B1" style={styles.searchIcon} />
           <TextInput

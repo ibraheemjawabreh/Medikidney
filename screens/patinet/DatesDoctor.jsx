@@ -9,7 +9,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useLanguage } from "../../context/LanguageContext";
 
-// ─── ثوابت الألوان ───────────────────────────────────────────────
 const C = {
   navy:    "#193B6B",
   teal:    "#26CDD6",
@@ -25,7 +24,6 @@ const C = {
   darkText:"#1A2E45",
 };
 
-// ─── مكوّن StepIndicator ─────────────────────────────────────────
 const StepIndicator = ({ currentStep }) => {
   const steps = [
     { icon: "doctor", label: "الطبيب" },
@@ -87,7 +85,6 @@ const si = StyleSheet.create({
   lineDone:     { backgroundColor: C.navy },
 });
 
-// ─── مكوّن DoctorCard ────────────────────────────────────────────
 const DoctorCard = ({ doctor, selected, onPress, t }) => (
   <Pressable
     onPress={onPress}
@@ -125,7 +122,6 @@ const dc = StyleSheet.create({
   spec:         { fontSize: 12, color: C.muted, marginTop: 2, textAlign: "right" },
 });
 
-// ─── مكوّن DayCard ───────────────────────────────────────────────
 const DayCard = ({ schedule, selected, onPress, formatTime, t }) => {
   const DAY_AR = {
     SUNDAY: "الأحد", MONDAY: "الاثنين", TUESDAY: "الثلاثاء",
@@ -151,16 +147,14 @@ const DayCard = ({ schedule, selected, onPress, formatTime, t }) => {
 
   return (
     <Pressable onPress={onPress} style={[dy.card, selected && dy.cardSelected]}>
-      {/* العمود الأيسر — رقم اليوم */}
+      
       <View style={[dy.dateBox, selected && dy.dateBoxSelected]}>
         <Text style={[dy.dayNum, selected && dy.dayNumSelected]}>{dayNum}</Text>
         <Text style={[dy.monthName, selected && dy.monthNameSelected]}>{monthName}</Text>
       </View>
 
-      {/* الفاصل */}
       <View style={[dy.divider, selected && dy.dividerSelected]} />
 
-      {/* العمود الأيمن — اسم اليوم والوقت */}
       <View style={dy.infoCol}>
         <View style={dy.nameRow}>
           <Text style={[dy.dayLabel, selected && dy.textW]}>{dayLabel}</Text>
@@ -175,7 +169,6 @@ const DayCard = ({ schedule, selected, onPress, formatTime, t }) => {
         </Text>
       </View>
 
-      {/* أيقونة الاختيار */}
       {selected && (
         <MaterialCommunityIcons name="check-circle" size={18} color={C.white} style={{ marginRight: 4 }} />
       )}
@@ -228,7 +221,6 @@ const dy = StyleSheet.create({
   todayTextSelected: { color: C.white },
 });
 
-// ─── مكوّن TimeSlot ──────────────────────────────────────────────
 const TimeSlot = ({ slot, selected, onPress, formatTime, t }) => (
   <Pressable
     disabled={slot.booked}
@@ -259,7 +251,6 @@ const ts = StyleSheet.create({
   bookedTag:   { fontSize: 9, color: C.red, marginRight: "auto" },
 });
 
-// ─── مكوّن SummaryRow ────────────────────────────────────────────
 const SummaryRow = ({ icon, label, value }) => (
   <View style={sr.row}>
     <Text style={sr.value}>{value}</Text>
@@ -277,12 +268,10 @@ const sr = StyleSheet.create({
   value: { fontSize: 14, fontWeight: "600", color: C.navy, textAlign: "right", flex: 1, marginRight: 16 },
 });
 
-// ─── الشاشة الرئيسية ─────────────────────────────────────────────
 const AppointmentScreen = () => {
   const navigation = useNavigation();
   const { t } = useLanguage();
 
-  // State
   const [step, setStep]                 = useState(0);
   const [doctors, setDoctors]           = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -301,7 +290,6 @@ const AppointmentScreen = () => {
   const slideAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim  = useRef(new Animated.Value(0)).current;
 
-  // ── Helpers ──────────────────────────────────────────────────────
   const formatDate = (date) => date.toISOString().split("T")[0];
 
   const getNextDate = (dayName) => {
@@ -347,7 +335,6 @@ const AppointmentScreen = () => {
     animateStep();
   };
 
-  // ── Data loading ─────────────────────────────────────────────────
   const initData = async () => {
     try {
       const [docsRes, myApptsRes] = await Promise.all([
@@ -418,10 +405,8 @@ const AppointmentScreen = () => {
         ...bookedSlots.map(tm =>   ({ time: tm, booked: true  })),
       ].sort((a, b) => a.time.localeCompare(b.time));
 
-      // فلترة المواعيد اللي فاتت إذا كان اليوم هو نفس اليوم
       const filtered = filterPastSlots(all, date);
 
-      // إذا كان اليوم نفسه وكل المواعيد المتاحة راحت
       if (isToday(date) && filtered.filter(s => !s.booked).length === 0 && all.filter(s => !s.booked).length > 0) {
         setSlots([]);
         setErrorMsg("انتهت مواعيد اليوم، يرجى اختيار يوم آخر أو المراجعة غداً.");
@@ -498,7 +483,7 @@ const AppointmentScreen = () => {
           text: t.appointments.bookSuccessBtn,
           onPress: () => {
             initData();
-            // Reset all
+            
             setStep(0);
             setSelectedDoctor(null);
             setSchedules([]);
@@ -520,7 +505,6 @@ const AppointmentScreen = () => {
     }
   };
 
-  // ── الشاشات ───────────────────────────────────────────────────────
   const DAY_AR = {
     SUNDAY: "الأحد", MONDAY: "الاثنين", TUESDAY: "الثلاثاء",
     WEDNESDAY: "الأربعاء", THURSDAY: "الخميس", FRIDAY: "الجمعة", SATURDAY: "السبت"
@@ -546,7 +530,7 @@ const AppointmentScreen = () => {
 
   const renderStep1 = () => (
     <View>
-      {/* Doctor summary pill */}
+      
       <Pressable onPress={() => goToStep(0)} style={s.summaryPill}>
         <MaterialCommunityIcons name="pencil-outline" size={15} color={C.teal} />
         <Text style={s.summaryPillText}>د. {selectedDoctor?.full_name}</Text>
@@ -572,7 +556,7 @@ const AppointmentScreen = () => {
 
   const renderStep2 = () => (
     <View>
-      {/* Breadcrumbs */}
+      
       <View style={s.breadRow}>
         <Pressable onPress={() => goToStep(1)} style={s.summaryPill}>
           <MaterialCommunityIcons name="pencil-outline" size={14} color={C.teal} />
@@ -662,7 +646,6 @@ const AppointmentScreen = () => {
     );
   };
 
-  // ── Loading screen ───────────────────────────────────────────────
   if (isWakingUp) return (
     <View style={s.center}>
       <ActivityIndicator size="large" color={C.teal} />
@@ -674,7 +657,6 @@ const AppointmentScreen = () => {
     <View style={s.container}>
       <StatusBar barStyle="light-content" backgroundColor={C.navy} />
 
-      {/* Header */}
       <View style={s.header}>
         <Pressable onPress={() => navigation.goBack()} style={s.backBtn}>
           <MaterialCommunityIcons name="arrow-right" size={24} color={C.white} />
@@ -688,7 +670,6 @@ const AppointmentScreen = () => {
 
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
 
-        {/* مواعيدي الحالية */}
         {myAppointments.length > 0 && (
           <View style={s.myApptsSection}>
             <Text style={s.myApptsTitle}>
@@ -716,10 +697,8 @@ const AppointmentScreen = () => {
           </View>
         )}
 
-        {/* Step indicator */}
         <StepIndicator currentStep={step} />
 
-        {/* Step content */}
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
           {step === 0 && renderStep0()}
           {step === 1 && renderStep1()}
@@ -754,7 +733,6 @@ const s = StyleSheet.create({
   scroll:       { padding: 16, paddingBottom: 80 },
   sectionTitle: { fontSize: 16, fontWeight: "700", color: C.navy, textAlign: "right", marginBottom: 14, marginTop: 4 },
 
-  // My appointments
   myApptsSection: { marginBottom: 6 },
   myApptsTitle:   { fontSize: 14, fontWeight: "700", color: C.navy, textAlign: "right", marginBottom: 10 },
   apptCard: {
@@ -776,15 +754,12 @@ const s = StyleSheet.create({
   statusChip:   { marginTop: 6, backgroundColor: C.tealBg, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 },
   statusChipText:{ fontSize: 11, color: C.teal, fontWeight: "600" },
 
-  // Breadcrumb / summary pill
   breadRow:     { flexDirection: "row", justifyContent: "flex-end", gap: 8, marginBottom: 16, flexWrap: "wrap" },
   summaryPill:  { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: C.tealBg, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 7, alignSelf: "flex-end", marginBottom: 16 },
   summaryPillText: { fontSize: 13, color: C.navy, fontWeight: "600" },
 
-  // Slots
   slotsGrid:    { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
 
-  // Step 3 — confirm
   confirmCard:  { backgroundColor: C.white, borderRadius: 18, padding: 18, marginBottom: 20, borderWidth: 1, borderColor: C.border },
   confirmTitle: { fontSize: 15, fontWeight: "700", color: C.navy, textAlign: "right", marginBottom: 10 },
 
@@ -811,7 +786,6 @@ const s = StyleSheet.create({
   },
   confirmBtnText: { color: C.white, fontSize: 16, fontWeight: "700" },
 
-  // Empty / error
   emptyBox:   { alignItems: "center", paddingVertical: 40, gap: 12 },
   emptyText:  { color: C.muted, fontSize: 14 },
   errorBox:   { backgroundColor: C.redBg, borderRadius: 12, padding: 16, alignItems: "center" },

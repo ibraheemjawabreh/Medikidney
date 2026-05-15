@@ -1,5 +1,4 @@
-// screens/patinet/PatientSessionScreen.jsx
-// شاشة المريض أثناء الجلسة: تايمر حي + lock screen لإدخال الوزن بعد الجلسة
+
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
@@ -13,7 +12,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
 
-// ── Validation ────────────────────────────────────────────────────────────────
 const validateWeight = (val, t) => {
   if (!val || val.trim() === '') return t.patientSessionScreen.weightRequired;
   const num = parseFloat(val);
@@ -22,7 +20,6 @@ const validateWeight = (val, t) => {
   return null;
 };
 
-// ── تنسيق الوقت (ساعات:دقائق:ثوانٍ) ─────────────────────────────────────────
 const formatDuration = (seconds) => {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
@@ -34,27 +31,22 @@ const formatDuration = (seconds) => {
   ].filter(Boolean).join(':');
 };
 
-// ── المكوّن الرئيسي ───────────────────────────────────────────────────────────
 const PatientSessionScreen = ({ route, navigation }) => {
   const { t } = useLanguage();
   const { sessionId, patientName, startTime } = route.params || {};
 
-  // ── حالة الجلسة ──
   const [sessionData, setSessionData] = useState(null);
-  const [phase, setPhase] = useState('IN_SESSION'); // IN_SESSION | WEIGHT_INPUT | DONE
+  const [phase, setPhase] = useState('IN_SESSION'); 
   const [elapsed, setElapsed] = useState(0);
 
-  // ── وزن بعد الجلسة ──
   const [weightAfter, setWeightAfter] = useState('');
   const [weightError, setWeightError] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [weightBefore, setWeightBefore] = useState(null);
 
-  // ── Timer ──
   const timerRef = useRef(null);
   const reminderRef = useRef(null);
 
-  // ── جلب بيانات الجلسة ──────────────────────────────────────────────────────
   const fetchSession = useCallback(async () => {
     if (!sessionId) return;
     try {
@@ -62,15 +54,13 @@ const PatientSessionScreen = ({ route, navigation }) => {
       setSessionData(data);
       if (data?.weight_before != null) setWeightBefore(data.weight_before);
 
-      // إذا كانت الجلسة منتهية بالفعل
       if (data?.status === 'COMPLETED') {
-        // التحقق: هل الممرض أدخل الوزن بعد الجلسة؟
+        
         if (data?.weight_after != null) {
-          // ✅ الممرض أدخل الوزن → المريض لا يحتاج يدخل شي
+          
           setPhase('DONE');
         } else {
-          // ⚠️ الممرض تخطى الوزن → المريض مُلزم بإدخال الوزن
-          // نتحقق أولاً إذا المريض سبق وأدخل الوزن
+
           const alreadyEntered = await AsyncStorage.getItem(`weight_entered_${sessionId}`);
           if (alreadyEntered) {
             setPhase('DONE');
@@ -86,14 +76,12 @@ const PatientSessionScreen = ({ route, navigation }) => {
 
   useFocusEffect(useCallback(() => { fetchSession(); }, [fetchSession]));
 
-  // ── التايمر ────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== 'IN_SESSION') {
       clearInterval(timerRef.current);
       return;
     }
 
-    // حساب الوقت المنقضي من وقت بداية الجلسة
     const startTimestamp =
       startTime && !Number.isNaN(new Date(startTime).getTime())
         ? new Date(startTime).getTime()
@@ -112,11 +100,9 @@ const PatientSessionScreen = ({ route, navigation }) => {
     return () => clearInterval(timerRef.current);
   }, [phase, sessionData?.created_at, startTime]);
 
-  // ── تنبيه الوزن بعد ساعتين ────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== 'IN_SESSION') return;
 
-    // تذكير بعد ساعتين (7200 ثانية)
     reminderRef.current = setTimeout(() => {
       if (phase === 'IN_SESSION') {
         Vibration.vibrate([500, 500, 500]);
@@ -131,26 +117,23 @@ const PatientSessionScreen = ({ route, navigation }) => {
     return () => clearTimeout(reminderRef.current);
   }, [phase]);
 
-  // ── منع الرجوع للخلف أثناء إدخال الوزن (lock) ────────────────────────────
   useEffect(() => {
     if (phase !== 'WEIGHT_INPUT') return;
 
     const handler = BackHandler.addEventListener('hardwareBackPress', () => {
       Alert.alert(t.patientSessionScreen.lockAlertTitle, t.patientSessionScreen.lockAlertMessage);
-      return true; // يمنع الرجوع
+      return true; 
     });
 
     return () => handler.remove();
   }, [phase]);
 
-  // ── انتهاء الجلسة → الانتقال لإدخال الوزن ──────────────────────────────
   const handleSessionEnd = () => {
     clearInterval(timerRef.current);
     setPhase('WEIGHT_INPUT');
     Vibration.vibrate(300);
   };
 
-  // ── حفظ الوزن بعد الجلسة ──────────────────────────────────────────────────
   const handleSaveWeight = async () => {
     const err = validateWeight(weightAfter, t);
     if (err) { setWeightError(err); return; }
@@ -159,17 +142,15 @@ const PatientSessionScreen = ({ route, navigation }) => {
     try {
       setIsSaving(true);
 
-      // تحديد البيانات حسب حالة الجلسة
       const body = {};
       if (sessionData?.status !== 'COMPLETED') {
-        // المريض ينهي الجلسة بنفسه (الممرض ما أنهاها)
+        
         body.status = 'COMPLETED';
       }
       body.weightAfter = parseFloat(weightAfter);
 
       await api.patch(`/dialysis-sessions/${sessionId}/status`, body);
 
-      // حفظ في AsyncStorage أن المريض أدخل وزنه
       await AsyncStorage.setItem(`weight_entered_${sessionId}`, '1');
 
       setPhase('DONE');
@@ -182,16 +163,10 @@ const PatientSessionScreen = ({ route, navigation }) => {
     }
   };
 
-  // ── انتهاء كل شيء ──────────────────────────────────────────────────────────
   const handleDone = () => {
     navigation.goBack();
   };
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // RENDER
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  // ── مرحلة انتهاء الجلسة (done) ──────────────────────────────────────────
   if (phase === 'DONE') {
     return (
       <View style={styles.center}>
@@ -223,13 +198,11 @@ const PatientSessionScreen = ({ route, navigation }) => {
     );
   }
 
-  // ── مرحلة إدخال الوزن (lock screen) ─────────────────────────────────────
   if (phase === 'WEIGHT_INPUT') {
     return (
       <View style={styles.lockScreen}>
         <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
 
-        {/* الرأس */}
         <View style={styles.lockHeader}>
           <MaterialCommunityIcons name="lock" size={32} color="#A32D2F" />
           <Text style={styles.lockTitle}>{t.patientSessionScreen.lockTitle}</Text>
@@ -238,7 +211,6 @@ const PatientSessionScreen = ({ route, navigation }) => {
           </Text>
         </View>
 
-        {/* معلومات الوزن قبل */}
         {weightBefore != null && (
           <View style={styles.lockWeightBefore}>
             <Text style={styles.lockWeightBeforeLabel}>{t.patientSessionScreen.weightBeforeLabel}</Text>
@@ -246,7 +218,6 @@ const PatientSessionScreen = ({ route, navigation }) => {
           </View>
         )}
 
-        {/* مربع الإدخال */}
         <View style={styles.lockInputCard}>
           <Text style={styles.lockInputTitle}>{t.patientSessionScreen.weightNowLabel}</Text>
           <View style={[styles.lockInputRow, weightError && styles.lockInputErr]}>
@@ -269,7 +240,6 @@ const PatientSessionScreen = ({ route, navigation }) => {
             <Text style={styles.lockErrText}>{weightError}</Text>
           )}
 
-          {/* حساب الفرق التقريبي */}
           {weightBefore != null && weightAfter && !isNaN(parseFloat(weightAfter)) && (
             <View style={styles.lockDiff}>
               <Text style={styles.lockDiffLabel}>{t.patientSessionScreen.fluidRemoved}</Text>
@@ -297,18 +267,15 @@ const PatientSessionScreen = ({ route, navigation }) => {
     );
   }
 
-  // ── مرحلة الجلسة الجارية ─────────────────────────────────────────────────
   return (
     <View style={styles.sessionScreen}>
       <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
 
-      {/* Header */}
       <View style={styles.sessionHeader}>
         <Text style={styles.sessionPatient}>{patientName || t.patientSessionScreen.sessionTitle}</Text>
         <Text style={styles.sessionSub}>{t.patientSessionScreen.sessionSub}</Text>
       </View>
 
-      {/* التايمر */}
       <View style={styles.timerCard}>
         <View style={styles.timerCircle}>
           <MaterialCommunityIcons name="water-sync" size={36} color="#26CDD6" style={{ marginBottom: 8 }} />
@@ -316,7 +283,6 @@ const PatientSessionScreen = ({ route, navigation }) => {
           <Text style={styles.timerLabel}>{t.patientSessionScreen.sessionTimeLabel}</Text>
         </View>
 
-        {/* نبضة متحركة */}
         <View style={styles.pulseRing} />
       </View>
 
@@ -336,7 +302,6 @@ const PatientSessionScreen = ({ route, navigation }) => {
         </Text>
       </View>
 
-      {/* زر العودة */}
       <View style={styles.sessionFooter}>
         <Pressable style={[styles.endBtn, { backgroundColor: '#193B6B' }]} onPress={() => navigation.goBack()}>
           <MaterialCommunityIcons name="arrow-right" size={24} color="#fff" />
@@ -350,7 +315,7 @@ const PatientSessionScreen = ({ route, navigation }) => {
 export default PatientSessionScreen;
 
 const styles = StyleSheet.create({
-  // ── IN_SESSION ──────────────────────────────────────────────────────────────
+  
   sessionScreen: { flex: 1, backgroundColor: '#F1FCFD' },
   sessionHeader: {
     paddingTop: 60,
@@ -434,7 +399,6 @@ const styles = StyleSheet.create({
   },
   endBtnText: { color: '#fff', fontSize: 18, fontWeight: '800' },
 
-  // ── WEIGHT_INPUT (lock screen) ───────────────────────────────────────────────
   lockScreen: { flex: 1, backgroundColor: '#193B6B', padding: 24 },
   lockHeader: { alignItems: 'center', paddingTop: 60, marginBottom: 30 },
   lockTitle: { fontSize: 22, fontWeight: '900', color: '#fff', marginTop: 16, textAlign: 'center' },
@@ -500,7 +464,6 @@ const styles = StyleSheet.create({
   },
   lockSaveBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
 
-  // ── DONE ──────────────────────────────────────────────────────────────────────
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#E9FAFB', padding: 24 },
   doneCard: { backgroundColor: '#fff', borderRadius: 24, padding: 30, alignItems: 'center', elevation: 6, width: '100%' },
   doneTitle: { fontSize: 24, fontWeight: '900', color: '#26CDD6', marginTop: 16, textAlign: 'center' },

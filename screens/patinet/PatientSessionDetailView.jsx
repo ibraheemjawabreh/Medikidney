@@ -13,15 +13,12 @@ import api from "../../services/api";
 import { useFocusEffect } from "@react-navigation/native";
 import { useLanguage } from '../../context/LanguageContext';
 
-// Removed hardcoded translations, now using useLanguage()
-
 const severityColors = {
   LOW: { bg: "#E9FAFB", text: "#193B6B" },
   MEDIUM: { bg: "#FFF7E6", text: "#A32D2F" },
   HIGH: { bg: "#fee2e2", text: "#991b1b" },
 };
 
-// ── Helper Components ─────────────────────────────────────────────────────────
 const SectionHeader = ({ icon, title, color = "#193B6B" }) => (
   <View style={styles.sectionHeader}>
     <View style={[styles.sectionIconCircle, { backgroundColor: color + "18" }]}>
@@ -46,7 +43,6 @@ const MetricChip = ({ label, value, icon, color }) => (
   </View>
 );
 
-// ── Main Screen ───────────────────────────────────────────────────────────────
 const PatientSessionDetailView = ({ route, navigation }) => {
   const { t } = useLanguage();
   const { sessionId, patientId } = route.params || {};
@@ -54,7 +50,6 @@ const PatientSessionDetailView = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ─── التحقق من المعاملات المطلوبة ───────────────────────────────
   if (!sessionId || !patientId) {
     return (
       <View style={styles.center}>
@@ -75,9 +70,6 @@ const PatientSessionDetailView = ({ route, navigation }) => {
       setLoading(true);
       setError(null);
 
-      // ── Strategy: always try the comprehensive last-session endpoint first.
-      // If session_id matches → use it (has everything).
-      // Otherwise → make parallel calls to all sub-endpoints.
       let sessionData = null;
       let vitalSignsData = [];
       let dialysisSettingsData = [];
@@ -86,14 +78,12 @@ const PatientSessionDetailView = ({ route, navigation }) => {
       let nurseData = null;
       let scheduleData = null;
 
-      // 1. Try comprehensive last-session endpoint
       try {
         const lastRes = await api.get(`/dialysis-sessions/patient/${patientId}/last-session`);
         console.log('[PatientSessionDetailView] last-session response:', lastRes.data);
-        // استخدام == بدل === لتجنب فشل المقارنة بين number و string
-        // eslint-disable-next-line eqeqeq
+
         if (lastRes.data?.session?.session_id == sessionId) {
-          // Perfect match — use all data from the comprehensive endpoint
+          
           const d = lastRes.data;
           console.log('[PatientSessionDetailView] Using last-session data');
           setData({
@@ -110,11 +100,10 @@ const PatientSessionDetailView = ({ route, navigation }) => {
           return;
         }
       } catch (e) {
-        // last-session failed or mismatched — fall through to parallel fetches
+        
         console.log('[PatientSessionDetailView] last-session failed or mismatched, trying individual endpoints:', e.message);
       }
 
-      // 2. Fetch all data in parallel from individual endpoints
       const [
         basicRes,
         vitalsRes,
@@ -129,7 +118,6 @@ const PatientSessionDetailView = ({ route, navigation }) => {
         api.get(`/dialysis-sessions/${sessionId}/details/medications`).catch(() => ({ data: [] })),
       ]);
 
-      // Basic session info
       if (basicRes.status === "fulfilled") {
         const s = basicRes.value.data;
         console.log('[PatientSessionDetailView] basicRes data:', JSON.stringify(s).substring(0, 200));
@@ -138,14 +126,14 @@ const PatientSessionDetailView = ({ route, navigation }) => {
         nurseData = s.nurse || null;
         scheduleData = s.schedule || null;
       } else {
-        // ── Fallback: جلب من قائمة الجلسات (يعمل مع NUTRITIONIST و غيره) ──
+        
         const errorStatus = basicRes.reason?.response?.status;
         console.log('[PatientSessionDetailView] individual endpoint failed (status:', errorStatus, '), trying sessions list fallback...');
 
         try {
           const listRes = await api.get(`/dialysis-sessions?patientId=${patientId}`);
           const sessionsList = Array.isArray(listRes.data) ? listRes.data : [];
-          // eslint-disable-next-line eqeqeq
+          
           const found = sessionsList.find(s => s.session_id == sessionId || s.id == sessionId);
 
           if (found) {
@@ -187,20 +175,18 @@ const PatientSessionDetailView = ({ route, navigation }) => {
         throw new Error(t.patientSessionDetail.fetchError);
       }
 
-      // Vital signs
       if (vitalsRes.status === "fulfilled") {
         const d = vitalsRes.value.data;
         vitalSignsData = Array.isArray(d) ? d : d?.data || [];
       }
 
-      // Dialysis settings — handle both array response and single-object (latest)
       if (settingsRes.status === "fulfilled") {
         const d = settingsRes.value.data;
         const obj = d?.data || d;
         if (Array.isArray(obj)) {
           dialysisSettingsData = obj;
         } else if (obj && typeof obj === "object" && (obj.blood_flow_rate != null || obj.bloodFlowRate != null)) {
-          // Normalize snake_case / camelCase from "latest" endpoint
+          
           dialysisSettingsData = [{
             setting_id: obj.setting_id || obj.id || obj.settingId,
             session_id: sessionId,
@@ -213,11 +199,10 @@ const PatientSessionDetailView = ({ route, navigation }) => {
         }
       }
 
-      // Symptoms
       if (symptomsRes.status === "fulfilled") {
         const d = symptomsRes.value.data;
         const list = Array.isArray(d) ? d : d?.data || [];
-        // Build breakdown
+        
         const breakdown = {};
         list.forEach((s) => {
           const t = s.symptomType || s.symptom_type;
@@ -238,7 +223,6 @@ const PatientSessionDetailView = ({ route, navigation }) => {
         };
       }
 
-      // Medications (optional fallback)
       let medicationsResult = [];
       if (medicationsRes.status === "fulfilled") {
         const d = medicationsRes.value.data;
@@ -336,7 +320,6 @@ const PatientSessionDetailView = ({ route, navigation }) => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#193B6B" />
 
-      {/* ── Header ── */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Icon name="arrow-left" type="material-community" size={28} color="#fff" />
@@ -353,7 +336,6 @@ const PatientSessionDetailView = ({ route, navigation }) => {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
 
-        {/* ── Patient & Nurse Info ── */}
         <View style={styles.card}>
           <SectionHeader icon="account-circle-outline" title={t.patientSessionDetail.patientNurseInfo} color="#193B6B" />
           <View style={styles.personRow}>
@@ -386,7 +368,6 @@ const PatientSessionDetailView = ({ route, navigation }) => {
           )}
         </View>
 
-        {/* ── Session Overview ── */}
         <View style={styles.card}>
           <SectionHeader icon="calendar-clock" title={t.patientSessionDetail.sessionInfo} color="#26CDD6" />
           <InfoRow label={t.patientSessionDetail.date} value={formatDate(session?.date)} />
@@ -411,7 +392,6 @@ const PatientSessionDetailView = ({ route, navigation }) => {
             </>
           )}
 
-          {/* ── الوزن قبل وبعد الجلسة ── */}
           {(session?.weight_before != null || session?.weight_after != null) && (
             <>
               <View style={styles.weightRow}>
@@ -440,7 +420,6 @@ const PatientSessionDetailView = ({ route, navigation }) => {
                 </View>
               </View>
 
-              {/* كمية السوائل المسحوبة (من إعدادات الجهاز) */}
               {(() => {
                 const lastSetting = dialysisSettings && dialysisSettings.length > 0
                   ? dialysisSettings[dialysisSettings.length - 1]
@@ -469,7 +448,6 @@ const PatientSessionDetailView = ({ route, navigation }) => {
 
         </View>
 
-        {/* ── Vital Signs ── */}
         <View style={styles.card}>
           <SectionHeader icon="heart-pulse" title={t.patientSessionDetail.vitalSigns} color="#DE1A1C" />
           {vitalSigns && vitalSigns.length > 0 ? (
@@ -501,7 +479,6 @@ const PatientSessionDetailView = ({ route, navigation }) => {
           )}
         </View>
 
-        {/* ── Dialysis Machine Settings ── */}
         <View style={styles.card}>
           <SectionHeader icon="cog-outline" title={t.patientSessionDetail.machineSettings} color="#26CDD6" />
           {dialysisSettings && dialysisSettings.length > 0 ? (
@@ -531,7 +508,6 @@ const PatientSessionDetailView = ({ route, navigation }) => {
           )}
         </View>
 
-        {/* ── Medications ── */}
         <View style={styles.card}>
           <SectionHeader icon="pill" title={t.patientSessionDetail.medications} color="#26CDD6" />
           {medications && medications.length > 0 ? (
@@ -564,7 +540,6 @@ const PatientSessionDetailView = ({ route, navigation }) => {
           )}
         </View>
 
-        {/* ── Symptoms ── */}
         <View style={styles.card}>
           <View style={styles.sectionHeaderRow}>
             <SectionHeader icon="alert-circle-outline" title={t.patientSessionDetail.symptoms} color="#f59e0b" />
@@ -579,7 +554,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
 
           {symptoms?.details && symptoms.details.length > 0 ? (
             <>
-              {/* Breakdown Summary */}
+              
               {symptoms.breakdown && Object.keys(symptoms.breakdown).length > 0 && (
                 <View style={styles.breakdownContainer}>
                   {Object.entries(symptoms.breakdown).map(([type, severities]) => {
@@ -596,7 +571,7 @@ const PatientSessionDetailView = ({ route, navigation }) => {
                 </View>
               )}
               <Divider style={styles.rowDivider} />
-              {/* Detail List */}
+              
               {symptoms.details.map((sym, idx) => {
                 const sev = severityColors[sym.severity] || { bg: "#F1FCFD", text: "#8296B1" };
                 return (
@@ -638,7 +613,6 @@ const styles = StyleSheet.create({
   errorText: { marginTop: 12, color: "#DE1A1C", fontSize: 15, textAlign: "center" },
   retryBtn: { marginTop: 16, backgroundColor: "#193B6B", paddingHorizontal: 24, paddingVertical: 10, borderRadius: 10 },
 
-  // Header
   header: {
     backgroundColor: "#193B6B",
     paddingTop: 50,
@@ -666,7 +640,6 @@ const styles = StyleSheet.create({
 
   scroll: { padding: 16 },
 
-  // Cards
   card: {
     backgroundColor: "#fff",
     borderRadius: 20,
@@ -679,13 +652,11 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
 
-  // Section header
   sectionHeader: { flexDirection: "row-reverse", alignItems: "center", marginBottom: 14 },
   sectionHeaderRow: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center", marginBottom: 14 },
   sectionIconCircle: { width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center", marginLeft: 10 },
   sectionTitle: { fontSize: 16, fontWeight: "800" },
 
-  // Person row (patient & nurse)
   personRow: { flexDirection: "row-reverse", justifyContent: "space-around", marginBottom: 12 },
   personBox: { flex: 1, alignItems: "center" },
   personDivider: { width: 1, backgroundColor: "#e2e8f0", marginHorizontal: 8 },
@@ -697,7 +668,6 @@ const styles = StyleSheet.create({
   allergyRow: { flexDirection: "row-reverse", alignItems: "center", backgroundColor: "#fff7ed", padding: 8, borderRadius: 8, marginTop: 4 },
   allergyText: { flex: 1, fontSize: 13, color: "#c2410c", textAlign: "right", marginRight: 6 },
 
-  // Info rows
   rowDivider: { marginVertical: 8, backgroundColor: "#f1f5f9" },
   infoRow: { paddingVertical: 4 },
   infoRowHighlight: { backgroundColor: "#f0fdf4", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, marginTop: 4 },
@@ -707,7 +677,6 @@ const styles = StyleSheet.create({
   notesBox: { flexDirection: "row-reverse", alignItems: "flex-start", backgroundColor: "#f8fafc", padding: 10, borderRadius: 10, marginTop: 8, gap: 6 },
   notesText: { flex: 1, fontSize: 13, color: "#475569", textAlign: "right", lineHeight: 20 },
 
-  // Vitals grid
   vitalsGrid: { flexDirection: "row-reverse", flexWrap: "wrap", gap: 8, marginTop: 8 },
   metricChip: {
     backgroundColor: "#f8fafc",
@@ -723,7 +692,6 @@ const styles = StyleSheet.create({
 
   recordTime: { fontSize: 11, color: "#8296B1", textAlign: "right", marginBottom: 6 },
 
-  // Medications
   medicationRow: { flexDirection: "row-reverse", alignItems: "flex-start", paddingVertical: 8 },
   medIconBox: { width: 40, height: 40, borderRadius: 20, backgroundColor: "#f0fdf4", justifyContent: "center", alignItems: "center", marginLeft: 10 },
   medInfo: { flex: 1 },
@@ -733,7 +701,6 @@ const styles = StyleSheet.create({
   medNotes: { fontSize: 12, color: "#8296B1", textAlign: "right", marginTop: 2 },
   medNurse: { fontSize: 10, color: "#8296B1", textAlign: "left", maxWidth: 80 },
 
-  // Symptoms
   breakdownContainer: { flexDirection: "row-reverse", flexWrap: "wrap", gap: 8, marginBottom: 8 },
   breakdownChip: { backgroundColor: "#fef3c7", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, flexDirection: "row-reverse", alignItems: "center", gap: 4 },
   breakdownType: { fontSize: 12, fontWeight: "700", color: "#92400e" },
@@ -747,11 +714,9 @@ const styles = StyleSheet.create({
   countBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   countBadgeText: { fontSize: 12, fontWeight: "bold" },
 
-  // Empty state
   emptySmall: { alignItems: "center", paddingVertical: 20 },
   emptySmallText: { color: "#8296B1", fontSize: 13, marginTop: 8 },
 
-  // Weight display
   weightRow: {
     flexDirection: "row-reverse",
     justifyContent: "space-around",

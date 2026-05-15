@@ -10,11 +10,10 @@ const api = axios.create({
   },
 });
 
-// Interceptor to add the token to every request
 api.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem('token');
-    // لا تقم بالكتابة فوق الهيدر إذا كان مرسلاً يدوياً (مثل حالة tempToken)
+    
     if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -25,17 +24,15 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor to handle responses (e.g., 401 errors)
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   async (error) => {
     if (error.response && error.response.status === 401) {
-      // Could trigger a global logout event here if needed
+      
       console.warn('Unauthorized! Logging out...');
-      // await AsyncStorage.removeItem('token');
-      // Navigation redirect could be handled here if we had access to navigation
+
     }
     return Promise.reject(error);
   }

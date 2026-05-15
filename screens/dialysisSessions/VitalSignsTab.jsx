@@ -7,7 +7,6 @@ import api from "../../services/api";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLanguage } from '../../context/LanguageContext';
 
-// ── Validate Weight ─────────────────────────────────────────────────────────
 const validateWeight = (val, fieldName, required = true) => {
   if (!val || val.trim() === '') {
     return required ? `${fieldName} مطلوب` : null;
@@ -18,13 +17,11 @@ const validateWeight = (val, fieldName, required = true) => {
   return null;
 };
 
-// ── تنسيق الوقت بشكل واضح ────────────────────────────────────────────────────
 const formatDateTime = (dateStr, t) => {
   if (!dateStr) return { time: t.unknown, ago: "" };
   const date = new Date(dateStr);
   const now = new Date();
 
-  // تنسيق الوقت مع مراعاة اللغة المختارة
   const locale = t.vitalSigns.now === 'الآن' ? 'ar-SA' : 'en-US';
   const time = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
@@ -41,27 +38,23 @@ const formatDateTime = (dateStr, t) => {
   return { time, ago };
 };
 
-// ── تحديد حالة الضغط ─────────────────────────────────────────────────────────
 const getBpStatus = (sys, dia, t) => {
   if (sys > 140 || dia > 90) return { label: t.vitalSigns.status.high, color: "#DE1A1C", bg: "#FBEAEA" };
   if (sys < 90 || dia < 60) return { label: t.vitalSigns.status.low, color: "#A32D2F", bg: "#FBEAEA" };
   return { label: t.vitalSigns.status.normal, color: "#26CDD6", bg: "#E9FAFB" };
 };
 
-// ── بطاقة قراءة واحدة ────────────────────────────────────────────────────────
 const VitalCard = ({ item, index, totalCount, onDelete, t }) => {
   const vitalId = item.vital_id || item.id;
   const { time, ago } = formatDateTime(item.recorded_at || item.createdAt, t);
   const bpStatus = getBpStatus(item.systolic, item.diastolic, t);
-  const readingNumber = totalCount - index; // رقم القراءة (الأحدث = الأكبر)
+  const readingNumber = totalCount - index; 
 
   return (
     <View style={cardStyles.wrap}>
 
-      {/* ── رأس البطاقة ── */}
       <View style={cardStyles.header}>
 
-        {/* يمين: رقم القراءة + الوقت */}
         <View style={cardStyles.headerRight}>
           <View style={cardStyles.readingBadge}>
             <Text style={cardStyles.readingNum}>#{readingNumber}</Text>
@@ -72,7 +65,6 @@ const VitalCard = ({ item, index, totalCount, onDelete, t }) => {
           </View>
         </View>
 
-        {/* يسار: حالة الضغط + زر الحذف */}
         <View style={cardStyles.headerLeft}>
           <View style={[cardStyles.statusBadge, { backgroundColor: bpStatus.bg }]}>
             <Text style={[cardStyles.statusText, { color: bpStatus.color }]}>
@@ -88,10 +80,8 @@ const VitalCard = ({ item, index, totalCount, onDelete, t }) => {
         </View>
       </View>
 
-      {/* ── القيم ── */}
       <View style={cardStyles.values}>
 
-        {/* الضغط */}
         <View style={cardStyles.valueBox}>
           <View style={cardStyles.bpRow}>
             <Text style={[cardStyles.bigNum, { color: '#26CDD6' }]}>{item.diastolic}</Text>
@@ -103,7 +93,6 @@ const VitalCard = ({ item, index, totalCount, onDelete, t }) => {
 
         <View style={cardStyles.divider} />
 
-        {/* النبض */}
         <View style={cardStyles.valueBox}>
           <Text style={[cardStyles.bigNum, { color: '#A32D2F' }]}>{item.pulse}</Text>
           <Text style={cardStyles.unit}>bpm نبض</Text>
@@ -111,13 +100,11 @@ const VitalCard = ({ item, index, totalCount, onDelete, t }) => {
 
         <View style={cardStyles.divider} />
 
-        {/* الحرارة */}
         <View style={cardStyles.valueBox}>
           <Text style={[cardStyles.bigNum, { color: '#8296B1' }]}>{item.temperature}</Text>
           <Text style={cardStyles.unit}>°C حرارة</Text>
         </View>
 
-        {/* الأكسجين (لو موجود) */}
         {item.oxygen_saturation != null && (
           <>
             <View style={cardStyles.divider} />
@@ -174,7 +161,6 @@ const cardStyles = StyleSheet.create({
   divider: { width: 1, height: 40, backgroundColor: '#f1f5f9' },
 });
 
-// ── المكوّن الرئيسي ───────────────────────────────────────────────────────────
 const VitalSignsTab = ({ route }) => {
   const { t } = useLanguage();
   const sessionId = route?.params?.sessionId;
@@ -194,7 +180,7 @@ const VitalSignsTab = ({ route }) => {
         `/dialysis-sessions/${sessionId}/details/vital-signs`
       );
       const list = Array.isArray(data) ? data : data?.data || [];
-      // الأحدث أولاً
+      
       setVitals([...list].reverse());
     } catch {
       setVitals([]);
@@ -207,7 +193,6 @@ const VitalSignsTab = ({ route }) => {
     fetchVitals();
   }, [sessionId]);
 
-  // ── حفظ قراءة جديدة ──────────────────────────────────────────
   const handleSave = async () => {
     const { systolic, diastolic, pulse, temperature } = form;
     if (!systolic || !diastolic || !pulse || !temperature)
@@ -237,7 +222,6 @@ const VitalSignsTab = ({ route }) => {
     }
   };
 
-  // ── حذف قراءة (يعمل على الويب + Expo Go + Native) ──────────
   const handleDelete = async (vitalId) => {
     const numericId = parseInt(vitalId, 10);
     if (isNaN(numericId)) return;
@@ -269,17 +253,11 @@ const VitalSignsTab = ({ route }) => {
     }
   };
 
-  // ── update حقل في الفورم ─────────────────────────────────────
   const setField = (key, val) => setForm(p => ({ ...p, [key]: val }));
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
-      {/* ══════════════════════════════════════════════════════════════
-          شريط العلامات الحيوية
-      ══════════════════════════════════════════════════════════════ */}
-
-      {/* ── شريط العنوان + زر الإضافة ── */}
       <View style={styles.topBar}>
         <Pressable
           onPress={() => setShowForm(v => !v)}
@@ -296,7 +274,6 @@ const VitalSignsTab = ({ route }) => {
         <Text style={styles.pageTitle}>{t.vitalSigns.title}</Text>
       </View>
 
-      {/* ── آخر قراءة (ملخص سريع) ── */}
       {vitals.length > 0 && !showForm && (
         <View style={styles.latestCard}>
           <Text style={styles.latestLabel}>{t.vitalSigns.latestReading}</Text>
@@ -335,12 +312,10 @@ const VitalSignsTab = ({ route }) => {
         </View>
       )}
 
-      {/* ── فورم الإدخال ── */}
       {showForm && (
         <View style={styles.formCard}>
           <Text style={styles.formTitle}>{t.vitalSigns.recordReading}</Text>
 
-          {/* ضغط الدم */}
           <Text style={styles.fieldLabel}>{t.vitalSigns.bloodPressure}</Text>
           <View style={styles.bpRow}>
             <View style={[styles.inputBox, { flex: 1 }]}>
@@ -366,7 +341,6 @@ const VitalSignsTab = ({ route }) => {
             </View>
           </View>
 
-          {/* نبض + حرارة */}
           <View style={styles.twoCol}>
             <View style={{ flex: 1 }}>
               <Text style={styles.fieldLabel}>{t.vitalSigns.pulse}</Text>
@@ -397,7 +371,6 @@ const VitalSignsTab = ({ route }) => {
             </View>
           </View>
 
-          {/* أكسجين */}
           <Text style={styles.fieldLabel}>{t.vitalSigns.oxygen}</Text>
           <View style={styles.inputBox}>
             <MaterialCommunityIcons name="water-percent" size={16} color="#26CDD6" style={{ marginLeft: 4 }} />
@@ -423,7 +396,6 @@ const VitalSignsTab = ({ route }) => {
         </View>
       )}
 
-      {/* ── سجل القراءات ── */}
       {loading ? (
         <ActivityIndicator color="#26CDD6" style={{ marginTop: 30 }} />
       ) : vitals.length === 0 ? (
@@ -457,12 +429,10 @@ const VitalSignsTab = ({ route }) => {
 
 export default VitalSignsTab;
 
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F1FCFD' },
   content: { padding: 16, paddingBottom: 40 },
 
-  // شريط العنوان
   topBar: {
     flexDirection: 'row-reverse', justifyContent: 'space-between',
     alignItems: 'center', marginBottom: 16,
@@ -476,7 +446,6 @@ const styles = StyleSheet.create({
   addBtnActive: { backgroundColor: '#DE1A1C' },
   addBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
 
-  // آخر قراءة
   latestCard: {
     backgroundColor: '#193B6B', borderRadius: 16, padding: 16,
     marginBottom: 16, elevation: 2,
@@ -489,7 +458,6 @@ const styles = StyleSheet.create({
   latestDivider: { width: 1, height: 36, backgroundColor: '#ffffff20' },
   latestTime: { color: '#BCEFF3', fontSize: 11, textAlign: 'left', marginTop: 10 },
 
-  // فورم
   formCard: {
     backgroundColor: '#fff', borderRadius: 16, padding: 18,
     marginBottom: 16, elevation: 2,
@@ -520,13 +488,11 @@ const styles = StyleSheet.create({
   },
   saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
 
-  // سجل
   historyLabel: {
     textAlign: 'right', fontSize: 14, fontWeight: '800',
     color: '#193B6B', marginBottom: 12,
   },
 
-  // فارغ
   emptyBox: { alignItems: 'center', paddingTop: 40, gap: 8 },
   emptyText: { fontSize: 15, color: '#8296B1', fontWeight: '700' },
   emptySub: { fontSize: 12, color: '#8296B1' },

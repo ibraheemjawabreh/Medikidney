@@ -6,12 +6,11 @@ import Constants from 'expo-constants';
 import { useNotificationContext } from '../context/NotificationContext';
 import { getVisibleUnreadCount } from '../utils/notificationBadge';
 
-// اضبط سلوك الإشعار - يظهر حتى لو التطبيق مفتوح
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,      // اعرض الإشعار كـ alert في الأعلى
-    shouldPlaySound: true,       // اشغل صوت
-    shouldSetBadge: true,        // أظهر badge على الأيقونة
+    shouldShowAlert: true,      
+    shouldPlaySound: true,       
+    shouldSetBadge: true,        
   }),
 });
 
@@ -21,10 +20,9 @@ export const useNotifications = (navigation) => {
   const responseListener = useRef();
 
   useEffect(() => {
-    // لا نسجل device token هنا - فقط احفظه محلياً
+    
     requestAndStoreDeviceToken();
 
-    // تحقق من الإشعارات الأولية (عندما يتم فتح التطبيق من إشعار)
     const checkInitialNotification = async () => {
       const notification = await Notifications.getLastNotificationResponseAsync();
       if (notification) {
@@ -38,7 +36,6 @@ export const useNotifications = (navigation) => {
     
     checkInitialNotification();
 
-    // استمع للإشعارات الواردة (حتى عندما التطبيق مفتوح)
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
         console.log('📲 إشعار وارد:', {
@@ -49,7 +46,6 @@ export const useNotifications = (navigation) => {
         syncUnreadCount();
       });
 
-    // استمع لنقر المستخدم على الإشعار
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
         const data = response.notification.request.content.data;
@@ -91,14 +87,12 @@ export const useNotifications = (navigation) => {
         return;
       }
 
-      // احصل على الـ Expo Push token
       const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
       const deviceToken = await Notifications.getExpoPushTokenAsync({
         projectId: projectId || 'db1d55b0-3193-4b75-b568-cc57c3faea0c'
       });
       console.log('✅ Expo Push Token:', deviceToken.data);
 
-      // احفظه محلياً فقط - لا نرسله الآن
       await AsyncStorage.setItem('deviceToken', deviceToken.data);
     } catch (error) {
       if (error.message.includes('FirebaseApp is not initialized')) {
@@ -109,7 +103,6 @@ export const useNotifications = (navigation) => {
     }
   };
 
-  // دالة للإرسال بعد تسجيل الدخول - استدعها من login screen
   const registerDeviceTokenAfterLogin = async () => {
     try {
       const deviceToken = await AsyncStorage.getItem('deviceToken');
@@ -131,7 +124,7 @@ export const useNotifications = (navigation) => {
   const registerForPushNotifications = registerDeviceTokenAfterLogin;
 
   const handleNotificationPress = (notificationType, relatedId, navigation) => {
-    // انقل المستخدم للصفحة المناسبة حسب نوع الإشعار
+    
     if (!navigation || !navigation.isReady()) {
       console.warn('⚠️ Navigation ليس جاهزاً');
       return;
@@ -144,10 +137,10 @@ export const useNotifications = (navigation) => {
       case 'LAB_TEST':
       case 'TEST':
         console.log('➡️ الانتقال لنتائج الفحوصات - Test ID:', relatedId);
-        // Tab 2: Tests, SubTab 1: Lab Tests
+        
         navigation.navigate('PatientProfile', { 
-          initialTab: 2,  // Tests tab
-          initialSubTab: 1,  // Lab Tests subtab
+          initialTab: 2,  
+          initialSubTab: 1,  
           testId: relatedId 
         });
         break;
@@ -155,10 +148,10 @@ export const useNotifications = (navigation) => {
       case 'RADIOLOGY':
       case 'IMAGING':
         console.log('➡️ الانتقال للأشعات - Image ID:', relatedId);
-        // Tab 2: Tests, SubTab 2: Radiology
+        
         navigation.navigate('PatientProfile', { 
-          initialTab: 2,  // Tests tab
-          initialSubTab: 2,  // Radiology subtab
+          initialTab: 2,  
+          initialSubTab: 2,  
           radiologyId: relatedId 
         });
         break;
@@ -166,10 +159,10 @@ export const useNotifications = (navigation) => {
       case 'PRESCRIPTION':
       case 'MEDICATION':
         console.log('➡️ الانتقال للأدوية - Prescription ID:', relatedId);
-        // Tab 2: Tests, SubTab 0: Prescriptions
+        
         navigation.navigate('PatientProfile', { 
-          initialTab: 2,  // Tests tab
-          initialSubTab: 0,  // Prescriptions subtab
+          initialTab: 2,  
+          initialSubTab: 0,  
           prescriptionId: relatedId 
         });
         break;
@@ -182,9 +175,9 @@ export const useNotifications = (navigation) => {
       case 'APPOINTMENT':
       case 'SCHEDULE':
         console.log('➡️ الانتقال للمواعيد - Appointment ID:', relatedId);
-        // Tab 3: Appointments
+        
         navigation.navigate('PatientProfile', { 
-          initialTab: 3,  // Appointments tab
+          initialTab: 3,  
           appointmentId: relatedId 
         });
         break;
@@ -198,16 +191,16 @@ export const useNotifications = (navigation) => {
       case 'SESSION':
       case 'DIALYSIS_SESSION':
         console.log('➡️ الانتقال لتفاصيل الجلسة - Session ID:', relatedId);
-        // Tab 1: Sessions
+        
         navigation.navigate('PatientProfile', { 
-          initialTab: 1,  // Sessions tab
+          initialTab: 1,  
           sessionId: relatedId 
         });
         break;
 
       default:
         console.log('📣 إشعار عام:', notificationType);
-        // الانتقال للشاشة الرئيسية للإشعارات
+        
         navigation.navigate('Notifications');
     }
   };

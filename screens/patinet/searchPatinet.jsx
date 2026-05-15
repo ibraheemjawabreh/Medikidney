@@ -90,13 +90,11 @@ const SearchPatient = ({ navigation }) => {
     >
       <View style={styles.innerContainer}>
 
-        {/* Header Section */}
         <View style={styles.headerSection}>
           <Text style={styles.headerTitle}>{t.searchPatient.title}</Text>
           <Text style={styles.headerSubtitle}>{t.searchPatient.placeholder}</Text>
         </View>
 
-        {/* Search Card */}
         <View style={styles.searchCard}>
           <Input
             placeholder={t.searchPatient.placeholder}
@@ -120,7 +118,6 @@ const SearchPatient = ({ navigation }) => {
           />
         </View>
 
-        {/* Results Section */}
         {patients && patients.length > 0 ? (
           <View style={styles.resultsWrapper}>
             <Text style={styles.resultsCount}>تم العثور على ({patients.length}) نتائج</Text>

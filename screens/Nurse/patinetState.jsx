@@ -22,14 +22,12 @@ const PatientState = ({ route }) => {
   const [myPatients, setMyPatients] = useState([]);
   const [myNurseId, setMyNurseId] = useState(null);
 
-  // ─── Modal الوزن قبل الجلسة ───────────────────────────────────
   const [weightModalVisible, setWeightModalVisible] = useState(false);
   const [pendingPatient, setPendingPatient] = useState(null);
   const [weightInput, setWeightInput] = useState('');
   const [weightInputError, setWeightInputError] = useState('');
   const [isSavingSession, setIsSavingSession] = useState(false);
 
-  // ─── جلب حالة المرضى المختارين ────────────────────────────
   const fetchStatus = async (isRefresh = false) => {
     try {
       isRefresh ? setRefreshing(true) : setLoading(true);
@@ -43,8 +41,6 @@ const PatientState = ({ route }) => {
 
       const allPatients = (scheduleRes.data.shifts ?? []).flatMap(s => s.patients);
 
-      // الفلترة الصحيحة: فقط المرضى المحجوزين لهذا الممرض حالياً
-      // نستخدم nurseId المستخرج مباشرة من البروفايل لضمان الدقة
       const filtered = allPatients.filter(p => p.assignedNurseId === nurseId);
 
       setMyPatients(filtered);
@@ -61,7 +57,6 @@ const PatientState = ({ route }) => {
     useCallback(() => { void fetchStatus(); }, [selectedPatientIds])
   );
 
-  // ─── حذف المريض من القائمة (إلغاء الحجز) ──────────────────────
   const handleUnassign = async (patient) => {
     Alert.alert(
       "تأكيد الحذف",
@@ -77,7 +72,6 @@ const PatientState = ({ route }) => {
                 `/dialysis-scheduling/assign-nurse/${patient.scheduleId}`
               );
 
-              // تحديث التخزين المحلي للعداد في الشاشة السابقة
               const stored = await AsyncStorage.getItem("nurse_confirmed_ids");
               if (stored) {
                 const parsed = JSON.parse(stored);
@@ -99,7 +93,6 @@ const PatientState = ({ route }) => {
     );
   };
 
-  // ─── الخطوة 1: افتح modal إدخال الوزن ────────────────────────
   const handleStartSession = (patient) => {
     setPendingPatient(patient);
     setWeightInput('');
@@ -107,9 +100,8 @@ const PatientState = ({ route }) => {
     setWeightModalVisible(true);
   };
 
-  // ─── الخطوة 2: تأكيد الوزن وإنشاء الجلسة ────────────────────
   const handleConfirmWeight = async () => {
-    // Validation
+    
     const num = parseFloat(weightInput);
     if (!weightInput.trim()) {
       setWeightInputError('الوزن مطلوب قبل بدء الجلسة');
@@ -141,7 +133,6 @@ const PatientState = ({ route }) => {
         }
       );
 
-      // جلب البيانات المحدثة للحصول على الـ sessionId الدقيق
       const updatedList = await fetchStatus();
       const updatedPatient = updatedList?.find(p => p.patientId === pendingPatient.patientId);
 
@@ -150,7 +141,7 @@ const PatientState = ({ route }) => {
       if (updatedPatient && updatedPatient.sessionId) {
         navigation.navigate("SessionDetails", { patient: updatedPatient });
       } else {
-        // Fallback في حال لم يجده
+        
         const fallbackId =
           createRes.data?.session_id ||
           createRes.data?.sessionId ||
@@ -175,7 +166,6 @@ const PatientState = ({ route }) => {
     }
   };
 
-  // ─── حالة الجلسة بصرياً ───────────────────────────────────
   const getStatusInfo = (status) => {
     switch (status) {
       case "COMPLETED": return { label: "مكتملة", color: "#26CDD6", icon: "check-circle", bg: "#E9FAFB" };
@@ -190,7 +180,6 @@ const PatientState = ({ route }) => {
   return (
     <View style={styles.container}>
 
-      {/* ══════ Modal إدخال الوزن قبل الجلسة ══════════════════════════ */}
       <Modal
         visible={weightModalVisible}
         transparent
@@ -199,7 +188,7 @@ const PatientState = ({ route }) => {
       >
         <View style={mStyles.overlay}>
           <View style={mStyles.sheet}>
-            {/* العنوان */}
+            
             <View style={mStyles.sheetHeader}>
               <MaterialCommunityIcons name="scale" size={28} color="#26CDD6" />
               <Text style={mStyles.sheetTitle}>وزن المريض قبل الجلسة</Text>
@@ -208,7 +197,6 @@ const PatientState = ({ route }) => {
               <Text style={mStyles.sheetPatient}>{pendingPatient.patientName}</Text>
             )}
 
-            {/* حقل الإدخال */}
             <View style={[mStyles.inputRow, weightInputError ? mStyles.inputErr : null]}>
               <MaterialCommunityIcons name="scale" size={20} color="#26CDD6" />
               <TextInput
@@ -226,7 +214,6 @@ const PatientState = ({ route }) => {
               <Text style={mStyles.errText}>{weightInputError}</Text>
             ) : null}
 
-            {/* الأزرار */}
             <View style={mStyles.btnRow}>
               <Pressable
                 style={mStyles.cancelBtn}
@@ -254,7 +241,6 @@ const PatientState = ({ route }) => {
         </View>
       </Modal>
 
-      {/* ── Header ──────────────────────────────────────── */}
       <View style={styles.header}>
         <Pressable onPress={() => navigation.navigate("NurseHome")} style={styles.backBtn}>
           <MaterialCommunityIcons name="arrow-right" size={24} color="#193B6B" />
@@ -268,8 +254,6 @@ const PatientState = ({ route }) => {
         </Pressable>
       </View>
 
-
-      {/* ── قائمة المرضى ─────────────────────────────── */}
       <ScrollView
         contentContainerStyle={styles.scroll}
         refreshControl={
@@ -302,7 +286,7 @@ const PatientState = ({ route }) => {
 
             return (
               <View key={patient.scheduleId} style={[styles.card, { borderRightColor: statusInfo.color }]}>
-                {/* ── رأس البطاقة ─────────── */}
+                
                 <View style={styles.cardHeader}>
                   <View style={[styles.statusBadge, { backgroundColor: statusInfo.bg }]}>
                     <MaterialCommunityIcons
@@ -317,10 +301,8 @@ const PatientState = ({ route }) => {
                   <Text style={styles.machineText}>جهاز #{patient.machineNumber}</Text>
                 </View>
 
-                {/* اسم المريض */}
                 <Text style={styles.patientName}>{patient.patientName}</Text>
 
-                {/* ── زر الإجراء ──────────── */}
                 <View style={styles.cardFooter}>
                   {isCompleted ? (
                     <View style={styles.doneRow}>
@@ -352,7 +334,6 @@ const PatientState = ({ route }) => {
                         )}
                       </Pressable>
 
-                      {/* زر سلة المهملات - يظهر فقط إذا لم تبدأ الجلسة */}
                       <Pressable
                         style={styles.removeBtn}
                         onPress={() => handleUnassign(patient)}

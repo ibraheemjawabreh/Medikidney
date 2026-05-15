@@ -31,7 +31,6 @@ const SessionDetails = ({ route, navigation }) => {
   const currentStepData = steps.find(s => s.id === step);
   const [isFinishing, setIsFinishing] = useState(false);
 
-  // ─── جلب بيانات الجلسة للتايمر ─────────────────────────────
   const [sessionData, setSessionData] = useState(null);
 
   useEffect(() => {
@@ -46,9 +45,8 @@ const SessionDetails = ({ route, navigation }) => {
     fetchSession();
   }, [sessionId]);
 
-  // ─── Modal إنهاء الجلسة ───────────────────────────────────
   const [endModalVisible, setEndModalVisible] = useState(false);
-  const [endModalPhase, setEndModalPhase] = useState('choice'); // 'choice' | 'weight_input'
+  const [endModalPhase, setEndModalPhase] = useState('choice'); 
   const [weightAfter, setWeightAfter] = useState('');
   const [weightInputError, setWeightInputError] = useState('');
 
@@ -75,7 +73,6 @@ const SessionDetails = ({ route, navigation }) => {
     }
   };
 
-  // ─── فتح Modal إنهاء الجلسة ───────────────────────────────
   const handleOpenEndModal = () => {
     setEndModalPhase('choice');
     setWeightAfter('');
@@ -83,9 +80,8 @@ const SessionDetails = ({ route, navigation }) => {
     setEndModalVisible(true);
   };
 
-  // ─── إنهاء الجلسة مع الوزن ────────────────────────────────
   const handleFinishWithWeight = async () => {
-    // Validation
+    
     const num = parseFloat(weightAfter);
     if (!weightAfter.trim()) {
       setWeightInputError(t.sessionDetails.weightRequired);
@@ -120,7 +116,6 @@ const SessionDetails = ({ route, navigation }) => {
     }
   };
 
-  // ─── إنهاء الجلسة بدون وزن (تخطي) ────────────────────────
   const handleFinishSkipWeight = async () => {
     try {
       setIsFinishing(true);
@@ -131,7 +126,7 @@ const SessionDetails = ({ route, navigation }) => {
           endTime: buildLocalTimePayload(),
         }
       );
-      // مسح الخطوة والتايمر لأن الجلسة انتهت
+      
       await AsyncStorage.removeItem(`step_${sessionId}`);
       await SessionTimer.clearTimer(sessionId);
       setEndModalVisible(false);
@@ -151,7 +146,6 @@ const SessionDetails = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
 
-      {/* ══════ Modal إنهاء الجلسة ══════════════════════════════ */}
       <Modal
         visible={endModalVisible}
         transparent
@@ -161,10 +155,9 @@ const SessionDetails = ({ route, navigation }) => {
         <View style={modalStyles.overlay}>
           <View style={modalStyles.sheet}>
 
-            {/* ── مرحلة الاختيار ── */}
             {endModalPhase === 'choice' && (
               <>
-                {/* الأيقونة والعنوان */}
+                
                 <View style={modalStyles.headerIcon}>
                   <View style={modalStyles.iconCircle}>
                     <MaterialCommunityIcons name="check-circle-outline" size={40} color="#26CDD6" />
@@ -173,7 +166,6 @@ const SessionDetails = ({ route, navigation }) => {
                 <Text style={modalStyles.title}>{t.sessionDetails.endSessionTitle}</Text>
                 <Text style={modalStyles.subtitle}>{t.sessionDetails.endSessionSubtitle}</Text>
 
-                {/* زر إدخال الوزن */}
                 <Pressable
                   style={modalStyles.optionBtn}
                   onPress={() => setEndModalPhase('weight_input')}
@@ -188,7 +180,6 @@ const SessionDetails = ({ route, navigation }) => {
                   <MaterialCommunityIcons name="chevron-left" size={22} color="#8296B1" />
                 </Pressable>
 
-                {/* زر التخطي */}
                 <Pressable
                   style={[modalStyles.optionBtn, { borderColor: '#FBEAEA' }]}
                   onPress={() => {
@@ -213,7 +204,6 @@ const SessionDetails = ({ route, navigation }) => {
                   <MaterialCommunityIcons name="chevron-left" size={22} color="#8296B1" />
                 </Pressable>
 
-                {/* زر الإلغاء */}
                 <Pressable
                   style={modalStyles.cancelBtn}
                   onPress={() => setEndModalVisible(false)}
@@ -224,7 +214,6 @@ const SessionDetails = ({ route, navigation }) => {
               </>
             )}
 
-            {/* ── مرحلة إدخال الوزن ── */}
             {endModalPhase === 'weight_input' && (
               <>
                 <View style={modalStyles.headerIcon}>
@@ -237,7 +226,6 @@ const SessionDetails = ({ route, navigation }) => {
                   <Text style={modalStyles.patientName}>{patient.patientName}</Text>
                 )}
 
-                {/* حقل الإدخال */}
                 <View style={[modalStyles.inputRow, weightInputError ? modalStyles.inputErr : null]}>
                   <MaterialCommunityIcons name="scale" size={20} color="#26CDD6" />
                   <TextInput
@@ -255,7 +243,6 @@ const SessionDetails = ({ route, navigation }) => {
                   <Text style={modalStyles.errText}>{weightInputError}</Text>
                 ) : null}
 
-                {/* الأزرار */}
                 <View style={modalStyles.btnRow}>
                   <Pressable
                     style={modalStyles.backChoiceBtn}
@@ -287,7 +274,6 @@ const SessionDetails = ({ route, navigation }) => {
         </View>
       </Modal>
 
-      {/* Header مع التايمر */}
       <View style={styles.header}>
         <View style={{ flexDirection: 'row-reverse', width: '100%', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <Pressable onPress={() => navigation.goBack()} style={{ padding: 5, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 10 }}>
@@ -308,11 +294,9 @@ const SessionDetails = ({ route, navigation }) => {
               }
 
               try {
-                // البحث عن المريض بالاسم للحصول على الـ User ID (id) الصحيح
-                // لأن الممرض لا يملك إلا الـ patient_id (الرقم الطبي)
+
                 const searchRes = await api.get(`/users/profile/patients/search?name=${encodeURIComponent(name)}`);
-                
-                // البحث عن مطابقة دقيقة بالاسم إذا وجدنا أكثر من نتيجة
+
                 const matchedPatient = searchRes.data?.find(p => p.name === name) || searchRes.data?.[0];
                 const userId = matchedPatient?.id;
 
@@ -321,7 +305,7 @@ const SessionDetails = ({ route, navigation }) => {
                 if (userId) {
                   navigation.navigate('StaffPatientView', { patientId: userId });
                 } else {
-                  // محاولة أخيرة بالرقم المتوفر
+                  
                   const fallbackId = patient?.patientId || sessionData?.patient_id;
                   navigation.navigate('StaffPatientView', { patientId: fallbackId });
                 }
@@ -336,11 +320,9 @@ const SessionDetails = ({ route, navigation }) => {
           </Pressable>
         </View>
 
-        {/* ── تايمر العد التنازلي ── */}
         {sessionData && <SessionTimer session={sessionData} size="large" />}
       </View>
 
-      {/* ── مؤشر المراحل (تحت الهيدر) ── */}
       <View style={styles.stepBar}>
         <View style={styles.stepIndicatorContainer}>
           {steps.map((s) => (
@@ -354,14 +336,12 @@ const SessionDetails = ({ route, navigation }) => {
         <Text style={styles.stepTitleBelow}>{t.sessionDetails.step} {step}: {currentStepData.title}</Text>
       </View>
 
-      {/* عرض الصفحة الحالية */}
       <View style={{ flex: 1 }}>
         {currentStepData.component}
       </View>
 
-      {/* أزرار التحكم في المراحل + زر إنهاء الجلسة */}
       <View style={styles.footerWrapper}>
-        {/* زر إنهاء الجلسة - يظهر فقط في المرحلة الأخيرة (الأعراض) */}
+        
         {step === 4 && (
           <Pressable
             style={styles.endSessionBtn}
@@ -373,7 +353,6 @@ const SessionDetails = ({ route, navigation }) => {
           </Pressable>
         )}
 
-        {/* أزرار التنقل بين المراحل */}
         <View style={styles.footer}>
           {step > 1 ? (
             <Pressable style={styles.backBtn} onPress={() => changeStep(step - 1)}>
@@ -405,7 +384,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // ── Step bar (below header) ──
   stepBar: {
     backgroundColor: '#fff',
     paddingVertical: 12,
@@ -489,7 +467,6 @@ const modalStyles = StyleSheet.create({
     shadowRadius: 20,
   },
 
-  // Header
   headerIcon: {
     alignItems: 'center',
     marginBottom: 12,
@@ -523,7 +500,6 @@ const modalStyles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  // Option buttons
   optionBtn: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
@@ -559,7 +535,6 @@ const modalStyles = StyleSheet.create({
     textAlign: 'right',
   },
 
-  // Cancel
   cancelBtn: {
     alignItems: 'center',
     paddingVertical: 14,
@@ -571,7 +546,6 @@ const modalStyles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // Weight input phase
   inputRow: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
@@ -607,7 +581,6 @@ const modalStyles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Buttons
   btnRow: {
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',

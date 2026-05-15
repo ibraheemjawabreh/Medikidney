@@ -7,10 +7,8 @@ import api from "../../services/api";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLanguage } from '../../context/LanguageContext';
 
-// ── وحدات الأدوية المتاحة ─────────────────────────────────────
 const UNITS = ['IU', 'mg', 'ml', 'mcg', 'g'];
 
-// ── الأدوية الشائعة (أزرار جاهزة) ────────────────────────────
 const PRESET_MEDS = [
   { name: "HEPARIN", icon: "needle", color: "#DE1A1C", dosage: 5000, unit: "IU", label: "هيبارين" },
   { name: "EPO", icon: "blood-bag", color: "#26CDD6", dosage: 4000, unit: "IU", label: "EPO" },
@@ -18,14 +16,12 @@ const PRESET_MEDS = [
   { name: "SALINE", icon: "water", color: "#26CDD6", dosage: 500, unit: "ml", label: "محلول ملحي" },
 ];
 
-// ── تنسيق الوقت ──────────────────────────────────────────────
 const formatTime = (dateStr, t) => {
   if (!dateStr) return "";
   const locale = t.vitalSigns.now === 'الآن' ? 'ar-SA' : 'en-US';
   return new Date(dateStr).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 };
 
-// ── مساعد للتأكيد (ويب + Expo Go + Native) ──────────────────
 const confirmAction = async (msg, t) => {
   if (Platform.OS === 'web') {
     return window.confirm(msg);
@@ -46,7 +42,6 @@ const showAlert = (title, msg) => {
   }
 };
 
-// ══════════════════════════════════════════════════════════════════
 const getMedicationRecordId = (med) => {
   if (!med) return null;
 
@@ -81,13 +76,12 @@ const MedicationsTab = ({ route }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [showCustom, setShowCustom] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState(null); // الدواء الشائع المختار
-  const [presetDosage, setPresetDosage] = useState('');   // الجرعة المعدلة
-  const [presetUnit, setPresetUnit] = useState('IU');     // وحدة الدواء الجاهز
+  const [selectedPreset, setSelectedPreset] = useState(null);
+  const [presetDosage, setPresetDosage] = useState('');
+  const [presetUnit, setPresetUnit] = useState('IU');
   const [presetNotes, setPresetNotes] = useState('');
   const [customForm, setCustomForm] = useState({ name: '', dosage: '', unit: 'IU', notes: '' });
 
-  // ── جلب الأدوية المسجلة ─────────────────────────────────────
   const fetchMeds = async () => {
     if (!sessionId) return;
     try {
@@ -108,7 +102,6 @@ const MedicationsTab = ({ route }) => {
 
   useEffect(() => { fetchMeds(); }, [sessionId]);
 
-  // ── إرسال دواء (من الأزرار الجاهزة أو المخصص) ──────────────
   const postMed = async (medData) => {
     try {
       setIsSubmitting(true);
@@ -131,7 +124,6 @@ const MedicationsTab = ({ route }) => {
     }
   };
 
-  // ── حذف دواء ────────────────────────────────────────────────
   const deleteMed = async (med) => {
     const medicationId = getMedicationRecordId(med);
     const numId = medicationId == null ? NaN : Number(medicationId);
@@ -161,7 +153,6 @@ const MedicationsTab = ({ route }) => {
     }
   };
 
-  // ── إرسال الدواء المخصص ─────────────────────────────────────
   const handleCustomSubmit = () => {
     if (!customForm.name || !customForm.dosage) {
       return showAlert(t.error, t.medications.customRequired);
@@ -176,7 +167,6 @@ const MedicationsTab = ({ route }) => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
-      {/* ── العنوان ── */}
       <View style={styles.topBar}>
         <Pressable
           onPress={() => setShowCustom(v => !v)}
@@ -188,7 +178,6 @@ const MedicationsTab = ({ route }) => {
         <Text style={styles.pageTitle}>{t.medications.title}</Text>
       </View>
 
-      {/* ── أزرار الأدوية الشائعة ── */}
       {!showCustom && (
         <View style={styles.presetSection}>
           <Text style={styles.sectionLabel}>{t.medications.presetLabel}</Text>
@@ -212,7 +201,7 @@ const MedicationsTab = ({ route }) => {
                     } else {
                       setSelectedPreset(med);
                       setPresetDosage(String(med.dosage));
-                      setPresetUnit(med.unit);   // ضبط الوحدة الافتراضية من الدواء
+                      setPresetUnit(med.unit);
                       setPresetNotes('');
                     }
                   }}
@@ -236,7 +225,6 @@ const MedicationsTab = ({ route }) => {
             })}
           </View>
 
-          {/* ── حقل الجرعة بعد اختيار دواء شائع ── */}
           {selectedPreset && (
             <View style={[styles.formCard, { borderTopColor: selectedPreset.color }]}>
               <Text style={styles.formTitle}>
@@ -257,7 +245,6 @@ const MedicationsTab = ({ route }) => {
                 <Text style={styles.unitSuffix}>{presetUnit}</Text>
               </View>
 
-              {/* ── اختيار الوحدة ── */}
               <Text style={styles.fieldLabel}>{t.medications.unit}</Text>
               <View style={styles.unitPicker}>
                 {UNITS.map(u => (
@@ -294,7 +281,7 @@ const MedicationsTab = ({ route }) => {
                     name: selectedPreset.name,
                     label: selectedPreset.label,
                     dosage: presetDosage,
-                    unit: presetUnit,          // الوحدة المختارة من المستخدم
+                    unit: presetUnit,
                     notes: presetNotes,
                   });
                   setSelectedPreset(null);
@@ -314,7 +301,6 @@ const MedicationsTab = ({ route }) => {
         </View>
       )}
 
-      {/* ── فورم الدواء المخصص ── */}
       {showCustom && (
         <View style={styles.formCard}>
           <Text style={styles.formTitle}>{t.medications.customTitle}</Text>
@@ -384,7 +370,6 @@ const MedicationsTab = ({ route }) => {
         </View>
       )}
 
-      {/* ── سجل الأدوية المعطاة ── */}
       <Text style={styles.historyLabel}>
         {t.medications.registered} ({meds.length})
       </Text>
@@ -405,7 +390,6 @@ const MedicationsTab = ({ route }) => {
           return (
             <View key={medId || index} style={styles.medCard}>
               <View style={styles.medHeader}>
-                {/* اسم الدواء + الوقت */}
                 <View style={styles.medRight}>
                   <View style={styles.medIconCircle}>
                     <MaterialCommunityIcons name="pill" size={18} color="#26CDD6" />
@@ -415,7 +399,6 @@ const MedicationsTab = ({ route }) => {
                     <Text style={styles.medTime}>{formatTime(med.recorded_at || med.administered_at || med.createdAt || med.administeredAt, t)}</Text>
                   </View>
                 </View>
-                {/* الجرعة + حذف */}
                 <View style={styles.medLeft}>
                   <View style={styles.doseBadge}>
                     <Text style={styles.doseText}>{med.dosage} {med.unit}</Text>
@@ -433,7 +416,6 @@ const MedicationsTab = ({ route }) => {
                   </Pressable>
                 </View>
               </View>
-              {/* الملاحظات */}
               {med.notes ? (
                 <View style={styles.noteRow}>
                   <Text style={styles.noteText}>{med.notes}</Text>
@@ -456,7 +438,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F1FCFD' },
   content: { padding: 16, paddingBottom: 40 },
 
-  // شريط العنوان
   topBar: {
     flexDirection: 'row-reverse', justifyContent: 'space-between',
     alignItems: 'center', marginBottom: 16,
@@ -469,7 +450,6 @@ const styles = StyleSheet.create({
   customBtnActive: { backgroundColor: '#DE1A1C' },
   customBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
 
-  // الأدوية الشائعة
   presetSection: { marginBottom: 20 },
   sectionLabel: { textAlign: 'right', color: '#8296B1', fontSize: 12, fontWeight: '600', marginBottom: 10 },
   presetGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', justifyContent: 'space-between' },
@@ -484,7 +464,6 @@ const styles = StyleSheet.create({
   presetChip: { paddingHorizontal: 14, paddingVertical: 5, borderRadius: 20 },
   presetChipText: { fontSize: 12, fontWeight: '800' },
 
-  // فورم مخصص
   formCard: {
     backgroundColor: '#fff', borderRadius: 16, padding: 18, marginBottom: 16,
     elevation: 2, borderTopWidth: 3, borderTopColor: '#26CDD6',
@@ -500,7 +479,6 @@ const styles = StyleSheet.create({
   inp: { flex: 1, textAlign: 'right', fontSize: 15, color: '#193B6B', fontWeight: '600' },
   unitSuffix: { color: '#8296B1', fontSize: 13, fontWeight: '800', marginRight: 6 },
 
-  // منتقي الوحدة
   unitPicker: {
     flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8, marginTop: 2,
   },
@@ -516,7 +494,6 @@ const styles = StyleSheet.create({
   },
   saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
 
-  // السجل
   historyLabel: { textAlign: 'right', fontSize: 14, fontWeight: '800', color: '#193B6B', marginBottom: 12 },
   medCard: {
     backgroundColor: '#fff', borderRadius: 14, marginBottom: 10, padding: 14,

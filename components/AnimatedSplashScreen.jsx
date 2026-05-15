@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Animated, StyleSheet, View, Easing } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 
-// منع الـ splash screen الافتراضي من الاختفاء فوراً
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function AnimatedSplashScreen({ children }) {
@@ -11,23 +10,22 @@ export default function AnimatedSplashScreen({ children }) {
   const animation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // محاكاة وقت التحميل السريع للتأكد من أن التطبيق في الخلفية جاهز
+    
     const timer = setTimeout(() => {
       setAppReady(true);
-    }, 400); // وقت قصير للسماح للتطبيق بالتحميل في الخلفية
+    }, 400); 
     
     return () => clearTimeout(timer);
   }, []);
 
   const triggerAnimation = async () => {
     try {
-      // إخفاء الـ splash الافتراضي الخاص بـ Expo
-      await SplashScreen.hideAsync();
       
-      // بدء الأنيميشن الناعم (تكبير بسيط + اختفاء متدرج)
+      await SplashScreen.hideAsync();
+
       Animated.timing(animation, {
         toValue: 1,
-        duration: 3200, // مدة الأنيميشن: 3.2 ثانية (زيادة بمقدار ثانيتين)
+        duration: 3200, 
         easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }).start(() => {
@@ -46,20 +44,19 @@ export default function AnimatedSplashScreen({ children }) {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* محتوى التطبيق الأساسي (يكون جاهزاً في الخلفية) */}
+      
       {isAppReady && children}
 
-      {/* واجهة الـ Splash المتحركة (تكون فوق التطبيق حتى تنتهي) */}
       {!isSplashAnimationComplete && (
         <Animated.View
           pointerEvents="none"
           style={[
             StyleSheet.absoluteFill,
             {
-              backgroundColor: '#ffffff', // نفس لون خلفية الـ splash الافتراضي
+              backgroundColor: '#ffffff', 
               opacity: animation.interpolate({
                 inputRange: [0, 0.7, 1],
-                outputRange: [1, 1, 0], // الشاشة تختفي في الثلث الأخير
+                outputRange: [1, 1, 0], 
               }),
               alignItems: 'center',
               justifyContent: 'center',
@@ -76,16 +73,16 @@ export default function AnimatedSplashScreen({ children }) {
                 {
                   scale: animation.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [1, 1.15], // تكبير خفيف وأنيق جداً
+                    outputRange: [1, 1.15], 
                   }),
                 },
               ],
               opacity: animation.interpolate({
                 inputRange: [0, 0.5, 1],
-                outputRange: [1, 0.8, 0], // اللوجو يختفي بنعومة
+                outputRange: [1, 0.8, 0], 
               }),
             }}
-            fadeDuration={0} // إلغاء الـ fade الافتراضي للصور في React Native
+            fadeDuration={0} 
           />
         </Animated.View>
       )}

@@ -12,7 +12,6 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 const NutritionistTable = ({ route, navigation }) => {
   const patientId = route.params?.patientId;
 
-  // --- States ---
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [forbiddenItems, setForbiddenItems] = useState("");
@@ -20,7 +19,7 @@ const NutritionistTable = ({ route, navigation }) => {
   const [breakfast, setBreakfast] = useState("");
   const [lunch, setLunch] = useState("");
   const [dinner, setDinner] = useState("");
-  const [mealNotes, setMealNotes] = useState(""); // استعادة حالة الملاحظات
+  const [mealNotes, setMealNotes] = useState(""); 
 
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
@@ -50,7 +49,7 @@ const NutritionistTable = ({ route, navigation }) => {
         setBreakfast(plan.breakfast || "");
         setLunch(plan.lunch || "");
         setDinner(plan.dinner || "");
-        setMealNotes(plan.meal_notes || plan.mealNotes || ""); // تعبئة الملاحظات من السيرفر
+        setMealNotes(plan.meal_notes || plan.mealNotes || ""); 
 
         if (plan.startDate || plan.start_date) setStartDate(new Date(plan.startDate || plan.start_date));
         if (plan.endDate || plan.end_date) setEndDate(new Date(plan.endDate || plan.end_date));
@@ -154,7 +153,6 @@ const NutritionistTable = ({ route, navigation }) => {
             <MealInput label="غداء" value={lunch} onChange={setLunch} />
             <MealInput label="عشاء" value={dinner} onChange={setDinner} />
 
-            {/* --- حقل الملاحظات الإضافية --- */}
             <Text style={styles.label}>ملاحظات إضافية على الوجبات</Text>
             <TextInput
               value={mealNotes}

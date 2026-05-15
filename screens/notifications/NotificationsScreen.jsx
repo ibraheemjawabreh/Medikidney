@@ -49,8 +49,6 @@ const NotificationsScreen = () => {
     initPage();
   }, []);
 
-
-
   const fetchUnreadCount = async () => {
     try {
       const count = await getVisibleUnreadCount(api);
@@ -63,7 +61,7 @@ const NotificationsScreen = () => {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      // Fetch all notifications (or fallback to unread if /notifications is not supported)
+      
       let response;
       try {
         response = await api.get('/notifications');
@@ -121,14 +119,12 @@ const NotificationsScreen = () => {
 
     console.log('🔔 معالجة الإشعار:', { notificationType, relatedId });
 
-    // تشغيل haptic feedback
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     } catch (err) {
-      // لا نوقف العملية إذا فشل Haptics
+      
     }
 
-    // Remove only the notification the patient opened.
     try {
       await api.patch(`/notifications/${notification.notification_id}/delete`);
       setNotifications((prev) =>
@@ -140,15 +136,14 @@ const NotificationsScreen = () => {
       return;
     }
 
-    // ثم انتقل للمكان المناسب
     switch (notificationType) {
       case 'TEST_RESULT':
       case 'LAB_TEST':
       case 'TEST':
         console.log('➡️ الانتقال لنتائج الفحوصات - Test ID:', relatedId);
         navigation.navigate('PatientProfile', {
-          initialTab: 2,  // Tests tab
-          initialSubTab: 1,  // Lab Tests subtab
+          initialTab: 2,  
+          initialSubTab: 1,  
           testId: relatedId
         });
         break;
@@ -157,8 +152,8 @@ const NotificationsScreen = () => {
       case 'IMAGING':
         console.log('➡️ الانتقال للأشعات - Image ID:', relatedId);
         navigation.navigate('PatientProfile', {
-          initialTab: 2,  // Tests tab
-          initialSubTab: 2,  // Radiology subtab
+          initialTab: 2,  
+          initialSubTab: 2,  
           radiologyId: relatedId
         });
         break;
@@ -167,8 +162,8 @@ const NotificationsScreen = () => {
       case 'MEDICATION':
         console.log('➡️ الانتقال للأدوية - Prescription ID:', relatedId);
         navigation.navigate('PatientProfile', {
-          initialTab: 2,  // Tests tab
-          initialSubTab: 0,  // Prescriptions subtab
+          initialTab: 2,  
+          initialSubTab: 0,  
           prescriptionId: relatedId
         });
         break;
@@ -191,7 +186,7 @@ const NotificationsScreen = () => {
       case 'SCHEDULE':
         console.log('➡️ الانتقال للمواعيد - Appointment ID:', relatedId);
         navigation.navigate('PatientProfile', {
-          initialTab: 3,  // Appointments tab
+          initialTab: 3,  
           appointmentId: relatedId
         });
         break;
@@ -206,14 +201,14 @@ const NotificationsScreen = () => {
       case 'DIALYSIS_SESSION':
         console.log('➡️ الانتقال لتفاصيل الجلسة - Session ID:', relatedId);
         navigation.navigate('PatientProfile', {
-          initialTab: 1,  // Sessions tab
+          initialTab: 1,  
           sessionId: relatedId
         });
         break;
 
       default:
         console.log('📣 إشعار عام:', notificationType);
-        // تم بالفعل وضع علامة "تمت قراءته"
+        
         break;
     }
   };
@@ -273,7 +268,7 @@ const NotificationsScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}

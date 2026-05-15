@@ -3,12 +3,8 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const TOTAL_DURATION = 10800; // 3 ساعات بالثواني
+const TOTAL_DURATION = 10800; 
 
-/**
- * تايمر عد تنازلي للجلسة الجارية
- * يحفظ وقت البدء في AsyncStorage عشان يضل يعد حتى لو المستخدم طلع ورجع
- */
 const SessionTimer = ({ session, size = 'small' }) => {
   const [remaining, setRemaining] = useState(TOTAL_DURATION);
   const [ready, setReady] = useState(false);
@@ -17,7 +13,6 @@ const SessionTimer = ({ session, size = 'small' }) => {
 
   const sessionId = session?.session_id || session?.id;
 
-  // أنيميشن النبض للأيقونة
   useEffect(() => {
     if (!ready || remaining <= 0) return;
     const pulse = Animated.loop(
@@ -84,11 +79,10 @@ const SessionTimer = ({ session, size = 'small' }) => {
 
   const isLarge = size === 'large';
 
-  // ─── الحجم الكبير (هيدر الممرض) ──────────────────────────────
   if (isLarge) {
     return (
       <View style={largeStyles.container}>
-        {/* الوقت + أيقونة */}
+        
         <View style={largeStyles.timeRow}>
           <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
             <MaterialCommunityIcons
@@ -100,16 +94,15 @@ const SessionTimer = ({ session, size = 'small' }) => {
           <Text style={largeStyles.timeText}>{timeStr}</Text>
         </View>
 
-        {/* شريط التحميل */}
         <View style={largeStyles.barContainer}>
           <View style={largeStyles.barBg}>
             <View style={[largeStyles.barFill, { width: `${progress * 100}%`, backgroundColor: barColor }]} />
-            {/* نقطة مضيئة على رأس الشريط */}
+            
             {remaining > 0 && progress > 0 && (
               <View style={[largeStyles.barGlow, { left: `${progress * 100}%`, backgroundColor: barColor }]} />
             )}
           </View>
-          {/* أرقام الشريط */}
+          
           <View style={largeStyles.barLabels}>
             <Text style={largeStyles.barLabelText}>0:00</Text>
             <Text style={[largeStyles.barLabelCenter, { color: barColor }]}>
@@ -122,7 +115,6 @@ const SessionTimer = ({ session, size = 'small' }) => {
     );
   }
 
-  // ─── الحجم الصغير (كارد) ──────────────────────────────────────
   return (
     <View style={smallStyles.container}>
       <View style={smallStyles.row}>
@@ -145,9 +137,6 @@ const SessionTimer = ({ session, size = 'small' }) => {
   );
 };
 
-/**
- * مسح بيانات التايمر عند إنهاء الجلسة
- */
 SessionTimer.clearTimer = async (sessionId) => {
   try {
     await AsyncStorage.removeItem(`timer_start_${sessionId}`);
@@ -156,7 +145,6 @@ SessionTimer.clearTimer = async (sessionId) => {
   }
 };
 
-// ─── Styles: Large (Header) ─────────────────────────────────────────
 const largeStyles = StyleSheet.create({
   container: {
     width: '100%',
@@ -223,7 +211,6 @@ const largeStyles = StyleSheet.create({
   },
 });
 
-// ─── Styles: Small (Card) ───────────────────────────────────────────
 const smallStyles = StyleSheet.create({
   container: {
     backgroundColor: '#E9FAFB',

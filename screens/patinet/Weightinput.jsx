@@ -8,7 +8,6 @@ const WeightInput = () => {
   const handleSubmit = () => {
     console.log("الوزن المدخل:", weight);
   };
-  
 
   return (
     <View style={styles.container}>

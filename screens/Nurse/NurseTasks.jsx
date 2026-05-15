@@ -18,16 +18,14 @@ const NurseTasks = ({ route, navigation }) => {
   const [loading, setLoading] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
 
-  // بيانات البداية
   const [bpBefore, setBpBefore] = useState("");
   const [startTime, setStartTime] = useState("");
 
-  // بيانات النهاية والحالة والملاحظات
   const [bpAfter, setBpAfter] = useState("");
   const [fluidRemoved, setFluidRemoved] = useState("");
   const [status, setStatus] = useState("COMPLETED");
-  const [notes, setNotes] = useState(""); // حقل الملاحظات الجديد
-  const [weightAfter, setWeightAfter] = useState(""); // الوزن بعد الجلسة
+  const [notes, setNotes] = useState(""); 
+  const [weightAfter, setWeightAfter] = useState(""); 
   const [scheduleId, setScheduleId] = useState(route.params?.scheduleId?.toString() || "");
 
   useEffect(() => {
@@ -181,7 +179,6 @@ const NurseTasks = ({ route, navigation }) => {
             <Text style={styles.label}>الوزن بعد الجلسة (كغ)</Text>
             <TextInput style={styles.input} value={weightAfter} onChangeText={setWeightAfter} keyboardType="decimal-pad" placeholder="70.5" />
 
-            {/* حقل الملاحظات الجديد */}
             <Text style={styles.label}>ملاحظات التمريض</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
@@ -220,7 +217,7 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 17, fontWeight: "bold", marginRight: 8, color: '#193B6B' },
   label: { fontSize: 13, color: "#8296B1", marginBottom: 6, textAlign: 'right', fontWeight: '700' },
   input: { backgroundColor: "#f8fafc", padding: 12, borderRadius: 10, borderWidth: 1, borderColor: "#cbd5e1", textAlign: 'right', marginBottom: 12, color: '#193B6B' },
-  textArea: { minHeight: 80, textAlignVertical: 'top', paddingTop: 10 }, // ستايل الملاحظات
+  textArea: { minHeight: 80, textAlignVertical: 'top', paddingTop: 10 }, 
   primaryButton: { backgroundColor: "#26CDD6", padding: 16, borderRadius: 12, alignItems: "center" },
   successButton: { backgroundColor: "#26CDD6", padding: 16, borderRadius: 12, alignItems: "center", marginTop: 10 },
   buttonText: { color: "#fff", fontSize: 15, fontWeight: "bold" },

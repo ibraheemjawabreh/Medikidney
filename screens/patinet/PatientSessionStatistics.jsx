@@ -17,9 +17,6 @@ import { useLanguage } from "../../context/LanguageContext";
 
 const { width } = Dimensions.get("window");
 
-// Removed translations since they are handled via useLanguage context
-
-// حساب اتجاه القيمة
 const getTrend = (values) => {
   const validValues = values.filter((v) => v !== null && v !== undefined && !isNaN(v));
   if (validValues.length < 2) return "neutral";
@@ -59,7 +56,6 @@ const TrendBadge = ({ trend, goodWhenDown = true, t }) => {
   );
 };
 
-// بطاقة إحصائية واحدة
 const StatCard = ({ title, icon, iconColor, values, unit, goodWhenDown = true, formatVal, t }) => {
   const validValues = values.filter((v) => v !== null && v !== undefined && !isNaN(Number(v)));
   const trend = getTrend(validValues.map(Number));
@@ -102,7 +98,7 @@ const StatCard = ({ title, icon, iconColor, values, unit, goodWhenDown = true, f
             <Text style={[styles.metricValue, { color: "#ef4444" }]}>{validValues.length ? `${max} ${unit}` : "—"}</Text>
           </View>
         </View>
-        {/* مؤشر الاتجاه البصري */}
+        
         <View style={styles.sparklineContainer}>
           {validValues.slice(-8).map((v, i) => {
             const numVals = validValues.slice(-8).map(Number);
@@ -123,7 +119,6 @@ const StatCard = ({ title, icon, iconColor, values, unit, goodWhenDown = true, f
   );
 };
 
-// بطاقة الأعراض
 const SymptomsCard = ({ allSymptoms, t }) => {
   if (!allSymptoms || allSymptoms.length === 0) {
     return (
@@ -141,7 +136,6 @@ const SymptomsCard = ({ allSymptoms, t }) => {
     );
   }
 
-  // تجميع الأعراض
   const counts = {};
   allSymptoms.forEach((s) => {
     const key = s.symptom_type;
@@ -181,7 +175,6 @@ const SymptomsCard = ({ allSymptoms, t }) => {
   );
 };
 
-// --- Main Screen ---
 const PatientSessionStatistics = ({ route, navigation }) => {
   const { t } = useLanguage();
   const { patientId, patientName } = route.params || {};
@@ -194,17 +187,16 @@ const PatientSessionStatistics = ({ route, navigation }) => {
   const fetchStatistics = useCallback(async () => {
     try {
       setLoading(true);
-      // جلب كل الجلسات (هذا الـ endpoint مسموح به)
+      
       const sessionsRes = await api.get(`/dialysis-sessions?patientId=${patientId}`);
       const sessionsList = Array.isArray(sessionsRes.data) ? sessionsRes.data : [];
       setSessions(sessionsList);
 
-      // استخراج البيانات من قائمة الجلسات مباشرة (بدون endpoints محجوبة)
       const vitalsArr = [];
       const weightsArr = [];
 
       for (const session of sessionsList) {
-        // --- الأوزان ---
+        
         if (session.weight_before !== null && session.weight_before !== undefined) {
           weightsArr.push({ date: session.date, value: session.weight_before, type: "before" });
         }
@@ -212,7 +204,6 @@ const PatientSessionStatistics = ({ route, navigation }) => {
           weightsArr.push({ date: session.date, value: session.weight_after, type: "after" });
         }
 
-        // --- ضغط الدم: استخراج من النص "120/80" ---
         const parseBP = (bp) => {
           if (!bp || bp === "0/0") return null;
           const parts = bp.split("/");
@@ -231,7 +222,6 @@ const PatientSessionStatistics = ({ route, navigation }) => {
         if (bpAfter) vitalsArr.push({ date: session.date, ...bpAfter, type: "after" });
       }
 
-      // جلب آخر جلسة شاملة لقراءات العلامات الحيوية
       try {
         const lastSessionRes = await api.get(`/dialysis-sessions/patient/${patientId}/last-session`);
         const lastSession = lastSessionRes.data;
@@ -248,7 +238,7 @@ const PatientSessionStatistics = ({ route, navigation }) => {
             });
           });
         }
-        // استخراج الأعراض من آخر جلسة
+        
         if (lastSession?.symptoms?.details && lastSession.symptoms.details.length > 0) {
           setAllSymptoms(lastSession.symptoms.details);
         } else {
@@ -275,7 +265,6 @@ const PatientSessionStatistics = ({ route, navigation }) => {
     return new Date(d).toLocaleDateString(t.vitalSigns.now === 'الآن' ? "ar-EG" : "en-US", { day: "numeric", month: "short" });
   };
 
-  // استخراج سلاسل البيانات مرتبة زمنياً
   const systolicValues = allVitals.map((v) => v.systolic).filter(Boolean);
   const diastolicValues = allVitals.map((v) => v.diastolic).filter(Boolean);
   const pulseValues = allVitals.map((v) => v.pulse).filter(Boolean);
@@ -297,7 +286,6 @@ const PatientSessionStatistics = ({ route, navigation }) => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#204a42" />
 
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Icon name="arrow-left" type="material-community" size={28} color="#fff" />
@@ -312,7 +300,6 @@ const PatientSessionStatistics = ({ route, navigation }) => {
         </View>
       </View>
 
-      {/* Summary Bar */}
       <View style={styles.summaryBar}>
         <View style={styles.summaryItem}>
           <Icon name="heart-pulse" type="material-community" size={18} color="#ef4444" />
@@ -335,7 +322,6 @@ const PatientSessionStatistics = ({ route, navigation }) => {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
-        {/* تنبيه للأخصائي */}
         <View style={styles.nutritionTip}>
           <Text style={styles.nutritionTipText}>
             {t.patientSessionStats.nutritionTip}
@@ -351,7 +337,7 @@ const PatientSessionStatistics = ({ route, navigation }) => {
           </View>
         ) : (
           <>
-            {/* ضغط الدم الانقباضي */}
+            
             <StatCard
               title={t.patientSessionStats.systolic}
               icon="heart-pulse"
@@ -361,7 +347,7 @@ const PatientSessionStatistics = ({ route, navigation }) => {
               goodWhenDown={true}
               t={t}
             />
-            {/* ضغط الدم الانبساطي */}
+            
             <StatCard
               title={t.patientSessionStats.diastolic}
               icon="heart-outline"
@@ -371,7 +357,7 @@ const PatientSessionStatistics = ({ route, navigation }) => {
               goodWhenDown={true}
               t={t}
             />
-            {/* النبض */}
+            
             <StatCard
               title={t.patientSessionStats.pulse}
               icon="pulse"
@@ -381,7 +367,7 @@ const PatientSessionStatistics = ({ route, navigation }) => {
               goodWhenDown={false}
               t={t}
             />
-            {/* درجة الحرارة */}
+            
             <StatCard
               title={t.patientSessionStats.temperature}
               icon="thermometer"
@@ -391,7 +377,7 @@ const PatientSessionStatistics = ({ route, navigation }) => {
               goodWhenDown={false}
               t={t}
             />
-            {/* تشبع الأكسجين */}
+            
             {o2Values.filter((v) => v !== null).length > 0 && (
               <StatCard
                 title={t.patientSessionStats.oxygen}
@@ -443,7 +429,6 @@ const PatientSessionStatistics = ({ route, navigation }) => {
         <Text style={styles.sectionTitle}>{t.patientSessionStats.symptoms}</Text>
         <SymptomsCard allSymptoms={allSymptoms} t={t} />
 
-        {/* آخر 5 جلسات */}
         <Divider style={{ marginVertical: 20 }} />
         <Text style={styles.sectionTitle}>{t.patientSessionStats.recentSessions}</Text>
         {sessions.slice(0, 5).map((s, i) => (

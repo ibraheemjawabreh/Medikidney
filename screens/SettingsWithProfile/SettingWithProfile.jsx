@@ -133,8 +133,6 @@ const ProfileSettingsScreen = ({ navigation }) => {
           onPress={() => navigation.navigate("ChangePassword")}
         />
 
-
-        {/* Language toggle item */}
         <TouchableOpacity style={styles.item} onPress={handleLanguageToggle}>
           <Switch
             value={lang === 'en'}
