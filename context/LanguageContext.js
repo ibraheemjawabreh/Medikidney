@@ -16,7 +16,6 @@ export const LanguageProvider = ({ children }) => {
   const [lang, setLang] = useState('ar');
 
   useEffect(() => {
-    // Load saved language on app start
     AsyncStorage.getItem(LANG_KEY).then(saved => {
       if (saved && (saved === 'ar' || saved === 'en')) {
         setLang(saved);

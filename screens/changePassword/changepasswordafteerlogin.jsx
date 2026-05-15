@@ -5,15 +5,12 @@ import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ChangePasswordFirstTime = ({ navigation, route }) => {
-  // استلام البيانات من صفحة Login
   const { tempToken, userRole } = route.params || {};
-
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [skipLoading, setSkipLoading] = useState(false);
 
-  // دالة التوجيه الموحدة
   const navigateToHome = async (token) => {
     await AsyncStorage.setItem("token", token);
     await AsyncStorage.setItem("role", userRole);
@@ -25,7 +22,6 @@ const ChangePasswordFirstTime = ({ navigation, route }) => {
     else navigation.replace("Login");
   };
 
-  // 1. تعيين كلمة المرور لأول مرة
   const handleSetInitialPassword = async () => {
     if (!newPassword || newPassword.length < 8) {
       Alert.alert("خطأ", "كلمة المرور يجب أن تكون 8 خانات على الأقل");
@@ -62,7 +58,6 @@ const ChangePasswordFirstTime = ({ navigation, route }) => {
     }
   };
 
-  // 2. تخطي التغيير
   const handleSkip = async () => {
     try {
       setSkipLoading(true);
@@ -71,7 +66,6 @@ const ChangePasswordFirstTime = ({ navigation, route }) => {
         {},
         { headers: { Authorization: `Bearer ${tempToken}` } }
       );
-      // يجب حفظ التوكن الجديد العائد من السيرفر وإلا سيبقى التوكن القديم يطلب التغيير!
       await navigateToHome(response.data.access_token || tempToken);
     } catch (err) {
       console.log("Skip Error:", err.response?.data);

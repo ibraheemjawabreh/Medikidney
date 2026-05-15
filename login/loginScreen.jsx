@@ -45,7 +45,6 @@ const LoginScreen = ({ navigation }) => {
 
       const userRole = data.user.role;
       
-      // Register device token only for PATIENTS
       if (userRole === "PATIENT") {
         try {
           const deviceToken = await AsyncStorage.getItem("deviceToken");
@@ -59,9 +58,7 @@ const LoginScreen = ({ navigation }) => {
               });
               console.log("✅ Device token registered after login");
             } catch (tokenErr) {
-              // لا نوقف التطبيق إذا فشل تسجيل device token - فقط نسجل التحذير
               console.warn("⚠️ تنبيه: لم يتمكن من تسجيل device token:", tokenErr?.message);
-              // التطبيق سيستمر بدون مشكلة
             }
           }
         } catch (storageErr) {

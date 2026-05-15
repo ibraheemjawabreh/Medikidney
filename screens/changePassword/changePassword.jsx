@@ -18,13 +18,11 @@ const ChangePassword = ({ navigation }) => {
       setLoading(true);
       seterrors({});
 
-      // 1. التحقق من المدخلات
       await ValidationChange.validate(
         { oldPassword, newPassword, confirmPassword },
         { abortEarly: false }
       );
 
-      // 3. إرسال طلب تغيير كلمة المرور التقليدي
       const response = await api.patch(
         "/auth/change-password",
         { oldPassword, newPassword, confirmPassword }
@@ -33,7 +31,6 @@ const ChangePassword = ({ navigation }) => {
       if (response.status === 200 || response.status === 201) {
         Alert.alert(t.success, t.changePasswordScreen.successMsg);
 
-        // بعد التغيير بنجاح، نعود للصفحة السابقة (البروفايل مثلاً)
         navigation.goBack();
       }
     } catch (err) {
