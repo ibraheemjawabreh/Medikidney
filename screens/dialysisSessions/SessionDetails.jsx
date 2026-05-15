@@ -22,8 +22,8 @@ const SessionDetails = ({ route, navigation }) => {
   const [step, setStep] = useState(1);
 
   const steps = [
-    { id: 1, title: t.sessionDetails.steps.vitals, component: <VitalSignsTab route={{ params: { sessionId } }} /> },
-    { id: 2, title: t.sessionDetails.steps.settings, component: <SettingsTab route={{ params: { sessionId } }} /> },
+    { id: 1, title: t.sessionDetails.steps.settings, component: <SettingsTab route={{ params: { sessionId } }} /> },
+    { id: 2, title: t.sessionDetails.steps.vitals, component: <VitalSignsTab route={{ params: { sessionId } }} /> },
     { id: 3, title: t.sessionDetails.steps.medications, component: <MedicationsTab route={{ params: { sessionId } }} /> },
     { id: 4, title: t.sessionDetails.steps.symptoms, component: <SymptomsTab route={{ params: { sessionId } }} /> },
   ];
