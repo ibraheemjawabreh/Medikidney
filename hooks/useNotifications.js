@@ -8,9 +8,9 @@ import { getVisibleUnreadCount } from '../utils/notificationBadge';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,      
-    shouldPlaySound: true,       
-    shouldSetBadge: true,        
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
   }),
 });
 
@@ -20,7 +20,6 @@ export const useNotifications = (navigation) => {
   const responseListener = useRef();
 
   useEffect(() => {
-    
     requestAndStoreDeviceToken();
 
     const checkInitialNotification = async () => {
@@ -33,7 +32,7 @@ export const useNotifications = (navigation) => {
         handleNotificationPress(notificationType, relatedId, navigation);
       }
     };
-    
+
     checkInitialNotification();
 
     notificationListener.current =
@@ -50,10 +49,10 @@ export const useNotifications = (navigation) => {
       Notifications.addNotificationResponseReceivedListener((response) => {
         const data = response.notification.request.content.data;
         console.log('✅ تم النقر على الإشعار:', data);
-        
+
         const notificationType = data?.notificationType || data?.type;
         const relatedId = data?.relatedId || data?.id;
-        
+
         handleNotificationPress(notificationType, relatedId, navigation);
       });
 
@@ -124,7 +123,6 @@ export const useNotifications = (navigation) => {
   const registerForPushNotifications = registerDeviceTokenAfterLogin;
 
   const handleNotificationPress = (notificationType, relatedId, navigation) => {
-    
     if (!navigation || !navigation.isReady()) {
       console.warn('⚠️ Navigation ليس جاهزاً');
       return;
@@ -137,33 +135,30 @@ export const useNotifications = (navigation) => {
       case 'LAB_TEST':
       case 'TEST':
         console.log('➡️ الانتقال لنتائج الفحوصات - Test ID:', relatedId);
-        
-        navigation.navigate('PatientProfile', { 
-          initialTab: 2,  
-          initialSubTab: 1,  
-          testId: relatedId 
+        navigation.navigate('PatientProfile', {
+          initialTab: 2,
+          initialSubTab: 1,
+          testId: relatedId
         });
         break;
 
       case 'RADIOLOGY':
       case 'IMAGING':
         console.log('➡️ الانتقال للأشعات - Image ID:', relatedId);
-        
-        navigation.navigate('PatientProfile', { 
-          initialTab: 2,  
-          initialSubTab: 2,  
-          radiologyId: relatedId 
+        navigation.navigate('PatientProfile', {
+          initialTab: 2,
+          initialSubTab: 2,
+          radiologyId: relatedId
         });
         break;
 
       case 'PRESCRIPTION':
       case 'MEDICATION':
         console.log('➡️ الانتقال للأدوية - Prescription ID:', relatedId);
-        
-        navigation.navigate('PatientProfile', { 
-          initialTab: 2,  
-          initialSubTab: 0,  
-          prescriptionId: relatedId 
+        navigation.navigate('PatientProfile', {
+          initialTab: 2,
+          initialSubTab: 0,
+          prescriptionId: relatedId
         });
         break;
 
@@ -175,10 +170,9 @@ export const useNotifications = (navigation) => {
       case 'APPOINTMENT':
       case 'SCHEDULE':
         console.log('➡️ الانتقال للمواعيد - Appointment ID:', relatedId);
-        
-        navigation.navigate('PatientProfile', { 
-          initialTab: 3,  
-          appointmentId: relatedId 
+        navigation.navigate('PatientProfile', {
+          initialTab: 3,
+          appointmentId: relatedId
         });
         break;
 
@@ -191,16 +185,14 @@ export const useNotifications = (navigation) => {
       case 'SESSION':
       case 'DIALYSIS_SESSION':
         console.log('➡️ الانتقال لتفاصيل الجلسة - Session ID:', relatedId);
-        
-        navigation.navigate('PatientProfile', { 
-          initialTab: 1,  
-          sessionId: relatedId 
+        navigation.navigate('PatientProfile', {
+          initialTab: 1,
+          sessionId: relatedId
         });
         break;
 
       default:
         console.log('📣 إشعار عام:', notificationType);
-        
         navigation.navigate('Notifications');
     }
   };
