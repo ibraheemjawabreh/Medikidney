@@ -10,7 +10,7 @@ const LoginValidation = yup.object().shape({
   password: yup
     .string()
     .required("الرجاء ادخال كلمة المرور")
-    .min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
+    
 });
 
 export default LoginValidation
